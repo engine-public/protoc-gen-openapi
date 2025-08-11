@@ -1,0 +1,11 @@
+---
+name: PR Build
+
+on:
+  pull_request:
+    branches: [ "*" ]
+
+jobs:
+  build:
+    uses: ./.github/workflows/build.yaml
+    secrets: inherit

@@ -1,0 +1,78 @@
+syntax = "proto3";
+
+package engine.protoc.openapi.model;
+
+import "engine/protoc/openapi/model/parameter_content.proto";
+import "engine/protoc/openapi/model/parameter_schema.proto";
+
+// Describes a single operation parameter.
+//
+// A unique parameter is defined by a combination of a [name](https://swagger.io/specification/#parameter-name) and [location](https://swagger.io/specification/#parameter-in).
+//
+// See [Appendix E](https://swagger.io/specification/#appendix-e-percent-encoding-and-form-media-types) for a detailed examination of percent-encoding concerns, including interactions with the `application/x-www-form-urlencoded` query string format.
+//
+// **Parameter Locations**
+//
+// There are four possible parameter locations specified by the in field:
+//
+// * path - Used together with [Path Templating](https://swagger.io/specification/#path-templating), where the parameter value is actually part of the operation's URL.
+//   This does not include the host or base path of the API.
+//   For example, in `/items/{itemId}`, the path parameter is `itemId`.
+// * query - Parameters that are appended to the URL. For example, in `/items?id=###`, the query parameter is `id`.
+// * header - Custom headers that are expected as part of the request. Note that [RFC7230](https://tools.ietf.org/html/rfc7230#section-3.2) states header names are case insensitive.
+// * cookie - Used to pass a specific cookie value to the API.
+//
+// **Fixed Fields**
+//
+// The rules for serialization of the parameter are specified in one of two ways.
+// Parameter Objects MUST include either a `content` field or a `schema` field, but not both.
+// See [Appendix B](https://swagger.io/specification/#appendix-b-data-type-conversion) for a discussion of converting values of various types to string representations.
+message Parameter {
+  // REQUIRED.
+  // The name of the parameter.
+  // Parameter names are case sensitive.
+  // If in is `"path"`, the `name` field MUST correspond to a template expression occurring within the [path](https://swagger.io/specification/#paths-path) field in the [Paths Object](https://swagger.io/specification/#paths-object).
+  // See [Path Templating](https://swagger.io/specification/#path-templating) for further information.
+  // If [in](https://swagger.io/specification/#parameter-in) is `"header"` and the [name] field is `"Accept"`, `"Content-Type"` or `"Authorization"`, the parameter definition SHALL be ignored.
+  // For all other cases, the `name` corresponds to the parameter name used by the [in](https://swagger.io/specification/#parameter-in) field.
+  //
+  // Note that while "Cookie" as a name is not forbidden if in is "header", the effect of defining a cookie parameter that way is undefined; use in: "cookie" instead.
+  //
+  // protoc info: While this field is required in OpenAPI, it is optional in this spec to allow for overrides.
+  optional string name = 1;
+
+  // REQUIRED.
+  // The location of the parameter.
+  // Possible values are `"query"`, `"header"`, `"path"` or `"cookie"`.
+  optional string in = 2;
+
+  // A brief description of the parameter.
+  // This could contain examples of use.
+  // [CommonMark syntax](https://spec.commonmark.org/) MAY be used for rich text representation.
+  optional string description = 3;
+
+  // Determines whether this parameter is mandatory.
+  // If the [parameter location](https://swagger.io/specification/#parameter-in) is "path", this field is **REQUIRED** and its value MUST be `true`.
+  // Otherwise, the field MAY be included and its default value is `false`.
+  optional bool required = 4;
+
+  // Specifies that a parameter is deprecated and SHOULD be transitioned out of usage.
+  // Default value is `false`.
+  optional bool deprecated = 5;
+
+  // If `true`, clients MAY pass a zero-length string value in place of parameters that would otherwise be omitted entirely, which the server SHOULD interpret as the parameter being unused.
+  // Default value is `false`.
+  // If [style](https://swagger.io/specification/#parameter-style) is used, and if [behavior is n/a (cannot be serialized)](https://swagger.io/specification/#style-examples), the value of `allowEmptyValue` SHALL be ignored.
+  // Interactions between this field and the parameter's [Schema Object](https://swagger.io/specification/#schema-object) are implementation-defined.
+  // This field is valid only for query parameters.
+  // Use of this field is NOT RECOMMENDED, and it is likely to be removed in a later revision.
+  optional bool allow_empty_value = 6;
+
+  oneof parameter_definition_type {
+    // The schema defining the type used for the parameter.
+    .engine.protoc.openapi.model.ParameterSchema schema = 7;
+
+    // A map containing the representations for the parameter. The key is the media type and the value describes it. The map MUST only contain one entry.
+    .engine.protoc.openapi.model.ParameterContent content = 8;
+  }
+}

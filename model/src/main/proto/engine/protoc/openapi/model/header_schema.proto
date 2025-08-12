@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package engine.protoc.openapi.model;
+
+import "engine/protoc/openapi/schema.proto";
+import "engine/protoc/openapi/model/example_or_reference.proto";
+import "engine/protoc/openapi/model/example_or_reference_map.proto";
+import "google/protobuf/any.proto";
+
+// For simpler scenarios, a [schema](https://swagger.io/specification/#header-schema) and [style](https://swagger.io/specification/#header-style) can describe the structure and syntax of the header.
+// When `example` or `examples` are provided in conjunction with the `schema` field, the example MUST follow the prescribed serialization strategy for the header.
+//
+// Serializing with `schema` is NOT RECOMMENDED for headers with parameters (name=value pairs following a `;`) in their values, or where values might have non-URL-safe characters; see [Appendix D](https://swagger.io/specification/#appendix-d-serializing-headers-and-cookies) for details.
+//
+// When `example` or `examples` are provided in conjunction with the `schema` field, the example SHOULD match the specified schema and follow the prescribed serialization strategy for the header.
+// The `example` and `examples` fields are mutually exclusive, and if either is present it SHALL override any `example` in the schema.
+message HeaderSchema {
+  // Describes how the header value will be serialized.
+  // The default (and only legal value for headers) is `"simple"`.
+  optional string style = 1;
+
+  // When this is true, header values of type array or object generate a single header whose value is a comma-separated list of the array items or key-value pairs of the map, see [Style Examples](https://swagger.io/specification/#style-examples).
+  // For other data types this field has no effect.
+  // The default value is `false`.
+  optional bool explode = 2;
+
+  // The schema defining the type used for the parameter.
+  .engine.protoc.openapi.Schema schema = 4;
+
+  oneof example_type {
+    // Example of the parameter's potential value; see [Working With Examples](https://swagger.io/specification/#working-with-examples).
+    .google.protobuf.Any example = 5;
+
+    // Examples of the parameter's potential value; see [Working With Examples](https://swagger.io/specification/#working-with-examples).
+    .engine.protoc.openapi.model.ExampleOrReferenceMap examples = 6;
+  }
+}

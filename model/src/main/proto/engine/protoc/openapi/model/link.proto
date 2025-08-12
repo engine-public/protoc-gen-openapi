@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package engine.protoc.openapi.model;
+
+import "engine/protoc/openapi/model/server.proto";
+import "google/protobuf/any.proto";
+
+
+// The Link Object represents a possible design-time link for a response.
+// The presence of a link does not guarantee the caller's ability to successfully invoke it, rather it provides a known relationship and traversal mechanism between responses and other operations.
+//
+// Unlike dynamic links (i.e. links provided **in** the response payload), the OAS linking mechanism does not require link information in the runtime response.
+//
+// For computing links and providing instructions to execute them, a [runtime expression](https://swagger.io/specification/#runtime-expressions) is used for accessing values in an operation and using them as parameters while invoking the linked operation.
+message Link {
+  oneof operation_locator_type {
+    // A URI reference to an OAS operation.
+    // This field is mutually exclusive of the `operationId` field, and MUST point to an [Operation Object](https://swagger.io/specification/#operation-object).
+    // Relative `operationRef` values MAY be used to locate an existing [Operation Object](https://swagger.io/specification/#operation-object) in the OpenAPI Description.
+    string operation_ref = 1;
+
+    // The name of an existing, resolvable OAS operation, as defined with a unique `operationId`.
+    // This field is mutually exclusive of the `operationRef` field.
+    string operation_id = 2;
+
+    // TODO
+    string operation_proto_ref = 3;
+  }
+
+  // A map representing parameters to pass to an operation as specified with `operationId` or identified via `operationRef`.
+  // The key is the parameter name to be used (optionally qualified with the parameter location, e.g. `path.id` for an `id` parameter in the path), whereas the value can be a constant or an expression to be evaluated and passed to the linked operation.
+  map<string, .google.protobuf.Any> parameters = 4;
+
+  // A literal value or [{expression}](https://swagger.io/specification/#runtime-expressions) to use as a request body when calling the target operation.
+  .google.protobuf.Any request_body = 5;
+
+  // A description of the link.
+  // [CommonMark syntax](https://spec.commonmark.org/ MAY be used for rich text representation.
+  optional string description = 6;
+
+  // A server object to be used by the target operation.
+  .engine.protoc.openapi.model.Server server = 7;
+}

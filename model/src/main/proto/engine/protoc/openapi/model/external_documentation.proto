@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package engine.protoc.openapi.model;
+
+// Allows referencing an external resource for extended documentation.
+message ExternalDocumentation {
+  // A description of the target documentation.
+  // [CommonMark syntax](https://spec.commonmark.org/) MAY be used for rich text representation.
+  optional string description = 1;
+
+  // REQUIRED.
+  // The URI for the target documentation.
+  // This MUST be in the form of a URI.
+  //
+  // protoc info: While this field is required in OpenAPI, it is optional in this spec to allow for overrides.
+  optional string url = 2;
+}

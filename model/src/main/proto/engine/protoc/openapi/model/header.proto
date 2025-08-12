@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package engine.protoc.openapi.model;
+
+import "engine/protoc/openapi/model/header_content.proto";
+import "engine/protoc/openapi/model/header_schema.proto";
+
+// Describes a single header for [HTTP responses](https://swagger.io/specification/#response-headers) and for [individual parts in multipart representations](https://swagger.io/specification/#encoding-headers); see the relevant [Response Object](https://swagger.io/specification/#response-object) and [Encoding Object](https://swagger.io/specification/#encoding-object) documentation for restrictions on which headers can be described.
+//
+// The Header Object follows the structure of the [Parameter Object](https://swagger.io/specification/#parameter-object), including determining its serialization strategy based on whether `schema` or `content` is present, with the following changes:
+//
+// 1. `name` MUST NOT be specified, it is given in the corresponding `headers` map.
+// 2. `in` MUST NOT be specified, it is implicitly in `header`.
+// 3. All traits that are affected by the location MUST be applicable to a location of `header` (for example, [style](https://swagger.io/specification/#parameter-style)). This means that `allowEmptyValue` and `allowReserved` MUST NOT be used, and `style`, if used, MUST be limited to `"simple"`.
+message Header {
+  // A brief description of the header.
+  // This could contain examples of use.
+  // [CommonMark syntax](https://spec.commonmark.org/) MAY be used for rich text representation.
+  optional string description = 1;
+
+  // Determines whether this header is mandatory. The default value is `false`.
+  optional bool required = 2;
+
+  // Specifies that the header is deprecated and SHOULD be transitioned out of usage. Default value is `false`.
+  optional bool deprecated = 3;
+
+  oneof header_definition_type {
+    // The schema defining the type used for the parameter.
+    .engine.protoc.openapi.model.HeaderSchema schema = 4;
+
+    // A map containing the representations for the parameter.
+    // The key is the media type and the value describes it.
+    // The map MUST only contain one entry.
+    .engine.protoc.openapi.model.HeaderContent content = 5;
+  }
+}

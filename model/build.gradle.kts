@@ -8,6 +8,7 @@ description = "OpenAPI annotations for protobuf Messages, Enums, Services, and R
 
 dependencies {
     api(libs.protobuf.java)
+    api(libs.google.api.grpc.googleCommonProtos)
 }
 
 kotlin {

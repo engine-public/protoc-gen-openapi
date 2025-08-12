@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package engine.protoc.openapi.model;
+
+// Contact information for the exposed API.
+message Contact {
+  // The identifying name of the contact person/organization.
+  optional string name = 1;
+
+  // The URI for the contact information.
+  // This MUST be in the form of a URI.
+  optional string url = 2;
+
+  // The email address of the contact person/organization.
+  // This MUST be in the form of an email address.
+  optional string email = 3;
+}

@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package engine.protoc.openapi.model;
+
+import "engine/protoc/openapi/schema.proto";
+import "engine/protoc/openapi/model/encoding.proto";
+import "engine/protoc/openapi/model/example_or_reference_map.proto";
+import "google/protobuf/any.proto";
+
+// Each Media Type Object provides schema and examples for the media type identified by its key.
+//
+// When example or examples are provided, the example SHOULD match the specified schema and be in the correct format as specified by the media type and its encoding.
+// The example and examples fields are mutually exclusive, and if either is present it SHALL override any example in the schema.
+// See Working With Examples for further guidance regarding the different ways of specifying examples, including non-JSON/YAML values.
+message MediaType {
+  // The schema defining the content of the request, response, parameter, or header.
+  .engine.protoc.openapi.Schema schema = 1;
+
+  oneof example_type {
+    // Example of the media type; see [Working With Examples](https://swagger.io/specification/#working-with-examples).
+    .google.protobuf.Any example = 2;
+
+    // Examples of the media type; see [Working With Examples](https://swagger.io/specification/#working-with-examples).
+    .engine.protoc.openapi.model.ExampleOrReferenceMap examples = 3;
+  }
+
+  // A map between a property name and its encoding information.
+  // The key, being the property name, MUST exist in the schema as a property.
+  // The `encoding` field SHALL only apply to [Request Body Objects](https://swagger.io/specification/#request-body-object), and only when the media type is `multipart` or `application/x-www-form-urlencoded`.
+  // If no Encoding Object is provided for a property, the behavior is determined by the default values documented for the Encoding Object.
+  map<string, .engine.protoc.openapi.model.Encoding> encoding = 4;
+}

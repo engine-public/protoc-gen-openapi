@@ -32,6 +32,7 @@ description = "protoc compiler to turn gRPC services into openapi v3.1 specs"
 dependencies {
     implementation(projects.protocGenOpenapiModel)
 
+    implementation(libs.kotlin.reflect)
     implementation(libs.protobuf.java)
 }
 

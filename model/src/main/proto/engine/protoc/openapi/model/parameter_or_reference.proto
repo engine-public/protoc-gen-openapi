@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package engine.protoc.openapi.model;
+
+import "engine/protoc/openapi/model/parameter.proto";
+import "engine/protoc/openapi/model/reference.proto";
+
+message ParameterOrReference {
+  oneof type {
+    .engine.protoc.openapi.model.Parameter parameter = 1;
+    .engine.protoc.openapi.model.Reference reference = 2;
+  }
+}

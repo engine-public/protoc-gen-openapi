@@ -4,8 +4,167 @@
   "methods":[{"name":"getInstance","parameterTypes":[] }]
 },
 {
+  "name":"com.google.protobuf.DescriptorProtos$FeatureSet",
+  "methods":[{"name":"newBuilder","parameterTypes":[] }]
+},
+{
+  "name":"com.google.protobuf.DescriptorProtos$FileOptions",
+  "methods":[{"name":"getCcEnableArenas","parameterTypes":[] }, {"name":"getCcGenericServices","parameterTypes":[] }, {"name":"getCsharpNamespace","parameterTypes":[] }, {"name":"getCsharpNamespaceBytes","parameterTypes":[] }, {"name":"getDeprecated","parameterTypes":[] }, {"name":"getFeatures","parameterTypes":[] }, {"name":"getGoPackage","parameterTypes":[] }, {"name":"getGoPackageBytes","parameterTypes":[] }, {"name":"getJavaGenerateEqualsAndHash","parameterTypes":[] }, {"name":"getJavaGenericServices","parameterTypes":[] }, {"name":"getJavaMultipleFiles","parameterTypes":[] }, {"name":"getJavaOuterClassname","parameterTypes":[] }, {"name":"getJavaOuterClassnameBytes","parameterTypes":[] }, {"name":"getJavaPackage","parameterTypes":[] }, {"name":"getJavaPackageBytes","parameterTypes":[] }, {"name":"getJavaStringCheckUtf8","parameterTypes":[] }, {"name":"getObjcClassPrefix","parameterTypes":[] }, {"name":"getObjcClassPrefixBytes","parameterTypes":[] }, {"name":"getOptimizeFor","parameterTypes":[] }, {"name":"getPhpClassPrefix","parameterTypes":[] }, {"name":"getPhpClassPrefixBytes","parameterTypes":[] }, {"name":"getPhpMetadataNamespace","parameterTypes":[] }, {"name":"getPhpMetadataNamespaceBytes","parameterTypes":[] }, {"name":"getPhpNamespace","parameterTypes":[] }, {"name":"getPhpNamespaceBytes","parameterTypes":[] }, {"name":"getPyGenericServices","parameterTypes":[] }, {"name":"getRubyPackage","parameterTypes":[] }, {"name":"getRubyPackageBytes","parameterTypes":[] }, {"name":"getSwiftPrefix","parameterTypes":[] }, {"name":"getSwiftPrefixBytes","parameterTypes":[] }, {"name":"getUninterpretedOption","parameterTypes":["int"] }, {"name":"getUninterpretedOptionCount","parameterTypes":[] }, {"name":"getUninterpretedOptionList","parameterTypes":[] }, {"name":"hasCcEnableArenas","parameterTypes":[] }, {"name":"hasCcGenericServices","parameterTypes":[] }, {"name":"hasCsharpNamespace","parameterTypes":[] }, {"name":"hasDeprecated","parameterTypes":[] }, {"name":"hasFeatures","parameterTypes":[] }, {"name":"hasGoPackage","parameterTypes":[] }, {"name":"hasJavaGenerateEqualsAndHash","parameterTypes":[] }, {"name":"hasJavaGenericServices","parameterTypes":[] }, {"name":"hasJavaMultipleFiles","parameterTypes":[] }, {"name":"hasJavaOuterClassname","parameterTypes":[] }, {"name":"hasJavaPackage","parameterTypes":[] }, {"name":"hasJavaStringCheckUtf8","parameterTypes":[] }, {"name":"hasObjcClassPrefix","parameterTypes":[] }, {"name":"hasOptimizeFor","parameterTypes":[] }, {"name":"hasPhpClassPrefix","parameterTypes":[] }, {"name":"hasPhpMetadataNamespace","parameterTypes":[] }, {"name":"hasPhpNamespace","parameterTypes":[] }, {"name":"hasPyGenericServices","parameterTypes":[] }, {"name":"hasRubyPackage","parameterTypes":[] }, {"name":"hasSwiftPrefix","parameterTypes":[] }]
+},
+{
+  "name":"com.google.protobuf.DescriptorProtos$FileOptions$Builder",
+  "methods":[{"name":"addUninterpretedOption","parameterTypes":["com.google.protobuf.DescriptorProtos$UninterpretedOption"] }, {"name":"clearCcEnableArenas","parameterTypes":[] }, {"name":"clearCcGenericServices","parameterTypes":[] }, {"name":"clearCsharpNamespace","parameterTypes":[] }, {"name":"clearDeprecated","parameterTypes":[] }, {"name":"clearFeatures","parameterTypes":[] }, {"name":"clearGoPackage","parameterTypes":[] }, {"name":"clearJavaGenerateEqualsAndHash","parameterTypes":[] }, {"name":"clearJavaGenericServices","parameterTypes":[] }, {"name":"clearJavaMultipleFiles","parameterTypes":[] }, {"name":"clearJavaOuterClassname","parameterTypes":[] }, {"name":"clearJavaPackage","parameterTypes":[] }, {"name":"clearJavaStringCheckUtf8","parameterTypes":[] }, {"name":"clearObjcClassPrefix","parameterTypes":[] }, {"name":"clearOptimizeFor","parameterTypes":[] }, {"name":"clearPhpClassPrefix","parameterTypes":[] }, {"name":"clearPhpMetadataNamespace","parameterTypes":[] }, {"name":"clearPhpNamespace","parameterTypes":[] }, {"name":"clearPyGenericServices","parameterTypes":[] }, {"name":"clearRubyPackage","parameterTypes":[] }, {"name":"clearSwiftPrefix","parameterTypes":[] }, {"name":"clearUninterpretedOption","parameterTypes":[] }, {"name":"getCcEnableArenas","parameterTypes":[] }, {"name":"getCcGenericServices","parameterTypes":[] }, {"name":"getCsharpNamespace","parameterTypes":[] }, {"name":"getDeprecated","parameterTypes":[] }, {"name":"getFeatures","parameterTypes":[] }, {"name":"getFeaturesBuilder","parameterTypes":[] }, {"name":"getGoPackage","parameterTypes":[] }, {"name":"getJavaGenerateEqualsAndHash","parameterTypes":[] }, {"name":"getJavaGenericServices","parameterTypes":[] }, {"name":"getJavaMultipleFiles","parameterTypes":[] }, {"name":"getJavaOuterClassname","parameterTypes":[] }, {"name":"getJavaPackage","parameterTypes":[] }, {"name":"getJavaStringCheckUtf8","parameterTypes":[] }, {"name":"getObjcClassPrefix","parameterTypes":[] }, {"name":"getOptimizeFor","parameterTypes":[] }, {"name":"getPhpClassPrefix","parameterTypes":[] }, {"name":"getPhpMetadataNamespace","parameterTypes":[] }, {"name":"getPhpNamespace","parameterTypes":[] }, {"name":"getPyGenericServices","parameterTypes":[] }, {"name":"getRubyPackage","parameterTypes":[] }, {"name":"getSwiftPrefix","parameterTypes":[] }, {"name":"getUninterpretedOption","parameterTypes":["int"] }, {"name":"getUninterpretedOptionBuilder","parameterTypes":["int"] }, {"name":"getUninterpretedOptionCount","parameterTypes":[] }, {"name":"getUninterpretedOptionList","parameterTypes":[] }, {"name":"hasCcEnableArenas","parameterTypes":[] }, {"name":"hasCcGenericServices","parameterTypes":[] }, {"name":"hasCsharpNamespace","parameterTypes":[] }, {"name":"hasDeprecated","parameterTypes":[] }, {"name":"hasFeatures","parameterTypes":[] }, {"name":"hasGoPackage","parameterTypes":[] }, {"name":"hasJavaGenerateEqualsAndHash","parameterTypes":[] }, {"name":"hasJavaGenericServices","parameterTypes":[] }, {"name":"hasJavaMultipleFiles","parameterTypes":[] }, {"name":"hasJavaOuterClassname","parameterTypes":[] }, {"name":"hasJavaPackage","parameterTypes":[] }, {"name":"hasJavaStringCheckUtf8","parameterTypes":[] }, {"name":"hasObjcClassPrefix","parameterTypes":[] }, {"name":"hasOptimizeFor","parameterTypes":[] }, {"name":"hasPhpClassPrefix","parameterTypes":[] }, {"name":"hasPhpMetadataNamespace","parameterTypes":[] }, {"name":"hasPhpNamespace","parameterTypes":[] }, {"name":"hasPyGenericServices","parameterTypes":[] }, {"name":"hasRubyPackage","parameterTypes":[] }, {"name":"hasSwiftPrefix","parameterTypes":[] }, {"name":"setCcEnableArenas","parameterTypes":["boolean"] }, {"name":"setCcGenericServices","parameterTypes":["boolean"] }, {"name":"setCsharpNamespace","parameterTypes":["java.lang.String"] }, {"name":"setCsharpNamespaceBytes","parameterTypes":["com.google.protobuf.ByteString"] }, {"name":"setDeprecated","parameterTypes":["boolean"] }, {"name":"setFeatures","parameterTypes":["com.google.protobuf.DescriptorProtos$FeatureSet"] }, {"name":"setGoPackage","parameterTypes":["java.lang.String"] }, {"name":"setGoPackageBytes","parameterTypes":["com.google.protobuf.ByteString"] }, {"name":"setJavaGenerateEqualsAndHash","parameterTypes":["boolean"] }, {"name":"setJavaGenericServices","parameterTypes":["boolean"] }, {"name":"setJavaMultipleFiles","parameterTypes":["boolean"] }, {"name":"setJavaOuterClassname","parameterTypes":["java.lang.String"] }, {"name":"setJavaOuterClassnameBytes","parameterTypes":["com.google.protobuf.ByteString"] }, {"name":"setJavaPackage","parameterTypes":["java.lang.String"] }, {"name":"setJavaPackageBytes","parameterTypes":["com.google.protobuf.ByteString"] }, {"name":"setJavaStringCheckUtf8","parameterTypes":["boolean"] }, {"name":"setObjcClassPrefix","parameterTypes":["java.lang.String"] }, {"name":"setObjcClassPrefixBytes","parameterTypes":["com.google.protobuf.ByteString"] }, {"name":"setOptimizeFor","parameterTypes":["com.google.protobuf.DescriptorProtos$FileOptions$OptimizeMode"] }, {"name":"setPhpClassPrefix","parameterTypes":["java.lang.String"] }, {"name":"setPhpClassPrefixBytes","parameterTypes":["com.google.protobuf.ByteString"] }, {"name":"setPhpMetadataNamespace","parameterTypes":["java.lang.String"] }, {"name":"setPhpMetadataNamespaceBytes","parameterTypes":["com.google.protobuf.ByteString"] }, {"name":"setPhpNamespace","parameterTypes":["java.lang.String"] }, {"name":"setPhpNamespaceBytes","parameterTypes":["com.google.protobuf.ByteString"] }, {"name":"setPyGenericServices","parameterTypes":["boolean"] }, {"name":"setRubyPackage","parameterTypes":["java.lang.String"] }, {"name":"setRubyPackageBytes","parameterTypes":["com.google.protobuf.ByteString"] }, {"name":"setSwiftPrefix","parameterTypes":["java.lang.String"] }, {"name":"setSwiftPrefixBytes","parameterTypes":["com.google.protobuf.ByteString"] }, {"name":"setUninterpretedOption","parameterTypes":["int","com.google.protobuf.DescriptorProtos$UninterpretedOption"] }]
+},
+{
+  "name":"com.google.protobuf.DescriptorProtos$FileOptions$OptimizeMode",
+  "methods":[{"name":"getValueDescriptor","parameterTypes":[] }, {"name":"valueOf","parameterTypes":["com.google.protobuf.Descriptors$EnumValueDescriptor"] }]
+},
+{
+  "name":"com.google.protobuf.DescriptorProtos$MethodDescriptorProto",
+  "methods":[{"name":"getClientStreaming","parameterTypes":[] }, {"name":"getInputType","parameterTypes":[] }, {"name":"getInputTypeBytes","parameterTypes":[] }, {"name":"getName","parameterTypes":[] }, {"name":"getNameBytes","parameterTypes":[] }, {"name":"getOptions","parameterTypes":[] }, {"name":"getOutputType","parameterTypes":[] }, {"name":"getOutputTypeBytes","parameterTypes":[] }, {"name":"getServerStreaming","parameterTypes":[] }, {"name":"hasClientStreaming","parameterTypes":[] }, {"name":"hasInputType","parameterTypes":[] }, {"name":"hasName","parameterTypes":[] }, {"name":"hasOptions","parameterTypes":[] }, {"name":"hasOutputType","parameterTypes":[] }, {"name":"hasServerStreaming","parameterTypes":[] }, {"name":"newBuilder","parameterTypes":[] }]
+},
+{
+  "name":"com.google.protobuf.DescriptorProtos$MethodDescriptorProto$Builder",
+  "methods":[{"name":"clearClientStreaming","parameterTypes":[] }, {"name":"clearInputType","parameterTypes":[] }, {"name":"clearName","parameterTypes":[] }, {"name":"clearOptions","parameterTypes":[] }, {"name":"clearOutputType","parameterTypes":[] }, {"name":"clearServerStreaming","parameterTypes":[] }, {"name":"getClientStreaming","parameterTypes":[] }, {"name":"getInputType","parameterTypes":[] }, {"name":"getName","parameterTypes":[] }, {"name":"getOptions","parameterTypes":[] }, {"name":"getOptionsBuilder","parameterTypes":[] }, {"name":"getOutputType","parameterTypes":[] }, {"name":"getServerStreaming","parameterTypes":[] }, {"name":"hasClientStreaming","parameterTypes":[] }, {"name":"hasInputType","parameterTypes":[] }, {"name":"hasName","parameterTypes":[] }, {"name":"hasOptions","parameterTypes":[] }, {"name":"hasOutputType","parameterTypes":[] }, {"name":"hasServerStreaming","parameterTypes":[] }, {"name":"setClientStreaming","parameterTypes":["boolean"] }, {"name":"setInputType","parameterTypes":["java.lang.String"] }, {"name":"setInputTypeBytes","parameterTypes":["com.google.protobuf.ByteString"] }, {"name":"setName","parameterTypes":["java.lang.String"] }, {"name":"setNameBytes","parameterTypes":["com.google.protobuf.ByteString"] }, {"name":"setOptions","parameterTypes":["com.google.protobuf.DescriptorProtos$MethodOptions"] }, {"name":"setOutputType","parameterTypes":["java.lang.String"] }, {"name":"setOutputTypeBytes","parameterTypes":["com.google.protobuf.ByteString"] }, {"name":"setServerStreaming","parameterTypes":["boolean"] }]
+},
+{
+  "name":"com.google.protobuf.DescriptorProtos$MethodOptions",
+  "methods":[{"name":"newBuilder","parameterTypes":[] }]
+},
+{
+  "name":"com.google.protobuf.DescriptorProtos$ServiceDescriptorProto",
+  "methods":[{"name":"getMethod","parameterTypes":["int"] }, {"name":"getMethodCount","parameterTypes":[] }, {"name":"getMethodList","parameterTypes":[] }, {"name":"getName","parameterTypes":[] }, {"name":"getNameBytes","parameterTypes":[] }, {"name":"getOptions","parameterTypes":[] }, {"name":"hasName","parameterTypes":[] }, {"name":"hasOptions","parameterTypes":[] }]
+},
+{
+  "name":"com.google.protobuf.DescriptorProtos$ServiceDescriptorProto$Builder",
+  "methods":[{"name":"addMethod","parameterTypes":["com.google.protobuf.DescriptorProtos$MethodDescriptorProto"] }, {"name":"clearMethod","parameterTypes":[] }, {"name":"clearName","parameterTypes":[] }, {"name":"clearOptions","parameterTypes":[] }, {"name":"getMethod","parameterTypes":["int"] }, {"name":"getMethodBuilder","parameterTypes":["int"] }, {"name":"getMethodCount","parameterTypes":[] }, {"name":"getMethodList","parameterTypes":[] }, {"name":"getName","parameterTypes":[] }, {"name":"getOptions","parameterTypes":[] }, {"name":"getOptionsBuilder","parameterTypes":[] }, {"name":"hasName","parameterTypes":[] }, {"name":"hasOptions","parameterTypes":[] }, {"name":"setMethod","parameterTypes":["int","com.google.protobuf.DescriptorProtos$MethodDescriptorProto"] }, {"name":"setName","parameterTypes":["java.lang.String"] }, {"name":"setNameBytes","parameterTypes":["com.google.protobuf.ByteString"] }, {"name":"setOptions","parameterTypes":["com.google.protobuf.DescriptorProtos$ServiceOptions"] }]
+},
+{
+  "name":"com.google.protobuf.DescriptorProtos$ServiceOptions",
+  "methods":[{"name":"newBuilder","parameterTypes":[] }]
+},
+{
+  "name":"com.google.protobuf.DescriptorProtos$UninterpretedOption",
+  "methods":[{"name":"newBuilder","parameterTypes":[] }]
+},
+{
+  "name":"com.google.protobuf.Extension"
+},
+{
   "name":"com.google.protobuf.ExtensionRegistry",
-  "methods":[{"name":"getEmptyRegistry","parameterTypes":[] }]
+  "methods":[{"name":"add","parameterTypes":["com.google.protobuf.Extension"] }, {"name":"getEmptyRegistry","parameterTypes":[] }]
+},
+{
+  "name":"engine.protoc.openapi.Openapi$OpenAPI",
+  "methods":[{"name":"getComponents","parameterTypes":[] }, {"name":"getDefaultInstance","parameterTypes":[] }, {"name":"getExternalDocs","parameterTypes":[] }, {"name":"getInfo","parameterTypes":[] }, {"name":"getJsonSchemaDialect","parameterTypes":[] }, {"name":"getJsonSchemaDialectBytes","parameterTypes":[] }, {"name":"getOpenapi","parameterTypes":[] }, {"name":"getOpenapiBytes","parameterTypes":[] }, {"name":"getPaths","parameterTypes":[] }, {"name":"getSecurity","parameterTypes":["int"] }, {"name":"getSecurityCount","parameterTypes":[] }, {"name":"getSecurityList","parameterTypes":[] }, {"name":"getServers","parameterTypes":["int"] }, {"name":"getServersCount","parameterTypes":[] }, {"name":"getServersList","parameterTypes":[] }, {"name":"getTags","parameterTypes":["int"] }, {"name":"getTagsCount","parameterTypes":[] }, {"name":"getTagsList","parameterTypes":[] }, {"name":"hasComponents","parameterTypes":[] }, {"name":"hasExternalDocs","parameterTypes":[] }, {"name":"hasInfo","parameterTypes":[] }, {"name":"hasJsonSchemaDialect","parameterTypes":[] }, {"name":"hasOpenapi","parameterTypes":[] }, {"name":"hasPaths","parameterTypes":[] }]
+},
+{
+  "name":"engine.protoc.openapi.Openapi$OpenAPI$Builder",
+  "methods":[{"name":"addSecurity","parameterTypes":["engine.protoc.openapi.model.SecurityRequirementOuterClass$SecurityRequirement"] }, {"name":"addServers","parameterTypes":["engine.protoc.openapi.model.ServerOuterClass$Server"] }, {"name":"addTags","parameterTypes":["engine.protoc.openapi.model.TagOuterClass$Tag"] }, {"name":"clearComponents","parameterTypes":[] }, {"name":"clearExternalDocs","parameterTypes":[] }, {"name":"clearInfo","parameterTypes":[] }, {"name":"clearJsonSchemaDialect","parameterTypes":[] }, {"name":"clearOpenapi","parameterTypes":[] }, {"name":"clearPaths","parameterTypes":[] }, {"name":"clearSecurity","parameterTypes":[] }, {"name":"clearServers","parameterTypes":[] }, {"name":"clearTags","parameterTypes":[] }, {"name":"getComponents","parameterTypes":[] }, {"name":"getComponentsBuilder","parameterTypes":[] }, {"name":"getExternalDocs","parameterTypes":[] }, {"name":"getExternalDocsBuilder","parameterTypes":[] }, {"name":"getInfo","parameterTypes":[] }, {"name":"getInfoBuilder","parameterTypes":[] }, {"name":"getJsonSchemaDialect","parameterTypes":[] }, {"name":"getOpenapi","parameterTypes":[] }, {"name":"getPaths","parameterTypes":[] }, {"name":"getPathsBuilder","parameterTypes":[] }, {"name":"getSecurity","parameterTypes":["int"] }, {"name":"getSecurityBuilder","parameterTypes":["int"] }, {"name":"getSecurityCount","parameterTypes":[] }, {"name":"getSecurityList","parameterTypes":[] }, {"name":"getServers","parameterTypes":["int"] }, {"name":"getServersBuilder","parameterTypes":["int"] }, {"name":"getServersCount","parameterTypes":[] }, {"name":"getServersList","parameterTypes":[] }, {"name":"getTags","parameterTypes":["int"] }, {"name":"getTagsBuilder","parameterTypes":["int"] }, {"name":"getTagsCount","parameterTypes":[] }, {"name":"getTagsList","parameterTypes":[] }, {"name":"hasComponents","parameterTypes":[] }, {"name":"hasExternalDocs","parameterTypes":[] }, {"name":"hasInfo","parameterTypes":[] }, {"name":"hasJsonSchemaDialect","parameterTypes":[] }, {"name":"hasOpenapi","parameterTypes":[] }, {"name":"hasPaths","parameterTypes":[] }, {"name":"setComponents","parameterTypes":["engine.protoc.openapi.model.ComponentsOuterClass$Components"] }, {"name":"setExternalDocs","parameterTypes":["engine.protoc.openapi.model.ExternalDocumentationOuterClass$ExternalDocumentation"] }, {"name":"setInfo","parameterTypes":["engine.protoc.openapi.model.InfoOuterClass$Info"] }, {"name":"setJsonSchemaDialect","parameterTypes":["java.lang.String"] }, {"name":"setJsonSchemaDialectBytes","parameterTypes":["com.google.protobuf.ByteString"] }, {"name":"setOpenapi","parameterTypes":["java.lang.String"] }, {"name":"setOpenapiBytes","parameterTypes":["com.google.protobuf.ByteString"] }, {"name":"setPaths","parameterTypes":["engine.protoc.openapi.model.PathsOuterClass$Paths"] }, {"name":"setSecurity","parameterTypes":["int","engine.protoc.openapi.model.SecurityRequirementOuterClass$SecurityRequirement"] }, {"name":"setServers","parameterTypes":["int","engine.protoc.openapi.model.ServerOuterClass$Server"] }, {"name":"setTags","parameterTypes":["int","engine.protoc.openapi.model.TagOuterClass$Tag"] }]
+},
+{
+  "name":"engine.protoc.openapi.model.ApiKeySecurityScheme$APIKeySecurityScheme",
+  "methods":[{"name":"newBuilder","parameterTypes":[] }]
+},
+{
+  "name":"engine.protoc.openapi.model.ComponentsOuterClass$Components",
+  "methods":[{"name":"getDefaultInstance","parameterTypes":[] }, {"name":"newBuilder","parameterTypes":[] }]
+},
+{
+  "name":"engine.protoc.openapi.model.ContactOuterClass$Contact",
+  "methods":[{"name":"getEmail","parameterTypes":[] }, {"name":"getEmailBytes","parameterTypes":[] }, {"name":"getName","parameterTypes":[] }, {"name":"getNameBytes","parameterTypes":[] }, {"name":"getUrl","parameterTypes":[] }, {"name":"getUrlBytes","parameterTypes":[] }, {"name":"hasEmail","parameterTypes":[] }, {"name":"hasName","parameterTypes":[] }, {"name":"hasUrl","parameterTypes":[] }, {"name":"newBuilder","parameterTypes":[] }]
+},
+{
+  "name":"engine.protoc.openapi.model.ContactOuterClass$Contact$Builder",
+  "methods":[{"name":"clearEmail","parameterTypes":[] }, {"name":"clearName","parameterTypes":[] }, {"name":"clearUrl","parameterTypes":[] }, {"name":"getEmail","parameterTypes":[] }, {"name":"getName","parameterTypes":[] }, {"name":"getUrl","parameterTypes":[] }, {"name":"hasEmail","parameterTypes":[] }, {"name":"hasName","parameterTypes":[] }, {"name":"hasUrl","parameterTypes":[] }, {"name":"setEmail","parameterTypes":["java.lang.String"] }, {"name":"setEmailBytes","parameterTypes":["com.google.protobuf.ByteString"] }, {"name":"setName","parameterTypes":["java.lang.String"] }, {"name":"setNameBytes","parameterTypes":["com.google.protobuf.ByteString"] }, {"name":"setUrl","parameterTypes":["java.lang.String"] }, {"name":"setUrlBytes","parameterTypes":["com.google.protobuf.ByteString"] }]
+},
+{
+  "name":"engine.protoc.openapi.model.ExternalDocumentationOuterClass$ExternalDocumentation",
+  "methods":[{"name":"getDescription","parameterTypes":[] }, {"name":"getDescriptionBytes","parameterTypes":[] }, {"name":"getUrl","parameterTypes":[] }, {"name":"getUrlBytes","parameterTypes":[] }, {"name":"hasDescription","parameterTypes":[] }, {"name":"hasUrl","parameterTypes":[] }, {"name":"newBuilder","parameterTypes":[] }]
+},
+{
+  "name":"engine.protoc.openapi.model.ExternalDocumentationOuterClass$ExternalDocumentation$Builder",
+  "methods":[{"name":"clearDescription","parameterTypes":[] }, {"name":"clearUrl","parameterTypes":[] }, {"name":"getDescription","parameterTypes":[] }, {"name":"getUrl","parameterTypes":[] }, {"name":"hasDescription","parameterTypes":[] }, {"name":"hasUrl","parameterTypes":[] }, {"name":"setDescription","parameterTypes":["java.lang.String"] }, {"name":"setDescriptionBytes","parameterTypes":["com.google.protobuf.ByteString"] }, {"name":"setUrl","parameterTypes":["java.lang.String"] }, {"name":"setUrlBytes","parameterTypes":["com.google.protobuf.ByteString"] }]
+},
+{
+  "name":"engine.protoc.openapi.model.HttpSecurityScheme$HTTPSecurityScheme",
+  "methods":[{"name":"newBuilder","parameterTypes":[] }]
+},
+{
+  "name":"engine.protoc.openapi.model.InfoOuterClass$Info",
+  "methods":[{"name":"getContact","parameterTypes":[] }, {"name":"getDescription","parameterTypes":[] }, {"name":"getDescriptionBytes","parameterTypes":[] }, {"name":"getLicense","parameterTypes":[] }, {"name":"getSummary","parameterTypes":[] }, {"name":"getSummaryBytes","parameterTypes":[] }, {"name":"getTermsOfService","parameterTypes":[] }, {"name":"getTermsOfServiceBytes","parameterTypes":[] }, {"name":"getTitle","parameterTypes":[] }, {"name":"getTitleBytes","parameterTypes":[] }, {"name":"getVersion","parameterTypes":[] }, {"name":"getVersionBytes","parameterTypes":[] }, {"name":"hasContact","parameterTypes":[] }, {"name":"hasDescription","parameterTypes":[] }, {"name":"hasLicense","parameterTypes":[] }, {"name":"hasSummary","parameterTypes":[] }, {"name":"hasTermsOfService","parameterTypes":[] }, {"name":"hasTitle","parameterTypes":[] }, {"name":"hasVersion","parameterTypes":[] }, {"name":"newBuilder","parameterTypes":[] }]
+},
+{
+  "name":"engine.protoc.openapi.model.InfoOuterClass$Info$Builder",
+  "methods":[{"name":"clearContact","parameterTypes":[] }, {"name":"clearDescription","parameterTypes":[] }, {"name":"clearLicense","parameterTypes":[] }, {"name":"clearSummary","parameterTypes":[] }, {"name":"clearTermsOfService","parameterTypes":[] }, {"name":"clearTitle","parameterTypes":[] }, {"name":"clearVersion","parameterTypes":[] }, {"name":"getContact","parameterTypes":[] }, {"name":"getContactBuilder","parameterTypes":[] }, {"name":"getDescription","parameterTypes":[] }, {"name":"getLicense","parameterTypes":[] }, {"name":"getLicenseBuilder","parameterTypes":[] }, {"name":"getSummary","parameterTypes":[] }, {"name":"getTermsOfService","parameterTypes":[] }, {"name":"getTitle","parameterTypes":[] }, {"name":"getVersion","parameterTypes":[] }, {"name":"hasContact","parameterTypes":[] }, {"name":"hasDescription","parameterTypes":[] }, {"name":"hasLicense","parameterTypes":[] }, {"name":"hasSummary","parameterTypes":[] }, {"name":"hasTermsOfService","parameterTypes":[] }, {"name":"hasTitle","parameterTypes":[] }, {"name":"hasVersion","parameterTypes":[] }, {"name":"setContact","parameterTypes":["engine.protoc.openapi.model.ContactOuterClass$Contact"] }, {"name":"setDescription","parameterTypes":["java.lang.String"] }, {"name":"setDescriptionBytes","parameterTypes":["com.google.protobuf.ByteString"] }, {"name":"setLicense","parameterTypes":["engine.protoc.openapi.model.LicenseOuterClass$License"] }, {"name":"setSummary","parameterTypes":["java.lang.String"] }, {"name":"setSummaryBytes","parameterTypes":["com.google.protobuf.ByteString"] }, {"name":"setTermsOfService","parameterTypes":["java.lang.String"] }, {"name":"setTermsOfServiceBytes","parameterTypes":["com.google.protobuf.ByteString"] }, {"name":"setTitle","parameterTypes":["java.lang.String"] }, {"name":"setTitleBytes","parameterTypes":["com.google.protobuf.ByteString"] }, {"name":"setVersion","parameterTypes":["java.lang.String"] }, {"name":"setVersionBytes","parameterTypes":["com.google.protobuf.ByteString"] }]
+},
+{
+  "name":"engine.protoc.openapi.model.LicenseOuterClass$License",
+  "methods":[{"name":"getIdentifier","parameterTypes":[] }, {"name":"getIdentifierBytes","parameterTypes":[] }, {"name":"getName","parameterTypes":[] }, {"name":"getNameBytes","parameterTypes":[] }, {"name":"getTypeCase","parameterTypes":[] }, {"name":"getUrl","parameterTypes":[] }, {"name":"getUrlBytes","parameterTypes":[] }, {"name":"hasIdentifier","parameterTypes":[] }, {"name":"hasName","parameterTypes":[] }, {"name":"hasUrl","parameterTypes":[] }, {"name":"newBuilder","parameterTypes":[] }]
+},
+{
+  "name":"engine.protoc.openapi.model.LicenseOuterClass$License$Builder",
+  "methods":[{"name":"clearIdentifier","parameterTypes":[] }, {"name":"clearName","parameterTypes":[] }, {"name":"clearType","parameterTypes":[] }, {"name":"clearUrl","parameterTypes":[] }, {"name":"getIdentifier","parameterTypes":[] }, {"name":"getName","parameterTypes":[] }, {"name":"getTypeCase","parameterTypes":[] }, {"name":"getUrl","parameterTypes":[] }, {"name":"hasIdentifier","parameterTypes":[] }, {"name":"hasName","parameterTypes":[] }, {"name":"hasUrl","parameterTypes":[] }, {"name":"setIdentifier","parameterTypes":["java.lang.String"] }, {"name":"setIdentifierBytes","parameterTypes":["com.google.protobuf.ByteString"] }, {"name":"setName","parameterTypes":["java.lang.String"] }, {"name":"setNameBytes","parameterTypes":["com.google.protobuf.ByteString"] }, {"name":"setUrl","parameterTypes":["java.lang.String"] }, {"name":"setUrlBytes","parameterTypes":["com.google.protobuf.ByteString"] }]
+},
+{
+  "name":"engine.protoc.openapi.model.MtlsSecurityScheme$MutualTLSSecurityScheme",
+  "methods":[{"name":"newBuilder","parameterTypes":[] }]
+},
+{
+  "name":"engine.protoc.openapi.model.OauthSecurityScheme$OAuthSecurityScheme",
+  "methods":[{"name":"newBuilder","parameterTypes":[] }]
+},
+{
+  "name":"engine.protoc.openapi.model.OpenidConnectSecurityScheme$OpenIDConnectSecurityScheme",
+  "methods":[{"name":"newBuilder","parameterTypes":[] }]
+},
+{
+  "name":"engine.protoc.openapi.model.PathsOuterClass$Paths",
+  "methods":[{"name":"newBuilder","parameterTypes":[] }]
+},
+{
+  "name":"engine.protoc.openapi.model.ReferenceOuterClass$Reference",
+  "methods":[{"name":"newBuilder","parameterTypes":[] }]
+},
+{
+  "name":"engine.protoc.openapi.model.SecurityRequirementOuterClass$SecurityRequirement",
+  "methods":[{"name":"getDefaultInstance","parameterTypes":[] }, {"name":"newBuilder","parameterTypes":[] }]
+},
+{
+  "name":"engine.protoc.openapi.model.SecurityRequirementValuesOuterClass$SecurityRequirementValues",
+  "methods":[{"name":"getValues","parameterTypes":["int"] }, {"name":"getValuesCount","parameterTypes":[] }, {"name":"getValuesList","parameterTypes":[] }]
+},
+{
+  "name":"engine.protoc.openapi.model.SecurityRequirementValuesOuterClass$SecurityRequirementValues$Builder",
+  "methods":[{"name":"addValues","parameterTypes":["java.lang.String"] }, {"name":"clearValues","parameterTypes":[] }, {"name":"getValues","parameterTypes":["int"] }, {"name":"getValuesCount","parameterTypes":[] }, {"name":"getValuesList","parameterTypes":[] }, {"name":"setValues","parameterTypes":["int","java.lang.String"] }]
+},
+{
+  "name":"engine.protoc.openapi.model.SecuritySchemeOrReferenceOuterClass$SecuritySchemeOrReference",
+  "methods":[{"name":"getReference","parameterTypes":[] }, {"name":"getSecurityScheme","parameterTypes":[] }, {"name":"getTypeCase","parameterTypes":[] }, {"name":"hasReference","parameterTypes":[] }, {"name":"hasSecurityScheme","parameterTypes":[] }]
+},
+{
+  "name":"engine.protoc.openapi.model.SecuritySchemeOrReferenceOuterClass$SecuritySchemeOrReference$Builder",
+  "methods":[{"name":"clearReference","parameterTypes":[] }, {"name":"clearSecurityScheme","parameterTypes":[] }, {"name":"clearType","parameterTypes":[] }, {"name":"getReference","parameterTypes":[] }, {"name":"getReferenceBuilder","parameterTypes":[] }, {"name":"getSecurityScheme","parameterTypes":[] }, {"name":"getSecuritySchemeBuilder","parameterTypes":[] }, {"name":"getTypeCase","parameterTypes":[] }, {"name":"hasReference","parameterTypes":[] }, {"name":"hasSecurityScheme","parameterTypes":[] }, {"name":"setReference","parameterTypes":["engine.protoc.openapi.model.ReferenceOuterClass$Reference"] }, {"name":"setSecurityScheme","parameterTypes":["engine.protoc.openapi.model.SecuritySchemeOuterClass$SecurityScheme"] }]
+},
+{
+  "name":"engine.protoc.openapi.model.SecuritySchemeOuterClass$SecurityScheme",
+  "methods":[{"name":"getApiKey","parameterTypes":[] }, {"name":"getDescription","parameterTypes":[] }, {"name":"getDescriptionBytes","parameterTypes":[] }, {"name":"getHttp","parameterTypes":[] }, {"name":"getMutualTls","parameterTypes":[] }, {"name":"getOauth2","parameterTypes":[] }, {"name":"getOpenIdConnect","parameterTypes":[] }, {"name":"getTypeCase","parameterTypes":[] }, {"name":"hasApiKey","parameterTypes":[] }, {"name":"hasDescription","parameterTypes":[] }, {"name":"hasHttp","parameterTypes":[] }, {"name":"hasMutualTls","parameterTypes":[] }, {"name":"hasOauth2","parameterTypes":[] }, {"name":"hasOpenIdConnect","parameterTypes":[] }, {"name":"newBuilder","parameterTypes":[] }]
+},
+{
+  "name":"engine.protoc.openapi.model.SecuritySchemeOuterClass$SecurityScheme$Builder",
+  "methods":[{"name":"clearApiKey","parameterTypes":[] }, {"name":"clearDescription","parameterTypes":[] }, {"name":"clearHttp","parameterTypes":[] }, {"name":"clearMutualTls","parameterTypes":[] }, {"name":"clearOauth2","parameterTypes":[] }, {"name":"clearOpenIdConnect","parameterTypes":[] }, {"name":"clearType","parameterTypes":[] }, {"name":"getApiKey","parameterTypes":[] }, {"name":"getApiKeyBuilder","parameterTypes":[] }, {"name":"getDescription","parameterTypes":[] }, {"name":"getHttp","parameterTypes":[] }, {"name":"getHttpBuilder","parameterTypes":[] }, {"name":"getMutualTls","parameterTypes":[] }, {"name":"getMutualTlsBuilder","parameterTypes":[] }, {"name":"getOauth2","parameterTypes":[] }, {"name":"getOauth2Builder","parameterTypes":[] }, {"name":"getOpenIdConnect","parameterTypes":[] }, {"name":"getOpenIdConnectBuilder","parameterTypes":[] }, {"name":"getTypeCase","parameterTypes":[] }, {"name":"hasApiKey","parameterTypes":[] }, {"name":"hasDescription","parameterTypes":[] }, {"name":"hasHttp","parameterTypes":[] }, {"name":"hasMutualTls","parameterTypes":[] }, {"name":"hasOauth2","parameterTypes":[] }, {"name":"hasOpenIdConnect","parameterTypes":[] }, {"name":"setApiKey","parameterTypes":["engine.protoc.openapi.model.ApiKeySecurityScheme$APIKeySecurityScheme"] }, {"name":"setDescription","parameterTypes":["java.lang.String"] }, {"name":"setDescriptionBytes","parameterTypes":["com.google.protobuf.ByteString"] }, {"name":"setHttp","parameterTypes":["engine.protoc.openapi.model.HttpSecurityScheme$HTTPSecurityScheme"] }, {"name":"setMutualTls","parameterTypes":["engine.protoc.openapi.model.MtlsSecurityScheme$MutualTLSSecurityScheme"] }, {"name":"setOauth2","parameterTypes":["engine.protoc.openapi.model.OauthSecurityScheme$OAuthSecurityScheme"] }, {"name":"setOpenIdConnect","parameterTypes":["engine.protoc.openapi.model.OpenidConnectSecurityScheme$OpenIDConnectSecurityScheme"] }]
+},
+{
+  "name":"engine.protoc.openapi.model.ServerOuterClass$Server",
+  "methods":[{"name":"getDefaultInstance","parameterTypes":[] }, {"name":"getDescription","parameterTypes":[] }, {"name":"getDescriptionBytes","parameterTypes":[] }, {"name":"getUrl","parameterTypes":[] }, {"name":"getUrlBytes","parameterTypes":[] }, {"name":"newBuilder","parameterTypes":[] }]
+},
+{
+  "name":"engine.protoc.openapi.model.ServerOuterClass$Server$Builder",
+  "methods":[{"name":"clearDescription","parameterTypes":[] }, {"name":"clearUrl","parameterTypes":[] }, {"name":"getDescription","parameterTypes":[] }, {"name":"getUrl","parameterTypes":[] }, {"name":"setDescription","parameterTypes":["java.lang.String"] }, {"name":"setDescriptionBytes","parameterTypes":["com.google.protobuf.ByteString"] }, {"name":"setUrl","parameterTypes":["java.lang.String"] }, {"name":"setUrlBytes","parameterTypes":["com.google.protobuf.ByteString"] }]
+},
+{
+  "name":"engine.protoc.openapi.model.TagOuterClass$Tag",
+  "methods":[{"name":"newBuilder","parameterTypes":[] }]
 },
 {
   "name":"java.nio.Buffer",

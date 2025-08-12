@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+package engine.protoc.openapi;
+
+import "engine/protoc/openapi/model/discriminator.proto";
+import "engine/protoc/openapi/model/xml.proto";
+import "google/protobuf/any.proto";
+
+// The Schema Object allows the definition of input and output data types.
+// These types can be objects, but also primitives and arrays.
+// This object is a superset of the [JSON Schema Specification Draft 2020-12](https://tools.ietf.org/html/draft-bhutton-json-schema-00).
+// The empty schema (which allows any instance to validate) MAY be represented by the boolean value `true` and a schema which allows no instance to validate MAY be represented by the boolean value `false`.
+//
+// For more information about the keywords, see [JSON Schema Core](https://tools.ietf.org/html/draft-bhutton-json-schema-00) and [JSON Schema Validation](https://tools.ietf.org/html/draft-bhutton-json-schema-validation-00).
+//
+// Unless stated otherwise, the keyword definitions follow those of JSON Schema and do not add any additional semantics; this includes keywords such as `$schema`, `$id`, `$ref`, and `$dynamicRef` being URIs rather than URLs.
+// Where JSON Schema indicates that behavior is defined by the application (e.g. for annotations), OAS also defers the definition of semantics to the application consuming the OpenAPI document.
+//
+// **JSON Schema Keywords**
+//
+// The OpenAPI Schema Object [dialect](https://tools.ietf.org/html/draft-bhutton-json-schema-00#section-4.3.3) is defined as requiring the [OAS base vocabulary](https://swagger.io/specification/#base-vocabulary), in addition to the vocabularies as specified in the JSON Schema Specification Draft 2020-12 [general purpose meta-schema](https://tools.ietf.org/html/draft-bhutton-json-schema-00#section-8).
+//
+// The OpenAPI Schema Object dialect for this version of the specification is identified by the URI `https://spec.openapis.org/oas/3.1/dialect/base` (the "OAS dialect schema id").
+//
+// The following keywords are taken from the JSON Schema specification but their definitions have been extended by the OAS:
+//
+// * description - [CommonMark syntax](https://spec.commonmark.org/) MAY be used for rich text representation.
+// * format - See [Data Type Formats](https://swagger.io/specification/#data-type-format) for further details. While relying on JSON Schema's defined formats, the OAS offers a few additional predefined formats.
+//
+// In addition to the JSON Schema keywords comprising the OAS dialect, the Schema Object supports keywords from any other vocabularies, or entirely arbitrary properties.
+//
+// JSON Schema implementations MAY choose to treat keywords defined by the OpenAPI Specification's base vocabulary as [unknown keywords](https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema-00#section-4.3.1), due to its inclusion in the OAS dialect with a [$vocabulary](https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema-00#section-8.1.2) value of `false`. The OAS base vocabulary is comprised of the following keywords:
+message Schema {
+  // Adds support for polymorphism.
+  // The discriminator is used to determine which of a set of schemas a payload is expected to satisfy.
+  // See [Composition and Inheritance](https://swagger.io/specification/#composition-and-inheritance-polymorphism) for more details.
+  .engine.protoc.openapi.model.Discriminator discriminator = 1;
+
+  // This MAY be used only on property schemas.
+  // It has no effect on root schemas.
+  // Adds additional metadata to describe the XML representation of this property.
+  .engine.protoc.openapi.model.XML xml = 2;
+
+  // Additional external documentation for this schema.
+  optional string external_docs = 3;
+
+  // A free-form field to include an example of an instance for this schema.
+  // To represent examples that cannot be naturally represented in JSON or YAML, a string value can be used to contain the example with escaping where necessary.
+  //
+  // **Deprecated**: The `example` field has been deprecated in favor of the JSON Schema `examples` keyword.
+  // Use of `example` is discouraged, and later versions of this specification may remove it.
+  .google.protobuf.Any example = 4;
+}

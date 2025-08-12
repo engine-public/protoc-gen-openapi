@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package engine.protoc.openapi.model;
+
+import "engine/protoc/openapi/model/link.proto";
+import "engine/protoc/openapi/model/reference.proto";
+
+message LinkOrReference {
+  oneof type {
+    .engine.protoc.openapi.model.Link link = 1;
+    .engine.protoc.openapi.model.Reference reference = 2;
+  }
+}

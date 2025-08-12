@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package engine.protoc.openapi;
+
+import "engine/protoc/openapi/openapi.proto";
+import "engine/protoc/openapi/operation.proto";
+import "engine/protoc/openapi/schema.proto";
+
+import "google/protobuf/descriptor.proto";
+
+// Adds the ability to add an OpenAPI definition to a proto file
+extend .google.protobuf.FileOptions {
+  .engine.protoc.openapi.OpenAPI file_level_openapi = 20231016;
+}
+
+// Adds the ability to add an OpenAPI definition to a proto `service`
+extend .google.protobuf.ServiceOptions {
+  .engine.protoc.openapi.OpenAPI service_level_openapi = 20231016;
+}
+
+// Adds the ability to add an OpenAPI operation to a rpc in a proto `service`
+extend .google.protobuf.MethodOptions {
+  .engine.protoc.openapi.Operation openapi_operation = 20231016;
+}
+
+// Adds the ability to add an OpenAPI schema to a field in a proto `message`
+extend .google.protobuf.MessageOptions {
+  .engine.protoc.openapi.Schema openapi_schema = 20231016;
+}

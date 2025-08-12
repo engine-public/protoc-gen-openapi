@@ -33,6 +33,7 @@ jobs:
         with:
           java-version: '21'
           distribution: 'graalvm-community'
+          native-image-job-reports: 'true'
 
       - name: Setup gradle
         uses: gradle/actions/setup-gradle@v4

@@ -34,10 +34,10 @@ dependencyResolutionManagement {
             val kotest = version("kotest", "5.9.1")
 
             val krj5 = "kotest.runner.junit5".apply {
-                library(this, "io.kotest", "kotest-runner-junit5",).versionRef(kotest)
+                library(this, "io.kotest", "kotest-runner-junit5").versionRef(kotest)
             }
             val kac = "kotest.assertions.core".apply {
-                library(this, "io.kotest", "kotest-assertions-core",).versionRef(kotest)
+                library(this, "io.kotest", "kotest-assertions-core").versionRef(kotest)
             }
 
             bundle("kotest", listOf(krj5, kac))

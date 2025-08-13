@@ -11,7 +11,7 @@ import kotlin.reflect.full.memberProperties
 
 public class ProtocGenOpenAPI(
     private val request: PluginProtos.CodeGeneratorRequest,
-    private val options: Options
+    private val options: Options,
 ) {
 
     /**
@@ -20,7 +20,7 @@ public class ProtocGenOpenAPI(
     public data class Options constructor(
         val recordCodeGeneratorRequest: File?,
         val recordCodeGeneratorResponse: File?,
-        ) {
+    ) {
 
         public class Builder {
             public var recordCodeGeneratorRequest: File? = null
@@ -45,11 +45,13 @@ public class ProtocGenOpenAPI(
                             Boolean::class -> optionValue.toBoolean()
                             File::class -> File(optionValue)
                             String::class -> optionValue
-                            else -> throw IllegalStateException("""
+                            else -> throw IllegalStateException(
+                                """
                                 `${property.returnType.classifier}` is not a supported `ProtocGenOpenAPI.Options` type.
                                 This is an error internal to `protoc-gen-openapi`.
                                 The provided option was `$parameter`.
-                                """.trimIndent())
+                                """.trimIndent(),
+                            )
                         }
                         property.setter.call(builder, convertedOptionValue)
                     }
@@ -58,25 +60,26 @@ public class ProtocGenOpenAPI(
                 }
             }
 
-            public fun build(): Options = Options(
-                recordCodeGeneratorRequest = recordCodeGeneratorRequest,
-                recordCodeGeneratorResponse = recordCodeGeneratorResponse,
-            )
+            public fun build(): Options =
+                Options(
+                    recordCodeGeneratorRequest = recordCodeGeneratorRequest,
+                    recordCodeGeneratorResponse = recordCodeGeneratorResponse,
+                )
         }
     }
 
     public companion object {
-        public fun ExtensionRegistry.prepare(): ExtensionRegistry = apply {
-            Annotations.registerAllExtensions(this)
-            AnnotationsProto.registerAllExtensions(this)
-        }
+        public fun ExtensionRegistry.prepare(): ExtensionRegistry =
+            apply {
+                Annotations.registerAllExtensions(this)
+                AnnotationsProto.registerAllExtensions(this)
+            }
 
         public fun from(
             input: InputStream,
             registry: ExtensionRegistry = ExtensionRegistry.newInstance().prepare(),
-            block: Options.Builder.() -> Unit = {}
+            block: Options.Builder.() -> Unit = {},
         ): ProtocGenOpenAPI {
-
             // capture the bytes in case we need to record them and parsing fails
             val stdin: ByteArray = input.readBytes()
 
@@ -96,7 +99,7 @@ public class ProtocGenOpenAPI(
             } catch (t: Throwable) {
                 throw IllegalStateException(
                     "The provided code generator request could not be parsed.  To record the request for debugging, re-run the compiler using the environment variable `PROTOC_GEN_OPENAPI_RECORD_CGREQ` with a writable file path.",
-                    t
+                    t,
                 )
             }
         }
@@ -109,8 +112,8 @@ public class ProtocGenOpenAPI(
         return PluginProtos.CodeGeneratorResponse.newBuilder().apply {
             supportedFeatures =
                 supportedFeatures or
-                    PluginProtos.CodeGeneratorResponse.Feature.FEATURE_PROTO3_OPTIONAL.number
-                        .toLong()
+                PluginProtos.CodeGeneratorResponse.Feature.FEATURE_PROTO3_OPTIONAL.number
+                    .toLong()
             request
                 .sourceFileDescriptorsList
                 .filter { it.serviceList.isNotEmpty() }

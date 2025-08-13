@@ -1,7 +1,56 @@
 syntax = "proto3";
 
-import "temp.proto";
+import "engine/protoc/openapi/annotations.proto";
+import "google/protobuf/empty.proto";
 
-message Example {
-  Temp temp = 1;
+option (engine.protoc.openapi.file_level_openapi) = {
+    info: {
+        title: "protoc-gen-openapi-example"
+        summary: "An example project created to demonstrate the protoc-gen-openapi plugin."
+        description: ""
+        contact: {
+            name: "Engine Partner API Support"
+            url: "https://github.com/engine-public/engine-partner-api"
+            email: "partner-api-support@engine.com"
+        },
+        license: {
+            name: "Apache License 2.0",
+            url: "https://github.com/engine-public/engine-partner-api/blob/main/LICENSE"
+        },
+        version: "12.34.56"
+    }
+    servers: [{
+        url: "https://example.com",
+        description: "Primary host"
+    }, {
+        url: "https://example.org"
+        description: "Secondary host"
+    }]
+    components: {
+        security_schemes: [{
+            key: "mTLS"
+            value: {
+                security_scheme: {
+                    description: "This API requires a certificate provisioned by the Engine team."
+                    mutual_tls: {}
+                }
+            }
+        }]
+    },
+    security: [{
+        names: [{
+            key: "mTLS"
+            value: {}
+        }]
+    }],
+    external_docs: {
+        description: "protoc-gen-openapi GitHub"
+        url: "https://github.com/HotelEngine/protoc-gen-openapi"
+    }
+};
+
+// Service comment
+service ExampleService {
+    // RPC comment
+    rpc Example(.google.protobuf.Empty) returns (.google.protobuf.Empty);
 }

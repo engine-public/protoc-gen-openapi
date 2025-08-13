@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package engine.protoc.openapi.model;
+
+import "engine/protoc/openapi/model/callback.proto";
+import "engine/protoc/openapi/model/reference.proto";
+
+message CallbackOrReference {
+  oneof type {
+    .engine.protoc.openapi.model.Callback callback = 1;
+    .engine.protoc.openapi.model.Reference reference = 2;
+  }
+}

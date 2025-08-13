@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package engine.protoc.openapi.model;
+
+import "engine/protoc/openapi/schema.proto";
+import "engine/protoc/openapi/model/callback_or_reference.proto";
+import "engine/protoc/openapi/model/example_or_reference.proto";
+import "engine/protoc/openapi/model/header_or_reference.proto";
+import "engine/protoc/openapi/model/link_or_reference.proto";
+import "engine/protoc/openapi/model/parameter_or_reference.proto";
+import "engine/protoc/openapi/model/path_item.proto";
+import "engine/protoc/openapi/model/response_or_reference.proto";
+import "engine/protoc/openapi/model/request_body_or_reference.proto";
+import "engine/protoc/openapi/model/security_scheme_or_reference.proto";
+
+// Holds a set of reusable objects for different aspects of the OAS.
+// All objects defined within the Components Object will have no effect on the API unless they are explicitly referenced from outside the Components Object.
+message Components {
+  // An object to hold reusable [Schema Objects](https://swagger.io/specification/#schema-object).
+  map<string, .engine.protoc.openapi.Schema> schemas = 1;
+
+  // An object to hold reusable Response Objects.
+  map<string, .engine.protoc.openapi.model.ResponseOrReference> responses = 2;
+
+  // An object to hold reusable Parameter Objects.
+  map<string, .engine.protoc.openapi.model.ParameterOrReference> parameters = 3;
+
+  // An object to hold reusable Example Objects.
+  map<string, .engine.protoc.openapi.model.ExampleOrReference> examples = 4;
+
+  // An object to hold reusable [Request Body Objects](https://swagger.io/specification/#request-body-object).
+  map<string, .engine.protoc.openapi.model.RequestBodyOrReference> request_bodies = 5;
+
+  // An object to hold reusable [Header Objects](https://swagger.io/specification/#header-object).
+  map<string, .engine.protoc.openapi.model.HeaderOrReference> headers = 6;
+
+  // An object to hold reusable [Security Scheme Objects](https://swagger.io/specification/#security-scheme-object).
+  map<string, .engine.protoc.openapi.model.SecuritySchemeOrReference> security_schemes = 7;
+
+  // An object to hold reusable [Link Objects](https://swagger.io/specification/#link-object).
+  map<string, .engine.protoc.openapi.model.LinkOrReference> links = 8;
+
+  // An object to hold reusable [Callback Objects](https://swagger.io/specification/#callback-object).
+  map<string, .engine.protoc.openapi.model.CallbackOrReference> callbacks = 9;
+
+  // An object to hold reusable [Path Item Objects](https://swagger.io/specification/#path-item-object).
+  map<string, .engine.protoc.openapi.model.PathItem> path_items = 10;
+}

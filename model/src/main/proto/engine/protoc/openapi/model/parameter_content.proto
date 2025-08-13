@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package engine.protoc.openapi.model;
+
+import "engine/protoc/openapi/model/media_type.proto";
+
+message ParameterContent {
+
+  // A map containing the representations for the parameter. The key is the media type and the value describes it. The map MUST only contain one entry.
+  map<string, .engine.protoc.openapi.model.MediaType> content = 1;
+}

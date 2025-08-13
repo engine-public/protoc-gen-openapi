@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package engine.protoc.openapi.model;
+
+import "engine/protoc/openapi/model/oauth_flow.proto";
+
+//Allows configuration of the supported OAuth Flows.
+message OAuthFlows {
+  // Configuration for the OAuth Implicit flow
+  .engine.protoc.openapi.model.OAuthFlow implicit = 1;
+
+  // Configuration for the OAuth Resource Owner Password flow
+  .engine.protoc.openapi.model.OAuthFlow password = 2;
+
+  // Configuration for the OAuth Client Credentials flow.
+  // Previously called application in OpenAPI 2.0.
+  .engine.protoc.openapi.model.OAuthFlow client_credentials = 3;
+
+  // Configuration for the OAuth Authorization Code flow.
+  // Previously called accessCode in OpenAPI 2.0.
+  .engine.protoc.openapi.model.OAuthFlow authorization_code = 4;
+}

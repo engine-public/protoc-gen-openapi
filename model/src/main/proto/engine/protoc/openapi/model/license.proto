@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package engine.protoc.openapi.model;
+
+// License information for the exposed API.
+message License {
+  // REQUIRED.
+  // The license name used for the API.
+  //
+  //   // proto information: While `name` is required in the OpenAPI spec, it is optional here to allow overlaying details from other sources.
+  optional string name = 1;
+
+  oneof type {
+    // An [SPDX](https://spdx.org/licenses/) license expression for the API.
+    // The `identifier` field is mutually exclusive of the `url` field.
+    string identifier = 2;
+
+    // A URI for the license used for the API. This MUST be in the form of a URI.
+    // The `url` field is mutually exclusive of the `identifier` field.
+    string url = 3;
+  }
+}

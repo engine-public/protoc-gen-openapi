@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package engine.protoc.openapi.model;
+
+import "engine/protoc/openapi/model/path_item.proto";
+
+// A map of possible out-of band callbacks related to the parent operation.
+// Each value in the map is a [Path Item Object](https://swagger.io/specification/#path-item-object) that describes a set of requests that may be initiated by the API provider and the expected responses.
+// The key value used to identify the Path Item Object is an expression, evaluated at runtime, that identifies a URL to use for the callback operation.
+// To describe incoming requests from the API provider independent from another API call, use the [webhooks](https://swagger.io/specification/#oas-webhooks) field.
+message Callback {
+  // **Key Expression**
+  //
+  // The key that identifies the Path Item Object is a runtime expression that can be evaluated in the context of a runtime HTTP request/response to identify the URL to be used for the callback request.
+  // A simple example might be $request.body#/url.
+  // However, using a runtime expression the complete HTTP message can be accessed.
+  // This includes accessing any part of a body that a JSON Pointer RFC6901 can reference.
+  //
+  // **Callback Object Examples**
+  //
+  // The following example uses the user provided queryUrl query string parameter to define the callback URL.
+  // This is similar to a webhook, but differs in that the callback only occurs because of the initial request that sent the queryUrl.
+  // ```yaml
+  // '{$request.query.queryUrl}':
+  //   post:
+  //     requestBody:
+  //       description: Callback payload
+  //       content:
+  //         application/json:
+  //           schema:
+  //             $ref: '#/components/schemas/SomePayload'
+  //     responses:
+  //       '200':
+  //         description: callback successfully processed
+  // ```
+  map<string, .engine.protoc.openapi.model.PathItem> callbacks = 1;
+}

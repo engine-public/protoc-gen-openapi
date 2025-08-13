@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package engine.protoc.openapi.model;
+
+message OpenIDConnectSecurityScheme {
+  // REQUIRED.
+  // Well-known URL to discover the [[OpenID-Connect-Discovery]] provider metadata.
+  string openid_connect_url = 1;
+}

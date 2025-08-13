@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package engine.protoc.openapi.model;
+
+import "engine/protoc/openapi/model/oauth_flows.proto";
+
+
+message OAuthSecurityScheme {
+  // REQUIRED.
+  // An object containing configuration information for the flow types supported.
+  .engine.protoc.openapi.model.OAuthFlows flows = 1;
+}

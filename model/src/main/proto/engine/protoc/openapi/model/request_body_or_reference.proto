@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package engine.protoc.openapi.model;
+
+import "engine/protoc/openapi/model/request_body.proto";
+import "engine/protoc/openapi/model/reference.proto";
+
+message RequestBodyOrReference {
+  oneof type {
+    .engine.protoc.openapi.model.RequestBody request_body = 1;
+    .engine.protoc.openapi.model.Reference reference = 2;
+  }
+}

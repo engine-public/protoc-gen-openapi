@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package engine.protoc.openapi.model;
+
+import "engine/protoc/openapi/model/reference.proto";
+
+// A single encoding definition applied to a single schema property.
+// See [Appendix B](https://swagger.io/specification/#appendix-b-data-type-conversion) for a discussion of converting values of various types to string representations.
+//
+// Properties are correlated with `multipart` parts using the [`name` parameter](https://www.rfc-editor.org/rfc/rfc7578#section-4.2) of `Content-Disposition: form-data`, and with `application/x-www-form-urlencoded` using the query string parameter names. In both cases, their order is implementation-defined.
+//
+// See [Appendix E](https://swagger.io/specification/#appendix-e-percent-encoding-and-form-media-types) for a detailed examination of percent-encoding concerns for form media types.
+message Encoding {
+  // The `Content-Type` for encoding a specific property.
+  // The value is a comma-separated list, each element of which is either a specific media type (e.g. `image/png`) or a wildcard media type (e.g. `image/*`).
+  // Default value depends on the property type as shown in the table below.
+  //
+  // The default values for contentType are as follows, where an n/a in the contentEncoding column means that the presence or value of contentEncoding is irrelevant:
+  //
+  // | `type`                                                               | `contentEncoding` | default `contentType`                         |
+  // |----------------------------------------------------------------------|-------------------|-----------------------------------------------|
+  // | [absent](https://swagger.io/specification/#working-with-binary-data) | _n/a_             | `application/octet-stream`                    |
+  // | `string`                                                             | _present_         | `application/octet-stream`                    |
+  // | `string`                                                             | _absent_          | `text/plain`                                  |
+  // | `number`, `integer`, or `boolean`                                    | _n/a_             | `text/plain`                                  |
+  // | `object`                                                             | _n/a_             | `application/json`                            |
+  // | `array`                                                              | _n/a_             | according to the `type` of the `items` schema |
+  //
+  // Determining how to handle a `type` value of `null` depends on how `null` values are being serialized.
+  // If `null` values are entirely omitted, then the `contentType` is irrelevant.
+  // See [Appendix B](https://swagger.io/specification/#appendix-b-data-type-conversion) for a discussion of data type conversion options.
+  optional string content_type = 1;
+
+  // A map allowing additional information to be provided as headers.
+  // `Content-Type` is described separately and SHALL be ignored in this section.
+  // This field SHALL be ignored if the request body media type is not a `multipart`.
+  //
+  // **protoc information**: The OpenAPI spec allows this to be either a Header or a Reference to a Header.
+  // However, protobuf doesn't allow circular dependencies in compilation.
+  // The OpenAPI chain of MediaType->Encoding->HeaderOrReference->Header->HeaderContent->MediaType is illegal.
+  // As such, we only allow References here, and the Header must be defined in the components.
+  map<string, .engine.protoc.openapi.model.Reference> headers = 2;
+}

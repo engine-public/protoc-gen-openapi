@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package engine.protoc.openapi.model;
+
+import "engine/protoc/openapi/model/api_key_security_scheme.proto";
+import "engine/protoc/openapi/model/http_security_scheme.proto";
+import "engine/protoc/openapi/model/mtls_security_scheme.proto";
+import "engine/protoc/openapi/model/oauth_security_scheme.proto";
+import "engine/protoc/openapi/model/openid_connect_security_scheme.proto";
+
+// Defines a security scheme that can be used by the operations.
+//
+// Supported schemes are HTTP authentication, an API key (either as a header, a cookie parameter or as a query parameter), mutual TLS (use of a client certificate), OAuth2's common flows (implicit, password, client credentials and authorization code) as defined in [RFC6749](https://tools.ietf.org/html/rfc6749), and [[OpenID-Connect-Core]].
+// Please note that as of 2020, the implicit flow is about to be deprecated by [OAuth 2.0 Security Best Current Practice](https://tools.ietf.org/html/draft-ietf-oauth-security-topics).
+// Recommended for most use cases is Authorization Code Grant flow with PKCE.
+message SecurityScheme {
+  // A description for security scheme.
+  // [CommonMark syntax](https://spec.commonmark.org/) MAY be used for rich text representation.
+  optional string description = 1;
+
+  oneof type {
+    .engine.protoc.openapi.model.APIKeySecurityScheme api_key = 2;
+    .engine.protoc.openapi.model.HTTPSecurityScheme http = 3;
+    .engine.protoc.openapi.model.MutualTLSSecurityScheme mutual_tls = 4;
+    .engine.protoc.openapi.model.OAuthSecurityScheme oauth2 = 5;
+    .engine.protoc.openapi.model.OpenIDConnectSecurityScheme open_id_connect = 6;
+  }
+}

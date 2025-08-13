@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package engine.protoc.openapi.model;
+
+import "engine/protoc/openapi/model/header.proto";
+import "engine/protoc/openapi/model/reference.proto";
+
+message HeaderOrReference {
+  oneof type {
+    .engine.protoc.openapi.model.Header header = 1;
+    .engine.protoc.openapi.model.Reference reference = 2;
+  }
+}

@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package engine.protoc.openapi.model;
+
+import "google/protobuf/any.proto";
+
+// An object grouping an internal or external example value with basic `summary` and `description` metadata.
+// This object is typically used in fields named `examples` (plural), and is a [referenceable](https://swagger.io/specification/#reference-object) alternative to older `example` (singular) fields that do not support referencing or metadata.
+//
+// Examples allow demonstration of the usage of properties, parameters and objects within OpenAPI.
+message Example {
+  // Short description for the example.
+  optional string summary = 1;
+
+  // Long description for the example. [CommonMark syntax](https://spec.commonmark.org/) MAY be used for rich text representation.
+  optional string description = 2;
+
+  oneof type {
+    // Embedded literal example. The `value` field and `externalValue` field are mutually exclusive.
+    // To represent examples of media types that cannot naturally represented in JSON or YAML, use a string value to contain the example, escaping where necessary.
+    .google.protobuf.Any value = 3;
+
+    // A URI that identifies the literal example.
+    // This provides the capability to reference examples that cannot easily be included in JSON or YAML documents.
+    // The `value` field and `externalValue` field are mutually exclusive.
+    // See the rules for resolving [Relative References](https://swagger.io/specification/#relative-references-in-api-description-uris).
+    string external_value = 4;
+  }
+}

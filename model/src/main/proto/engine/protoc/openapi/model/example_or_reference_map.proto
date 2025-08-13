@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package engine.protoc.openapi.model;
+
+import "engine/protoc/openapi/model/example_or_reference.proto";
+
+message ExampleOrReferenceMap {
+  map<string, .engine.protoc.openapi.model.ExampleOrReference> examples = 1;
+}

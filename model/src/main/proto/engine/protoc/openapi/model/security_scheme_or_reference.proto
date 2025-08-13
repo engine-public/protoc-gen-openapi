@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package engine.protoc.openapi.model;
+
+import "engine/protoc/openapi/model/reference.proto";
+import "engine/protoc/openapi/model/security_scheme.proto";
+
+message SecuritySchemeOrReference {
+  oneof type {
+    .engine.protoc.openapi.model.SecurityScheme security_scheme = 1;
+    .engine.protoc.openapi.model.Reference reference = 2;
+  }
+}

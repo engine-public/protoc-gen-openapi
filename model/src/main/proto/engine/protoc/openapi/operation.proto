@@ -1,0 +1,76 @@
+syntax = "proto3";
+
+package engine.protoc.openapi;
+
+import "engine/protoc/openapi/model/external_documentation.proto";
+import "engine/protoc/openapi/model/parameter_or_reference.proto";
+import "engine/protoc/openapi/model/request_body_or_reference.proto";
+import "engine/protoc/openapi/model/reference.proto";
+import "engine/protoc/openapi/model/responses.proto";
+import "engine/protoc/openapi/model/security_requirement.proto";
+import "engine/protoc/openapi/model/server.proto";
+
+// Describes a single API operation on a path.
+message Operation {
+  // A list of tags for API documentation control.
+  // Tags can be used for logical grouping of operations by resources or any other qualifier.
+  repeated string tags = 1;
+
+  // A short summary of what the operation does.
+  optional string summary = 2;
+
+  // A verbose explanation of the operation behavior.
+  // [CommonMark syntax](https://spec.commonmark.org/) MAY be used for rich text representation.
+  optional string description = 3;
+
+  // Additional external documentation for this operation.
+  .engine.protoc.openapi.model.ExternalDocumentation external_docs = 4;
+
+  // Unique string used to identify the operation.
+  // The id MUST be unique among all operations described in the API.
+  // The operationId value is **case-sensitive**.
+  // Tools and libraries MAY use the operationId to uniquely identify an operation, therefore, it is RECOMMENDED to follow common programming naming conventions.
+  optional string operationId = 5;
+
+  // A list of parameters that are applicable for this operation.
+  // If a parameter is already defined at the [Path Item](https://swagger.io/specification/#path-item-parameters), the new definition will override it but can never remove it.
+  // The list MUST NOT include duplicated parameters.
+  // A unique parameter is defined by a combination of a [name](https://swagger.io/specification/#parameter-name) and [location](https://swagger.io/specification/#parameter-in).
+  // The list can use the Reference Object to link to parameters that are defined in the [OpenAPI Object's `components.parameters`](https://swagger.io/specification/#components-parameters).
+  repeated .engine.protoc.openapi.model.ParameterOrReference parameters = 6;
+
+  // The request body applicable for this operation.
+  // The `requestBody` is fully supported in HTTP methods where the HTTP 1.1 specification [RFC7231](https://tools.ietf.org/html/rfc7231#section-4.3.1) has explicitly defined semantics for request bodies.
+  // In other cases where the HTTP spec is vague (such as [GET](https://tools.ietf.org/html/rfc7231#section-4.3.1), [HEAD](https://tools.ietf.org/html/rfc7231#section-4.3.2) and [DELETE](https://tools.ietf.org/html/rfc7231#section-4.3.5)), `requestBody` is permitted but does not have well-defined semantics and SHOULD be avoided if possible.
+  .engine.protoc.openapi.model.RequestBodyOrReference request_body = 7;
+
+  // The list of possible responses as they are returned from executing this operation.
+  .engine.protoc.openapi.model.Responses responses = 8;
+
+  // A map of possible out-of band callbacks related to the parent operation.
+  // The key is a unique identifier for the Callback Object.
+  // Each value in the map is a [Callback Object](https://swagger.io/specification/#callback-object) that describes a request that may be initiated by the API provider and the expected responses.
+  //
+  // **protoc information**: The OpenAPI spec allows this to be either a callback or a reference to a callback.
+  // However, protobuf doesn't allow circular dependencies in compilation.
+  // The OpenAPI chain of Callback->PathItem->Operation->CallbackOrReference->Callback is illegal.
+  // As such, we only allow References here, and the callbacks must be defined in the components.
+  map<string, .engine.protoc.openapi.model.Reference> callbacks = 9;
+
+  // Declares this operation to be deprecated.
+  // Consumers SHOULD refrain from usage of the declared operation.
+  // Default value is `false`.
+  optional bool deprecated = 10;
+
+  // A declaration of which security mechanisms can be used for this operation.
+  // The list of values includes alternative Security Requirement Objects that can be used.
+  // Only one of the Security Requirement Objects need to be satisfied to authorize a request.
+  // To make security optional, an empty security requirement (`{}`) can be included in the array.
+  // This definition overrides any declared top-level [security](https://swagger.io/specification/#oas-security).
+  // To remove a top-level security declaration, an empty array can be used.
+  repeated .engine.protoc.openapi.model.SecurityRequirement security = 11;
+
+  // An alternative `servers` array to service this operation.
+  // If a `servers` array is specified at the [Path Item Object](https://swagger.io/specification/#path-item-servers) or [OpenAPI Object](https://swagger.io/specification/#oas-servers) level, it will be overridden by this value.
+  repeated .engine.protoc.openapi.model.Server servers = 12;
+}

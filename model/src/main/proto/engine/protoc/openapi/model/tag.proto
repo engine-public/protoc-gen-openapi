@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package engine.protoc.openapi.model;
+
+import "engine/protoc/openapi/model/external_documentation.proto";
+
+// Adds metadata to a single tag that is used by the Operation Object.
+// It is not mandatory to have a Tag Object per tag defined in the Operation Object instances.
+message Tag {
+  // REQUIRED.
+  // The name of the tag.
+  string name = 1;
+
+  // A description for the tag.
+  // [CommonMark syntax](https://spec.commonmark.org/) MAY be used for rich text representation.
+  optional string description = 2;
+
+  // Additional external documentation for this tag.
+  .engine.protoc.openapi.model.ExternalDocumentation external_docs = 3;
+}

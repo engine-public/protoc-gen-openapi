@@ -40,7 +40,7 @@ protobuf {
             )
             it.plugins {
                 create("openapi") {
-                    option("recordCodeGenertorRequest=/var/tmp/protoc-gen-openapi.cgreq")
+                    option("recordCodeGeneratorRequest=/var/tmp/protoc-gen-openapi.cgreq")
                     option("recordCodeGeneratorResponse=/var/tmp/protoc-gen-openapi.cgresp")
                 }
             }

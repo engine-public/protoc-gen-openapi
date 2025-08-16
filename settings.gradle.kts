@@ -27,6 +27,7 @@ dependencyResolutionManagement {
 
             library("kotlin.reflect", "org.jetbrains.kotlin", "kotlin-reflect").versionRef(kotlin)
             library("google.api.grpc.googleCommonProtos", "com.google.api.grpc", "proto-google-common-protos").version("2.22.0")
+            library("openapi4j.parser", "org.openapi4j", "openapi-parser").version("1.0.7")
             library("protobuf.java", "com.google.protobuf", "protobuf-java").versionRef(protobuf)
             library("slf4j.api", "org.slf4j", "slf4j-api").versionRef(slf4j)
         }
@@ -39,6 +40,8 @@ dependencyResolutionManagement {
             val kac = "kotest.assertions.core".apply {
                 library(this, "io.kotest", "kotest-assertions-core").versionRef(kotest)
             }
+
+            library("kotest.framework.datatest", "io.kotest", "kotest-framework-datatest").versionRef(kotest)
 
             bundle("kotest", listOf(krj5, kac))
         }
@@ -65,5 +68,13 @@ rootDir
         include(projectName)
         project(projectName).projectDir = it
     }
+
+// manually include projects intended to be moved out of monorepo
+include(":protoc-utils")
+project(":protoc-utils").projectDir = rootDir.resolve("protoc-utils")
+
+include(":protoc-utils-recorder")
+project(":protoc-utils-recorder").projectDir = rootDir.resolve("protoc-utils/recorder")
+
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")

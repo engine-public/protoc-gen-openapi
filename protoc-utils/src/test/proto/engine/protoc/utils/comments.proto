@@ -1,0 +1,135 @@
+// header comment
+// second line of header comment.
+
+/*
+ * Multiline comment
+ *  with varying whitespace indent
+ *   on a few different lines
+ */
+
+/**
+ * JavaDoc comment
+ */
+
+/* Allen Holub, Enough Rope, Rule 29
+ */
+
+/* Multi-line for
+** non-indenting
+** editors
+** Allen Holub, Enough Rope, Rule 31.
+*/
+
+/***********************
+ *                     *
+ * Block Comment Frame *
+ *                     *
+ * with multiple lines *
+ *                     *
+ ***********************/
+
+/*====================\
+|                     |
+| Block Comment Frame |
+|                     |
+\====================*/
+
+/************************\
+|************************|
+|*                      *|
+|*                      *|
+|* Block Comment Frame  *|
+|*                      *|
+|*                      *|
+|*                      *|
+|************************|
+\************************/
+
+//
+// multiple consecutive single line
+// with top and bottom padding
+//
+
+//////////////////////////
+//                      //
+//  Framed Single Line  //
+//                      //
+//////////////////////////
+
+//
+
+// comment attached to syntax
+syntax = "proto3"; // trailing comment attached to syntax
+
+// comment attached to package
+package engine.protoc.utils; /*
+ trailing multiline comment
+*/
+
+// comment on import of google/protobuf/empty.proto
+import "google/protobuf/empty.proto";
+// trailing comment on the next line
+
+// comment on import of google/protobuf/any.proto
+import "google/protobuf/any.proto";
+
+// random extra comment
+
+// comment on unused import of google/protobuf/wrappers.proto
+import "google/protobuf/wrappers.proto";
+
+/* single line c-style comment on same line as import */ import "google/protobuf/duration.proto";
+
+// here to test and evaluate how downstream dependencies appear
+import "engine/protoc/utils/to_be_imported.proto";
+
+import "engine/protoc/utils/registered_extensions.proto";
+import "engine/protoc/utils/unregistered_extensions.proto";
+
+// comment on deprecated option
+option deprecated = true;
+
+// comment on java_multiple_files option
+option java_multiple_files = false;
+
+// comment on custom extension option that is registered at deser time of the cgrec
+option (.engine.protoc.utils.registered_example) = {
+    // **SENTINEL** comments on objects assigned to values of custom options are lost by the protoc compiler
+    one: 1;
+};
+
+// comment on custom extension option that is NOT registered at deser time of the cgrec
+option (.engine.protoc.utils.unregistered_example) = {
+    // **SENTINEL** comments on objects assigned to values of custom options are lost by the protoc compiler
+    two: 2;
+};
+
+// comment on message MessageWithComment
+message MessageWithComment {
+    // comment on message
+    message NestedMessageWithComment {
+        // comment on field in nest message MessageWithComment.NestedMessageWithComment.field_with_comment
+        string field_with_comment = 1;
+    }
+
+    // comment on field in a message MessageWithComment.field_with_comment
+    int32 field_with_comment = 1;
+
+    int64 field_without_comment = 2;
+}
+
+message MessageWithoutComment {
+
+}
+
+// comment on enum EnumWithComment
+enum EnumWithComment {
+    // comment on EnumValue EnumWithComment.ENUM_WITH_COMMENT_DEFAULT
+    ENUM_WITH_COMMENT_DEFAULT = 0;
+}
+
+enum EnumWithoutComment {
+    ENUM_WITHOUT_COMMENT_DEFAULT = 0;
+}
+
+

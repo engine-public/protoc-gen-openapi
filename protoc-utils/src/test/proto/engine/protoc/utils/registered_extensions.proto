@@ -1,0 +1,9 @@
+syntax = "proto3";
+package engine.protoc.utils;
+import "google/protobuf/descriptor.proto";
+extend .google.protobuf.FileOptions {
+    .engine.protoc.utils.RegisteredFileExtensionExample registered_example = 8998998;
+}
+message RegisteredFileExtensionExample {
+    int32 one = 1;
+}

@@ -12,7 +12,7 @@ import kotlin.reflect.KClass
 /**
  * Extracts comment content and its detected [Style] from the raw protoc output.
  */
-public abstract class CommentParser<S: Style> {
+public abstract class CommentParser<S : Style> {
 
     public companion object {
         /**
@@ -31,22 +31,22 @@ public abstract class CommentParser<S: Style> {
     /**
      * The result of an attempt to parse a comment
      */
-    public sealed interface Result<S: Style> {
+    public sealed interface Result<S : Style> {
         /**
          * A result indicated that comment parsing has failed.
          */
-        public data class Failure<S: Style>(
+        public data class Failure<S : Style>(
             val type: KClass<out CommentParser<S>>,
             val reason: String,
-        ): Result<S>
+        ) : Result<S>
 
         /**
          * A result indicated comment parsing succeeded, including the
          */
-        public data class Success<S: Style>(
+        public data class Success<S : Style>(
             public val cleaned: String,
             public val style: S,
-        ): Result<S>
+        ) : Result<S>
     }
 
     /**
@@ -101,7 +101,7 @@ public abstract class CommentParser<S: Style> {
                     lastContentLineIndex = i
                 }
             }
-            firstContentLineIndex?.let { it..lastContentLineIndex!!} ?: IntRange.EMPTY
+            firstContentLineIndex?.let { it..lastContentLineIndex!! } ?: IntRange.EMPTY
         }
 
         /**
@@ -155,7 +155,6 @@ public abstract class CommentParser<S: Style> {
                      * for example. consider a comment like the following...
                      */
 
-
                     // Comment #1
                     /*
                      * This is my first line of the comment:
@@ -174,12 +173,11 @@ public abstract class CommentParser<S: Style> {
                      * In this case, we want to preserve the first line because we need it to know the second line's "* " isn't the prefix, it's " ".
                      */
 
-
                     // Comment #2:
                     /* first line
-                    ** second line
-                    ** third line
-                    */
+                     ** second line
+                     ** third line
+                     */
 
                     // comes through as:
                     /*
@@ -192,7 +190,6 @@ public abstract class CommentParser<S: Style> {
                      * In this case, the intended behavior would be to evaluate the 2nd
                      * and 3rd lines for a common prefix, ignoring the first.  the common prefix is "* ".
                      */
-
 
                     /*
                      * Best we can do?
@@ -209,10 +206,10 @@ public abstract class CommentParser<S: Style> {
                     }
 
                     rawContentLines
-                        .slice(firstContentIndexToBeCompared ..rawContentLines.lastIndex)
+                        .slice(firstContentIndexToBeCompared..rawContentLines.lastIndex)
                         .fold(rawContentLines[firstContentIndexToBeCompared] to rawContentLines[firstContentIndexToBeCompared]) { acc, it ->
                             acc.first.commonPrefixWith(it) to acc.second.commonSuffixWith(
-                                it
+                                it,
                             )
                         }
                         .let {
@@ -248,9 +245,7 @@ public abstract class CommentParser<S: Style> {
         /**
          * True if the provided index in [rawCommentLines] has at least one alpha-numeric character.
          */
-        public fun hasCommentContent(index: Int): Boolean {
-            return commentContentCache.computeIfAbsent(index) { i -> rawCommentLines[i].contains(commentContentCharsPattern) }
-        }
+        public fun hasCommentContent(index: Int): Boolean = commentContentCache.computeIfAbsent(index) { i -> rawCommentLines[i].contains(commentContentCharsPattern) }
         private val commentContentCache = ConcurrentHashMap<Int, Boolean>()
     }
 

@@ -12,7 +12,7 @@ import com.google.protobuf.DescriptorProtos
 public class LocationWrapper(
     proto: DescriptorProtos.SourceCodeInfo.Location,
     commentParsers: List<CommentParser<out Style>> = CommentParser.DefaultParsers,
-): AbstractGeneratedMessageWrapper<DescriptorProtos.SourceCodeInfo.Location>(proto) {
+) : AbstractGeneratedMessageWrapper<DescriptorProtos.SourceCodeInfo.Location>(proto) {
     public val path: List<Int> get() = proto.pathList
     public val span: Span by lazy { Span.of(proto.spanList) }
     public val leadingComments: Comment? by lazy { if (proto.hasLeadingComments()) Comment.Companion.fromRaw(proto.getLeadingComments(), commentParsers) else null }

@@ -10,9 +10,9 @@ public class JavaDoc(
     newlineAfterOpeningFence: Boolean = true,
     newlineBeforeClosingFence: Boolean = true,
     newlineAfterClosingFence: Boolean = true,
-): Style(
+) : Style(
     openingFence = "/**",
-    closingFence = if (newlineBeforeClosingFence) " " else "" + "*/",
+    closingFence = (if (newlineBeforeClosingFence) " " else "") + "*/",
     newlineAfterOpeningFence = newlineAfterOpeningFence,
     newlineBeforeClosingFence = newlineBeforeClosingFence,
     newlineAfterClosingFence = newlineAfterClosingFence,
@@ -21,13 +21,11 @@ public class JavaDoc(
             index == 0 && !newlineAfterOpeningFence -> " $line"
             else -> " * $line"
         }
-    }
+    },
 ) {
     public companion object;
 
-    public object Parser: CommentParser<JavaDoc>() {
-        override fun tryParse(ctx: ParseContext): Result<JavaDoc> {
-            return fail("TODO")
-        }
+    public object Parser : CommentParser<JavaDoc>() {
+        override fun tryParse(ctx: ParseContext): Result<JavaDoc> = fail("TODO")
     }
 }

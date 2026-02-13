@@ -4,145 +4,146 @@ import io.kotest.core.spec.style.FunSpec
 import io.kotest.datatest.withData
 import io.kotest.matchers.shouldBe
 
-class CommentTests: FunSpec({
-    /**
-     * A test description that wraps original intent, the output of protoc, and our attempts to make meaning of the mess.
-     */
-    data class TestCase(
+class CommentTests :
+    FunSpec({
         /**
-         * A description of the test, used as the name of the test in KoTest
+         * A test description that wraps original intent, the output of protoc, and our attempts to make meaning of the mess.
          */
-        val description: String,
+        data class TestCase(
+            /**
+             * A description of the test, used as the name of the test in KoTest
+             */
+            val description: String,
 
-        /**
-         * What the original comment looked like before protoc obliterated it
-         */
-        val source: String,
+            /**
+             * What the original comment looked like before protoc obliterated it
+             */
+            val source: String,
 
-        /**
-         * The value protoc would give the plugin
-         */
-        val protoc: String,
+            /**
+             * The value protoc would give the plugin
+             */
+            val protoc: String,
 
-        /**
-         * The value as it should be after we've cleaned up the mess
-         */
-        val expectedCleanedResult: String,
-    ) {
-        val comment by lazy { Comment.fromRaw(protoc, CommentParser.DefaultParsers) }
-    }
+            /**
+             * The value as it should be after we've cleaned up the mess
+             */
+            val expectedCleanedResult: String,
+        ) {
+            val comment by lazy { Comment.fromRaw(protoc, CommentParser.DefaultParsers) }
+        }
 
-    val testCases = listOf(
-        TestCase(
-            description = "single-line comment",
-            source = """
+        val testCases = listOf(
+            TestCase(
+                description = "single-line comment",
+                source = """
                 |// header comment
                 |
-            """.trimMargin(),
-            protoc = """
+                """.trimMargin(),
+                protoc = """
                 | header comment
                 |
-            """.trimMargin(),
-            expectedCleanedResult = """
+                """.trimMargin(),
+                expectedCleanedResult = """
                 |header comment
-            """.trimMargin(),
-        ),
-        TestCase(
-            description = "multiple single-line comments",
-            source = """
+                """.trimMargin(),
+            ),
+            TestCase(
+                description = "multiple single-line comments",
+                source = """
                 |// header comment
                 |// second line of header comment.
                 |
-            """.trimMargin(),
-            protoc = """
+                """.trimMargin(),
+                protoc = """
                 | header comment
                 | second line of header comment.
                 |
-            """.trimMargin(),
-            expectedCleanedResult = """
+                """.trimMargin(),
+                expectedCleanedResult = """
                 |header comment
                 |second line of header comment.
-            """.trimMargin(),
-        ),
-        TestCase(
-            description = "multi-line c-style with varying whitespace",
-            source = """
+                """.trimMargin(),
+            ),
+            TestCase(
+                description = "multi-line c-style with varying whitespace",
+                source = """
                 |/*
                 | * Multiline comment
                 | *  with varying whitespace indent
                 | *   on a few different lines
                 | */
                 |
-            """.trimMargin(),
-            protoc = """
+                """.trimMargin(),
+                protoc = """
                 |
                 | Multiline comment
                 |  with varying whitespace indent
                 |   on a few different lines
                 |
-            """.trimMargin(),
-            expectedCleanedResult = """
+                """.trimMargin(),
+                expectedCleanedResult = """
                 |Multiline comment
                 | with varying whitespace indent
                 |  on a few different lines
-            """.trimMargin(),
-        ),
-        TestCase(
-            description = "single-line JavaDoc comments",
-            source = """
+                """.trimMargin(),
+            ),
+            TestCase(
+                description = "single-line JavaDoc comments",
+                source = """
                 |/**
                 | * JavaDoc comment
                 | */
-            """.trimMargin(),
-            protoc = """
+                """.trimMargin(),
+                protoc = """
                 |*
                 | JavaDoc comment
                 |
-            """.trimMargin(),
-            expectedCleanedResult = """
+                """.trimMargin(),
+                expectedCleanedResult = """
                 |JavaDoc comment
-            """.trimMargin(),
-        ),
-        TestCase(
-            description = "c-style comment with the comment content on the first line",
-            source = """
+                """.trimMargin(),
+            ),
+            TestCase(
+                description = "c-style comment with the comment content on the first line",
+                source = """
                 |/* Allen Holub, Enough Rope, Rule 29
                 | */
-            """.trimMargin(),
-            protoc = """
+                """.trimMargin(),
+                protoc = """
                 | Allen Holub, Enough Rope, Rule 29
                 |
-            """.trimMargin(),
-            expectedCleanedResult = """
+                """.trimMargin(),
+                expectedCleanedResult = """
                 |Allen Holub, Enough Rope, Rule 29
-            """.trimMargin(),
-        ),
-        TestCase(
-            description = "multi-line c-style comment with left fencing",
-            source = """
+                """.trimMargin(),
+            ),
+            TestCase(
+                description = "multi-line c-style comment with left fencing",
+                source = """
                 |/* Multi-line for
                 |** non-indenting
                 |** editors
                 |** Allen Holub, Enough Rope, Rule 31.
                 |*/
-            """.trimMargin(),
-            protoc = """
+                """.trimMargin(),
+                protoc = """
                 | Multi-line for
                 |* non-indenting
                 |* editors
                 |* Allen Holub, Enough Rope, Rule 31.
                 |
-            """.trimMargin(),
-            expectedCleanedResult = """
+                """.trimMargin(),
+                expectedCleanedResult = """
                 |Multi-line for
                 |non-indenting
                 |editors
                 |Allen Holub, Enough Rope, Rule 31.
-            """.trimMargin(),
-        ),
-        TestCase(
-            description = "c-style block comment, asterisk edges, padding and internal whitespace",
-            source = """
+                """.trimMargin(),
+            ),
+            TestCase(
+                description = "c-style block comment, asterisk edges, padding and internal whitespace",
+                source = """
                 |/***********************
                 | *                     *
                 | * Block Comment Frame *
@@ -151,8 +152,8 @@ class CommentTests: FunSpec({
                 | *                     *
                 | ***********************/
                 |
-            """.trimMargin(),
-            protoc = """
+                """.trimMargin(),
+                protoc = """
                 |**********************
                 |                     *
                 | Block Comment Frame *
@@ -161,38 +162,38 @@ class CommentTests: FunSpec({
                 |                     *
                 |*********************
                 |
-            """.trimMargin(),
-            expectedCleanedResult = """
+                """.trimMargin(),
+                expectedCleanedResult = """
                 |Block Comment Frame
                 |
                 |with multiple lines
-            """.trimMargin(),
-        ),
-        TestCase(
-            description = "c-style block comment frame, pipe edges, padding",
-            source = """
+                """.trimMargin(),
+            ),
+            TestCase(
+                description = "c-style block comment frame, pipe edges, padding",
+                source = """
                 |/*====================\
                 ||                     |
                 || Block Comment Frame |
                 ||                     |
                 |\====================*/
                 |
-            """.trimMargin(),
-            protoc = """
+                """.trimMargin(),
+                protoc = """
                 |====================\
                 |                     |
                 | Block Comment Frame |
                 |                     |
                 |\====================
                 |
-            """.trimMargin(),
-            expectedCleanedResult = """
+                """.trimMargin(),
+                expectedCleanedResult = """
                 |Block Comment Frame
-            """.trimMargin(),
-        ),
-        TestCase(
-            description = "c-style block comment frame, double top and bottom, irregular left, right top and bottom padding",
-            source = """
+                """.trimMargin(),
+            ),
+            TestCase(
+                description = "c-style block comment frame, double top and bottom, irregular left, right top and bottom padding",
+                source = """
                 |/************************\
                 ||************************|
                 ||*                      *|
@@ -204,8 +205,8 @@ class CommentTests: FunSpec({
                 ||************************|
                 |\************************/
                 |
-            """.trimMargin(),
-            protoc = """
+                """.trimMargin(),
+                protoc = """
                 |***********************\
                 ||************************|
                 ||*                      *|
@@ -217,66 +218,66 @@ class CommentTests: FunSpec({
                 ||************************|
                 |\***********************
                 |
-            """.trimMargin(),
-            expectedCleanedResult = """
+                """.trimMargin(),
+                expectedCleanedResult = """
                 |Block Comment Frame
-            """.trimMargin(),
-        ),
-        TestCase(
-            description = "c-style block comment with both fences on the same line",
-            source = """/* single line c-style comment on same line as import */""",
-            protoc = " single line c-style comment on same line as import ",
-            expectedCleanedResult = "single line c-style comment on same line as import",
-        ),
-        TestCase(
-            description = "single-line, multiple consecutive, padding on top and bottom top",
-            source = """
+                """.trimMargin(),
+            ),
+            TestCase(
+                description = "c-style block comment with both fences on the same line",
+                source = """/* single line c-style comment on same line as import */""",
+                protoc = " single line c-style comment on same line as import ",
+                expectedCleanedResult = "single line c-style comment on same line as import",
+            ),
+            TestCase(
+                description = "single-line, multiple consecutive, padding on top and bottom top",
+                source = """
                 |//
                 |// multiple consecutive single line
                 |// with top and bottom padding
                 |//
-            """.trimMargin(),
-            protoc = """
+                """.trimMargin(),
+                protoc = """
                 |
                 | multiple consecutive single line
                 | with top and bottom padding
                 |
                 |
-            """.trimMargin(),
-            expectedCleanedResult = """
+                """.trimMargin(),
+                expectedCleanedResult = """
                 |multiple consecutive single line
                 |with top and bottom padding
-            """.trimMargin(),
-        ),
-        TestCase(
-            description = "framed single-line",
-            source = """
+                """.trimMargin(),
+            ),
+            TestCase(
+                description = "framed single-line",
+                source = """
                 |//////////////////////////
                 |//                      //
                 |//  Framed Single Line  //
                 |//                      //
                 |//////////////////////////
                 |
-            """.trimMargin(),
-            protoc = """
+                """.trimMargin(),
+                protoc = """
                 |////////////////////////
                 |                      //
                 |  Framed Single Line  //
                 |                      //
                 |////////////////////////
                 |
-            """.trimMargin(),
-            expectedCleanedResult = "Framed Single Line",
+                """.trimMargin(),
+                expectedCleanedResult = "Framed Single Line",
+            ),
         )
-    )
 
-    context("Comment parsing tests") {
-        withData<TestCase>(
-            { it.description },
-            testCases
-        ) { testData ->
-            println(testData)
-            testData.comment.cleaned shouldBe testData.expectedCleanedResult
+        context("Comment parsing tests") {
+            withData<TestCase>(
+                { it.description },
+                testCases,
+            ) { testData ->
+                println(testData)
+                testData.comment.cleaned shouldBe testData.expectedCleanedResult
+            }
         }
-    }
-})
+    })

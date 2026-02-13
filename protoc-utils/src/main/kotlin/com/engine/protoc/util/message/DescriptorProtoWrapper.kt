@@ -7,8 +7,7 @@ import com.google.protobuf.DescriptorProtos
 public class DescriptorProtoWrapper(
     proto: DescriptorProtos.DescriptorProto,
 
-):
-    AbstractGeneratedMessageWrapper<DescriptorProtos.DescriptorProto>(proto) {
+) : AbstractGeneratedMessageWrapper<DescriptorProtos.DescriptorProto>(proto) {
 
 //    public val name: SyntaxElement<String>? by lazy { if (proto.hasName()) SyntaxElement(proto.name, null) else null }
 

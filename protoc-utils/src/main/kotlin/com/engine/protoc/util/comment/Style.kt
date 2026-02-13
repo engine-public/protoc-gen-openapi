@@ -40,18 +40,19 @@ public abstract class Style(
     /**
      * Format a comment in this style.
      */
-    public fun formatComment(comment: String): String = StringBuilder().apply {
-        append(openingFence)
-        if (newlineAfterOpeningFence) appendLine()
-        val lines = comment.lines()
-        lines
-            .slice(0 until lines.lastIndex)
-            .forEachIndexed { index, line ->
-                appendLine(lineMapper(index, line))
-            }
-        append(lineMapper(lines.lastIndex, lines.last()))
-        if (newlineBeforeClosingFence) appendLine()
-        append(closingFence)
-        if (newlineAfterClosingFence) appendLine()
-    }.toString()
+    public fun formatComment(comment: String): String =
+        StringBuilder().apply {
+            append(openingFence)
+            if (newlineAfterOpeningFence) appendLine()
+            val lines = comment.lines()
+            lines
+                .slice(0 until lines.lastIndex)
+                .forEachIndexed { index, line ->
+                    appendLine(lineMapper(index, line))
+                }
+            append(lineMapper(lines.lastIndex, lines.last()))
+            if (newlineBeforeClosingFence) appendLine()
+            append(closingFence)
+            if (newlineAfterClosingFence) appendLine()
+        }.toString()
 }

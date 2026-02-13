@@ -1,15 +1,12 @@
 package com.engine.protoc.openapi
 
-import com.engine.protoc.openapi.extensions.getExtension
 import com.google.api.AnnotationsProto
-import com.google.api.HttpRule
 import com.google.protobuf.DescriptorProtos
 import com.google.protobuf.ExtensionRegistry
 import com.google.protobuf.compiler.PluginProtos
 import engine.protoc.openapi.Annotations
 import org.openapi4j.parser.model.SerializationFlag
 import org.openapi4j.parser.model.v3.OpenApi3
-import org.openapi4j.parser.model.v3.Operation
 import java.io.File
 import java.io.InputStream
 import java.util.EnumSet
@@ -151,23 +148,22 @@ public class ProtocGenOpenAPI(
     public fun processFileDescriptorProto(proto: DescriptorProtos.FileDescriptorProto): OpenApi3? {
         for (service in proto.serviceList) {
             for (rpc in service.methodList) {
-                listOf<String>()
-                val http: HttpRule = rpc.getExtension(AnnotationsProto.http) ?: continue
-
-                val results = Operation()
-
-                // make request schema or args
-                // make response schema or args
-
-                when (http.patternCase) {
-                    HttpRule.PatternCase.GET -> TODO()
-                    HttpRule.PatternCase.PUT -> TODO()
-                    HttpRule.PatternCase.POST -> TODO()
-                    HttpRule.PatternCase.DELETE -> TODO()
-                    HttpRule.PatternCase.PATCH -> TODO()
-                    HttpRule.PatternCase.CUSTOM -> TODO()
-                    HttpRule.PatternCase.PATTERN_NOT_SET -> TODO()
-                }
+//                val http: HttpRule = rpc.findExtension<HttpRule, DescriptorProtos.MethodDescriptorProto >(AnnotationsProto.http) ?: continue
+//
+//                val results = Operation()
+//
+//                // make request schema or args
+//                // make response schema or args
+//
+//                when (http.patternCase) {
+//                    HttpRule.PatternCase.GET -> TODO()
+//                    HttpRule.PatternCase.PUT -> TODO()
+//                    HttpRule.PatternCase.POST -> TODO()
+//                    HttpRule.PatternCase.DELETE -> TODO()
+//                    HttpRule.PatternCase.PATCH -> TODO()
+//                    HttpRule.PatternCase.CUSTOM -> TODO()
+//                    HttpRule.PatternCase.PATTERN_NOT_SET -> TODO()
+//                }
             }
         }
 

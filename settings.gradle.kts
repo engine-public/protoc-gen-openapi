@@ -76,5 +76,4 @@ project(":protoc-utils").projectDir = rootDir.resolve("protoc-utils")
 include(":protoc-utils-recorder")
 project(":protoc-utils-recorder").projectDir = rootDir.resolve("protoc-utils/recorder")
 
-
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")

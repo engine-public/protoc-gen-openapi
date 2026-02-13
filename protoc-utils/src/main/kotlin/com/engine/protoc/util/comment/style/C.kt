@@ -11,9 +11,9 @@ public class C(
     newlineAfterOpeningFence: Boolean = false,
     newlineBeforeClosingFence: Boolean = true,
     newlineAfterClosingFence: Boolean = true,
-): Style(
+) : Style(
     openingFence = "/*",
-    closingFence =  " */",
+    closingFence = " */",
     newlineAfterOpeningFence = newlineAfterOpeningFence,
     newlineBeforeClosingFence = newlineBeforeClosingFence,
     newlineAfterClosingFence = newlineAfterClosingFence,
@@ -22,25 +22,25 @@ public class C(
             index == 0 && !newlineAfterOpeningFence -> " $line"
             else -> " * $line"
         }
-    }
+    },
 ) {
     public companion object;
 
-    public object Parser: CommentParser<C>() {
+    public object Parser : CommentParser<C>() {
         override fun tryParse(ctx: ParseContext): Result<C> {
             if (ctx.rawCommonEdges.first.isNotBlank()) {
-                fail("A standard c-style comment should have no common left-edge.")
+                return fail("A standard c-style comment should have no common left-edge.")
             }
             if (ctx.rawCommonEdges.second.isNotBlank()) {
-                fail("A standard c-style comment should have no common right-edge.")
+                return fail("A standard c-style comment should have no common right-edge.")
             }
             return Result.Success(
                 ctx.cleanedContentLines.joinToString("\n"),
                 C(
                     newlineAfterOpeningFence = ctx.contentLineIndices.first > 0,
                     newlineBeforeClosingFence = ctx.contentLineIndices.last < ctx.rawCommentLines.lastIndex,
-                    newlineAfterClosingFence = ctx.hasNewlineAfterClosingFence
-                )
+                    newlineAfterClosingFence = ctx.hasNewlineAfterClosingFence,
+                ),
             )
         }
     }

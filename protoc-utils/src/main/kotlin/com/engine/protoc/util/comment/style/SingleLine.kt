@@ -17,21 +17,20 @@ public object SingleLine : Style(
     lineMapper = { _, line -> "// $line" },
 ) {
     public object Parser : CommentParser<SingleLine>() {
-        override fun tryParse(ctx: ParseContext): Result<SingleLine> {
-            return when {
+        override fun tryParse(ctx: ParseContext): Result<SingleLine> =
+            when {
                 !ctx.hasNewlineAfterClosingFence -> fail(
-                    "A single-line comment must end in a newline."
+                    "A single-line comment must end in a newline.",
                 )
 
                 ctx.rawCommentLines.last().isNotEmpty() -> fail(
-                    "The last line of a single-line comment must be a single newline."
+                    "The last line of a single-line comment must be a single newline.",
                 )
 
                 else -> Result.Success(
                     ctx.cleanedContentLines.joinToString(separator = "\n"),
-                    SingleLine
+                    SingleLine,
                 )
             }
-        }
     }
 }

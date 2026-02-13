@@ -9,13 +9,13 @@ import com.engine.protoc.util.comment.Style
 public class Holub(
     newlineAfterOpeningFence: Boolean = false,
     newlineAfterClosingFence: Boolean = true,
-): Style(
+) : Style(
     openingFence = "/*",
     closingFence = "*/",
     newlineAfterOpeningFence = newlineAfterOpeningFence,
     newlineBeforeClosingFence = true,
     newlineAfterClosingFence = newlineAfterClosingFence,
-    lineMapper = { _, line -> "** $line" }
+    lineMapper = { _, line -> "** $line" },
 ) {
     public companion object;
 

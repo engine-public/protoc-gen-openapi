@@ -8,7 +8,7 @@ import com.google.protobuf.DescriptorProtos
 /**
  * Wrapper for a FileDescriptorProto, providing convenient access to its properties and associated syntax elements.
  */
-public class FileDescriptorProtoWrapper(internal val cgreq: CodeGeneratorRequestWrapper, proto: DescriptorProtos.FileDescriptorProto, ): AbstractGeneratedMessageWrapper<DescriptorProtos.FileDescriptorProto>(proto) {
+public class FileDescriptorProtoWrapper(internal val cgreq: CodeGeneratorRequestWrapper, proto: DescriptorProtos.FileDescriptorProto) : AbstractGeneratedMessageWrapper<DescriptorProtos.FileDescriptorProto>(proto) {
     /**
      * The relative path to the file from one of the source roots.
      */
@@ -18,9 +18,13 @@ public class FileDescriptorProtoWrapper(internal val cgreq: CodeGeneratorRequest
      * Generated info about the source file, including comments and location identification of the File's syntax elements.
      */
     public val sourceCodeInfo: SourceCodeInfoWrapper? by lazy {
-        if (proto.hasSourceCodeInfo()) SourceCodeInfoWrapper(
-            proto.sourceCodeInfo
-        ) else null
+        if (proto.hasSourceCodeInfo()) {
+            SourceCodeInfoWrapper(
+                proto.sourceCodeInfo,
+            )
+        } else {
+            null
+        }
     }
 
     /**
@@ -31,9 +35,11 @@ public class FileDescriptorProtoWrapper(internal val cgreq: CodeGeneratorRequest
             SyntaxElement(
                 proto.`package`,
                 listOf(DescriptorProtos.FileDescriptorProto.PACKAGE_FIELD_NUMBER),
-                this
+                this,
             )
-        } else null
+        } else {
+            null
+        }
     }
 
     /**
@@ -75,8 +81,11 @@ public class FileDescriptorProtoWrapper(internal val cgreq: CodeGeneratorRequest
             FileOptionsWrapper(
                 proto.options,
                 this,
-                listOf(DescriptorProtos.FileDescriptorProto.OPTIONS_FIELD_NUMBER))
-        } else null
+                listOf(DescriptorProtos.FileDescriptorProto.OPTIONS_FIELD_NUMBER),
+            )
+        } else {
+            null
+        }
     }
 
     /**
@@ -86,11 +95,15 @@ public class FileDescriptorProtoWrapper(internal val cgreq: CodeGeneratorRequest
     public val syntax: SyntaxElement<String>? by lazy {
         if (proto.hasSyntax()) {
             SyntaxElement(
-                proto.syntax, listOf(
-                    DescriptorProtos.FileDescriptorProto.SYNTAX_FIELD_NUMBER
-                ), this
+                proto.syntax,
+                listOf(
+                    DescriptorProtos.FileDescriptorProto.SYNTAX_FIELD_NUMBER,
+                ),
+                this,
             )
-        } else null
+        } else {
+            null
+        }
     }
     // TODO edition
 }

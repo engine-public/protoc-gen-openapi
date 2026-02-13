@@ -1,6 +1,6 @@
 [
 {
-  "name":"com.engine.protoc.openapi.MainKt",
+  "name":"com.engine.protoc.util.recorder.MainKt",
   "methods":[{"name":"main","parameterTypes":["java.lang.String[]"] }]
 }
 ]

@@ -17,25 +17,25 @@ public class Framed(
     leftPadding: Int = Defaults.LEFT_PADDING,
     rightPadding: Int = Defaults.RIGHT_PADDING,
     newlineAfterFrame: Boolean = Defaults.NEWLINE_AFTER_FRAME,
-): Style(
-    openingFence = frameTop + (1 .. topPadding).joinToString(prefix="\n", separator = "\n") {
+) : Style(
+    openingFence = frameTop + (1..topPadding).joinToString(prefix = "\n", separator = "\n") {
         Defaults.frameLine(
             commentLine = "",
             width = width,
             leftFrameEdge = leftFrameEdge,
             leftPadding = leftPadding,
             rightFrameEdge = rightFrameEdge,
-            rightPadding = rightPadding
+            rightPadding = rightPadding,
         )
     },
-    closingFence = (1 .. bottomPadding).joinToString(postfix="\n", separator = "\n") {
+    closingFence = (1..bottomPadding).joinToString(postfix = "\n", separator = "\n") {
         Defaults.frameLine(
             commentLine = "",
             width = width,
             leftFrameEdge = leftFrameEdge,
             leftPadding = leftPadding,
             rightFrameEdge = rightFrameEdge,
-            rightPadding = rightPadding
+            rightPadding = rightPadding,
         )
     } + frameBottom,
     newlineAfterOpeningFence = true,
@@ -96,18 +96,17 @@ public class Framed(
             leftPadding: Int = Defaults.LEFT_PADDING,
             rightFrameEdge: String = Defaults.RIGHT_FRAME_EDGE,
             rightPadding: Int = Defaults.RIGHT_PADDING,
-        ): String {
-            return (
-                leftFrameEdge
-                    + "".padEnd(leftPadding)
-                    + commentLine.padEnd(width - leftFrameEdge.length - leftPadding - rightPadding - rightFrameEdge.length)
-                    + "".padEnd(rightPadding)
-                    + rightFrameEdge
+        ): String =
+            (
+                leftFrameEdge +
+                    "".padEnd(leftPadding) +
+                    commentLine.padEnd(width - leftFrameEdge.length - leftPadding - rightPadding - rightFrameEdge.length) +
+                    "".padEnd(rightPadding) +
+                    rightFrameEdge
                 )
-        }
     }
 
-    public object Parser: CommentParser<Framed>() {
+    public object Parser : CommentParser<Framed>() {
 
         override fun tryParse(ctx: ParseContext): Result<Framed> {
             // must be >1 line of comment content including one header and one footer
@@ -143,7 +142,7 @@ public class Framed(
                     if (rightFrameEdge.endsWith("*")) {
                         // looks like a holub... `** comment **`
                         if (rightFrameEdge.endsWith("**") && ctx.rawCommonEdges.first.startsWith(
-                                "*"
+                                "*",
                             )
                         ) {
                             rightFrameReversed to leftEdgeSize - rightFrameReversed.length
@@ -184,13 +183,13 @@ public class Framed(
                 }
 
             // figure out if this is a single-line frame or a c-style frame
-            val (openingFence, closingFence) = if (leftFrameEdge.trimStart().startsWith("//"))  "//" to "//"  else Defaults.FRAME_OPENING_FENCE to Defaults.FRAME_CLOSING_FENCE
+            val (openingFence, closingFence) = if (leftFrameEdge.trimStart().startsWith("//")) "//" to "//" else Defaults.FRAME_OPENING_FENCE to Defaults.FRAME_CLOSING_FENCE
 
             val frameTop = ctx.rawCommentLines
                 .slice(0 until (firstTopPaddingLineIndex ?: ctx.contentLineIndices.first))
                 .joinToString(separator = "\n", prefix = openingFence)
 
-            val frameBottom = (((lastBottomPaddingLineIndex ?: ctx.contentLineIndices.last) + 1) .. ctx.lastNonEmptyIndex)
+            val frameBottom = (((lastBottomPaddingLineIndex ?: ctx.contentLineIndices.last) + 1)..ctx.lastNonEmptyIndex)
                 .joinToString("\n") { i ->
                     when (i) {
                         // is the last line of the frame
@@ -223,7 +222,7 @@ public class Framed(
                             val leftEdgeTrimmed = leftFrameEdge.trimEnd()
                             leftEdgeTrimmed + "".padStart(
                                 width - leftEdgeTrimmed.length - trimmedAndCleaned.length,
-                                trimmedAndCleaned[0]
+                                trimmedAndCleaned[0],
                             ) + trimmedAndCleaned
                         }
                     }
@@ -245,8 +244,8 @@ public class Framed(
                         bottomPadding = bottomPadding,
                         leftPadding = leftPadding,
                         rightPadding = rightPadding,
-                        newlineAfterFrame = ctx.hasNewlineAfterClosingFence
-                    )
+                        newlineAfterFrame = ctx.hasNewlineAfterClosingFence,
+                    ),
                 )
         }
     }

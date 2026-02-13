@@ -35,6 +35,7 @@ dependencies {
     implementation(libs.kotlin.reflect)
     implementation(libs.openapi4j.parser)
     implementation(libs.protobuf.java)
+    implementation(projects.protocUtils)
 }
 
 allprojects {

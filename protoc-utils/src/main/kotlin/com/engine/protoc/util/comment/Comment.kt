@@ -25,7 +25,6 @@ public data class Comment(
              * The raw string from protoc to parse into a cleaned comment and style
              */
             rawComment: String,
-
             /**
              * The list of parsers to attempt.
              * @see [CommentParser.Companion.DefaultParsers]
@@ -51,7 +50,5 @@ public data class Comment(
      * Return a valid comment, based on the provided style.
      * By default, retain the original style.
      */
-    public fun reconstruct(style: Style): String {
-        return style.formatComment(cleaned)
-    }
+    public fun reconstruct(style: Style): String = style.formatComment(cleaned)
 }

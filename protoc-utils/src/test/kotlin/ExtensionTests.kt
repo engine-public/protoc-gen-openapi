@@ -21,10 +21,11 @@ class ExtensionTests: FunSpec({
         .use { input ->
             PluginProtos.CodeGeneratorRequest.parseFrom(input, registry)
         }
+        .wrap()
 
-    val file = cgreq.sourceFileDescriptorsList.find {
+    val file = cgreq.sourceFileDescriptors.find {
         it.name == "engine/protoc/utils/extensions.proto" // TODO make a new proto file for this test
-    }.shouldNotBeNull().wrap()
+    }.shouldNotBeNull()
 
     val options = file.options.shouldNotBeNull()
 

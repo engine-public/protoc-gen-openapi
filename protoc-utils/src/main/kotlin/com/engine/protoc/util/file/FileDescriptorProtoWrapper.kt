@@ -2,12 +2,13 @@ package com.engine.protoc.util.file
 
 import com.engine.protoc.util.AbstractGeneratedMessageWrapper
 import com.engine.protoc.util.SyntaxElement
+import com.engine.protoc.util.compiler.CodeGeneratorRequestWrapper
 import com.google.protobuf.DescriptorProtos
 
 /**
  * Wrapper for a FileDescriptorProto, providing convenient access to its properties and associated syntax elements.
  */
-public class FileDescriptorProtoWrapper(proto: DescriptorProtos.FileDescriptorProto): AbstractGeneratedMessageWrapper<DescriptorProtos.FileDescriptorProto>(proto) {
+public class FileDescriptorProtoWrapper(internal val cgreq: CodeGeneratorRequestWrapper, proto: DescriptorProtos.FileDescriptorProto, ): AbstractGeneratedMessageWrapper<DescriptorProtos.FileDescriptorProto>(proto) {
     /**
      * The relative path to the file from one of the source roots.
      */
@@ -26,9 +27,13 @@ public class FileDescriptorProtoWrapper(proto: DescriptorProtos.FileDescriptorPr
      * The package applied to the contents of the file.
      */
     public val `package`: SyntaxElement<String>? by lazy {
-        if (proto.hasPackage()) SyntaxElement(proto.`package`, sourceCodeInfo?.findLocationByPath(
-            DescriptorProtos.FileDescriptorProto.PACKAGE_FIELD_NUMBER
-        )) else null
+        if (proto.hasPackage()) {
+            SyntaxElement(
+                proto.`package`,
+                listOf(DescriptorProtos.FileDescriptorProto.PACKAGE_FIELD_NUMBER),
+                this
+            )
+        } else null
     }
 
     /**
@@ -36,7 +41,7 @@ public class FileDescriptorProtoWrapper(proto: DescriptorProtos.FileDescriptorPr
      */
     public val dependencies: List<Dependency> by lazy {
         proto.dependencyList.mapIndexed { index, dependency ->
-            Dependency(dependency, sourceCodeInfo?.findLocationByPath(Dependency.indexedPath(index)))
+            Dependency(dependency, listOf(DescriptorProtos.FileDescriptorProto.DEPENDENCY_FIELD_NUMBER, index), this)
         }
     }
     public val dependenciesByName: Map<String, Dependency> by lazy {
@@ -66,10 +71,12 @@ public class FileDescriptorProtoWrapper(proto: DescriptorProtos.FileDescriptorPr
     // TODO extension
 
     public val options: FileOptionsWrapper? by lazy {
-        if (proto.hasOptions()) FileOptionsWrapper(
-            proto.options,
-            sourceCodeInfo
-        ) else null
+        if (proto.hasOptions()) {
+            FileOptionsWrapper(
+                proto.options,
+                this,
+                listOf(DescriptorProtos.FileDescriptorProto.OPTIONS_FIELD_NUMBER))
+        } else null
     }
 
     /**
@@ -77,8 +84,13 @@ public class FileDescriptorProtoWrapper(proto: DescriptorProtos.FileDescriptorPr
      * @see DescriptorProtos.FileDescriptorProto.getSyntax
      */
     public val syntax: SyntaxElement<String>? by lazy {
-        if (proto.hasSyntax()) SyntaxElement(proto.syntax, sourceCodeInfo?.findLocationByPath(
-            DescriptorProtos.FileDescriptorProto.SYNTAX_FIELD_NUMBER)) else null
+        if (proto.hasSyntax()) {
+            SyntaxElement(
+                proto.syntax, listOf(
+                    DescriptorProtos.FileDescriptorProto.SYNTAX_FIELD_NUMBER
+                ), this
+            )
+        } else null
     }
     // TODO edition
 }

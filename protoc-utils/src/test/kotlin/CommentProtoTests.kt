@@ -186,6 +186,33 @@ class CommentProtoTests :
             }
         }
 
+        context("enum type comments") {
+            val enumTypes = file.enumTypes
+
+            assertSoftly {
+                withClue("enum count matches proto file") {
+                    enumTypes.size shouldBe 2
+                }
+            }
+
+            test("EnumWithComment has leading comment") {
+                enumTypes[0].location.shouldNotBeNull()
+                    .leadingComments.shouldNotBeNull()
+                    .cleaned shouldBe "comment on enum EnumWithComment"
+            }
+
+            test("EnumWithComment.ENUM_WITH_COMMENT_DEFAULT has leading comment") {
+                enumTypes[0].values[0].location.shouldNotBeNull()
+                    .leadingComments.shouldNotBeNull()
+                    .cleaned shouldBe "comment on EnumValue EnumWithComment.ENUM_WITH_COMMENT_DEFAULT"
+            }
+
+            test("EnumWithoutComment has no leading comment") {
+                enumTypes[1].location.shouldNotBeNull()
+                    .leadingComments.shouldBeNull()
+            }
+        }
+
         context("file option comments") {
             val options = file.options.shouldNotBeNull()
 

@@ -1,10 +1,10 @@
 package com.engine.protoc.util.compiler
 
-import com.engine.protoc.util.AbstractGeneratedMessageWrapper
+import com.engine.protoc.util.GeneratedMessageWrapper
 import com.engine.protoc.util.file.FileDescriptorProtoWrapper
 import com.google.protobuf.compiler.PluginProtos
 
-public class CodeGeneratorRequestWrapper(proto: PluginProtos.CodeGeneratorRequest) : AbstractGeneratedMessageWrapper<PluginProtos.CodeGeneratorRequest>(proto) {
+public class CodeGeneratorRequestWrapper(override val proto: PluginProtos.CodeGeneratorRequest) : GeneratedMessageWrapper<PluginProtos.CodeGeneratorRequest> {
     /**
      * The .proto files that were explicitly listed on the command-line.  The
      * code generator should generate code only for these files.  Each file's

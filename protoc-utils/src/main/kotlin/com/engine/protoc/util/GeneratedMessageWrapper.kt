@@ -5,4 +5,6 @@ import com.google.protobuf.GeneratedMessage
 /**
  * Base class for wrappers around generated protobuf messages.
  */
-public abstract class AbstractGeneratedMessageWrapper<MessageT : GeneratedMessage>(public val proto: MessageT)
+public interface GeneratedMessageWrapper<MessageT : GeneratedMessage> {
+    public val proto: MessageT
+}

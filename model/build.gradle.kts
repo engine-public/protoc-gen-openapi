@@ -25,11 +25,11 @@ protobuf {
         }
     }
     generateProtoTasks {
-        all().forEach {
-            it.generateDescriptorSet = true
-            it.descriptorSetOptions.includeImports = true
+        all().all {
+            generateDescriptorSet = true
+            descriptorSetOptions.includeImports = true
 
-            it.plugins {
+            plugins {
                 create("doc") {
                     option("markdown,${project.name}-${version}.md")
                 }

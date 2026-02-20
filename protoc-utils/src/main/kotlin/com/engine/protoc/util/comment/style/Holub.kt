@@ -25,7 +25,7 @@ public class Holub(
             if (!ctx.hasCommentContent(ctx.lastNonEmptyIndex)) return fail("Holub comments have an empty footer.")
             if (ctx.rawCommonEdges.second.isNotBlank()) return fail("Holub comments aren't framed.")
             if (!ctx.rawCommonEdges.first.startsWith("*")) return fail("Holub comments have an unindented * on the left edge.")
-            return Result.Success(ctx.cleanedContentLines.joinToString("\n"), Holub(newlineAfterOpeningFence = ctx.contentLineIndices.contains(0), newlineAfterClosingFence = ctx.contentLineIndices.contains(ctx.rawContentLines.lastIndex)))
+            return Result.Success(ctx.cleanedContentLines.joinToString("\n"), Holub(newlineAfterOpeningFence = !ctx.contentLineIndices.contains(0), newlineAfterClosingFence = ctx.hasNewlineAfterClosingFence))
         }
     }
 }

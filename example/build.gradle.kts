@@ -31,14 +31,14 @@ protobuf {
         }
     }
     generateProtoTasks {
-        all().forEach {
-            it.dependsOn(
+        all().all {
+            dependsOn(
                 project
                     .project(projects.protocGenOpenapi.path)
                     .tasks
-                    .first { it.name == "nativeCompile" }
+                    .named("nativeCompile")
             )
-            it.plugins {
+            plugins {
                 create("openapi") {
                     option("recordCodeGeneratorRequest=/var/tmp/protoc-gen-openapi.cgreq")
                     option("recordCodeGeneratorResponse=/var/tmp/protoc-gen-openapi.cgresp")

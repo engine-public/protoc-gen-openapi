@@ -27,10 +27,10 @@ protobuf {
         }
     }
     generateProtoTasks {
-        all().forEach {
-            it.dependsOn(":protoc-utils-recorder:nativeCompile")
-            tasks.findByPath(":protoc-utils:processTestResources")!!.dependsOn(it)
-            it.plugins {
+        all().all {
+            dependsOn(":protoc-utils-recorder:nativeCompile")
+            tasks.findByPath(":protoc-utils:processTestResources")!!.dependsOn(this)
+            plugins {
                 create("recorder")
             }
         }

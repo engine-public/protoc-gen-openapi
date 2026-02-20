@@ -213,6 +213,34 @@ class CommentProtoTests :
             }
         }
 
+        context("enum option comments") {
+            val enumOptions = file.enumTypes[0].options.shouldNotBeNull()
+
+            assertSoftly {
+                withClue("unregistered_enum_example") {
+                    enumOptions.findExtension(UnregisteredExtensions.unregisteredEnumExample).shouldBeNull()
+                    file
+                        .sourceCodeInfo.shouldNotBeNull()
+                        .findLocationByPath(
+                            DescriptorProtos.FileDescriptorProto.ENUM_TYPE_FIELD_NUMBER,
+                            0,
+                            DescriptorProtos.EnumDescriptorProto.OPTIONS_FIELD_NUMBER,
+                            UnregisteredExtensions.unregisteredEnumExample.number,
+                        ).shouldNotBeNull()
+                        .leadingComments.shouldNotBeNull()
+                        .cleaned shouldBe "comment on custom enum extension option that is NOT registered at deser time of the cgrec"
+                }
+
+                withClue("registered_enum_example") {
+                    enumOptions
+                        .findExtension(RegisteredExtensions.registeredEnumExample).shouldNotBeNull()
+                        .location.shouldNotBeNull()
+                        .leadingComments.shouldNotBeNull()
+                        .cleaned shouldBe "comment on custom enum extension option that is registered at deser time of the cgrec"
+                }
+            }
+        }
+
         context("file option comments") {
             val options = file.options.shouldNotBeNull()
 

@@ -8,3 +8,12 @@ option (.engine.protoc.utils.registered_example) = {
 option (.engine.protoc.utils.unregistered_example) = {
     two: 2
 };
+enum ExtensionEnum {
+    option (.engine.protoc.utils.registered_enum_example) = {
+        three: 3
+    };
+    option (.engine.protoc.utils.unregistered_enum_example) = {
+        four: 4
+    };
+    EXTENSION_ENUM_DEFAULT = 0;
+}

@@ -38,4 +38,15 @@ class ExtensionTests :
             options.findExtension(UnregisteredExtensions.unregisteredExample).shouldBeNull()
             options.proto.findUnregisteredExtension(UnregisteredExtensions.unregisteredExample).shouldNotBeNull() shouldBe UnregisteredExtensions.UnregisteredFileExtensionExample.newBuilder().apply { two = 2 }.build()
         }
+
+        val enumOptions = file.enumTypes[0].options.shouldNotBeNull()
+
+        test("registered enum extension") {
+            enumOptions.findExtension(RegisteredExtensions.registeredEnumExample).shouldNotBeNull().value shouldBe RegisteredExtensions.RegisteredEnumExtensionExample.newBuilder().apply { three = 3 }.build()
+        }
+
+        test("unregistered enum extension") {
+            enumOptions.findExtension(UnregisteredExtensions.unregisteredEnumExample).shouldBeNull()
+            enumOptions.proto.findUnregisteredExtension(UnregisteredExtensions.unregisteredEnumExample).shouldNotBeNull() shouldBe UnregisteredExtensions.UnregisteredEnumExtensionExample.newBuilder().apply { four = 4 }.build()
+        }
     })

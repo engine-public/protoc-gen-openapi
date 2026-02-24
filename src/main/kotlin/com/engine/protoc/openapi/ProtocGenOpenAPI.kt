@@ -1,11 +1,15 @@
 package com.engine.protoc.openapi
 
 import com.google.api.AnnotationsProto
+import com.google.protobuf.DescriptorProtos
 import com.google.protobuf.ExtensionRegistry
 import com.google.protobuf.compiler.PluginProtos
 import engine.protoc.openapi.Annotations
+import org.openapi4j.parser.model.SerializationFlag
+import org.openapi4j.parser.model.v3.OpenApi3
 import java.io.File
 import java.io.InputStream
+import java.util.EnumSet
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.full.memberProperties
 
@@ -110,17 +114,26 @@ public class ProtocGenOpenAPI(
         options.recordCodeGeneratorRequest?.outputStream()?.use { output -> request.writeTo(output) }
 
         return PluginProtos.CodeGeneratorResponse.newBuilder().apply {
+            // you must explicitly state that your plugin supports optional fields or protoc fails
             supportedFeatures =
                 supportedFeatures or
                 PluginProtos.CodeGeneratorResponse.Feature.FEATURE_PROTO3_OPTIONAL.number
                     .toLong()
+
+            // look at every file that needs to be compiled
+            // 1. filter out any that have no services
+            // 2. transform that file into an openapi spec, if possible
+            // 3. spit out the openapi yaml for any files that survived
             request
                 .sourceFileDescriptorsList
                 .filter { it.serviceList.isNotEmpty() }
-                .map { fileDescriptor ->
+                .associateWith(::processFileDescriptorProto)
+                .filterValues { it != null }
+                .mapValues { it.value!! }
+                .map { (key, value) ->
                     PluginProtos.CodeGeneratorResponse.File.newBuilder().apply {
-                        name = fileDescriptor.name.replace(".proto", ".txt")
-                        content = fileDescriptor.options.getExtension(Annotations.fileLevelOpenapi).toString()
+                        name = key.name.removeSuffix(".proto") + ".openapi.yaml"
+                        content = value.toString(EnumSet.of(SerializationFlag.OUT_AS_YAML))
                     }
                 }
                 .forEach {
@@ -130,5 +143,30 @@ public class ProtocGenOpenAPI(
             // if requested, record the response
             options.recordCodeGeneratorResponse?.outputStream()?.use { output -> request.writeTo(output) }
         }
+    }
+
+    public fun processFileDescriptorProto(proto: DescriptorProtos.FileDescriptorProto): OpenApi3? {
+        for (service in proto.serviceList) {
+            for (rpc in service.methodList) {
+//                val http: HttpRule = rpc.findExtension<HttpRule, DescriptorProtos.MethodDescriptorProto >(AnnotationsProto.http) ?: continue
+//
+//                val results = Operation()
+//
+//                // make request schema or args
+//                // make response schema or args
+//
+//                when (http.patternCase) {
+//                    HttpRule.PatternCase.GET -> TODO()
+//                    HttpRule.PatternCase.PUT -> TODO()
+//                    HttpRule.PatternCase.POST -> TODO()
+//                    HttpRule.PatternCase.DELETE -> TODO()
+//                    HttpRule.PatternCase.PATCH -> TODO()
+//                    HttpRule.PatternCase.CUSTOM -> TODO()
+//                    HttpRule.PatternCase.PATTERN_NOT_SET -> TODO()
+//                }
+            }
+        }
+
+        return null
     }
 }

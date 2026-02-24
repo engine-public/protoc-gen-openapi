@@ -1,0 +1,10 @@
+syntax = "proto3";
+package engine.protoc.utils;
+import "engine/protoc/utils/registered_extensions.proto";
+import "engine/protoc/utils/unregistered_extensions.proto";
+option (.engine.protoc.utils.registered_example) = {
+    one: 1
+};
+option (.engine.protoc.utils.unregistered_example) = {
+    two: 2
+};

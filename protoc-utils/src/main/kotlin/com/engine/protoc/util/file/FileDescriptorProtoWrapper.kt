@@ -1,14 +1,16 @@
 package com.engine.protoc.util.file
 
-import com.engine.protoc.util.AbstractGeneratedMessageWrapper
+import com.engine.protoc.util.GeneratedMessageWrapper
 import com.engine.protoc.util.SyntaxElement
 import com.engine.protoc.util.compiler.CodeGeneratorRequestWrapper
+import com.engine.protoc.util.enums.EnumDescriptorProtoWrapper
+import com.engine.protoc.util.message.DescriptorProtoWrapper
 import com.google.protobuf.DescriptorProtos
 
 /**
  * Wrapper for a FileDescriptorProto, providing convenient access to its properties and associated syntax elements.
  */
-public class FileDescriptorProtoWrapper(internal val cgreq: CodeGeneratorRequestWrapper, proto: DescriptorProtos.FileDescriptorProto) : AbstractGeneratedMessageWrapper<DescriptorProtos.FileDescriptorProto>(proto) {
+public class FileDescriptorProtoWrapper(internal val cgreq: CodeGeneratorRequestWrapper, override val proto: DescriptorProtos.FileDescriptorProto) : GeneratedMessageWrapper<DescriptorProtos.FileDescriptorProto> {
     /**
      * The relative path to the file from one of the source roots.
      */
@@ -69,10 +71,32 @@ public class FileDescriptorProtoWrapper(internal val cgreq: CodeGeneratorRequest
         dependencies.slice(proto.weakDependencyList)
     }
 
-    // TODO option_dependency -- field id 15
+    /**
+     * Names of files imported by this file purely for the purpose of providing
+     * option extensions. These are excluded from the dependency list above.
+     */
+    public val optionDependencies: List<Dependency> by lazy {
+        proto.optionDependencyList.mapIndexed { index, dependency -> Dependency(dependency, listOf(DescriptorProtos.FileDescriptorProto.OPTION_DEPENDENCY_FIELD_NUMBER, index), this) }
+    }
 
-    // TODO message_type
-    // TODO enum_type
+    public val messageTypes: List<DescriptorProtoWrapper> by lazy {
+        proto.messageTypeList.mapIndexed { index, msgProto ->
+            DescriptorProtoWrapper(
+                msgProto,
+                listOf(DescriptorProtos.FileDescriptorProto.MESSAGE_TYPE_FIELD_NUMBER, index),
+                this,
+            )
+        }
+    }
+    public val enumTypes: List<EnumDescriptorProtoWrapper> by lazy {
+        proto.enumTypeList.mapIndexed { index, enumProto ->
+            EnumDescriptorProtoWrapper(
+                enumProto,
+                listOf(DescriptorProtos.FileDescriptorProto.ENUM_TYPE_FIELD_NUMBER, index),
+                this,
+            )
+        }
+    }
     // TODO service
     // TODO extension
 

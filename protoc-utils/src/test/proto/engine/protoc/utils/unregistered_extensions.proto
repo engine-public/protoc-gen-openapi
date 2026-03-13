@@ -7,3 +7,9 @@ extend .google.protobuf.FileOptions {
 message UnregisteredFileExtensionExample {
     int32 two = 2;
 }
+extend .google.protobuf.EnumOptions {
+    .engine.protoc.utils.UnregisteredEnumExtensionExample unregistered_enum_example = 9889888;
+}
+message UnregisteredEnumExtensionExample {
+    int32 four = 4;
+}

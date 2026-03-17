@@ -27,3 +27,11 @@ message Proto2MessageWithExtensions {
         optional string container_string = 100;
     }
 }
+
+// A file-level extend block.  The extension descriptor appears in
+// FileDescriptorProto.extension (field 7), not inside any message.
+// comment on file-level extension
+extend Proto2ExtensionTarget {
+    // A file-level extension field.
+    optional string file_level_string = 101;
+}

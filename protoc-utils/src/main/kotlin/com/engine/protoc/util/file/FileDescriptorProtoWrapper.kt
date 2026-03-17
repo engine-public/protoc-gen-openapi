@@ -5,6 +5,7 @@ import com.engine.protoc.util.SyntaxElement
 import com.engine.protoc.util.compiler.CodeGeneratorRequestWrapper
 import com.engine.protoc.util.enums.EnumDescriptorProtoWrapper
 import com.engine.protoc.util.message.DescriptorProtoWrapper
+import com.engine.protoc.util.message.FieldDescriptorProtoWrapper
 import com.engine.protoc.util.service.ServiceDescriptorProtoWrapper
 import com.google.protobuf.DescriptorProtos
 
@@ -107,7 +108,20 @@ public class FileDescriptorProtoWrapper(internal val cgreq: CodeGeneratorRequest
             )
         }
     }
-    // TODO extension
+
+    /**
+     * All top-level extension fields defined in this file via `extend OtherMessage { ... }`
+     * blocks at the file level.  Each entry describes one extension field.
+     */
+    public val extensions: List<FieldDescriptorProtoWrapper> by lazy {
+        proto.extensionList.mapIndexed { index, extensionProto ->
+            FieldDescriptorProtoWrapper(
+                extensionProto,
+                listOf(DescriptorProtos.FileDescriptorProto.EXTENSION_FIELD_NUMBER, index),
+                this,
+            )
+        }
+    }
 
     public val options: FileOptionsWrapper? by lazy {
         if (proto.hasOptions()) {
@@ -138,5 +152,21 @@ public class FileDescriptorProtoWrapper(internal val cgreq: CodeGeneratorRequest
             null
         }
     }
-    // TODO edition
+    /**
+     * The edition of the proto file.
+     * WARNING: This field should only be used by protobuf plugins or special
+     * cases like the proto compiler. Other uses are discouraged and
+     * developers should rely on the protoreflect APIs for their client language.
+     */
+    public val edition: SyntaxElement<DescriptorProtos.Edition>? by lazy {
+        if (proto.hasEdition()) {
+            SyntaxElement(
+                proto.edition,
+                listOf(DescriptorProtos.FileDescriptorProto.EDITION_FIELD_NUMBER),
+                this,
+            )
+        } else {
+            null
+        }
+    }
 }

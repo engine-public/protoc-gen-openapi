@@ -2,7 +2,7 @@ package com.engine.protoc.util.compiler
 
 // TODO : Placeholder for now
 public class CodeGeneratorResponseWrapper {
-    /**
+    /*
      * // The plugin writes an encoded CodeGeneratorResponse to stdout.
      * message CodeGeneratorResponse {
      *   // Error message.  If non-empty, code generation failed.  The plugin process

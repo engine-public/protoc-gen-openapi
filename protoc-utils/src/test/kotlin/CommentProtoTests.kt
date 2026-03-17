@@ -32,7 +32,7 @@ class CommentProtoTests :
 
         val file = cgreq.sourceFileDescriptors.find { it.name == "engine/protoc/utils/comments.proto" }.shouldNotBeNull()
 
-        /**
+        /*
          * Some comments are just dropped by protoc, and we have no way to extract them.
          * This test looks for any of these comments and fails if they appear.
          * This would indicate an update to the protoc compiler made it possible to extract

@@ -27,6 +27,24 @@ public class EnumOptionsWrapper(
     }
 
     /**
+     * Enable the legacy handling of JSON field name conflicts.  This lowercases
+     * and strips underscored from the fields before comparison in proto3 only.
+     * The new behavior takes `json_name` into account and applies to proto2 as
+     * well.
+     * TODO Remove this legacy behavior once downstream teams have
+     * had time to migrate.
+     */
+    @Deprecated("Legacy behavior planned for removal. Migrate off JSON field name conflict handling.")
+    public val deprecatedLegacyJsonFieldConflicts: SyntaxElement<Boolean>? =
+        (if (proto.hasDeprecatedLegacyJsonFieldConflicts()) proto.deprecatedLegacyJsonFieldConflicts else null)?.let {
+            SyntaxElement(
+                it,
+                path + DescriptorProtos.EnumOptions.DEPRECATED_LEGACY_JSON_FIELD_CONFLICTS_FIELD_NUMBER,
+                file,
+            )
+        }
+
+    /**
      * Any features defined in the specific edition.
      * WARNING: This field should only be used by protobuf plugins or special
      * cases like the proto compiler. Other uses are discouraged and

@@ -63,4 +63,10 @@ public class EnumDescriptorProtoWrapper(
             )
         }
     }
+
+    /** Support for `export` and `local` keywords on enums. */
+    public val visibility: SyntaxElement<DescriptorProtos.SymbolVisibility>? =
+        (if (proto.hasVisibility()) proto.visibility else null)?.let {
+            SyntaxElement(it, path + DescriptorProtos.EnumDescriptorProto.VISIBILITY_FIELD_NUMBER, file)
+        }
 }

@@ -95,7 +95,17 @@ public class FieldDescriptorProtoWrapper(
             SyntaxElement(it, path + DescriptorProtos.FieldDescriptorProto.JSON_NAME_FIELD_NUMBER, file)
         }
 
-    // TODO: options: FieldOptionsWrapper — implement once FieldOptionsWrapper is created
+    public val options: FieldOptionsWrapper? by lazy {
+        if (proto.hasOptions()) {
+            FieldOptionsWrapper(
+                proto.options,
+                file,
+                path + DescriptorProtos.FieldDescriptorProto.OPTIONS_FIELD_NUMBER,
+            )
+        } else {
+            null
+        }
+    }
 
     /**
      * If true, this is a proto3 "optional". When a proto3 field is optional, it

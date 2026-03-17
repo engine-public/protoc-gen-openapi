@@ -141,3 +141,15 @@ enum EnumWithComment {
 enum EnumWithoutComment {
     ENUM_WITHOUT_COMMENT_DEFAULT = 0;
 }
+
+// comment on message MessageWithReserved
+message MessageWithReserved {
+    // comment on field in MessageWithReserved
+    string current_field = 1;
+
+    // comment on reserved range in MessageWithReserved
+    reserved 10 to 20;
+
+    // comment on reserved name in MessageWithReserved
+    reserved "old_field_name";
+}

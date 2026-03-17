@@ -226,7 +226,7 @@ public abstract class CommentParser<S : Style> {
          */
         public fun cleanedLine(index: Int): String {
             return cleanedLineCache.computeIfAbsent(index) { i ->
-                /**
+                /*
                  * special casing for first line and fencing messing up left edge detection
                  */
                 if (i == 0 && !rawContentLines[i].startsWith(rawCommonEdges.first) && rawContentLines[i].startsWith(" ")) {

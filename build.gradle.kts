@@ -33,7 +33,6 @@ dependencies {
     implementation(projects.protocGenOpenapiModel)
 
     implementation(libs.kotlin.reflect)
-    implementation(libs.openapi4j.parser)
     implementation(libs.protobuf.java)
     implementation(projects.protocUtils)
 }
@@ -66,7 +65,7 @@ allprojects {
     }
 
     configure<KtlintExtension> {
-        version.set("1.5.0")
+        version.set("1.8.0")
         filter {
             /*
              * work around bug in the ktlint plugin that doesn't honor exclusions of
@@ -113,7 +112,7 @@ allprojects {
     }
 
     configure<KtlintExtension> {
-        version.set("1.7.1")
+        version.set("1.8.0")
         filter {
             /*
              * work around bug in the ktlint plugin that doesn't honor exclusions of

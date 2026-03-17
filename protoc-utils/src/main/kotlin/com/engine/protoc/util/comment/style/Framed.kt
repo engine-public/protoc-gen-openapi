@@ -156,7 +156,9 @@ public class Framed(
                             when (rightPadding) {
                                 // there is insufficient room for spacing
                                 0, 1 -> rightFrameReversed to 0
+
                                 2 -> rightFrameReversed to leftEdgeSize - rightFrameReversed.length
+
                                 else -> " $rightFrameReversed".let { it to leftEdgeSize - it.length }
                             }
                         } else {

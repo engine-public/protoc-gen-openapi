@@ -39,6 +39,7 @@ public data class Comment(
                         raw = rawComment,
                         cleaned = result.cleaned,
                     )
+
                     is CommentParser.Result.Failure -> lastFailure = result
                 }
             }

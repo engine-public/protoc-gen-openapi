@@ -11,7 +11,7 @@ pluginManagement {
         id("com.google.osdetector").version("1.7.3")
         id("com.google.protobuf").version("0.9.4")
         id("org.graalvm.buildtools.native").version("0.11.0")
-        id("org.jlleitschuh.gradle.ktlint").version("13.0.0")
+        id("org.jlleitschuh.gradle.ktlint").version("14.2.0")
     }
 }
 
@@ -27,7 +27,6 @@ dependencyResolutionManagement {
 
             library("kotlin.reflect", "org.jetbrains.kotlin", "kotlin-reflect").versionRef(kotlin)
             library("google.api.grpc.googleCommonProtos", "com.google.api.grpc", "proto-google-common-protos").version("2.22.0")
-            library("openapi4j.parser", "org.openapi4j", "openapi-parser").version("1.0.7")
             library("protobuf.java", "com.google.protobuf", "protobuf-java").versionRef(protobuf)
             library("slf4j.api", "org.slf4j", "slf4j-api").versionRef(slf4j)
         }

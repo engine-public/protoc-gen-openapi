@@ -241,6 +241,96 @@ class CommentProtoTests :
             }
         }
 
+        context("service type comments") {
+            val services = file.services
+
+            assertSoftly {
+                withClue("service count matches proto file") {
+                    services.size shouldBe 2
+                }
+            }
+
+            test("ServiceWithComment has leading comment") {
+                services[0].location.shouldNotBeNull()
+                    .leadingComments.shouldNotBeNull()
+                    .cleaned shouldBe "comment on service ServiceWithComment"
+            }
+
+            test("ServiceWithComment.MethodWithComment has leading comment") {
+                services[0].methods[0].location.shouldNotBeNull()
+                    .leadingComments.shouldNotBeNull()
+                    .cleaned shouldBe "comment on method ServiceWithComment.MethodWithComment"
+            }
+
+            test("ServiceWithComment.MethodWithoutComment has no leading comment") {
+                services[0].methods[1].location.shouldNotBeNull()
+                    .leadingComments.shouldBeNull()
+            }
+
+            test("ServiceWithoutComment has no leading comment") {
+                services[1].location.shouldNotBeNull()
+                    .leadingComments.shouldBeNull()
+            }
+        }
+
+        context("service option comments") {
+            val serviceOptions = file.services[0].options.shouldNotBeNull()
+
+            assertSoftly {
+                withClue("unregistered_service_example") {
+                    serviceOptions.findExtension(UnregisteredExtensions.unregisteredServiceExample).shouldBeNull()
+                    file
+                        .sourceCodeInfo.shouldNotBeNull()
+                        .findLocationByPath(
+                            DescriptorProtos.FileDescriptorProto.SERVICE_FIELD_NUMBER,
+                            0,
+                            DescriptorProtos.ServiceDescriptorProto.OPTIONS_FIELD_NUMBER,
+                            UnregisteredExtensions.unregisteredServiceExample.number,
+                        ).shouldNotBeNull()
+                        .leadingComments.shouldNotBeNull()
+                        .cleaned shouldBe "comment on custom service extension option that is NOT registered at deser time of the cgrec"
+                }
+
+                withClue("registered_service_example") {
+                    serviceOptions
+                        .findExtension(RegisteredExtensions.registeredServiceExample).shouldNotBeNull()
+                        .location.shouldNotBeNull()
+                        .leadingComments.shouldNotBeNull()
+                        .cleaned shouldBe "comment on custom service extension option that is registered at deser time of the cgrec"
+                }
+            }
+        }
+
+        context("method option comments") {
+            val methodOptions = file.services[0].methods[0].options.shouldNotBeNull()
+
+            assertSoftly {
+                withClue("unregistered_method_example") {
+                    methodOptions.findExtension(UnregisteredExtensions.unregisteredMethodExample).shouldBeNull()
+                    file
+                        .sourceCodeInfo.shouldNotBeNull()
+                        .findLocationByPath(
+                            DescriptorProtos.FileDescriptorProto.SERVICE_FIELD_NUMBER,
+                            0,
+                            DescriptorProtos.ServiceDescriptorProto.METHOD_FIELD_NUMBER,
+                            0,
+                            DescriptorProtos.MethodDescriptorProto.OPTIONS_FIELD_NUMBER,
+                            UnregisteredExtensions.unregisteredMethodExample.number,
+                        ).shouldNotBeNull()
+                        .leadingComments.shouldNotBeNull()
+                        .cleaned shouldBe "comment on custom method extension option that is NOT registered at deser time of the cgrec"
+                }
+
+                withClue("registered_method_example") {
+                    methodOptions
+                        .findExtension(RegisteredExtensions.registeredMethodExample).shouldNotBeNull()
+                        .location.shouldNotBeNull()
+                        .leadingComments.shouldNotBeNull()
+                        .cleaned shouldBe "comment on custom method extension option that is registered at deser time of the cgrec"
+                }
+            }
+        }
+
         context("file option comments") {
             val options = file.options.shouldNotBeNull()
 

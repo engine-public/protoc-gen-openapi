@@ -13,3 +13,15 @@ extend .google.protobuf.EnumOptions {
 message RegisteredEnumExtensionExample {
     int32 three = 3;
 }
+extend .google.protobuf.ServiceOptions {
+    .engine.protoc.utils.RegisteredServiceExtensionExample registered_service_example = 8998996;
+}
+message RegisteredServiceExtensionExample {
+    int32 five = 5;
+}
+extend .google.protobuf.MethodOptions {
+    .engine.protoc.utils.RegisteredMethodExtensionExample registered_method_example = 8998995;
+}
+message RegisteredMethodExtensionExample {
+    int32 six = 6;
+}

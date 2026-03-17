@@ -5,6 +5,7 @@ import com.engine.protoc.util.SyntaxElement
 import com.engine.protoc.util.compiler.CodeGeneratorRequestWrapper
 import com.engine.protoc.util.enums.EnumDescriptorProtoWrapper
 import com.engine.protoc.util.message.DescriptorProtoWrapper
+import com.engine.protoc.util.service.ServiceDescriptorProtoWrapper
 import com.google.protobuf.DescriptorProtos
 
 /**
@@ -97,7 +98,15 @@ public class FileDescriptorProtoWrapper(internal val cgreq: CodeGeneratorRequest
             )
         }
     }
-    // TODO service
+    public val services: List<ServiceDescriptorProtoWrapper> by lazy {
+        proto.serviceList.mapIndexed { index, serviceProto ->
+            ServiceDescriptorProtoWrapper(
+                serviceProto,
+                listOf(DescriptorProtos.FileDescriptorProto.SERVICE_FIELD_NUMBER, index),
+                this,
+            )
+        }
+    }
     // TODO extension
 
     public val options: FileOptionsWrapper? by lazy {

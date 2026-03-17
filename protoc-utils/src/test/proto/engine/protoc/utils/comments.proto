@@ -142,6 +142,40 @@ enum EnumWithoutComment {
     ENUM_WITHOUT_COMMENT_DEFAULT = 0;
 }
 
+// comment on service ServiceWithComment
+service ServiceWithComment {
+    // comment on custom service extension option that is registered at deser time of the cgrec
+    option (.engine.protoc.utils.registered_service_example) = {
+        // **SENTINEL** comments on objects assigned to values of custom options are lost by the protoc compiler
+        five: 5;
+    };
+    // comment on custom service extension option that is NOT registered at deser time of the cgrec
+    option (.engine.protoc.utils.unregistered_service_example) = {
+        // **SENTINEL** comments on objects assigned to values of custom options are lost by the protoc compiler
+        seven: 7;
+    };
+
+    // comment on method ServiceWithComment.MethodWithComment
+    rpc MethodWithComment(google.protobuf.Empty) returns (google.protobuf.Empty) {
+        // comment on custom method extension option that is registered at deser time of the cgrec
+        option (.engine.protoc.utils.registered_method_example) = {
+            // **SENTINEL** comments on objects assigned to values of custom options are lost by the protoc compiler
+            six: 6;
+        };
+        // comment on custom method extension option that is NOT registered at deser time of the cgrec
+        option (.engine.protoc.utils.unregistered_method_example) = {
+            // **SENTINEL** comments on objects assigned to values of custom options are lost by the protoc compiler
+            eight: 8;
+        };
+    }
+
+    rpc MethodWithoutComment(google.protobuf.Empty) returns (google.protobuf.Empty);
+}
+
+service ServiceWithoutComment {
+    rpc MethodWithoutComment(google.protobuf.Empty) returns (google.protobuf.Empty);
+}
+
 // comment on message MessageWithReserved
 message MessageWithReserved {
     // comment on field in MessageWithReserved

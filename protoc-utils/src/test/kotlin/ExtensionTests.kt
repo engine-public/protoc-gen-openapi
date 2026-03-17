@@ -49,4 +49,26 @@ class ExtensionTests :
             enumOptions.findExtension(UnregisteredExtensions.unregisteredEnumExample).shouldBeNull()
             enumOptions.proto.findUnregisteredExtension(UnregisteredExtensions.unregisteredEnumExample).shouldNotBeNull() shouldBe UnregisteredExtensions.UnregisteredEnumExtensionExample.newBuilder().apply { four = 4 }.build()
         }
+
+        val serviceOptions = file.services[0].options.shouldNotBeNull()
+
+        test("registered service extension") {
+            serviceOptions.findExtension(RegisteredExtensions.registeredServiceExample).shouldNotBeNull().value shouldBe RegisteredExtensions.RegisteredServiceExtensionExample.newBuilder().apply { five = 5 }.build()
+        }
+
+        test("unregistered service extension") {
+            serviceOptions.findExtension(UnregisteredExtensions.unregisteredServiceExample).shouldBeNull()
+            serviceOptions.proto.findUnregisteredExtension(UnregisteredExtensions.unregisteredServiceExample).shouldNotBeNull() shouldBe UnregisteredExtensions.UnregisteredServiceExtensionExample.newBuilder().apply { seven = 7 }.build()
+        }
+
+        val methodOptions = file.services[0].methods[0].options.shouldNotBeNull()
+
+        test("registered method extension") {
+            methodOptions.findExtension(RegisteredExtensions.registeredMethodExample).shouldNotBeNull().value shouldBe RegisteredExtensions.RegisteredMethodExtensionExample.newBuilder().apply { six = 6 }.build()
+        }
+
+        test("unregistered method extension") {
+            methodOptions.findExtension(UnregisteredExtensions.unregisteredMethodExample).shouldBeNull()
+            methodOptions.proto.findUnregisteredExtension(UnregisteredExtensions.unregisteredMethodExample).shouldNotBeNull() shouldBe UnregisteredExtensions.UnregisteredMethodExtensionExample.newBuilder().apply { eight = 8 }.build()
+        }
     })

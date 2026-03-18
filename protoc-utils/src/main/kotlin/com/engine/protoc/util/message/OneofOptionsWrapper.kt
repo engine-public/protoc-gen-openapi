@@ -5,6 +5,11 @@ import com.engine.protoc.util.SyntaxElement
 import com.engine.protoc.util.file.FileDescriptorProtoWrapper
 import com.google.protobuf.DescriptorProtos
 
+/**
+ * Wrapper for [com.google.protobuf.DescriptorProtos.OneofOptions], exposing each standard
+ * oneof-level option as a [com.engine.protoc.util.SyntaxElement].  Each property is null when
+ * the corresponding option was not set on the oneof.
+ */
 public class OneofOptionsWrapper(
     proto: DescriptorProtos.OneofOptions,
     file: FileDescriptorProtoWrapper,

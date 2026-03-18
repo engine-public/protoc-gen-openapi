@@ -14,10 +14,12 @@ public class OneofDescriptorProtoWrapper(
 ) : AbstractLocatable(path, file),
     GeneratedMessageWrapper<DescriptorProtos.OneofDescriptorProto> {
 
+    /** The unqualified name of this oneof as written in the .proto source. */
     public val name: SyntaxElement<String>? = (if (proto.hasName()) proto.name else null)?.let {
         SyntaxElement(it, path + DescriptorProtos.OneofDescriptorProto.NAME_FIELD_NUMBER, file)
     }
 
+    /** Options set on this oneof, or null if none were specified. */
     public val options: OneofOptionsWrapper? by lazy {
         if (proto.hasOptions()) {
             OneofOptionsWrapper(

@@ -26,6 +26,18 @@ public class JavaDoc(
     public companion object;
 
     public object Parser : CommentParser<JavaDoc>() {
-        override fun tryParse(ctx: ParseContext): Result<JavaDoc> = fail("TODO")
+        override fun tryParse(ctx: ParseContext): Result<JavaDoc> {
+            if (!ctx.rawCommentLines.first().startsWith("*")) {
+                return fail("JavaDoc comments always start with /**")
+            }
+            return Result.Success(
+                ctx.cleanedContentLines.joinToString("\n"),
+                JavaDoc(
+                    newlineAfterOpeningFence = ctx.contentLineIndices.first > 0,
+                    newlineBeforeClosingFence = ctx.contentLineIndices.last < ctx.rawCommentLines.lastIndex,
+                    newlineAfterClosingFence = ctx.hasNewlineAfterClosingFence,
+                ),
+            )
+        }
     }
 }

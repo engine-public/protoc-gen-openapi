@@ -4,9 +4,13 @@ import com.engine.protoc.util.file.SourceCodeInfoWrapper
 import com.google.protobuf.DescriptorProtos
 
 /**
- * Utility function that finds Location instances that match the exact provided path.
- * Location information from the source file is stored in the [SourceCodeInfoWrapper] as a List<List<Int>>.
- * This locations list is somewhat recursive in that there can exist entries for location of a grouping construct that does not point at a leaf node in the syntax.
+ * Returns the [DescriptorProtos.SourceCodeInfo.Location] whose path exactly matches [path], or
+ * null if none exists.
+ *
+ * Protoc emits one location entry per syntax element, keyed by a path of field-number/index pairs
+ * (see [Locatable.path]).  Entries exist for both leaf nodes (e.g. a single field) and their
+ * enclosing constructs (e.g. the message that contains them), so an exact-length match is required
+ * to avoid returning a parent location instead of the intended element.
  */
 public fun DescriptorProtos.SourceCodeInfo.findLocation(path: List<Int>): DescriptorProtos.SourceCodeInfo.Location? {
     locations@ for (location in this.locationList) {

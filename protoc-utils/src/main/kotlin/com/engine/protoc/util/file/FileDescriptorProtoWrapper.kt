@@ -10,7 +10,12 @@ import com.engine.protoc.util.service.ServiceDescriptorProtoWrapper
 import com.google.protobuf.DescriptorProtos
 
 /**
- * Wrapper for a FileDescriptorProto, providing convenient access to its properties and associated syntax elements.
+ * Wrapper for a [com.google.protobuf.DescriptorProtos.FileDescriptorProto], providing typed,
+ * lazily-evaluated access to all proto elements defined in a single .proto file along with their
+ * source locations and comments.
+ *
+ * The [cgreq] back-reference is needed to resolve cross-file lookups such as [Dependency.dependencyFileDescriptor]
+ * and to supply the [SourceCodeInfoWrapper] used for comment extraction.
  */
 public class FileDescriptorProtoWrapper(internal val cgreq: CodeGeneratorRequestWrapper, override val proto: DescriptorProtos.FileDescriptorProto) : GeneratedMessageWrapper<DescriptorProtos.FileDescriptorProto> {
     /**
@@ -54,6 +59,7 @@ public class FileDescriptorProtoWrapper(internal val cgreq: CodeGeneratorRequest
             Dependency(dependency, listOf(DescriptorProtos.FileDescriptorProto.DEPENDENCY_FIELD_NUMBER, index), this)
         }
     }
+    /** The same dependencies as [dependencies] indexed by import path for O(1) lookup. */
     public val dependenciesByName: Map<String, Dependency> by lazy {
         dependencies.associateBy { it.value }
     }

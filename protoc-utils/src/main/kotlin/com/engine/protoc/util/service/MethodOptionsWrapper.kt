@@ -5,6 +5,11 @@ import com.engine.protoc.util.SyntaxElement
 import com.engine.protoc.util.file.FileDescriptorProtoWrapper
 import com.google.protobuf.DescriptorProtos
 
+/**
+ * Wrapper for [com.google.protobuf.DescriptorProtos.MethodOptions], exposing each standard
+ * method-level option as a [com.engine.protoc.util.SyntaxElement].  Each property is null when
+ * the corresponding option was not set on the method.
+ */
 public class MethodOptionsWrapper(
     proto: DescriptorProtos.MethodOptions,
     file: FileDescriptorProtoWrapper,

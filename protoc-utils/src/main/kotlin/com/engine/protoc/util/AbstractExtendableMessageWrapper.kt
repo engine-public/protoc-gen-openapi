@@ -15,6 +15,13 @@ public abstract class AbstractExtendableMessageWrapper<ExtendableMessageT : Gene
     public override val path: List<Int>,
 ) : GeneratedMessageWrapper<ExtendableMessageT>,
     Locatable {
+    /**
+     * Returns the value of [extension] on this message as a [SyntaxElement] (which carries source
+     * location so callers can access comments on the option), or null if the extension is not set.
+     * The extension must have been registered on the [com.google.protobuf.ExtensionRegistry] used
+     * when the enclosing [com.google.protobuf.compiler.PluginProtos.CodeGeneratorRequest] was parsed;
+     * use [com.engine.protoc.util.extensions.findUnregisteredExtension] for extensions that were not.
+     */
     public fun <MessageT, GeneratedExtensionT : GeneratedMessage.GeneratedExtension<ExtendableMessageT, MessageT>> findExtension(extension: GeneratedExtensionT): SyntaxElement<MessageT>? {
         return proto.findExtension(extension)?.let {
             return SyntaxElement(it, path + extension.number, file)

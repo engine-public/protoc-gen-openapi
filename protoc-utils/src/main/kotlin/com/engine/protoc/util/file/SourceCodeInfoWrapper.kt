@@ -14,7 +14,12 @@ public class SourceCodeInfoWrapper(override val proto: DescriptorProtos.SourceCo
     public val locations: List<LocationWrapper> by lazy { proto.locationList.map { it.wrap() } }
     private val locationsByPath: Map<List<Int>, LocationWrapper> by lazy { locations.associateBy { it.path } }
 
+    /** Looks up the location for a path supplied as individual integers (vararg convenience overload). */
     public fun findLocationByPath(vararg id: Int): LocationWrapper? = locationsByPath[id.toList()]
+
+    /** Looks up the location for the given path, or null if no entry exists for that exact path. */
     public fun findLocationByPath(path: List<Int>): LocationWrapper? = locationsByPath[path]
+
+    /** Looks up the location for the given [Locatable] element using its path, or null if not found. */
     public fun findLocation(locatable: Locatable): LocationWrapper? = locationsByPath[locatable.path]
 }

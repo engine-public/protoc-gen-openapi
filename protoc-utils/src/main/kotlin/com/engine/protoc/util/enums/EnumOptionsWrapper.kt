@@ -5,6 +5,11 @@ import com.engine.protoc.util.SyntaxElement
 import com.engine.protoc.util.file.FileDescriptorProtoWrapper
 import com.google.protobuf.DescriptorProtos
 
+/**
+ * Wrapper for [com.google.protobuf.DescriptorProtos.EnumOptions], exposing each standard
+ * enum-level option as a [com.engine.protoc.util.SyntaxElement].  Each property is null when
+ * the corresponding option was not set on the enum.
+ */
 public class EnumOptionsWrapper(
     proto: DescriptorProtos.EnumOptions,
     file: FileDescriptorProtoWrapper,

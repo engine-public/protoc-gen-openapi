@@ -21,9 +21,7 @@ public class Parameters(
     }
 
     /** Returns the last value for [key] as a [String], or null if the option is absent. */
-    public operator fun get(key: String): String? {
-        return get<String>(key)
-    }
+    public operator fun get(key: String): String? = get<String>(key)
 
     /**
      * Returns the option value(s) for [option] coerced to [T], or null if the option is absent.

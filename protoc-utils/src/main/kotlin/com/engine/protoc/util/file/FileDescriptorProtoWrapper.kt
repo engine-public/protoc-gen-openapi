@@ -59,6 +59,7 @@ public class FileDescriptorProtoWrapper(internal val cgreq: CodeGeneratorRequest
             Dependency(dependency, listOf(DescriptorProtos.FileDescriptorProto.DEPENDENCY_FIELD_NUMBER, index), this)
         }
     }
+
     /** The same dependencies as [dependencies] indexed by import path for O(1) lookup. */
     public val dependenciesByName: Map<String, Dependency> by lazy {
         dependencies.associateBy { it.value }
@@ -158,6 +159,7 @@ public class FileDescriptorProtoWrapper(internal val cgreq: CodeGeneratorRequest
             null
         }
     }
+
     /**
      * The edition of the proto file.
      * WARNING: This field should only be used by protobuf plugins or special

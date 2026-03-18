@@ -28,6 +28,7 @@ public class FileOptionsWrapper(
             file,
         )
     }
+
     /**
      * Controls the name of the wrapper Java class generated for the .proto file.  That class will
      * always contain the .proto file's getDescriptor() method as well as any top-level extensions
@@ -41,6 +42,7 @@ public class FileOptionsWrapper(
             file,
         )
     }
+
     /**
      * If enabled, then the Java code generator will generate a separate .java file for each
      * top-level message, enum, and service defined in the .proto file.  Thus, these types will
@@ -64,6 +66,7 @@ public class FileOptionsWrapper(
             file,
         )
     }
+
     /**
      * A proto2 file can set this to true to opt in to UTF-8 checking for Java, which will throw an
      * exception if invalid UTF-8 is parsed from the wire or assigned to a string field.  Proto3
@@ -77,6 +80,7 @@ public class FileOptionsWrapper(
             file,
         )
     }
+
     /** Controls whether generated code is optimized for speed, binary size, or the lite runtime. */
     public val optimizeFor: SyntaxElement<DescriptorProtos.FileOptions.OptimizeMode>? = (if (proto.hasOptimizeFor()) proto.optimizeFor else null)?.let {
         SyntaxElement(
@@ -85,6 +89,7 @@ public class FileOptionsWrapper(
             file,
         )
     }
+
     /**
      * Sets the Go package where structs generated from this .proto will be placed.  If omitted, the
      * Go package will be derived from: the basename of the package import path, if provided;
@@ -97,6 +102,7 @@ public class FileOptionsWrapper(
             file,
         )
     }
+
     /**
      * Should generic services be generated for C++?  Generic services are not specific to any
      * particular RPC system and are now deprecated in favour of RPC-specific plugins.  Defaults to
@@ -109,6 +115,7 @@ public class FileOptionsWrapper(
             file,
         )
     }
+
     /**
      * Should generic services be generated for Java?  See [ccGenericServices] for the full
      * explanation; this is the Java counterpart.
@@ -120,6 +127,7 @@ public class FileOptionsWrapper(
             file,
         )
     }
+
     /**
      * Should generic services be generated for Python?  See [ccGenericServices] for the full
      * explanation; this is the Python counterpart.
@@ -138,6 +146,7 @@ public class FileOptionsWrapper(
             file,
         )
     }
+
     /**
      * Enables the use of arenas for the proto messages in this file.  Applies only to generated
      * classes for C++.
@@ -149,6 +158,7 @@ public class FileOptionsWrapper(
             file,
         )
     }
+
     /**
      * Sets the Objective-C class prefix prepended to all Objective-C generated classes from this
      * .proto.  There is no default.
@@ -160,6 +170,7 @@ public class FileOptionsWrapper(
             file,
         )
     }
+
     /** Namespace for generated C# classes; defaults to the package. */
     public val csharpNamespace: SyntaxElement<String>? = (if (proto.hasCsharpNamespace()) proto.csharpNamespace else null)?.let {
         SyntaxElement(
@@ -168,6 +179,7 @@ public class FileOptionsWrapper(
             file,
         )
     }
+
     /**
      * By default Swift generators will take the proto package, CamelCase it replacing '.' with
      * underscore, and use that to prefix the types/symbols defined.  When this option is provided,
@@ -180,6 +192,7 @@ public class FileOptionsWrapper(
             file,
         )
     }
+
     /** Sets the PHP class prefix prepended to all PHP generated classes from this .proto.  Default is empty. */
     public val phpClassPrefix: SyntaxElement<String>? = (if (proto.hasPhpClassPrefix()) proto.phpClassPrefix else null)?.let {
         SyntaxElement(
@@ -188,6 +201,7 @@ public class FileOptionsWrapper(
             file,
         )
     }
+
     /**
      * Use this option to change the namespace of PHP generated classes.  Default is empty.  When
      * empty, the package name will be used for determining the namespace.
@@ -199,6 +213,7 @@ public class FileOptionsWrapper(
             file,
         )
     }
+
     /**
      * Use this option to change the namespace of PHP generated metadata classes.  Default is
      * empty.  When empty, the proto file name will be used for determining the namespace.
@@ -210,6 +225,7 @@ public class FileOptionsWrapper(
             file,
         )
     }
+
     /**
      * Use this option to change the package of Ruby generated classes.  Default is empty.  When
      * not set, the package name will be used for determining the Ruby package.
@@ -228,6 +244,7 @@ public class FileOptionsWrapper(
             file,
         )
     }
+
     /** The parser stores options it doesn't recognize here. See [com.google.protobuf.DescriptorProtos.UninterpretedOption]. */
     public val uninterpretedOptions: List<SyntaxElement<DescriptorProtos.UninterpretedOption>> by lazy {
         proto.uninterpretedOptionList.mapIndexed { index, option ->

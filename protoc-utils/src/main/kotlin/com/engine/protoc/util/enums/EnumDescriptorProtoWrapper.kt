@@ -29,6 +29,7 @@ public class EnumDescriptorProtoWrapper(
             )
         }
     }
+
     /** Options set on this enum, or null if none were specified. */
     public val options: EnumOptionsWrapper? by lazy {
         if (proto.hasOptions()) {

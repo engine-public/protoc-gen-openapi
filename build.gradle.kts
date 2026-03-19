@@ -49,6 +49,20 @@ allprojects {
         mavenCentral()
     }
 
+    configurations.named("ktlint").configure {
+        resolutionStrategy {
+            eachDependency {
+                /*
+                 * https://github.com/HotelEngine/protoc-gen-openapi/security/dependabot/3
+                 * https://nvd.nist.gov/vuln/detail/CVE-2026-1225
+                 */
+                if (requested.group == "ch.qos.logback" && requested.module.name.startsWith("logback-")) {
+                    useVersion("[1.5.25,)")
+                }
+            }
+        }
+    }
+
     configure<JavaPluginExtension> {
         withJavadocJar()
         withSourcesJar()

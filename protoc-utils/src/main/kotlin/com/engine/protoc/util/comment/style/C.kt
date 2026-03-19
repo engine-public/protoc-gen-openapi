@@ -2,7 +2,6 @@ package com.engine.protoc.util.comment.style
 
 import com.engine.protoc.util.comment.CommentParser
 import com.engine.protoc.util.comment.Style
-import com.sun.net.httpserver.Authenticator
 
 /**
  * A C-Style multi-line comment. (/* */)

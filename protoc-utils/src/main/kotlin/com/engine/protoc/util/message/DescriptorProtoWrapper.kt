@@ -73,6 +73,33 @@ public class DescriptorProtoWrapper(
         }
     }
 
+    public val options: MessageOptionsWrapper? by lazy {
+        if (proto.hasOptions()) {
+            MessageOptionsWrapper(
+                proto.options,
+                file,
+                path + DescriptorProtos.DescriptorProto.OPTIONS_FIELD_NUMBER,
+            )
+        } else {
+            null
+        }
+    }
+
+    /**
+     * The oneof groups declared in this message.  Each field that belongs to a
+     * oneof has its [FieldDescriptorProtoWrapper.oneofIndex] set to the index of
+     * the oneof in this list.
+     */
+    public val oneofDecls: List<OneofDescriptorProtoWrapper> by lazy {
+        proto.oneofDeclList.mapIndexed { index, oneofProto ->
+            OneofDescriptorProtoWrapper(
+                oneofProto,
+                path + DescriptorProtos.DescriptorProto.ONEOF_DECL_FIELD_NUMBER + index,
+                file,
+            )
+        }
+    }
+
     /**
      * Extension ranges declared in this message.  These ranges specify which
      * field numbers are reserved for extension fields (defined elsewhere via

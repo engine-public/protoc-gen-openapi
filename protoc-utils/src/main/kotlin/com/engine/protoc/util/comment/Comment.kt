@@ -48,8 +48,7 @@ public data class Comment(
     }
 
     /**
-     * Return a valid comment, based on the provided style.
-     * By default, retain the original style.
+     * Re-encodes the cleaned comment content in the given style.
      */
     public fun reconstruct(style: Style): String = style.formatComment(cleaned)
 }

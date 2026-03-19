@@ -41,7 +41,7 @@ public abstract class CommentParser<S : Style> {
         ) : Result<S>
 
         /**
-         * A result indicated comment parsing succeeded, including the
+         * A result indicating comment parsing succeeded, including the cleaned text and detected style.
          */
         public data class Success<S : Style>(
             public val cleaned: String,

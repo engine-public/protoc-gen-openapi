@@ -268,4 +268,48 @@ class DescriptorProtoWrapperTests :
                     .extensions.shouldBeEmpty()
             }
         }
+
+        // ---------------------------------------------------------------------------
+        // file-level extensions (FileDescriptorProto.extension — proto2 only)
+        // ---------------------------------------------------------------------------
+
+        context("file-level extensions") {
+            test("proto2 file has exactly one file-level extension") {
+                proto2File.extensions shouldHaveSize 1
+            }
+
+            test("file-level extension name is correct") {
+                proto2File.extensions[0].name?.value shouldBe "file_level_string"
+            }
+
+            test("file-level extension extendee is the fully-qualified name of Proto2ExtensionTarget") {
+                // protoc always writes extendee as a fully-qualified name with a leading dot
+                proto2File.extensions[0].extendee?.value shouldBe
+                    ".engine.protoc.utils.Proto2ExtensionTarget"
+            }
+
+            test("file-level extension field number matches the proto source") {
+                proto2File.extensions[0].number?.value shouldBe 101
+            }
+
+            test("proto3 file has no file-level extensions") {
+                file.extensions.shouldBeEmpty()
+            }
+        }
+
+        // ---------------------------------------------------------------------------
+        // edition
+        // proto2 and proto3 files never carry an edition field; only files that
+        // use the "editions" syntax do.  Both should always be null here.
+        // ---------------------------------------------------------------------------
+
+        context("edition") {
+            test("proto2 file has null edition") {
+                proto2File.edition.shouldBeNull()
+            }
+
+            test("proto3 file has null edition") {
+                file.edition.shouldBeNull()
+            }
+        }
     })

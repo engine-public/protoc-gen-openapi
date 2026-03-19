@@ -5,6 +5,11 @@ import com.engine.protoc.util.SyntaxElement
 import com.engine.protoc.util.file.FileDescriptorProtoWrapper
 import com.google.protobuf.DescriptorProtos
 
+/**
+ * Wrapper for [com.google.protobuf.DescriptorProtos.EnumOptions], exposing each standard
+ * enum-level option as a [com.engine.protoc.util.SyntaxElement].  Each property is null when
+ * the corresponding option was not set on the enum.
+ */
 public class EnumOptionsWrapper(
     proto: DescriptorProtos.EnumOptions,
     file: FileDescriptorProtoWrapper,
@@ -25,6 +30,24 @@ public class EnumOptionsWrapper(
     public val deprecated: SyntaxElement<Boolean>? = (if (proto.hasDeprecated()) proto.deprecated else null)?.let {
         SyntaxElement(it, path + DescriptorProtos.EnumOptions.DEPRECATED_FIELD_NUMBER, file)
     }
+
+    /**
+     * Enable the legacy handling of JSON field name conflicts.  This lowercases
+     * and strips underscored from the fields before comparison in proto3 only.
+     * The new behavior takes `json_name` into account and applies to proto2 as
+     * well.
+     * TODO Remove this legacy behavior once downstream teams have
+     * had time to migrate.
+     */
+    @Deprecated("Legacy behavior planned for removal. Migrate off JSON field name conflict handling.")
+    public val deprecatedLegacyJsonFieldConflicts: SyntaxElement<Boolean>? =
+        (if (proto.hasDeprecatedLegacyJsonFieldConflicts()) proto.deprecatedLegacyJsonFieldConflicts else null)?.let {
+            SyntaxElement(
+                it,
+                path + DescriptorProtos.EnumOptions.DEPRECATED_LEGACY_JSON_FIELD_CONFLICTS_FIELD_NUMBER,
+                file,
+            )
+        }
 
     /**
      * Any features defined in the specific edition.

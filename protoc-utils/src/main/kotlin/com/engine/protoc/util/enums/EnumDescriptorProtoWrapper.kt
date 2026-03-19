@@ -14,9 +14,12 @@ public class EnumDescriptorProtoWrapper(
 ) : AbstractLocatable(path, file),
     GeneratedMessageWrapper<DescriptorProtos.EnumDescriptorProto> {
 
+    /** The unqualified name of this enum as written in the .proto source. */
     public val name: SyntaxElement<String>? = (if (proto.hasName()) proto.name else null)?.let {
         SyntaxElement(it, path + DescriptorProtos.EnumDescriptorProto.NAME_FIELD_NUMBER, file)
     }
+
+    /** The values declared in this enum, in source order. */
     public val values: List<EnumValueDescriptorProtoWrapper> by lazy {
         proto.valueList.mapIndexed { index, valueProto ->
             EnumValueDescriptorProtoWrapper(
@@ -26,6 +29,8 @@ public class EnumDescriptorProtoWrapper(
             )
         }
     }
+
+    /** Options set on this enum, or null if none were specified. */
     public val options: EnumOptionsWrapper? by lazy {
         if (proto.hasOptions()) {
             EnumOptionsWrapper(
@@ -63,4 +68,10 @@ public class EnumDescriptorProtoWrapper(
             )
         }
     }
+
+    /** Support for `export` and `local` keywords on enums. */
+    public val visibility: SyntaxElement<DescriptorProtos.SymbolVisibility>? =
+        (if (proto.hasVisibility()) proto.visibility else null)?.let {
+            SyntaxElement(it, path + DescriptorProtos.EnumDescriptorProto.VISIBILITY_FIELD_NUMBER, file)
+        }
 }

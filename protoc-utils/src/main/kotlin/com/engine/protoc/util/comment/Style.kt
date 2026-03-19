@@ -25,7 +25,7 @@ public abstract class Style(
     public val newlineBeforeClosingFence: Boolean,
 
     /**
-     * If true, a newline will be inserted immediately before the closing fence in the result of [formatComment].
+     * If true, a newline will be inserted immediately after the closing fence in the result of [formatComment].
      */
     public val newlineAfterClosingFence: Boolean,
 

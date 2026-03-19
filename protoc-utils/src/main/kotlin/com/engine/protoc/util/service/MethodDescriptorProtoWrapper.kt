@@ -6,7 +6,11 @@ import com.engine.protoc.util.SyntaxElement
 import com.engine.protoc.util.file.FileDescriptorProtoWrapper
 import com.google.protobuf.DescriptorProtos
 
-/** Describes a method of a service. */
+/**
+ * Describes a single RPC method within a [ServiceDescriptorProtoWrapper].
+ * Each method has a name, fully-qualified input and output message types, optional streaming
+ * flags, and optional method-level options (including custom extensions).
+ */
 public class MethodDescriptorProtoWrapper(
     override val proto: DescriptorProtos.MethodDescriptorProto,
     path: List<Int>,
@@ -14,6 +18,7 @@ public class MethodDescriptorProtoWrapper(
 ) : AbstractLocatable(path, file),
     GeneratedMessageWrapper<DescriptorProtos.MethodDescriptorProto> {
 
+    /** The unqualified name of this method as written in the .proto source. */
     public val name: SyntaxElement<String>? = (if (proto.hasName()) proto.name else null)?.let {
         SyntaxElement(it, path + DescriptorProtos.MethodDescriptorProto.NAME_FIELD_NUMBER, file)
     }
@@ -31,6 +36,7 @@ public class MethodDescriptorProtoWrapper(
         SyntaxElement(it, path + DescriptorProtos.MethodDescriptorProto.OUTPUT_TYPE_FIELD_NUMBER, file)
     }
 
+    /** Options set on this method, or null if none were specified. */
     public val options: MethodOptionsWrapper? by lazy {
         if (proto.hasOptions()) {
             MethodOptionsWrapper(

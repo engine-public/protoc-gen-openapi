@@ -5,6 +5,11 @@ import com.engine.protoc.util.SyntaxElement
 import com.engine.protoc.util.file.FileDescriptorProtoWrapper
 import com.google.protobuf.DescriptorProtos
 
+/**
+ * Wrapper for [com.google.protobuf.DescriptorProtos.EnumValueOptions], exposing each standard
+ * enum-value-level option as a [com.engine.protoc.util.SyntaxElement].  Each property is null
+ * when the corresponding option was not set on the enum value.
+ */
 public class EnumValueOptionsWrapper(
     proto: DescriptorProtos.EnumValueOptions,
     file: FileDescriptorProtoWrapper,
@@ -39,6 +44,16 @@ public class EnumValueOptionsWrapper(
     public val debugRedact: SyntaxElement<Boolean>? = (if (proto.hasDebugRedact()) proto.debugRedact else null)?.let {
         SyntaxElement(it, path + DescriptorProtos.EnumValueOptions.DEBUG_REDACT_FIELD_NUMBER, file)
     }
+
+    /** Information about the support window of a feature value. */
+    public val featureSupport: SyntaxElement<DescriptorProtos.FieldOptions.FeatureSupport>? =
+        (if (proto.hasFeatureSupport()) proto.featureSupport else null)?.let {
+            SyntaxElement(
+                it,
+                path + DescriptorProtos.EnumValueOptions.FEATURE_SUPPORT_FIELD_NUMBER,
+                file,
+            )
+        }
 
     /** The parser stores options it doesn't recognize here. See [com.google.protobuf.DescriptorProtos.UninterpretedOption]. */
     public val uninterpretedOptions: List<SyntaxElement<DescriptorProtos.UninterpretedOption>> by lazy {

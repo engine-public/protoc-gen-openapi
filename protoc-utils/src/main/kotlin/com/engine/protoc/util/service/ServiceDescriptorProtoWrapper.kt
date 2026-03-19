@@ -14,10 +14,12 @@ public class ServiceDescriptorProtoWrapper(
 ) : AbstractLocatable(path, file),
     GeneratedMessageWrapper<DescriptorProtos.ServiceDescriptorProto> {
 
+    /** The unqualified name of this service as written in the .proto source. */
     public val name: SyntaxElement<String>? = (if (proto.hasName()) proto.name else null)?.let {
         SyntaxElement(it, path + DescriptorProtos.ServiceDescriptorProto.NAME_FIELD_NUMBER, file)
     }
 
+    /** The RPC methods declared in this service, in source order. */
     public val methods: List<MethodDescriptorProtoWrapper> by lazy {
         proto.methodList.mapIndexed { index, methodProto ->
             MethodDescriptorProtoWrapper(
@@ -28,6 +30,7 @@ public class ServiceDescriptorProtoWrapper(
         }
     }
 
+    /** Options set on this service, or null if none were specified. */
     public val options: ServiceOptionsWrapper? by lazy {
         if (proto.hasOptions()) {
             ServiceOptionsWrapper(

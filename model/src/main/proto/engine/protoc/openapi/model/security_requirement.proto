@@ -14,6 +14,12 @@ import "engine/protoc/openapi/model/security_requirement_values.proto";
 // This enables support for scenarios where the API allows multiple, independent security schemes.
 //
 // An empty Security Requirement Object ({}) indicates anonymous access is supported.
+//
+// **Structural note**: The OpenAPI Security Requirement Object is defined as a plain map (not an
+// object with a named field). This message wraps the map in a `names` field because protobuf
+// requires maps to live inside a message. Serializers MUST unwrap the `names` field when emitting
+// JSON/YAML — the output should be an object whose keys are security scheme names, not an object
+// with a `names` key.
 message SecurityRequirement {
   // Each name MUST correspond to a security scheme which is declared in the Security Schemes under the Components Object.
   // If the security scheme is of type "oauth2" or "openIdConnect", then the value is a list of scope names required for the execution, and the list MAY be empty if authorization does not require a specified scope.

@@ -71,7 +71,7 @@ jobs:
           JF_USER: ${{ vars.JF_USER }}
           JF_PASSWORD: ${{ secrets.JF_PASSWORD }}
         run: |
-          ./gradlew clean compileKotlin -x ktlintCheck
+          ./gradlew -Pcodeql=true clean compileKotlin -x ktlintCheck
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3

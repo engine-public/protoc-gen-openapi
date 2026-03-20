@@ -51,11 +51,11 @@ protobuf {
     }
 }
 
-if (!project.hasProperty("codeql")) {
+if (project.hasProperty("codeql")) {
     gradle.taskGraph.whenReady {
         gradle.taskGraph.allTasks.forEach {
             if (it.project == project) {
-                logger.quiet("Disabling ${it.name} because codeql is running")
+                logger.quiet("Disabling ${it.path} due to codeql run.")
                 it.enabled = false
             }
         }

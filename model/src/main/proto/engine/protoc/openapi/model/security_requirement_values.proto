@@ -2,16 +2,16 @@ syntax = "proto3";
 
 package engine.protoc.openapi.model;
 
-// Lists the required security schemes to execute this operation.
-// The name used for each property MUST correspond to a security scheme declared in the Security Schemes under the Components Object.
+// Wrapper for the list of scope names (or role names) associated with a single entry in a
+// [Security Requirement Object](https://swagger.io/specification/#security-requirement-object).
 //
-// A Security Requirement Object MAY refer to multiple security schemes in which case all schemes MUST be satisfied for a request to be authorized.
-// This enables support for scenarios where multiple query parameters or HTTP headers are required to convey security information.
+// For `oauth2` and `openIdConnect` security schemes, `values` holds the list of required OAuth
+// scope names; the list MAY be empty if no specific scope is required.
+// For all other security scheme types, `values` MAY hold a list of role names required for
+// execution, but these are not otherwise defined or exchanged in-band.
 //
-// When the security field is defined on the OpenAPI Object or Operation Object and contains multiple Security Requirement Objects, only one of the entries in the list needs to be satisfied to authorize the request.
-// This enables support for scenarios where the API allows multiple, independent security schemes.
-//
-// An empty Security Requirement Object ({}) indicates anonymous access is supported.
+// This wrapper message exists because protobuf map values cannot be `repeated` scalar types
+// directly; the map in [SecurityRequirement] maps scheme names to this message.
 message SecurityRequirementValues {
   repeated string values = 1;
 }

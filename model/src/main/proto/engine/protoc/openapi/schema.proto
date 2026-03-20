@@ -3,6 +3,7 @@ syntax = "proto3";
 package engine.protoc.openapi;
 
 import "engine/protoc/openapi/model/discriminator.proto";
+import "engine/protoc/openapi/model/external_documentation.proto";
 import "engine/protoc/openapi/model/xml.proto";
 import "google/protobuf/any.proto";
 
@@ -42,7 +43,7 @@ message Schema {
   .engine.protoc.openapi.model.XML xml = 2;
 
   // Additional external documentation for this schema.
-  optional string external_docs = 3;
+  .engine.protoc.openapi.model.ExternalDocumentation external_docs = 3;
 
   // A free-form field to include an example of an instance for this schema.
   // To represent examples that cannot be naturally represented in JSON or YAML, a string value can be used to contain the example with escaping where necessary.

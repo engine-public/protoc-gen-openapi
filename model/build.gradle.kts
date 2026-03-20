@@ -38,13 +38,4 @@ protobuf {
     }
 }
 
-gradle.taskGraph.whenReady {
-    gradle.taskGraph.allTasks.forEach {
-        if (project.hasProperty("codeql")) {
-            if (it.name.startsWith("nativeCompile")) {
-                logger.quiet("Disabling ${it.path} due to codeql run.")
-                it.enabled = false
-            }
-        }
-    }
-}
+

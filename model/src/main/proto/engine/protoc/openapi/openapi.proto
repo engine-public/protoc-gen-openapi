@@ -6,7 +6,7 @@ import "engine/protoc/openapi/model/components.proto";
 import "engine/protoc/openapi/model/external_documentation.proto";
 import "engine/protoc/openapi/model/info.proto";
 import "engine/protoc/openapi/model/paths.proto";
-import "engine/protoc/openapi/model/path_item.proto";
+import "engine/protoc/openapi/model/path_item_or_reference.proto";
 import "engine/protoc/openapi/model/security_requirement.proto";
 import "engine/protoc/openapi/model/server.proto";
 import "engine/protoc/openapi/model/tag.proto";
@@ -45,7 +45,7 @@ message OpenAPI {
   // Closely related to the `callbacks` feature, this section describes requests initiated other than by an API call, for example by an out of band registration.
   // The key name is a unique string to refer to each webhook, while the (optionally referenced) Path Item Object describes a request that may be initiated by the API provider and the expected responses.
   // An [example](https://learn.openapis.org/examples/v3.1/webhook-example.html) is available.
-  map<string, .engine.protoc.openapi.model.PathItem> webhooks = 6;
+  map<string, .engine.protoc.openapi.model.PathItemOrReference> webhooks = 6;
 
   // An element to hold various Objects for the OpenAPI Description.
   .engine.protoc.openapi.model.Components components = 7;

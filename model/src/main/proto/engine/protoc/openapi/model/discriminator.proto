@@ -7,12 +7,17 @@ package engine.protoc.openapi.model;
 // The Discriminator Object does this by implicitly or explicitly associating the possible values of a named property with alternative schemas.
 //
 // Note that `discriminator` MUST NOT change the validation outcome of the schema.
+//
+// The `discriminator` keyword is only valid when used alongside `oneOf`, `anyOf`, or `allOf` in
+// the parent Schema Object.
+// Inline schemas are never valid discriminator targets; only named schemas referenced via `$ref`
+// are considered as alternatives.
 message Discriminator {
 
   // REQUIRED.
   // The name of the property in the payload that will hold the discriminating value.
   // This property SHOULD be required in the payload schema, as the behavior when the property is absent is undefined.
-  string property_name = 1;
+  optional string property_name = 1;
 
   // An object to hold mappings between payload values and schema names or URI references.
   map<string, string> mapping = 2;

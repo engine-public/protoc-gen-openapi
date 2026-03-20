@@ -4,8 +4,13 @@ package engine.protoc.openapi.model;
 
 import "engine/protoc/openapi/model/media_type.proto";
 
+// Wrapper for the content-based serialization variant of a Header Object.
+//
+// This message exists to allow the `content` map to participate in the `oneof header_definition_type`
+// in [Header](https://swagger.io/specification/#header-object); proto3 does not permit map fields
+// directly inside a `oneof`. Per the spec, the map MUST contain exactly one entry.
 message HeaderContent {
-  // A map containing the representations for the parameter.
+  // A map containing the representations for the header.
   // The key is the media type and the value describes it. The map MUST only contain one entry.
   map<string, .engine.protoc.openapi.model.MediaType> content = 1;
 }

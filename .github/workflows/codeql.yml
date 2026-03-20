@@ -43,12 +43,13 @@ jobs:
           fetch-tags: 'true'
           fetch-depth: '0'
 
-      - name: Set up JDK 21
+      - name: Setup GraalVM
         if: matrix.language == 'java-kotlin'
-        uses: actions/setup-java@v4
+        uses: graalvm/setup-graalvm@f744c72a42b1995d7b0cbc314bde4bace7ac1fe1
         with:
           java-version: '21'
-          distribution: 'corretto'
+          distribution: 'graalvm-community'
+          native-image-job-reports: 'true'
 
       # Configure Gradle for optimal use in GitHub Actions, including caching of downloaded dependencies.
       # See: https://github.com/gradle/actions/blob/main/setup-gradle/README.md

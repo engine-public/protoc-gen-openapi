@@ -29,15 +29,6 @@ graalvmNative {
                 vendor.set(JvmVendorSpec.GRAAL_VM)
             })
             buildArgs.add("-H:ThrowMissingRegistrationErrors=")
-            if (project.hasProperty("codeql")) {
-                logger.quiet("Identified codeql run, adding bypass for agent classes.")
-                listOf(
-                    "com.semmle.extractor.java.InterceptingAgent",
-                    "com.semmle.extractor.java.interceptors.ECJInterceptor",
-                ).forEach {
-                    buildArgs.add(("--initialize-at-run-time=$it"))
-                }
-            }
         }
     }
 }

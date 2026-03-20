@@ -21,7 +21,7 @@ message OpenAPI {
   // This is _not_ related to the API [info.version](https://swagger.io/specification/#info-version) string.
   //
   // protoc info: While this field is required in OpenAPI, it is optional in this spec to allow for overrides.
-  // If not provided, will default to 3.1.1
+  // If not provided, will default to 3.1.0
   optional string openapi = 1;
 
   // REQUIRED.

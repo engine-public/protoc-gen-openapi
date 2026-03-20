@@ -19,8 +19,11 @@ message PathItem {
     // _**Note**: The behavior of `$ref` with adjacent properties is likely to change in future versions of this specification to bring it into closer alignment with the behavior of the [Reference Object](https://swagger.io/specification/#reference-object)._
     string uri_ref = 1;
 
-    // A fully qualified name of a service and method name, for example: `engine.shop.lodging.service.v1.LodgingShoppingService#FindBestOffers.  The RPC must exist, have a `` option, and be within the context of the protoc session.
-    // TODO fix comment above
+    // A fully qualified service and method name used to resolve a path item from the protoc
+    // compilation context, for example:
+    // `engine.shop.lodging.service.v1.LodgingShoppingService#FindBestOffers`
+    // The referenced RPC must exist, have a `(google.api.http)` option, and be present in the
+    // set of files passed to the current protoc invocation.
     string proto_ref = 2;
   }
 

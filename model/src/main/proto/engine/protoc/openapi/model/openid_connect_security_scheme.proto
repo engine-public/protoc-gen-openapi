@@ -5,5 +5,6 @@ package engine.protoc.openapi.model;
 message OpenIDConnectSecurityScheme {
   // REQUIRED.
   // Well-known URL to discover the [[OpenID-Connect-Discovery]] provider metadata.
+  // This MUST be in the form of a URL and MUST use TLS.
   string openid_connect_url = 1;
 }

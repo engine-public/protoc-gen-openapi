@@ -20,7 +20,7 @@ public class ProtocGenOpenAPI(
      */
     public data class Options(
         val merge: Boolean,
-        val caseStrategy: Any
+        val caseStrategy: Any,
     ) {
         public enum class CaseStrategy {
             UNMODIFIED,
@@ -29,7 +29,7 @@ public class ProtocGenOpenAPI(
         }
 
         public class Builder(
-            private val parameters: Parameters
+            private val parameters: Parameters,
         ) {
             public companion object {
                 public fun from(requestParameter: String): Builder {

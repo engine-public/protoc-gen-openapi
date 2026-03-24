@@ -129,7 +129,6 @@ class ParametersTests :
         // Missing key — each type returns null when the option is absent.
         // ---------------------------------------------------------------------------
 
-
         context("missing key returns null for each supported type") {
             val params = Parameters("x=y")
 

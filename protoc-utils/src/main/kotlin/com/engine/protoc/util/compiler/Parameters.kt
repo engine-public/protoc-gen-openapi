@@ -35,10 +35,15 @@ public class Parameters(
     public inline operator fun <reified T> get(option: String): T? =
         when (typeOf<T>()) {
             typeOf<Int>() -> tokenized[option]?.last()?.toInt() as T?
+
             typeOf<List<Int>>() -> tokenized[option]?.map { it.toInt() } as T?
+
             typeOf<String>() -> tokenized[option]?.last() as T?
+
             typeOf<List<String>>() -> tokenized[option] as T?
+
             typeOf<Boolean>() -> tokenized[option]?.last()?.toBoolean() as T?
+
             typeOf<List<Boolean>>() -> tokenized[option]?.map { it.toBoolean() } as T?
 
             else -> when {
@@ -48,6 +53,7 @@ public class Parameters(
                         (T::class.java as Class<Enum<*>>).enumConstants.first { it.name == value } as T
                     }
                 }
+
                 typeOf<T>().classifier == List::class &&
                     (typeOf<T>().arguments.firstOrNull()?.type?.classifier as? KClass<*>)?.java?.isEnum == true -> {
                     @Suppress("UNCHECKED_CAST")
@@ -55,6 +61,7 @@ public class Parameters(
                         (typeOf<T>().arguments.first().type!!.classifier as KClass<*>).java as Class<Enum<*>>
                     tokenized[option]?.map { value -> enumClass.enumConstants.first { it.name == value } } as T?
                 }
+
                 else -> throw UnsupportedOperationException("Unsupported option type ${typeOf<T>()} for $option")
             }
         }

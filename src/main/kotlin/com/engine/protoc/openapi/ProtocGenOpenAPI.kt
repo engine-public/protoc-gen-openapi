@@ -1,17 +1,16 @@
 package com.engine.protoc.openapi
 
+import com.engine.protoc.util.compiler.CodeGeneratorRequestWrapper
 import com.engine.protoc.util.compiler.Parameters
+import com.engine.protoc.util.extensions.wrap
 import com.google.api.AnnotationsProto
 import com.google.protobuf.ExtensionRegistry
 import com.google.protobuf.compiler.PluginProtos
 import engine.protoc.openapi.Annotations
-import java.io.File
 import java.io.InputStream
-import kotlin.reflect.KMutableProperty
-import kotlin.reflect.full.memberProperties
 
 public class ProtocGenOpenAPI(
-    private val request: PluginProtos.CodeGeneratorRequest,
+    private val request: CodeGeneratorRequestWrapper,
     private val options: Options,
 ) {
 
@@ -20,7 +19,7 @@ public class ProtocGenOpenAPI(
      */
     public data class Options(
         val merge: Boolean,
-        val caseStrategy: Any,
+        val caseStrategy: CaseStrategy,
     ) {
         public enum class CaseStrategy {
             UNMODIFIED,
@@ -28,20 +27,18 @@ public class ProtocGenOpenAPI(
             SNAKE_CASE,
         }
 
-        public class Builder(
-            private val parameters: Parameters,
-        ) {
+        public class Builder private constructor(parameters: Parameters) {
+            public var merge: Boolean = parameters.get<Boolean>("merge") ?: false
+            public var caseStrategy: CaseStrategy = parameters.get<CaseStrategy>("caseStrategy") ?: CaseStrategy.UNMODIFIED
+
             public companion object {
-                public fun from(requestParameter: String): Builder {
-                    val builder = Builder(Parameters(requestParameter))
-                    return builder
-                }
+                public fun from(parameters: Parameters): Builder = Builder(parameters)
             }
 
             public fun build(): Options =
                 Options(
-                    parameters.get<Boolean>("merge") ?: false,
-                    parameters.get<CaseStrategy>("caseStrategy") ?: CaseStrategy.UNMODIFIED,
+                    merge,
+                    caseStrategy,
                 )
         }
     }
@@ -58,10 +55,10 @@ public class ProtocGenOpenAPI(
             registry: ExtensionRegistry = ExtensionRegistry.newInstance().prepare(),
             block: Options.Builder.() -> Unit = {},
         ): ProtocGenOpenAPI {
-            val cgreq = PluginProtos.CodeGeneratorRequest.parseFrom(input, registry)
+            val cgreq = PluginProtos.CodeGeneratorRequest.parseFrom(input, registry).wrap()
             return ProtocGenOpenAPI(
                 cgreq,
-                Options.Builder.from(cgreq.parameter).apply(block).build(),
+                Options.Builder.from(cgreq.parameters).apply(block).build(),
             )
         }
     }

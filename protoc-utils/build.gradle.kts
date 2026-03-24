@@ -1,3 +1,6 @@
+import com.google.protobuf.gradle.GenerateProtoTask
+import kotlin.collections.filter
+
 plugins {
     id("com.google.protobuf")
 }
@@ -28,10 +31,12 @@ protobuf {
     }
     generateProtoTasks {
         all().all {
-            dependsOn(":protoc-utils-recorder:nativeCompile")
-            tasks.findByPath(":protoc-utils:processTestResources")!!.dependsOn(this)
-            plugins {
-                create("recorder")
+            if (isTest) {
+                dependsOn(":protoc-utils-recorder:nativeCompile")
+                tasks.findByPath(":protoc-utils:processTestResources")!!.dependsOn(this)
+                plugins {
+                    create("recorder")
+                }
             }
         }
     }

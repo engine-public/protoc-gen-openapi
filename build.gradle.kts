@@ -192,8 +192,10 @@ protobuf {
                 .asFile
                 .absolutePath
         }
-        generateProtoTasks {
-            all().all {
+    }
+    generateProtoTasks {
+        all().all {
+            if (isTest) {
                 dependsOn(":protoc-utils-recorder:nativeCompile")
                 tasks.findByPath(":protoc-utils:processTestResources")!!.dependsOn(this)
                 plugins {

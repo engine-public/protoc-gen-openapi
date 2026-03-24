@@ -1,5 +1,6 @@
 package com.engine.protoc.util.compiler
 
+import kotlin.reflect.KClass
 import kotlin.reflect.typeOf
 
 /**
@@ -25,7 +26,8 @@ public class Parameters(
 
     /**
      * Returns the option value(s) for [option] coerced to [T], or null if the option is absent.
-     * Supported types: [String], [Int], [Boolean] and their [List] variants.
+     * Supported types: [String], [Int], [Boolean], any enum class, and their [List] variants.
+     * Enum values are matched by name (case-sensitive).
      * When a key appears multiple times, scalar types return the last value; list types return all
      * values in order.
      * @throws UnsupportedOperationException if [T] is not one of the supported types.
@@ -38,6 +40,22 @@ public class Parameters(
             typeOf<List<String>>() -> tokenized[option] as T?
             typeOf<Boolean>() -> tokenized[option]?.last()?.toBoolean() as T?
             typeOf<List<Boolean>>() -> tokenized[option]?.map { it.toBoolean() } as T?
-            else -> throw UnsupportedOperationException("Unsupported option type ${typeOf<T>()} for $option")
+
+            else -> when {
+                T::class.java.isEnum -> {
+                    @Suppress("UNCHECKED_CAST")
+                    tokenized[option]?.last()?.let { value ->
+                        (T::class.java as Class<Enum<*>>).enumConstants.first { it.name == value } as T
+                    }
+                }
+                typeOf<T>().classifier == List::class &&
+                    (typeOf<T>().arguments.firstOrNull()?.type?.classifier as? KClass<*>)?.java?.isEnum == true -> {
+                    @Suppress("UNCHECKED_CAST")
+                    val enumClass =
+                        (typeOf<T>().arguments.first().type!!.classifier as KClass<*>).java as Class<Enum<*>>
+                    tokenized[option]?.map { value -> enumClass.enumConstants.first { it.name == value } } as T?
+                }
+                else -> throw UnsupportedOperationException("Unsupported option type ${typeOf<T>()} for $option")
+            }
         }
 }

@@ -374,28 +374,32 @@ message SchemaObject {
   // JSON Schema 2020-12 — Referencing keywords
   // -----------------------------------------------------------------------
 
-  // A URI reference that identifies the schema to use.
-  // In the context of an OAS document, `$ref` values are resolved relative to the document
-  // root. Use `#/components/schemas/MyType` to reference a component schema.
-  // When `$ref` is present, all other keywords in the same schema object are valid and
-  // apply alongside the referenced schema (unlike JSON Schema draft-07 where other keywords
-  // were ignored).
-  // See https://json-schema.org/draft/2020-12/json-schema-core#section-8.2.3.1
-  optional string ref = 52;
+    oneof ref_type {
+        // A URI reference that identifies the schema to use.
+        // In the context of an OAS document, `$ref` values are resolved relative to the document
+        // root. Use `#/components/schemas/MyType` to reference a component schema.
+        // When `$ref` is present, all other keywords in the same schema object are valid and
+        // apply alongside the referenced schema (unlike JSON Schema draft-07 where other keywords
+        // were ignored).
+        // See https://json-schema.org/draft/2020-12/json-schema-core#section-8.2.3.1
+        string uri_ref = 52;
+
+        .google.protobuf.Any proto_ref = 53;
+    }
 
   // A map of reusable schema definitions, scoped to this schema.
   // Keys are definition names; values are schemas.
   // Referenced via `$ref` relative to the schema's `$id` or document root.
   // Example: `{ "ref": "#/$defs/Address", "defs": { "Address": { "object": { ... } } } }`
   // See https://json-schema.org/draft/2020-12/json-schema-core#section-8.2.4
-  map<string, Schema> defs = 53;
+  map<string, Schema> defs = 54;
 
   // Sets the base URI for this schema, used to resolve relative `$ref` values within it.
   // Must be an absolute URI. Should be unique across all schemas in the document.
   // Typically used on top-level named schemas in `components/schemas` to establish a stable,
   // addressable identity.
   // See https://json-schema.org/draft/2020-12/json-schema-core#section-8.2.1
-  optional string id = 54;
+  optional string id = 55;
 
   // Declares the JSON Schema dialect this schema should be validated against.
   // The value MUST be a URI identifying the meta-schema.
@@ -403,24 +407,24 @@ message SchemaObject {
   // Override this per-schema only if you need a different dialect; the document-level default
   // can be set via the root `OpenAPI.json_schema_dialect` field instead.
   // See https://json-schema.org/draft/2020-12/json-schema-core#section-8.1.1
-  optional string schema_dialect = 55;
+  optional string schema_dialect = 56;
 
   // A plain string that establishes a schema identifier that other schemas can target with
   // `$dynamicRef`. Unlike `$id`, `$anchor` does not affect `$ref` resolution.
   // Must match the pattern `^[A-Za-z_][-A-Za-z0-9._]*$`.
   // See https://json-schema.org/draft/2020-12/json-schema-core#section-8.2.2
-  optional string anchor = 56;
+  optional string anchor = 57;
 
   // A URI reference to a schema, where the final resolution target is determined at runtime
   // based on the `$dynamicAnchor` of the schema at the base URI.
   // Used to build extensible, recursive schema libraries.
   // The URI MUST contain a fragment, which SHOULD be a plain name fragment (matching an anchor).
   // See https://json-schema.org/draft/2020-12/json-schema-core#section-8.2.3.2
-  optional string dynamic_ref = 57;
+  optional string dynamic_ref = 58;
 
   // Defines a dynamic anchor that `$dynamicRef` can resolve to.
   // Like `$anchor`, but participates in dynamic scope resolution.
   // Must match the same naming pattern as `$anchor`.
   // See https://json-schema.org/draft/2020-12/json-schema-core#section-8.2.2
-  optional string dynamic_anchor = 58;
+  optional string dynamic_anchor = 59;
 }

@@ -177,6 +177,10 @@ graalvmNative {
     }
 }
 
+val processTestResources = tasks.named("processTestResources", ProcessResources::class) {
+    from(project.layout.buildDirectory.dir("generated/source/proto/test/recorder").map { it.file("code-generator-request.binpb") })
+}
+
 protobuf {
     protoc {
         artifact = tools.protoc.compiler.get().toString()
@@ -197,7 +201,7 @@ protobuf {
         all().all {
             if (isTest) {
                 dependsOn(":protoc-utils-recorder:nativeCompile")
-                tasks.findByPath(":protoc-utils:processTestResources")!!.dependsOn(this)
+                processTestResources.configure { dependsOn(this@all) }
                 plugins {
                     create("recorder")
                 }

@@ -1,6 +1,3 @@
-import com.google.protobuf.gradle.GenerateProtoTask
-import kotlin.collections.filter
-
 plugins {
     id("com.google.protobuf")
 }
@@ -11,6 +8,10 @@ dependencies {
     api(libs.protobuf.java)
     testImplementation(libs.protobuf.java)
     testImplementation(testLibs.kotest.framework.datatest)
+}
+
+val processTestResources = tasks.named("processTestResources", ProcessResources::class) {
+    from(project.layout.buildDirectory.dir("generated/source/proto/test/recorder").map { it.file("code-generator-request.binpb") })
 }
 
 protobuf {
@@ -33,15 +34,11 @@ protobuf {
         all().all {
             if (isTest) {
                 dependsOn(":protoc-utils-recorder:nativeCompile")
-                tasks.findByPath(":protoc-utils:processTestResources")!!.dependsOn(this)
+                processTestResources.configure { dependsOn(this@all) }
                 plugins {
                     create("recorder")
                 }
             }
         }
     }
-}
-
-tasks.named("processTestResources", ProcessResources::class) {
-    from(project.layout.buildDirectory.dir("generated/source/proto/test/recorder").map { it.file("code-generator-request.binpb") })
 }

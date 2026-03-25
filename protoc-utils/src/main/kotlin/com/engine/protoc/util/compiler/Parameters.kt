@@ -49,17 +49,29 @@ public class Parameters(
             else -> when {
                 T::class.java.isEnum -> {
                     @Suppress("UNCHECKED_CAST")
+                    val enumClass = T::class.java as Class<Enum<*>>
                     tokenized[option]?.last()?.let { value ->
-                        (T::class.java as Class<Enum<*>>).enumConstants.first { it.name == value } as T
+                        (
+                            enumClass.enumConstants.firstOrNull { it.name.equals(value, ignoreCase = true) }
+                                ?: throw NoSuchElementException(
+                                    "`$value` is not a valid value in ${enumClass.enumConstants.joinToString(prefix = "[", postfix = "]") { "`${it.name}`" }}",
+                                )
+                            ) as T
                     }
                 }
 
                 typeOf<T>().classifier == List::class &&
                     (typeOf<T>().arguments.firstOrNull()?.type?.classifier as? KClass<*>)?.java?.isEnum == true -> {
                     @Suppress("UNCHECKED_CAST")
-                    val enumClass =
-                        (typeOf<T>().arguments.first().type!!.classifier as KClass<*>).java as Class<Enum<*>>
-                    tokenized[option]?.map { value -> enumClass.enumConstants.first { it.name == value } } as T?
+                    val enumClass = (typeOf<T>().arguments.first().type!!.classifier as KClass<*>).java as Class<Enum<*>>
+                    tokenized[option]?.map { value ->
+                        (
+                            enumClass.enumConstants.firstOrNull { it.name.equals(value, ignoreCase = true) }
+                                ?: throw NoSuchElementException(
+                                    "`$value` is not a valid value in ${enumClass.enumConstants.joinToString(prefix = "[", postfix = "]") { "`${it.name}`" }}",
+                                )
+                            )
+                    } as T?
                 }
 
                 else -> throw UnsupportedOperationException("Unsupported option type ${typeOf<T>()} for $option")

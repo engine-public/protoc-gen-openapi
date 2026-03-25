@@ -1,0 +1,426 @@
+syntax = "proto3";
+
+package swagger;
+
+import "engine/protoc/openapi/annotations.proto";
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/struct.proto";
+import "google/protobuf/wrappers.proto";
+
+option (.engine.protoc.openapi.file) = {
+    openapi: "3.1.0"
+    info: {
+        title: "Swagger Petstore - OpenAPI 3.1"
+        description: "This is a sample Pet Store Server based on the OpenAPI 3.1 specification.\nYou can find out more about\nSwagger at [https://swagger.io](https://swagger.io)."
+        termsOfService: "https://swagger.io/terms/"
+        contact: {
+            email: "apiteam@swagger.io"
+        }
+        license: {
+            name: "Apache 2.0"
+            url: "https://www.apache.org/licenses/LICENSE-2.0.html"
+        }
+        version: "1.0.10"
+        summary: "Pet Store 3.1"
+        // TODO x-namespace: "swagger"
+    }
+    external_docs: {
+        description: "Find out more about Swagger"
+        url: "https://swagger.io"
+    }
+    servers: [{
+        url: "/api/v31"
+    }]
+    tags: [{
+        name: "pet"
+        description: "Everything about your Pets"
+        external_docs: {
+            description: "Find out more"
+            url: "https://swagger.io"
+        }
+    }]
+    components: {
+        security_schemes: {
+            key: "petstore_auth"
+            value: {
+                security_scheme: {
+                    oauth2: {
+                        flows: {
+                            implicit: {
+                                authorization_url: "https://petstore31.swagger.io/oauth/authorize"
+                                scopes: { key: "write:pets" value: "modify pets in your account" }
+                                scopes: { key: "read:pets"  value: "read your pets" }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        security_schemes: {
+            key: "mutual_tls"
+            value: {
+                security_scheme: {
+                    mutual_tls: {}
+                }
+            }
+        }
+        security_schemes: {
+            key: "api_key"
+            value: {
+                security_scheme: {
+                    api_key: {
+                        name: "api_key"
+                        in: "header"
+                    }
+                }
+            }
+        }
+    }
+    webhooks: {
+        key: "newPet"
+        value: {
+            path_item: {
+                post: {
+                    request_body: {
+                        request_body: {
+                            description: "Information about a new pet in the system"
+                            content: {
+                                key: "application/json"
+                                value: {
+                                    schema: {
+                                        object: {
+                                            proto_ref: { [type.googleapis.com/swagger.Pet] {} }
+                                            description: "Webhook Pet"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    responses: {
+                        codes: {
+                            key: "200"
+                            value: {
+                                response_object: {
+                                    description: "Return a 200 status to indicate that the data was received successfully"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+};
+
+// Everything about your Pets
+service PetService {
+    // Update an existing pet.
+    rpc UpdatePet(.swagger.Pet) returns (.swagger.Pet) {
+        option (.google.api.http) = {
+            put: "/pet"
+            body: "*"
+        };
+        option (.engine.protoc.openapi.method) = {
+            tags: ["pet"]
+            description: "Update an existing pet by Id."
+            operationId: "updatePet"
+            request_body: {
+                request_body: {
+                    description: "Pet object that needs to be updated in the store"
+                    content: {
+                        key: "application/json"
+                        value: {
+                            schema: {
+                                object: {
+                                    description: "A Pet in JSON Format"
+                                    required: ["id"]
+                                    write_only: true
+                                }
+                            }
+                        }
+                    }
+                    content: {
+                        key: "application/xml"
+                        value: {
+                            schema: {
+                                object: {
+                                    description: "A Pet in XML Format"
+                                    required: ["id"]
+                                    write_only: true
+                                }
+                            }
+                        }
+                    }
+                    required: true
+                }
+            }
+            responses: {
+                default: {
+                    response_object: {
+                        description: "Unexpected error"
+                    }
+                }
+                codes: {
+                    key: "200"
+                    value: {
+                        response_object: {
+                            description: "Successful operation"
+                            content: {
+                                key: "application/xml"
+                                value: {
+                                    schema: {
+                                        object: {
+                                            proto_ref: { [type.googleapis.com/swagger.Pet] {} }
+                                            description: "A Pet in XML Format"
+                                            read_only: true
+                                        }
+                                    }
+                                }
+                            }
+                            content: {
+                                key: "application/json"
+                                value: {
+                                    schema: {
+                                        object: {
+                                            proto_ref: { [type.googleapis.com/swagger.Pet] {} }
+                                            description: "A Pet in JSON Format"
+                                            read_only: true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                codes: {
+                    key: "400"
+                    value: {
+                        response_object: {
+                            description: "Invalid ID supplied"
+                        }
+                    }
+                }
+                codes: {
+                    key: "404"
+                    value: {
+                        response_object: {
+                            description: "Pet not found"
+                        }
+                    }
+                }
+                codes: {
+                    key: "405"
+                    value: {
+                        response_object: {
+                            description: "Validation exception"
+                        }
+                    }
+                }
+            }
+            security: {
+                names: {
+                    key: "petstore_auth"
+                    value: {
+                        values: ["write:pets", "read:pets"]
+                    }
+                }
+            }
+        };
+    }
+
+    // Add a new pet to the store.
+    rpc AddPet(.swagger.Pet) returns (.swagger.Pet) {
+        option (.google.api.http) = {
+            post: "/pet"
+            body: "*"
+        };
+        option (.engine.protoc.openapi.method) = {
+            tags: ["pet"]
+            description: "Add a new pet to the store."
+            operationId: "addPet"
+            request_body: {
+                request_body: {
+                    description: "Create a new pet in the store"
+                    content: {
+                        key: "application/json"
+                        value: {
+                            schema: {
+                                object: {
+                                    description: "A Pet in JSON Format"
+                                    required: ["id"]
+                                    write_only: true
+                                }
+                            }
+                        }
+                    }
+                    content: {
+                        key: "application/xml"
+                        value: {
+                            schema: {
+                                object: {
+                                    description: "A Pet in XML Format"
+                                    required: ["id"]
+                                    write_only: true
+                                }
+                            }
+                        }
+                    }
+                    required: true
+                }
+            }
+            responses: {
+                default: {
+                    response_object: {
+                        description: "Unexpected error"
+                    }
+                }
+                codes: {
+                    key: "200"
+                    value: {
+                        response_object: {
+                            description: "Successful operation"
+                            content: {
+                                key: "application/xml"
+                                value: {
+                                    schema: {
+                                        object: {
+                                            proto_ref: { [type.googleapis.com/swagger.Pet] {} }
+                                            description: "A Pet in XML Format"
+                                            read_only: true
+                                        }
+                                    }
+                                }
+                            }
+                            content: {
+                                key: "application/json"
+                                value: {
+                                    schema: {
+                                        object: {
+                                            proto_ref: { [type.googleapis.com/swagger.Pet] {} }
+                                            description: "A Pet in JSON Format"
+                                            read_only: true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                codes: {
+                    key: "405"
+                    value: {
+                        response_object: {
+                            description: "Invalid input"
+                        }
+                    }
+                }
+            }
+            security: {
+                names: {
+                    key: "petstore_auth"
+                    value: {
+                        values: ["write:pets", "read:pets"]
+                    }
+                }
+            }
+        };
+    }
+
+    rpc GetPetById(.google.protobuf.Int64Value) returns (.swagger.Pet) {
+        option (.google.api.http) = {
+            get: "/pet/{value}"
+            body: ""
+        };
+        option (.engine.protoc.openapi.method) = {
+
+        };
+    }
+}
+
+message Category {
+    int64 id = 1;
+    string name = 2;
+}
+
+message Pet {
+    option (.engine.protoc.openapi.message) = {
+        object: {
+            required: ["name", "photo_urls"]
+        }
+    };
+
+    int64 id = 1;
+    // Pet Category
+    .swagger.Category category = 2;
+    string name = 3 [(.engine.protoc.openapi.field) = {
+        object: {
+            examples: {
+                [type.googleapis.com/google.protobuf.StringValue] { value: "doggie" }
+            }
+        }
+    }];
+    repeated string photo_urls = 4 [(.engine.protoc.openapi.field) = {
+        object: {
+            items: {
+                object: {
+                    xml: {
+                        name: "photoUrl"
+                    }
+                }
+            }
+            xml: {
+                wrapped: true
+            }
+        }
+    }];
+    repeated .swagger.Tag tags = 5 [(.engine.protoc.openapi.field) = {
+        object: {
+            xml: {
+                wrapped: true
+            }
+        }
+    }];
+
+    // pet status in the store
+    string status = 6 [(.engine.protoc.openapi.field) = {
+        object: {
+            enum: { [type.googleapis.com/google.protobuf.Value] { string_value: "available" } }
+            enum: { [type.googleapis.com/google.protobuf.Value] { string_value: "pending" } }
+            enum: { [type.googleapis.com/google.protobuf.Value] { string_value: "sold" } }
+        }
+    }];
+    int32 available_instances = 7 [(.engine.protoc.openapi.field) = {
+        object: {
+            examples: { [type.googleapis.com/google.protobuf.Int32Value] { value: 7 } }
+            exclusive_maximum: 10
+            exclusive_minimum: 1
+            // swagger-extension: true
+        }
+    }];;
+    int64 pet_details_id = 8 [(.engine.protoc.openapi.field) = {
+        object: {
+            uri_ref: "#pet_details_id"
+        }
+    }];
+    .swagger.PetDetails pet_details = 9;
+}
+
+message PetDetails {
+    int64 id = 1 [(.engine.protoc.openapi.field) = {
+        object: {
+            anchor: "pet_details_id"
+            examples: { [type.googleapis.com/google.protobuf.Int64Value] { value: 10 } }
+        }
+    }];
+    // PetDetails Category
+    .swagger.Category category = 2;
+    .swagger.Tag tag = 3;
+}
+
+message Tag {
+    int64 id = 1;
+    string name = 2;
+}
+

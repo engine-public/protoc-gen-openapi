@@ -10,6 +10,10 @@ dependencies {
     testImplementation(testLibs.kotest.framework.datatest)
 }
 
+val processTestResources = tasks.named("processTestResources", ProcessResources::class) {
+    from(project.layout.buildDirectory.dir("generated/source/proto/test/recorder").map { it.file("code-generator-request.binpb") })
+}
+
 protobuf {
     protoc {
         artifact = tools.protoc.compiler.get().toString()
@@ -28,15 +32,13 @@ protobuf {
     }
     generateProtoTasks {
         all().all {
-            dependsOn(":protoc-utils-recorder:nativeCompile")
-            tasks.findByPath(":protoc-utils:processTestResources")!!.dependsOn(this)
-            plugins {
-                create("recorder")
+            if (isTest) {
+                dependsOn(":protoc-utils-recorder:nativeCompile")
+                processTestResources.configure { dependsOn(this@all) }
+                plugins {
+                    create("recorder")
+                }
             }
         }
     }
-}
-
-tasks.named("processTestResources", ProcessResources::class) {
-    from(project.layout.buildDirectory.dir("generated/source/proto/test/recorder").map { it.file("code-generator-request.binpb") })
 }

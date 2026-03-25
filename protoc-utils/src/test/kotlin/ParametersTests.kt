@@ -102,6 +102,27 @@ class ParametersTests :
                     Parameters("x=3.14").get<Double>("x")
                 }
             }
+
+            test("get<Enum> deserializes enum value by name") {
+                Parameters("color=RED").get<Color>("color") shouldBe Color.RED
+            }
+
+            test("get<Enum> with repeated key returns last value") {
+                Parameters("color=RED,color=BLUE").get<Color>("color") shouldBe Color.BLUE
+            }
+
+            test("get<List<Enum>> returns all enum values in order") {
+                Parameters("color=RED,color=GREEN,color=BLUE").get<List<Color>>("color") shouldBe
+                    listOf(Color.RED, Color.GREEN, Color.BLUE)
+            }
+
+            test("get<Enum> for absent key returns null") {
+                Parameters("x=y").get<Color>("color").shouldBeNull()
+            }
+
+            test("get<List<Enum>> for absent key returns null") {
+                Parameters("x=y").get<List<Color>>("color").shouldBeNull()
+            }
         }
 
         // ---------------------------------------------------------------------------
@@ -136,3 +157,5 @@ class ParametersTests :
             }
         }
     })
+
+private enum class Color { RED, GREEN, BLUE }

@@ -4,16 +4,12 @@ import org.jlleitschuh.gradle.ktlint.KtlintExtension
 import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 
 plugins {
-    kotlin("jvm")
-
-    id("com.google.osdetector")
-    id("org.graalvm.buildtools.native")
     application
-
-    // load plugins for downstream, even though they aren't used in the root project
-    // this prevents multiple copies of the plugins from being active, and allows us to configure them here
-    id("com.google.protobuf").apply(false)
-    id("org.jlleitschuh.gradle.ktlint").apply(false)
+    kotlin("jvm")
+    id("com.google.osdetector")
+    id("com.google.protobuf")
+    id("org.graalvm.buildtools.native")
+    id("org.jlleitschuh.gradle.ktlint")
 }
 
 fun calculateVersion(): String {
@@ -178,6 +174,39 @@ graalvmNative {
     metadataRepository {
         enabled = true
         version = "0.3.24"
+    }
+}
+
+val processTestResources = tasks.named("processTestResources", ProcessResources::class) {
+    from(project.layout.buildDirectory.dir("generated/source/proto/test/recorder").map { it.file("code-generator-request.binpb") })
+}
+
+protobuf {
+    protoc {
+        artifact = tools.protoc.compiler.get().toString()
+    }
+    plugins {
+        create("recorder") {
+            path = project
+                .project(projects.protocUtilsRecorder.path)
+                .layout
+                .buildDirectory
+                .map { it.dir("native/nativeCompile").file("${projects.protocUtilsRecorder.name}-${osdetector.arch}") }
+                .get()
+                .asFile
+                .absolutePath
+        }
+    }
+    generateProtoTasks {
+        all().all {
+            if (isTest) {
+                dependsOn(":protoc-utils-recorder:nativeCompile")
+                processTestResources.configure { dependsOn(this@all) }
+                plugins {
+                    create("recorder")
+                }
+            }
+        }
     }
 }
 

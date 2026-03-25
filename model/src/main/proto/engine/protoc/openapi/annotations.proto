@@ -10,20 +10,25 @@ import "google/protobuf/descriptor.proto";
 
 // Adds the ability to add an OpenAPI definition to a proto file
 extend .google.protobuf.FileOptions {
-  .engine.protoc.openapi.OpenAPI file_level_openapi = 20231016;
+  .engine.protoc.openapi.OpenAPI file = 20231016;
 }
 
 // Adds the ability to add an OpenAPI definition to a proto `service`
 extend .google.protobuf.ServiceOptions {
-  .engine.protoc.openapi.OpenAPI service_level_openapi = 20231016;
+  .engine.protoc.openapi.OpenAPI service = 20231016;
 }
 
 // Adds the ability to add an OpenAPI operation to a rpc in a proto `service`
 extend .google.protobuf.MethodOptions {
-  .engine.protoc.openapi.Operation openapi_operation = 20231016;
+  .engine.protoc.openapi.Operation method = 20231016;
+}
+
+// Adds the ability to add an OpenAPI schema to a proto `message`
+extend .google.protobuf.MessageOptions {
+  .engine.protoc.openapi.Schema message = 20231016;
 }
 
 // Adds the ability to add an OpenAPI schema to a field in a proto `message`
-extend .google.protobuf.MessageOptions {
-  .engine.protoc.openapi.Schema openapi_schema = 20231016;
+extend .google.protobuf.FieldOptions {
+    .engine.protoc.openapi.Schema field = 20231016;
 }

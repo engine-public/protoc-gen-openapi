@@ -29,14 +29,14 @@ jobs:
           fetch-depth: 0
 
       - name: Setup GraalVM
-        uses: graalvm/setup-graalvm@v1
+        uses: graalvm/setup-graalvm@f744c72a42b1995d7b0cbc314bde4bace7ac1fe1
         with:
           java-version: '21'
           distribution: 'graalvm-community'
           native-image-job-reports: 'true'
 
       - name: Setup gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@06832c7b30a0129d7fb559bcc6e43d26f6374244
 
       - name: Determine Build Version
         env:

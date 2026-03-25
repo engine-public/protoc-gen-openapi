@@ -15,6 +15,9 @@ kotlin {
     explicitApi = ExplicitApiMode.Disabled
 }
 
+// TODO:
+//  disabled until issues with codeql and native compile are addressed.
+//  this should probably be a testResource and not a
 protobuf {
     protoc {
         artifact = tools.protoc.compiler.get().toString()
@@ -43,6 +46,17 @@ protobuf {
                     option("recordCodeGeneratorRequest=/var/tmp/protoc-gen-openapi.cgreq")
                     option("recordCodeGeneratorResponse=/var/tmp/protoc-gen-openapi.cgresp")
                 }
+            }
+        }
+    }
+}
+
+gradle.taskGraph.whenReady {
+    gradle.taskGraph.allTasks.forEach {
+        if (project.hasProperty("codeql")) {
+            if (it.project == project) {
+                logger.quiet("Disabling ${it.path} due to codeql run.")
+                it.enabled = false
             }
         }
     }

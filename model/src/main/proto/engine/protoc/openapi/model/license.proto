@@ -7,7 +7,7 @@ message License {
   // REQUIRED.
   // The license name used for the API.
   //
-  //   // proto information: While `name` is required in the OpenAPI spec, it is optional here to allow overlaying details from other sources.
+  // protoc information: While `name` is required in the OpenAPI spec, it is optional here to allow overlaying details from other sources.
   optional string name = 1;
 
   oneof type {

@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package engine.protoc.openapi.model;
+
+import "engine/protoc/openapi/model/path_item.proto";
+import "engine/protoc/openapi/model/reference.proto";
+
+// A union type that is either a [Path Item Object](https://swagger.io/specification/#path-item-object)
+// or a [Reference Object](https://swagger.io/specification/#reference-object).
+// Used in the `webhooks` field of the root OpenAPI Object, the `pathItems` field of the
+// Components Object, and as values in the Callback Object.
+message PathItemOrReference {
+  oneof type {
+    .engine.protoc.openapi.model.PathItem path_item = 1;
+    .engine.protoc.openapi.model.Reference reference = 2;
+  }
+}

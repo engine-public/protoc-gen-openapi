@@ -4,8 +4,13 @@ package engine.protoc.openapi.model;
 
 import "engine/protoc/openapi/model/media_type.proto";
 
+// Wrapper for the content-based serialization variant of a Parameter Object.
+//
+// This message exists to allow the `content` map to participate in the `oneof parameter_definition_type`
+// in [Parameter](https://swagger.io/specification/#parameter-object); proto3 does not permit map
+// fields directly inside a `oneof`. Per the spec, the map MUST contain exactly one entry.
 message ParameterContent {
-
-  // A map containing the representations for the parameter. The key is the media type and the value describes it. The map MUST only contain one entry.
+  // A map containing the representations for the parameter.
+  // The key is the media type and the value describes it. The map MUST only contain one entry.
   map<string, .engine.protoc.openapi.model.MediaType> content = 1;
 }

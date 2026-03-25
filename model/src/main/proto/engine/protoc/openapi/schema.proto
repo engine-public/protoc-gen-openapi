@@ -3,37 +3,73 @@ syntax = "proto3";
 package engine.protoc.openapi;
 
 import "engine/protoc/openapi/model/discriminator.proto";
+import "engine/protoc/openapi/model/external_documentation.proto";
 import "engine/protoc/openapi/model/xml.proto";
 import "google/protobuf/any.proto";
 
 // The Schema Object allows the definition of input and output data types.
 // These types can be objects, but also primitives and arrays.
 // This object is a superset of the [JSON Schema Specification Draft 2020-12](https://tools.ietf.org/html/draft-bhutton-json-schema-00).
-// The empty schema (which allows any instance to validate) MAY be represented by the boolean value `true` and a schema which allows no instance to validate MAY be represented by the boolean value `false`.
 //
-// For more information about the keywords, see [JSON Schema Core](https://tools.ietf.org/html/draft-bhutton-json-schema-00) and [JSON Schema Validation](https://tools.ietf.org/html/draft-bhutton-json-schema-validation-00).
+// Per JSON Schema 2020-12, a schema may be expressed in one of two forms:
+//  - A **boolean schema**: `true` means any value is valid; `false` means no value is valid.
+//  - An **object schema**: a [SchemaObject] with JSON Schema and OAS-specific keywords.
 //
-// Unless stated otherwise, the keyword definitions follow those of JSON Schema and do not add any additional semantics; this includes keywords such as `$schema`, `$id`, `$ref`, and `$dynamicRef` being URIs rather than URLs.
-// Where JSON Schema indicates that behavior is defined by the application (e.g. for annotations), OAS also defers the definition of semantics to the application consuming the OpenAPI document.
+// For most annotation use cases, use the `object` branch.
+// Boolean schemas are useful when composing schemas (e.g. `additional_properties: { boolean: false }`).
 //
-// **JSON Schema Keywords**
-//
-// The OpenAPI Schema Object [dialect](https://tools.ietf.org/html/draft-bhutton-json-schema-00#section-4.3.3) is defined as requiring the [OAS base vocabulary](https://swagger.io/specification/#base-vocabulary), in addition to the vocabularies as specified in the JSON Schema Specification Draft 2020-12 [general purpose meta-schema](https://tools.ietf.org/html/draft-bhutton-json-schema-00#section-8).
-//
-// The OpenAPI Schema Object dialect for this version of the specification is identified by the URI `https://spec.openapis.org/oas/3.1/dialect/base` (the "OAS dialect schema id").
-//
-// The following keywords are taken from the JSON Schema specification but their definitions have been extended by the OAS:
-//
-// * description - [CommonMark syntax](https://spec.commonmark.org/) MAY be used for rich text representation.
-// * format - See [Data Type Formats](https://swagger.io/specification/#data-type-format) for further details. While relying on JSON Schema's defined formats, the OAS offers a few additional predefined formats.
-//
-// In addition to the JSON Schema keywords comprising the OAS dialect, the Schema Object supports keywords from any other vocabularies, or entirely arbitrary properties.
-//
-// JSON Schema implementations MAY choose to treat keywords defined by the OpenAPI Specification's base vocabulary as [unknown keywords](https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema-00#section-4.3.1), due to its inclusion in the OAS dialect with a [$vocabulary](https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema-00#section-8.1.2) value of `false`. The OAS base vocabulary is comprised of the following keywords:
+// @See https://swagger.io/specification/#schema-object
+// @See https://json-schema.org/draft/2020-12/json-schema-core
 message Schema {
+  oneof schema_value {
+    // A boolean schema.
+    // `true` allows any instance to validate (equivalent to an empty schema `{}`).
+    // `false` rejects all instances (equivalent to `{ "not": {} }`).
+    // See https://json-schema.org/draft/2020-12/json-schema-core#section-4.3.2
+    bool boolean = 1;
+
+    // An object schema conforming to JSON Schema Draft 2020-12 and the OAS 3.1 base vocabulary.
+    SchemaObject object = 2;
+  }
+}
+
+// Describes an object schema conforming to JSON Schema Draft 2020-12 with OAS 3.1 extensions.
+//
+// This object is a superset of the [JSON Schema Specification Draft 2020-12](https://tools.ietf.org/html/draft-bhutton-json-schema-00).
+// The empty schema (which allows any instance to validate) MAY be represented by the boolean value `true`
+// and a schema which allows no instance to validate MAY be represented by the boolean value `false`.
+//
+// For more information about the keywords, see [JSON Schema Core](https://tools.ietf.org/html/draft-bhutton-json-schema-00)
+// and [JSON Schema Validation](https://tools.ietf.org/html/draft-bhutton-json-schema-validation-00).
+//
+// Unless stated otherwise, the keyword definitions follow those of JSON Schema and do not add any
+// additional semantics; this includes keywords such as `$schema`, `$id`, `$ref`, and `$dynamicRef`
+// being URIs rather than URLs.
+// Where JSON Schema indicates that behavior is defined by the application (e.g. for annotations),
+// OAS also defers the definition of semantics to the application consuming the OpenAPI document.
+//
+// **OAS Base Vocabulary**
+//
+// The OpenAPI Schema Object [dialect](https://tools.ietf.org/html/draft-bhutton-json-schema-00#section-4.3.3)
+// is identified by the URI `https://spec.openapis.org/oas/3.1/dialect/base` and includes all
+// JSON Schema 2020-12 vocabularies plus three OAS-specific keywords: `discriminator`, `xml`, and
+// `externalDocs`.
+//
+// **JSON Schema Keywords Whose Definitions Are Extended by OAS**
+//
+// * `description` — [CommonMark syntax](https://spec.commonmark.org/) MAY be used for rich text.
+// * `format` — OAS adds additional predefined formats beyond JSON Schema's (e.g., `int32`,
+//   `int64`, `float`, `double`, `byte`, `binary`, `date`, `date-time`, `password`).
+message SchemaObject {
+
+  // -----------------------------------------------------------------------
+  // OAS 3.1 base vocabulary (beyond JSON Schema)
+  // -----------------------------------------------------------------------
+
   // Adds support for polymorphism.
-  // The discriminator is used to determine which of a set of schemas a payload is expected to satisfy.
-  // See [Composition and Inheritance](https://swagger.io/specification/#composition-and-inheritance-polymorphism) for more details.
+  // The discriminator is used to determine which of a set of schemas a payload is expected to
+  // satisfy. See [Composition and Inheritance](https://swagger.io/specification/#composition-and-inheritance-polymorphism) for more details.
+  // Only valid when used alongside `one_of`, `any_of`, or `all_of`.
   .engine.protoc.openapi.model.Discriminator discriminator = 1;
 
   // This MAY be used only on property schemas.
@@ -42,12 +78,349 @@ message Schema {
   .engine.protoc.openapi.model.XML xml = 2;
 
   // Additional external documentation for this schema.
-  optional string external_docs = 3;
+  .engine.protoc.openapi.model.ExternalDocumentation external_docs = 3;
 
   // A free-form field to include an example of an instance for this schema.
-  // To represent examples that cannot be naturally represented in JSON or YAML, a string value can be used to contain the example with escaping where necessary.
+  // To represent examples that cannot be naturally represented in JSON or YAML, a string value
+  // can be used to contain the example with escaping where necessary.
   //
-  // **Deprecated**: The `example` field has been deprecated in favor of the JSON Schema `examples` keyword.
-  // Use of `example` is discouraged, and later versions of this specification may remove it.
+  // **Deprecated**: The `example` field has been deprecated in favor of the JSON Schema `examples`
+  // keyword. Use `examples` (field 11) instead.
   .google.protobuf.Any example = 4;
+
+  // -----------------------------------------------------------------------
+  // JSON Schema 2020-12 — Metadata keywords
+  // -----------------------------------------------------------------------
+
+  // A short, human-readable title for the schema.
+  // See https://json-schema.org/draft/2020-12/json-schema-validation#section-9.1
+  optional string title = 5;
+
+  // An explanation of the purpose of this schema instance.
+  // [CommonMark syntax](https://spec.commonmark.org/) MAY be used for rich text representation.
+  // See https://json-schema.org/draft/2020-12/json-schema-validation#section-9.1
+  optional string description = 6;
+
+  // The default value for this schema instance.
+  // Unlike a JSON Schema `default`, this documents the receiver's behavior rather than inserting
+  // the value into the data.
+  // See https://json-schema.org/draft/2020-12/json-schema-validation#section-9.2
+  .google.protobuf.Any default = 7;
+
+  // Indicates that the schema instance is deprecated and SHOULD be transitioned out of usage.
+  // Default value is `false`.
+  // See https://json-schema.org/draft/2020-12/json-schema-validation#section-9.3
+  optional bool deprecated = 8;
+
+  // If `true`, indicates that the value SHOULD NOT be modified.
+  // Relevant only when the schema is for a property within a request body.
+  // Default value is `false`.
+  // See https://json-schema.org/draft/2020-12/json-schema-validation#section-9.4
+  optional bool read_only = 9;
+
+  // If `true`, indicates that the value is write-only and SHOULD NOT be included in responses.
+  // Relevant only when the schema is for a property within a response body.
+  // Default value is `false`.
+  // See https://json-schema.org/draft/2020-12/json-schema-validation#section-9.4
+  optional bool write_only = 10;
+
+  // Example values for this schema instance.
+  // Each value SHOULD be valid against this schema.
+  // Replaces the deprecated OAS `example` field (field 4).
+  // See https://json-schema.org/draft/2020-12/json-schema-validation#section-9.5
+  repeated .google.protobuf.Any examples = 11;
+
+  // -----------------------------------------------------------------------
+  // JSON Schema 2020-12 — Type and value keywords
+  // -----------------------------------------------------------------------
+
+  // The type(s) of values that are valid against this schema.
+  // Each element must be one of: `"null"`, `"boolean"`, `"integer"`, `"number"`,
+  // `"string"`, `"array"`, `"object"`.
+  // Multiple types may be specified (e.g., `["string", "null"]` for a nullable string).
+  // A single type may be expressed as a one-element list.
+  // OAS also recognizes the additional format hints `int32`, `int64`, `float`, `double`,
+  // `byte`, `binary`, `date`, `date-time`, and `password` via the `format` field.
+  // See https://json-schema.org/draft/2020-12/json-schema-validation#section-6.1.1
+  repeated string type = 12;
+
+  // Semantic validation of string values.
+  // JSON Schema defines several built-in formats (e.g., `"date-time"`, `"email"`, `"uuid"`).
+  // OAS 3.1 adds: `"int32"`, `"int64"`, `"float"`, `"double"`, `"byte"`, `"binary"`,
+  // `"date"`, `"date-time"`, `"password"`.
+  // Validation against `format` is OPTIONAL; tooling MAY use this for documentation or
+  // light validation.
+  // See https://json-schema.org/draft/2020-12/json-schema-validation#section-7
+  optional string format = 13;
+
+  // Restricts the value to a fixed set of acceptable values.
+  // The value of this keyword MUST be an array. This array SHOULD have at least one element
+  // and elements SHOULD be unique.
+  // An instance validates successfully if its value is equal to one of the elements of this array.
+  // See https://json-schema.org/draft/2020-12/json-schema-validation#section-6.1.2
+  repeated .google.protobuf.Any enum = 14;
+
+  // Restricts the value to a single specific value.
+  // An instance validates successfully only if its value is exactly equal to this keyword's value.
+  // See https://json-schema.org/draft/2020-12/json-schema-validation#section-6.1.3
+  .google.protobuf.Any const = 15;
+
+  // -----------------------------------------------------------------------
+  // JSON Schema 2020-12 — Numeric validation keywords
+  // -----------------------------------------------------------------------
+
+  // A numeric instance is valid only if its value is evenly divisible by this value.
+  // Must be strictly greater than zero.
+  // See https://json-schema.org/draft/2020-12/json-schema-validation#section-6.2.1
+  optional double multiple_of = 16;
+
+  // A numeric instance is valid only if its value is less than or exactly equal to this value.
+  // See https://json-schema.org/draft/2020-12/json-schema-validation#section-6.2.2
+  optional double maximum = 17;
+
+  // A numeric instance is valid only if its value is strictly less than (not equal to) this value.
+  // In JSON Schema 2020-12, `exclusiveMaximum` is a number (not a boolean as in draft-07).
+  // See https://json-schema.org/draft/2020-12/json-schema-validation#section-6.2.3
+  optional double exclusive_maximum = 18;
+
+  // A numeric instance is valid only if its value is greater than or exactly equal to this value.
+  // See https://json-schema.org/draft/2020-12/json-schema-validation#section-6.2.4
+  optional double minimum = 19;
+
+  // A numeric instance is valid only if its value is strictly greater than (not equal to) this value.
+  // In JSON Schema 2020-12, `exclusiveMinimum` is a number (not a boolean as in draft-07).
+  // See https://json-schema.org/draft/2020-12/json-schema-validation#section-6.2.5
+  optional double exclusive_minimum = 20;
+
+  // -----------------------------------------------------------------------
+  // JSON Schema 2020-12 — String validation keywords
+  // -----------------------------------------------------------------------
+
+  // A string instance is valid only if its length is less than or exactly equal to this value.
+  // The length of a string is the number of its characters as defined by RFC 8259.
+  // Must be a non-negative integer.
+  // See https://json-schema.org/draft/2020-12/json-schema-validation#section-6.3.1
+  optional uint64 max_length = 21;
+
+  // A string instance is valid only if its length is greater than or exactly equal to this value.
+  // Must be a non-negative integer. Defaults to 0.
+  // See https://json-schema.org/draft/2020-12/json-schema-validation#section-6.3.2
+  optional uint64 min_length = 22;
+
+  // A string instance is valid if the regular expression matches the instance successfully.
+  // The string is considered valid if the ECMA-262 regular expression dialect finds a match
+  // anywhere in the string.
+  // See https://json-schema.org/draft/2020-12/json-schema-validation#section-6.3.3
+  optional string pattern = 23;
+
+  // Specifies the encoding used to store the contents of the string.
+  // For binary content (e.g., file uploads), set this to `"base64"`.
+  // This replaces the use of `format: "byte"` and `format: "binary"` from OAS 3.0 for
+  // encoding binary data in string fields.
+  // See https://json-schema.org/draft/2020-12/json-schema-validation#section-8.3
+  optional string content_encoding = 24;
+
+  // Specifies the MIME media type of the string contents.
+  // For example, use `"application/json"` for a JSON-encoded string.
+  // Should be combined with `content_encoding` when the content is binary.
+  // See https://json-schema.org/draft/2020-12/json-schema-validation#section-8.4
+  optional string content_media_type = 25;
+
+  // If `content_media_type` is set, this schema validates the decoded content.
+  // Only meaningful when both `content_media_type` and `content_encoding` are set.
+  // See https://json-schema.org/draft/2020-12/json-schema-validation#section-8.5
+  Schema content_schema = 26;
+
+  // -----------------------------------------------------------------------
+  // JSON Schema 2020-12 — Array validation keywords
+  // -----------------------------------------------------------------------
+
+  // If `items` is a schema, all items in the array must be valid against that schema.
+  // In JSON Schema 2020-12, `items` is always a single schema (not an array).
+  // For tuple validation, use `prefix_items` instead.
+  // See https://json-schema.org/draft/2020-12/json-schema-core#section-10.3.1.2
+  Schema items = 27;
+
+  // Validates positional items in an array (tuple validation).
+  // Each schema in the list validates the item at the corresponding index.
+  // Items beyond the length of this list are validated by `items` (if present).
+  // Replaces the array form of `items` from JSON Schema draft-07.
+  // See https://json-schema.org/draft/2020-12/json-schema-core#section-10.3.1.1
+  repeated Schema prefix_items = 28;
+
+  // An array instance is valid against this keyword if at least one of its items is valid
+  // against the given schema.
+  // Use with `min_contains` and `max_contains` to control how many items must match.
+  // See https://json-schema.org/draft/2020-12/json-schema-core#section-10.3.1.3
+  Schema contains = 29;
+
+  // An array instance is valid against this keyword if the number of items that validate
+  // against `contains` is at least this value. Must be a non-negative integer. Defaults to 1.
+  // See https://json-schema.org/draft/2020-12/json-schema-validation#section-6.4.4
+  optional uint64 min_contains = 30;
+
+  // An array instance is valid against this keyword if the number of items that validate
+  // against `contains` is at most this value. Must be a non-negative integer.
+  // See https://json-schema.org/draft/2020-12/json-schema-validation#section-6.4.3
+  optional uint64 max_contains = 31;
+
+  // An array instance is valid only if its size is less than or exactly equal to this value.
+  // Must be a non-negative integer.
+  // See https://json-schema.org/draft/2020-12/json-schema-validation#section-6.4.1
+  optional uint64 max_items = 32;
+
+  // An array instance is valid only if its size is greater than or exactly equal to this value.
+  // Must be a non-negative integer. Defaults to 0.
+  // See https://json-schema.org/draft/2020-12/json-schema-validation#section-6.4.2
+  optional uint64 min_items = 33;
+
+  // If `true`, the array must not contain duplicate values.
+  // Default is `false`.
+  // See https://json-schema.org/draft/2020-12/json-schema-validation#section-6.4.3
+  optional bool unique_items = 34;
+
+  // Applies to array items that are not evaluated by `prefix_items`, `items`, or `contains`.
+  // See https://json-schema.org/draft/2020-12/json-schema-core#section-11.2
+  Schema unevaluated_items = 35;
+
+  // -----------------------------------------------------------------------
+  // JSON Schema 2020-12 — Object validation keywords
+  // -----------------------------------------------------------------------
+
+  // A map of property names to their schema definitions.
+  // An object instance is valid if all present properties that match a key in this map
+  // validate against the corresponding schema.
+  // See https://json-schema.org/draft/2020-12/json-schema-core#section-10.3.2.1
+  map<string, Schema> properties = 36;
+
+  // Like `properties`, but the keys are ECMA-262 regular expressions.
+  // Any property whose name matches the pattern must validate against the corresponding schema.
+  // See https://json-schema.org/draft/2020-12/json-schema-core#section-10.3.2.3
+  map<string, Schema> pattern_properties = 37;
+
+  // Controls validation of properties not covered by `properties` or `pattern_properties`.
+  // Use `additional_properties_allowed` to set a boolean (true = allow any, false = disallow all).
+  // Use `additional_properties_schema` to validate against a schema.
+  // See https://json-schema.org/draft/2020-12/json-schema-core#section-10.3.2.3
+  oneof additional_properties_type {
+    // If `false`, no additional properties (beyond those defined in `properties` and
+    // `pattern_properties`) are allowed. If `true` (the default), additional properties
+    // are unconstrained.
+    bool additional_properties_allowed = 38;
+
+    // Additional properties must validate against this schema.
+    Schema additional_properties_schema = 39;
+  }
+
+  // If present, all property names of the object instance must be valid against this schema.
+  // See https://json-schema.org/draft/2020-12/json-schema-core#section-10.3.2.4
+  Schema property_names = 40;
+
+  // A list of property names that are required to be present in the object instance.
+  // Each element must be unique.
+  // See https://json-schema.org/draft/2020-12/json-schema-validation#section-6.5.3
+  repeated string required = 41;
+
+  // An object instance is valid only if its number of properties is less than or exactly
+  // equal to this value. Must be a non-negative integer.
+  // See https://json-schema.org/draft/2020-12/json-schema-validation#section-6.5.1
+  optional uint64 max_properties = 42;
+
+  // An object instance is valid only if its number of properties is greater than or exactly
+  // equal to this value. Must be a non-negative integer. Defaults to 0.
+  // See https://json-schema.org/draft/2020-12/json-schema-validation#section-6.5.2
+  optional uint64 min_properties = 43;
+
+  // Applies to object properties that are not evaluated by `properties`,
+  // `pattern_properties`, or `additional_properties`.
+  // See https://json-schema.org/draft/2020-12/json-schema-core#section-11.3
+  Schema unevaluated_properties = 44;
+
+  // -----------------------------------------------------------------------
+  // JSON Schema 2020-12 — Schema composition keywords
+  // -----------------------------------------------------------------------
+
+  // The instance must be valid against all of the given subschemas.
+  // See https://json-schema.org/draft/2020-12/json-schema-core#section-10.2.1.1
+  repeated Schema all_of = 45;
+
+  // The instance must be valid against at least one of the given subschemas.
+  // See https://json-schema.org/draft/2020-12/json-schema-core#section-10.2.1.2
+  repeated Schema any_of = 46;
+
+  // The instance must be valid against exactly one of the given subschemas.
+  // See https://json-schema.org/draft/2020-12/json-schema-core#section-10.2.1.3
+  repeated Schema one_of = 47;
+
+  // The instance must NOT be valid against this schema.
+  // See https://json-schema.org/draft/2020-12/json-schema-core#section-10.2.1.4
+  Schema not = 48;
+
+  // If the instance is valid against `if_schema`, it must also be valid against `then_schema`.
+  // If the instance is NOT valid against `if_schema`, it must be valid against `else_schema`
+  // (if present). `if_schema` alone has no effect; it requires `then_schema` or `else_schema`.
+  // See https://json-schema.org/draft/2020-12/json-schema-core#section-10.2.2.1
+  Schema if_schema = 49;
+
+  // Evaluated only when `if_schema` is present and the instance validates against it.
+  // See https://json-schema.org/draft/2020-12/json-schema-core#section-10.2.2.2
+  Schema then_schema = 50;
+
+  // Evaluated only when `if_schema` is present and the instance does NOT validate against it.
+  // See https://json-schema.org/draft/2020-12/json-schema-core#section-10.2.2.3
+  Schema else_schema = 51;
+
+  // -----------------------------------------------------------------------
+  // JSON Schema 2020-12 — Referencing keywords
+  // -----------------------------------------------------------------------
+
+  // A URI reference that identifies the schema to use.
+  // In the context of an OAS document, `$ref` values are resolved relative to the document
+  // root. Use `#/components/schemas/MyType` to reference a component schema.
+  // When `$ref` is present, all other keywords in the same schema object are valid and
+  // apply alongside the referenced schema (unlike JSON Schema draft-07 where other keywords
+  // were ignored).
+  // See https://json-schema.org/draft/2020-12/json-schema-core#section-8.2.3.1
+  optional string ref = 52;
+
+  // A map of reusable schema definitions, scoped to this schema.
+  // Keys are definition names; values are schemas.
+  // Referenced via `$ref` relative to the schema's `$id` or document root.
+  // Example: `{ "ref": "#/$defs/Address", "defs": { "Address": { "object": { ... } } } }`
+  // See https://json-schema.org/draft/2020-12/json-schema-core#section-8.2.4
+  map<string, Schema> defs = 53;
+
+  // Sets the base URI for this schema, used to resolve relative `$ref` values within it.
+  // Must be an absolute URI. Should be unique across all schemas in the document.
+  // Typically used on top-level named schemas in `components/schemas` to establish a stable,
+  // addressable identity.
+  // See https://json-schema.org/draft/2020-12/json-schema-core#section-8.2.1
+  optional string id = 54;
+
+  // Declares the JSON Schema dialect this schema should be validated against.
+  // The value MUST be a URI identifying the meta-schema.
+  // The default dialect for OAS 3.1 schemas is `https://spec.openapis.org/oas/3.1/dialect/base`.
+  // Override this per-schema only if you need a different dialect; the document-level default
+  // can be set via the root `OpenAPI.json_schema_dialect` field instead.
+  // See https://json-schema.org/draft/2020-12/json-schema-core#section-8.1.1
+  optional string schema_dialect = 55;
+
+  // A plain string that establishes a schema identifier that other schemas can target with
+  // `$dynamicRef`. Unlike `$id`, `$anchor` does not affect `$ref` resolution.
+  // Must match the pattern `^[A-Za-z_][-A-Za-z0-9._]*$`.
+  // See https://json-schema.org/draft/2020-12/json-schema-core#section-8.2.2
+  optional string anchor = 56;
+
+  // A URI reference to a schema, where the final resolution target is determined at runtime
+  // based on the `$dynamicAnchor` of the schema at the base URI.
+  // Used to build extensible, recursive schema libraries.
+  // The URI MUST contain a fragment, which SHOULD be a plain name fragment (matching an anchor).
+  // See https://json-schema.org/draft/2020-12/json-schema-core#section-8.2.3.2
+  optional string dynamic_ref = 57;
+
+  // Defines a dynamic anchor that `$dynamicRef` can resolve to.
+  // Like `$anchor`, but participates in dynamic scope resolution.
+  // Must match the same naming pattern as `$anchor`.
+  // See https://json-schema.org/draft/2020-12/json-schema-core#section-8.2.2
+  optional string dynamic_anchor = 58;
 }

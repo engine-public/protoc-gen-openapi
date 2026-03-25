@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package engine.protoc.openapi.model;
 
-import "engine/protoc/openapi/model/path_item.proto";
+import "engine/protoc/openapi/model/path_item_or_reference.proto";
 
 // A map of possible out-of band callbacks related to the parent operation.
 // Each value in the map is a [Path Item Object](https://swagger.io/specification/#path-item-object) that describes a set of requests that may be initiated by the API provider and the expected responses.
@@ -33,5 +33,5 @@ message Callback {
   //       '200':
   //         description: callback successfully processed
   // ```
-  map<string, .engine.protoc.openapi.model.PathItem> callbacks = 1;
+  map<string, .engine.protoc.openapi.model.PathItemOrReference> callbacks = 1;
 }

@@ -7,6 +7,12 @@ import "engine/protoc/openapi/model/path_item.proto";
 // Holds the relative paths to the individual endpoints and their operations.
 // The path is appended to the URL from the [Server Object](https://swagger.io/specification/#server-object) in order to construct the full URL.
 // The Paths Object MAY be empty, due to [Access Control List (ACL) constraints](https://swagger.io/specification/#security-filtering).
+//
+// **Structural note**: The OpenAPI Paths Object is defined as a plain map (not an object with
+// a named field containing the map). This message wraps the map in a `paths` field because
+// protobuf requires maps to live inside a message. Serializers MUST unwrap the `paths` field
+// when emitting JSON/YAML — the output should be a top-level object whose keys are path strings,
+// not an object with a `paths` key.
 message Paths {
   // A relative path to an individual endpoint.
   // The field name MUST begin with a forward slash (/).

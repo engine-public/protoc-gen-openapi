@@ -40,4 +40,45 @@ message Encoding {
   // The OpenAPI chain of MediaType->Encoding->HeaderOrReference->Header->HeaderContent->MediaType is illegal.
   // As such, we only allow References here, and the Header must be defined in the components.
   map<string, .engine.protoc.openapi.model.Reference> headers = 2;
+
+  // Describes how a specific property value will be serialized depending on its type.
+  // See [Parameter Object](https://swagger.io/specification/#parameter-object) for details on the
+  // [style](https://swagger.io/specification/#parameter-style) field.
+  // The behavior follows the same values as query parameter serialization, with the exception that
+  // there are no `path`-specific or `header`-specific rules.
+  // The default value is `"form"`.
+  // This field SHALL be ignored if the request body media type is not `application/x-www-form-urlencoded`
+  // or `multipart/form-data`.
+  // If a value is explicitly defined, then the value of `contentType` (implicit or explicit) SHALL
+  // be ignored.
+  optional string style = 3;
+
+  // When this is `true`, property values of type `array` or `object` generate separate parameters
+  // for each value of the array, or key-value pair of the map.
+  // For other types of properties, this field has no effect.
+  // When [style](https://swagger.io/specification/#parameter-style) is `"form"`, the default value
+  // is `true`.
+  // For all other styles, the default value is `false`.
+  // This field SHALL be ignored if the request body media type is not `application/x-www-form-urlencoded`
+  // or `multipart/form-data`.
+  // If a value is explicitly defined, then the value of `contentType` (implicit or explicit) SHALL
+  // be ignored.
+  optional bool explode = 4;
+
+  // When this is `true`, parameter values are serialized using reserved expansion, as defined by
+  // [RFC6570](https://datatracker.ietf.org/doc/html/rfc6570#section-3.2.3), which allows
+  // [RFC3986's reserved character set](https://datatracker.ietf.org/doc/html/rfc3986#section-2.2),
+  // as well as percent-encoded triples, to pass through unchanged, while still percent-encoding
+  // all other disallowed characters (including % outside of percent-encoded triples).
+  // Applications are still responsible for percent-encoding reserved characters that are
+  // [not allowed in the query string](https://datatracker.ietf.org/doc/html/rfc3986#section-3.4)
+  // (`[`, `]`, `#`), or have a special meaning in `application/x-www-form-urlencoded`
+  // (`-`, `&`, `+`); see Appendices [C](https://swagger.io/specification/#appendix-c-using-rfc6570-based-serialization)
+  // and [E](https://swagger.io/specification/#appendix-e-percent-encoding-and-form-media-types) for details.
+  // The default value is `false`.
+  // This field SHALL be ignored if the request body media type is not `application/x-www-form-urlencoded`
+  // or `multipart/form-data`.
+  // If a value is explicitly defined, then the value of `contentType` (implicit or explicit) SHALL
+  // be ignored.
+  optional bool allow_reserved = 5;
 }

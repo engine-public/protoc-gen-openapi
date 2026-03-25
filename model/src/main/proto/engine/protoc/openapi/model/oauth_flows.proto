@@ -4,7 +4,7 @@ package engine.protoc.openapi.model;
 
 import "engine/protoc/openapi/model/oauth_flow.proto";
 
-//Allows configuration of the supported OAuth Flows.
+// Allows configuration of the supported OAuth Flows.
 message OAuthFlows {
   // Configuration for the OAuth Implicit flow
   .engine.protoc.openapi.model.OAuthFlow implicit = 1;

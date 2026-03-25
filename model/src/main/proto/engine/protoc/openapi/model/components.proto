@@ -8,7 +8,7 @@ import "engine/protoc/openapi/model/example_or_reference.proto";
 import "engine/protoc/openapi/model/header_or_reference.proto";
 import "engine/protoc/openapi/model/link_or_reference.proto";
 import "engine/protoc/openapi/model/parameter_or_reference.proto";
-import "engine/protoc/openapi/model/path_item.proto";
+import "engine/protoc/openapi/model/path_item_or_reference.proto";
 import "engine/protoc/openapi/model/response_or_reference.proto";
 import "engine/protoc/openapi/model/request_body_or_reference.proto";
 import "engine/protoc/openapi/model/security_scheme_or_reference.proto";
@@ -44,5 +44,5 @@ message Components {
   map<string, .engine.protoc.openapi.model.CallbackOrReference> callbacks = 9;
 
   // An object to hold reusable [Path Item Objects](https://swagger.io/specification/#path-item-object).
-  map<string, .engine.protoc.openapi.model.PathItem> path_items = 10;
+  map<string, .engine.protoc.openapi.model.PathItemOrReference> path_items = 10;
 }

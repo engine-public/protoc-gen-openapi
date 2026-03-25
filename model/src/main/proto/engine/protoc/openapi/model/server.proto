@@ -14,7 +14,7 @@ message Server {
 
   // An optional string describing the host designated by the URL.
   // [CommonMark](https://spec.commonmark.org/) syntax MAY be used for rich text representation.
-  string description = 2;
+  optional string description = 2;
 
   // A map between a variable name and its value.
   // The value is used for substitution in the server's URL template.

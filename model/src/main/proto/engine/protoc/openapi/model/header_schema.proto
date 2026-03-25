@@ -25,13 +25,13 @@ message HeaderSchema {
   optional bool explode = 2;
 
   // The schema defining the type used for the parameter.
-  .engine.protoc.openapi.Schema schema = 4;
+  .engine.protoc.openapi.Schema schema = 3;
 
   oneof example_type {
     // Example of the parameter's potential value; see [Working With Examples](https://swagger.io/specification/#working-with-examples).
-    .google.protobuf.Any example = 5;
+    .google.protobuf.Any example = 4;
 
     // Examples of the parameter's potential value; see [Working With Examples](https://swagger.io/specification/#working-with-examples).
-    .engine.protoc.openapi.model.ExampleOrReferenceMap examples = 6;
+    .engine.protoc.openapi.model.ExampleOrReferenceMap examples = 5;
   }
 }

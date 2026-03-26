@@ -8,9 +8,8 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.node.ObjectNode
+import com.engine.protoc.util.file.FileDescriptorProtoWrapper
 import com.google.protobuf.compiler.PluginProtos
-
-private const val OUTPUT_FILE_NAME = "swagger.openapi.json"
 
 /**
  * Main compilation entry point.
@@ -23,7 +22,8 @@ private const val OUTPUT_FILE_NAME = "swagger.openapi.json"
  * 3. All message types reachable from RPC inputs/outputs and `proto_ref` usages are collected and
  *    turned into `components/schemas` entries.
  *
- * The result is a single `swagger.openapi.json` file in the [PluginProtos.CodeGeneratorResponse].
+ * The output file is named `<package>.<ServiceName>.openapi.json` when the compilation covers a
+ * single service, or `<common-package-prefix>.openapi.json` when multiple services are merged.
  */
 internal class Compiler(private val request: CodeGeneratorRequestWrapper) {
 
@@ -81,7 +81,7 @@ internal class Compiler(private val request: CodeGeneratorRequestWrapper) {
         val json = mapper.writeValueAsString(doc)
 
         val file = PluginProtos.CodeGeneratorResponse.File.newBuilder()
-            .setName(OUTPUT_FILE_NAME)
+            .setName(outputFileName(targetFiles))
             .setContent(json)
             .build()
 
@@ -91,5 +91,31 @@ internal class Compiler(private val request: CodeGeneratorRequestWrapper) {
             )
             .addFile(file)
             .build()
+    }
+
+    private fun outputFileName(targetFiles: List<FileDescriptorProtoWrapper>): String {
+        val services = targetFiles.flatMap { file ->
+            file.services.map { svc -> file.`package`?.value.orEmpty() to svc.name?.value.orEmpty() }
+        }
+        return when (services.size) {
+            1 -> "${services[0].first}.${services[0].second}.openapi.json"
+            else -> {
+                val packages = services.map { it.first }
+                    .ifEmpty { targetFiles.map { it.`package`?.value.orEmpty() } }
+                val prefix = commonPackagePrefix(packages)
+                if (prefix.isEmpty()) "openapi.json" else "$prefix.openapi.json"
+            }
+        }
+    }
+
+    private fun commonPackagePrefix(packages: List<String>): String {
+        val nonEmpty = packages.filter { it.isNotEmpty() }
+        if (nonEmpty.isEmpty()) return ""
+        val parts = nonEmpty.map { it.split(".") }
+        val common = mutableListOf<String>()
+        for (i in 0 until parts.minOf { it.size }) {
+            if (parts.all { it[i] == parts[0][i] }) common.add(parts[0][i]) else break
+        }
+        return common.joinToString(".")
     }
 }

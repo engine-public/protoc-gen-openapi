@@ -1,12 +1,12 @@
 package com.engine.protoc.openapi.compile
 
+import com.engine.protoc.openapi.Annotations
+import com.engine.protoc.openapi.Schema
 import com.engine.protoc.openapi.compile.json.JsonContext
 import com.engine.protoc.openapi.compile.json.toJson
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.google.protobuf.DescriptorProtos
-import engine.protoc.openapi.Annotations
-import engine.protoc.openapi.SchemaOuterClass.Schema
 
 /**
  * Builds the `components/schemas` section from all message types identified by [collector].

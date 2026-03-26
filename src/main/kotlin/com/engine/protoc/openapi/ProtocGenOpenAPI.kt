@@ -1,5 +1,6 @@
 package com.engine.protoc.openapi
 
+import com.engine.protoc.openapi.Annotations
 import com.engine.protoc.openapi.compile.Compiler
 import com.engine.protoc.util.compiler.CodeGeneratorRequestWrapper
 import com.engine.protoc.util.compiler.Parameters
@@ -7,7 +8,6 @@ import com.engine.protoc.util.extensions.wrap
 import com.google.api.AnnotationsProto
 import com.google.protobuf.ExtensionRegistry
 import com.google.protobuf.compiler.PluginProtos
-import engine.protoc.openapi.Annotations
 import java.io.InputStream
 
 public class ProtocGenOpenAPI(

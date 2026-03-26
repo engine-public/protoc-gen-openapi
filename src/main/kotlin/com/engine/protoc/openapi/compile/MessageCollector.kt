@@ -1,8 +1,8 @@
 package com.engine.protoc.openapi.compile
 
+import com.engine.protoc.openapi.Schema
+import com.engine.protoc.openapi.SchemaObject
 import com.google.protobuf.DescriptorProtos
-import engine.protoc.openapi.SchemaOuterClass.Schema
-import engine.protoc.openapi.SchemaOuterClass.SchemaObject
 
 /**
  * Collects every proto message type that must appear in `components/schemas`, starting from

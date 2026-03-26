@@ -1,5 +1,7 @@
 package com.engine.protoc.openapi.compile
 
+import com.engine.protoc.openapi.Annotations
+import com.engine.protoc.openapi.Operation
 import com.engine.protoc.openapi.compile.json.JsonContext
 import com.engine.protoc.openapi.compile.json.toJson
 import com.engine.protoc.util.file.FileDescriptorProtoWrapper
@@ -9,8 +11,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.google.api.AnnotationsProto
 import com.google.api.HttpRule
 import com.google.protobuf.DescriptorProtos
-import engine.protoc.openapi.Annotations
-import engine.protoc.openapi.OperationOuterClass.Operation
 
 /**
  * Builds the `paths` section of the OpenAPI document from gRPC service definitions and their

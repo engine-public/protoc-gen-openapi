@@ -2,6 +2,9 @@ syntax = "proto3";
 
 package engine.protoc.openapi.model;
 
+option java_package = "com.engine.protoc.openapi.model";
+option java_multiple_files = true;
+
 // License information for the exposed API.
 message License {
   // REQUIRED.

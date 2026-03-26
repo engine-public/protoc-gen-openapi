@@ -1,12 +1,12 @@
 package com.engine.protoc.openapi.compile.json
 
+import com.engine.protoc.openapi.Schema
+import com.engine.protoc.openapi.SchemaObject
+import com.engine.protoc.openapi.model.Discriminator
+import com.engine.protoc.openapi.model.ExternalDocumentation
+import com.engine.protoc.openapi.model.XML
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
-import engine.protoc.openapi.SchemaOuterClass.Schema
-import engine.protoc.openapi.SchemaOuterClass.SchemaObject
-import engine.protoc.openapi.model.DiscriminatorOuterClass.Discriminator
-import engine.protoc.openapi.model.ExternalDocumentationOuterClass.ExternalDocumentation
-import engine.protoc.openapi.model.Xml.XML
 
 // ---------------------------------------------------------------------------
 // Schema (oneof bool | SchemaObject)

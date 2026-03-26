@@ -1,5 +1,6 @@
 package com.engine.protoc.openapi.compile
 
+import com.engine.protoc.openapi.Annotations
 import com.engine.protoc.openapi.compile.json.JsonContext
 import com.engine.protoc.openapi.compile.json.mergeInto
 import com.engine.protoc.util.compiler.CodeGeneratorRequestWrapper
@@ -8,7 +9,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.google.protobuf.compiler.PluginProtos
-import engine.protoc.openapi.Annotations
 
 private const val OUTPUT_FILE_NAME = "swagger.openapi.json"
 

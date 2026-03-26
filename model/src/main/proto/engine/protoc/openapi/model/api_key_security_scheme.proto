@@ -2,6 +2,10 @@ syntax = "proto3";
 
 package engine.protoc.openapi.model;
 
+option java_package = "com.engine.protoc.openapi.model";
+option java_multiple_files = true;
+option java_outer_classname = "APIKeySecuritySchemeProto";
+
 message APIKeySecurityScheme {
   // REQUIRED.
   // The name of the header, query or cookie parameter to be used.

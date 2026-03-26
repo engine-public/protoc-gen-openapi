@@ -2,6 +2,9 @@ syntax = "proto3";
 
 package engine.protoc.openapi.model;
 
+option java_package = "com.engine.protoc.openapi.model";
+option java_multiple_files = true;
+
 import "engine/protoc/openapi/model/external_documentation.proto";
 
 // Adds metadata to a single tag that is used by the Operation Object.

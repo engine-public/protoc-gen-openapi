@@ -2,6 +2,9 @@ syntax = "proto3";
 
 package engine.protoc.openapi.model;
 
+option java_package = "com.engine.protoc.openapi.model";
+option java_multiple_files = true;
+
 // An object representing a Server Variable for server URL template substitution.
 message ServerVariable {
   // An enumeration of string values to be used if the substitution options are from a limited set.

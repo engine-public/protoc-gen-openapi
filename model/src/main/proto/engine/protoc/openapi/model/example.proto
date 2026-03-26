@@ -2,6 +2,9 @@ syntax = "proto3";
 
 package engine.protoc.openapi.model;
 
+option java_package = "com.engine.protoc.openapi.model";
+option java_multiple_files = true;
+
 import "google/protobuf/any.proto";
 
 // An object grouping an internal or external example value with basic `summary` and `description` metadata.

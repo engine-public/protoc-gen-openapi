@@ -2,6 +2,9 @@ syntax = "proto3";
 
 package engine.protoc.openapi.model;
 
+option java_package = "com.engine.protoc.openapi.model";
+option java_multiple_files = true;
+
 import "engine/protoc/openapi/model/api_key_security_scheme.proto";
 import "engine/protoc/openapi/model/http_security_scheme.proto";
 import "engine/protoc/openapi/model/mtls_security_scheme.proto";

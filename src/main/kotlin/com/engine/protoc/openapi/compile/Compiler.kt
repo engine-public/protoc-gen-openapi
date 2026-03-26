@@ -4,11 +4,12 @@ import com.engine.protoc.openapi.Annotations
 import com.engine.protoc.openapi.compile.json.JsonContext
 import com.engine.protoc.openapi.compile.json.mergeInto
 import com.engine.protoc.util.compiler.CodeGeneratorRequestWrapper
+import com.engine.protoc.util.compiler.CodeGeneratorResponseWrapper
+import com.engine.protoc.util.file.FileDescriptorProtoWrapper
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.node.ObjectNode
-import com.engine.protoc.util.file.FileDescriptorProtoWrapper
 import com.google.protobuf.compiler.PluginProtos
 
 /**
@@ -28,6 +29,7 @@ import com.google.protobuf.compiler.PluginProtos
 internal class Compiler(private val request: CodeGeneratorRequestWrapper) {
 
     fun compile(): PluginProtos.CodeGeneratorResponse {
+        val response = CodeGeneratorResponseWrapper()
         val mapper = ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
         val messageIndex = MessageIndex(request.protoFiles)
         val ctx = JsonContext(mapper, messageIndex)
@@ -42,55 +44,66 @@ internal class Compiler(private val request: CodeGeneratorRequestWrapper) {
         doc.put("openapi", "3.1.0")
 
         for (file in targetFiles) {
-            val extension = file.options?.findExtension(Annotations.file)?.value ?: continue
-            extension.mergeInto(doc, ctx)
+            try {
+                val extension = file.options?.findExtension(Annotations.file)?.value ?: continue
+                extension.mergeInto(doc, ctx)
+            } catch (e: Exception) {
+                response.addError("[${file.name}] Error merging OpenAPI extension: ${e.detail()}")
+            }
         }
 
         // ---- Build paths from services ----------------------------------
         val collector = MessageCollector(messageIndex)
         val pathsBuilder = PathsBuilder(ctx, collector)
-        val pathsNode = pathsBuilder.build(targetFiles)
 
-        // Merge paths: annotation-defined paths take precedence over RPC-inferred paths
-        val existingPaths = doc.get("paths") as? ObjectNode ?: ctx.obj()
-        pathsNode.fields().forEach { (path, rpcPathItem) ->
-            val existing = existingPaths.get(path) as? ObjectNode
-            if (existing != null) {
-                with(ctx) { existing.deepMerge(rpcPathItem as ObjectNode) }
-            } else {
-                existingPaths.set<JsonNode>(path, rpcPathItem)
+        for (file in targetFiles) {
+            try {
+                val filePathsNode = pathsBuilder.build(listOf(file))
+                val existingPaths = doc.get("paths") as? ObjectNode ?: ctx.obj().also {
+                    doc.set<JsonNode>("paths", it)
+                }
+                filePathsNode.fields().forEach { (path, rpcPathItem) ->
+                    val existing = existingPaths.get(path) as? ObjectNode
+                    if (existing != null) {
+                        with(ctx) { existing.deepMerge(rpcPathItem as ObjectNode) }
+                    } else {
+                        existingPaths.set<JsonNode>(path, rpcPathItem)
+                    }
+                }
+                if (existingPaths.size() > 0) doc.set<JsonNode>("paths", existingPaths)
+            } catch (e: Exception) {
+                response.addError("[${file.name}] Error building paths: ${e.detail()}")
             }
         }
-        if (existingPaths.size() > 0) doc.set<JsonNode>("paths", existingPaths)
 
         // ---- Build component schemas ------------------------------------
-        val schemaBuilder = SchemaBuilder(ctx, pathsBuilder)
-        val schemas = schemaBuilder.build(collector)
+        try {
+            val schemaBuilder = SchemaBuilder(ctx, pathsBuilder)
+            val schemas = schemaBuilder.build(collector)
 
-        if (schemas.size() > 0) {
-            val components = doc.get("components") as? ObjectNode
-                ?: ctx.obj().also { doc.set<JsonNode>("components", it) }
-            val existingSchemas = components.get("schemas") as? ObjectNode
-                ?: ctx.obj().also { components.set<JsonNode>("schemas", it) }
-            schemas.fields().forEach { (name, schema) ->
-                existingSchemas.set<JsonNode>(name, schema)
+            if (schemas.size() > 0) {
+                val components = doc.get("components") as? ObjectNode
+                    ?: ctx.obj().also { doc.set<JsonNode>("components", it) }
+                val existingSchemas = components.get("schemas") as? ObjectNode
+                    ?: ctx.obj().also { components.set<JsonNode>("schemas", it) }
+                schemas.fields().forEach { (name, schema) ->
+                    existingSchemas.set<JsonNode>(name, schema)
+                }
             }
+        } catch (e: Exception) {
+            response.addError("Error building component schemas: ${e.detail()}")
         }
 
         // ---- Serialize --------------------------------------------------
-        val json = mapper.writeValueAsString(doc)
+        if (!response.hasErrors) {
+            try {
+                response.addFile(outputFileName(targetFiles), mapper.writeValueAsString(doc))
+            } catch (e: Exception) {
+                response.addError("Error serializing output: ${e.detail()}")
+            }
+        }
 
-        val file = PluginProtos.CodeGeneratorResponse.File.newBuilder()
-            .setName(outputFileName(targetFiles))
-            .setContent(json)
-            .build()
-
-        return PluginProtos.CodeGeneratorResponse.newBuilder()
-            .setSupportedFeatures(
-                PluginProtos.CodeGeneratorResponse.Feature.FEATURE_PROTO3_OPTIONAL.number.toLong(),
-            )
-            .addFile(file)
-            .build()
+        return response.build()
     }
 
     private fun outputFileName(targetFiles: List<FileDescriptorProtoWrapper>): String {
@@ -105,6 +118,17 @@ internal class Compiler(private val request: CodeGeneratorRequestWrapper) {
                 val prefix = commonPackagePrefix(packages)
                 if (prefix.isEmpty()) "openapi.json" else "$prefix.openapi.json"
             }
+        }
+    }
+
+    private fun Exception.detail(): String = buildString {
+        append(this@detail.javaClass.simpleName)
+        message?.let { append(": $it") }
+        var cause = cause
+        while (cause != null) {
+            append("\n  Caused by: ${cause.javaClass.simpleName}")
+            cause.message?.let { append(": $it") }
+            cause = cause.cause
         }
     }
 

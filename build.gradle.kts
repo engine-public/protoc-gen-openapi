@@ -27,12 +27,11 @@ description = "protoc compiler to turn gRPC services into openapi v3.1 specs"
 
 dependencies {
     implementation(projects.protocGenOpenapiModel)
-
-    implementation(libs.kotlin.reflect)
-    implementation(libs.protobuf.java)
     implementation(projects.protocUtils)
 
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.17.2")
+    implementation(libs.jackson.databind)
+    implementation(libs.kotlin.reflect)
+    implementation(libs.protobuf.java)
 }
 
 allprojects {

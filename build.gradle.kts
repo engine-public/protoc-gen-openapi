@@ -1,3 +1,4 @@
+import org.gradle.internal.extensions.stdlib.capitalized
 import org.gradle.kotlin.dsl.configure
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 import org.jlleitschuh.gradle.ktlint.KtlintExtension
@@ -5,6 +6,7 @@ import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 
 plugins {
     application
+    idea
     kotlin("jvm")
     id("com.google.osdetector")
     id("com.google.protobuf")
@@ -140,6 +142,38 @@ allprojects {
     }
 }
 
+testing {
+    suites {
+        /*
+         * we want the compiler to generate multiple CodeGeneratorRequests so we can
+         * isolate different types of proto files to be compiled in a single session.
+         * this block configures them all...
+         */
+        withType<JvmTestSuite> {
+            useJUnitJupiter()
+            dependencies {
+                implementation(project())
+
+                // Explicitly extend the implementation configuration
+                configurations.named(sources.implementationConfigurationName) {
+                    extendsFrom(project.configurations.getByName(JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME))
+                }
+            }
+            val testSuiteName = this.name
+            logger.quiet("Test suite for $testSuiteName")
+            tasks.named("process${testSuiteName.capitalized()}Resources", ProcessResources::class) {
+                dependsOn("generate${testSuiteName.capitalized()}Proto")
+                from(project.layout.buildDirectory.dir("generated/source/proto/$testSuiteName/recorder").map { it.file("code-generator-request.binpb") })
+            }
+        }
+
+        /*
+         * then one line here per protoc compilation run...
+         */
+        register<JvmTestSuite>("petstore")
+    }
+}
+
 application {
     mainClass.set("com.engine.protoc.openapi.MainKt")
 }
@@ -178,10 +212,6 @@ graalvmNative {
     }
 }
 
-val processTestResources = tasks.named("processTestResources", ProcessResources::class) {
-    from(project.layout.buildDirectory.dir("generated/source/proto/test/recorder").map { it.file("code-generator-request.binpb") })
-}
-
 protobuf {
     protoc {
         artifact = tools.protoc.compiler.get().toString()
@@ -200,9 +230,14 @@ protobuf {
     }
     generateProtoTasks {
         all().all {
-            if (isTest) {
+            /*
+             * Matches all proto tasks except the main generateProto... unfortunately,
+             * the protobuf plugin doesn't recognize testsuites as "test" tasks, so
+             * isTest doesn't work.
+             */
+            if (name == "generate${this.sourceSet.name.capitalized()}Proto") {
                 dependsOn(":protoc-utils-recorder:nativeCompile")
-                processTestResources.configure { dependsOn(this@all) }
+//                tasks.named("process${this.sourceSet.name.capitalized()}Resources").configure { dependsOn(this@all) }
                 plugins {
                     create("recorder")
                 }

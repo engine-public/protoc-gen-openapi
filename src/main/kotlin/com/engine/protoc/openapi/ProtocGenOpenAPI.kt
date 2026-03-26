@@ -1,6 +1,5 @@
 package com.engine.protoc.openapi
 
-import com.engine.protoc.openapi.Annotations
 import com.engine.protoc.openapi.compile.Compiler
 import com.engine.protoc.util.compiler.CodeGeneratorRequestWrapper
 import com.engine.protoc.util.compiler.Parameters

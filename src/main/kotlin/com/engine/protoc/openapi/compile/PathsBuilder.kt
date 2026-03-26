@@ -71,10 +71,15 @@ internal class PathsBuilder(
 
         // ---- Summary (leading comment → annotation override) -------------
         val comment = method.location?.proto?.leadingComments?.trim()?.ifEmpty { null }
-        val summary = annotation?.takeIf { it.hasSummary() }?.summary ?: comment?.firstLine()
+        val summary = annotation?.takeIf { it.hasSummary() }?.summary ?: comment?.firstSentence()
         if (summary != null) node.put("summary", summary)
 
-        if (annotation?.hasDescription() == true) node.put("description", annotation.description)
+        val description = when {
+            annotation?.hasDescription() == true -> annotation.description
+            comment != null -> comment
+            else -> null
+        }
+        if (description != null) node.put("description", description)
         if (annotation?.hasOperationId() == true) node.put("operationId", annotation.operationId)
 
         if (annotation?.tagsList?.isNotEmpty() == true) {
@@ -333,4 +338,14 @@ internal fun HttpRule.primaryBinding(): HttpBinding? {
 // String helpers
 // ---------------------------------------------------------------------------
 
-private fun String.firstLine(): String? = lines().firstOrNull { it.isNotBlank() }?.trim()
+private fun String.firstSentence(): String {
+    for (i in indices) {
+        when (this[i]) {
+            '.', '!', '?' -> {
+                val next = getOrNull(i + 1)
+                if (next != null && next.isWhitespace()) return substring(0, i + 1).trim()
+            }
+        }
+    }
+    return trim()
+}

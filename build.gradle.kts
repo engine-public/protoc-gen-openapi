@@ -31,6 +31,8 @@ dependencies {
     implementation(libs.kotlin.reflect)
     implementation(libs.protobuf.java)
     implementation(projects.protocUtils)
+
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.17.2")
 }
 
 allprojects {

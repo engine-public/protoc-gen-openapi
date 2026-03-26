@@ -1,5 +1,6 @@
 package com.engine.protoc.openapi
 
+import com.engine.protoc.openapi.compile.Compiler
 import com.engine.protoc.util.compiler.CodeGeneratorRequestWrapper
 import com.engine.protoc.util.compiler.Parameters
 import com.engine.protoc.util.extensions.wrap
@@ -20,6 +21,7 @@ public class ProtocGenOpenAPI(
     public data class Options(
         val merge: Boolean,
         val caseStrategy: CaseStrategy,
+        val validateOutput: Boolean,
     ) {
         public enum class CaseStrategy {
             UNMODIFIED,
@@ -30,6 +32,7 @@ public class ProtocGenOpenAPI(
         public class Builder private constructor(parameters: Parameters) {
             public var merge: Boolean = parameters.get<Boolean>("merge") ?: false
             public var caseStrategy: CaseStrategy = parameters.get<CaseStrategy>("caseStrategy") ?: CaseStrategy.UNMODIFIED
+            public var validateOutput: Boolean = true
 
             public companion object {
                 public fun from(parameters: Parameters): Builder = Builder(parameters)
@@ -39,6 +42,7 @@ public class ProtocGenOpenAPI(
                 Options(
                     merge,
                     caseStrategy,
+                    validateOutput,
                 )
         }
     }
@@ -63,15 +67,5 @@ public class ProtocGenOpenAPI(
         }
     }
 
-    public fun compile(): PluginProtos.CodeGeneratorResponse {
-        // if requested, record the request
-        return PluginProtos.CodeGeneratorResponse.newBuilder().apply {
-            supportedFeatures = PluginProtos.CodeGeneratorResponse.Feature.FEATURE_PROTO3_OPTIONAL.number.toLong()
-            // TODO
-            //  look at every file that needs to be compiled
-            //  1. filter out any that have no services
-            //  2. transform that file into an openapi spec, if possible
-            //  3. spit out the openapi yaml for any files that survived
-        }.build()
-    }
+    public fun compile(): PluginProtos.CodeGeneratorResponse = Compiler(request).compile()
 }

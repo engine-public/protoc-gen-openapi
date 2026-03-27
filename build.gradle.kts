@@ -184,7 +184,7 @@ graalvmNative {
     binaries {
         named("main") {
             imageName = "${project.name}-${osdetector.arch}"
-            mainClass = "com.engine.protoc.openapi.MainKt"
+            mainClass = application.mainClass
             sharedLibrary = false
             verbose = true
             resources.autodetect()
@@ -228,6 +228,15 @@ protobuf {
                 .asFile
                 .absolutePath
         }
+//        create("openapi") {
+//            path = project
+//                .layout
+//                .buildDirectory
+//                .map { it.dir("native/nativeCompile").file("${project.name}-${osdetector.arch}") }
+//                .get()
+//                .asFile
+//                .absolutePath
+//        }
     }
     generateProtoTasks {
         all().all {
@@ -238,10 +247,10 @@ protobuf {
              */
             if (name == "generate${this.sourceSet.name.capitalized()}Proto") {
                 dependsOn(":protoc-utils-recorder:nativeCompile")
+//                dependsOn(":nativeCompile")
                 plugins {
-                    create("recorder") {
-                        option("validateOutput=true")
-                    }
+                    create("recorder")
+//                    create("openapi")
                 }
             }
         }

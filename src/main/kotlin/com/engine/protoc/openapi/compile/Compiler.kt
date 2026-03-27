@@ -18,7 +18,6 @@ import com.networknt.schema.SchemaLocation
 import com.networknt.schema.SchemaRegistry
 import com.networknt.schema.SpecificationVersion
 
-
 /**
  * Main compilation entry point.
  *
@@ -46,7 +45,7 @@ internal class Compiler(
             it.schemaIdResolvers {
                 it.mapPrefix(
                     "https://spec.openapis.org/oas/3.1",
-                    "classpath:schemas/spec.openapis.org/oas/3.1"
+                    "classpath:schemas/spec.openapis.org/oas/3.1",
                 )
             }
         }.getSchema(SchemaLocation.of("https://spec.openapis.org/oas/3.1/schema-base/2022-10-07"))

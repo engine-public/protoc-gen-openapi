@@ -10,6 +10,7 @@ import "engine/protoc/openapi/model/http_security_scheme.proto";
 import "engine/protoc/openapi/model/mtls_security_scheme.proto";
 import "engine/protoc/openapi/model/oauth_security_scheme.proto";
 import "engine/protoc/openapi/model/openid_connect_security_scheme.proto";
+import "google/protobuf/struct.proto";
 
 // Defines a security scheme that can be used by the operations.
 //
@@ -28,4 +29,16 @@ message SecurityScheme {
     .engine.protoc.openapi.model.OAuthSecurityScheme oauth2 = 5;
     .engine.protoc.openapi.model.OpenIDConnectSecurityScheme open_id_connect = 6;
   }
+
+  // Extensions (also referred to as specification extensions or vendor extensions) are custom
+  // properties that start with x-, such as x-logo. These are used to add extra information or
+  // functionality that the OpenAPI standard doesn't include by default. For example, many tools
+  // including Amazon API Gateway, ReDoc, APIMatic, and Fern use extensions to include details
+  // specific to their products.
+  // Extensions are supported on the root level of the API spec and in the following places:
+  //   info section, paths section, individual paths and operations, operation parameters,
+  //   responses, tags, and security schemes.
+  // The extension value can be a primitive, an array, an object or null. If the value is an
+  // object or array of objects, the object's property names do not need to start with x-.
+  map<string, google.protobuf.Value> extensions = 7;
 }

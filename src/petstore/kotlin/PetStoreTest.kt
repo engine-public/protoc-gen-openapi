@@ -69,6 +69,7 @@ class PetStoreTest : FunSpec({
         info.get("title").asText() shouldBe "Swagger Petstore - OpenAPI 3.1"
         info.get("version").asText() shouldBe "1.0.10"
         info.get("summary").asText() shouldBe "Pet Store 3.1"
+        info.get("x-namespace").asText() shouldBe "swagger"
     }
 
     test("servers") {
@@ -148,8 +149,7 @@ class PetStoreTest : FunSpec({
     }
 
     test("matches petstore.openapi.json") {
-        val expectedStream = PetStoreTest::class.java.getResourceAsStream("/petstore.openapi.json")
-            ?: error("petstore.openapi.json not found in test resources")
+        val expectedStream = PetStoreTest::class.java.getResourceAsStream("/petstore.openapi.modified.json").shouldNotBeNull()
         val expected = mapper.readTree(expectedStream)
         val diffs = collectJsonDiffs("$", expected, json)
         assertSoftly {

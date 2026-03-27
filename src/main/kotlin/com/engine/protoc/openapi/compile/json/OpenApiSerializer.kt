@@ -34,6 +34,7 @@ import com.engine.protoc.openapi.model.ServerVariable
 import com.engine.protoc.openapi.model.Tag
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
+import com.google.protobuf.Value
 
 // ---------------------------------------------------------------------------
 // Top-level OpenAPI document
@@ -93,6 +94,16 @@ internal fun OpenAPI.mergeInto(
             with(ctx) { pathItem.deepMerge(v.toJson(ctx)) }
         }
     }
+    extensionsMap.putExtensionsInto(dest, ctx)
+}
+
+// ---------------------------------------------------------------------------
+// Extensions
+// ---------------------------------------------------------------------------
+
+/** Writes each entry of an extensions map as a top-level key on [node], unwrapping values. */
+private fun Map<String, Value>.putExtensionsInto(node: ObjectNode, ctx: JsonContext) {
+    for ((key, value) in this) node.set<JsonNode>(key, value.toJson(ctx))
 }
 
 // ---------------------------------------------------------------------------
@@ -108,6 +119,7 @@ internal fun Info.toJson(ctx: JsonContext): ObjectNode {
     if (hasContact()) node.set<JsonNode>("contact", contact.toJson(ctx))
     if (hasLicense()) node.set<JsonNode>("license", license.toJson(ctx))
     if (version.isNotEmpty()) node.put("version", version)
+    extensionsMap.putExtensionsInto(node, ctx)
     return node
 }
 
@@ -164,6 +176,7 @@ internal fun Tag.toJson(ctx: JsonContext): ObjectNode {
     node.put("name", name)
     if (hasDescription()) node.put("description", description)
     if (hasExternalDocs()) node.set<JsonNode>("externalDocs", externalDocs.toJson(ctx))
+    extensionsMap.putExtensionsInto(node, ctx)
     return node
 }
 
@@ -195,6 +208,7 @@ internal fun PathItem.toJson(ctx: JsonContext): ObjectNode {
         for (s in serversList) arr.add(s.toJson(ctx))
         node.set<JsonNode>("servers", arr)
     }
+    extensionsMap.putExtensionsInto(node, ctx)
     return node
 }
 
@@ -231,6 +245,7 @@ internal fun Operation.toJson(ctx: JsonContext): ObjectNode {
         node.set<JsonNode>("servers", arr)
     }
     if (hasDeprecated()) node.put("deprecated", deprecated)
+    extensionsMap.putExtensionsInto(node, ctx)
     return node
 }
 
@@ -254,6 +269,7 @@ internal fun Parameter.toJson(ctx: JsonContext): ObjectNode {
     if (hasDeprecated()) node.put("deprecated", deprecated)
     if (hasAllowEmptyValue()) node.put("allowEmptyValue", allowEmptyValue)
     if (hasSchema()) node.set<JsonNode>("schema", schema.schema.toJson(ctx))
+    extensionsMap.putExtensionsInto(node, ctx)
     return node
 }
 
@@ -320,6 +336,7 @@ internal fun ResponseObject.toJson(ctx: JsonContext): ObjectNode {
         for ((k, v) in contentMap) contentNode.set<JsonNode>(k, v.toJson(ctx))
         node.set<JsonNode>("content", contentNode)
     }
+    extensionsMap.putExtensionsInto(node, ctx)
     return node
 }
 
@@ -360,8 +377,8 @@ internal fun SecuritySchemeOrReference.toJson(ctx: JsonContext): ObjectNode =
         else -> ctx.obj()
     }
 
-internal fun SecurityScheme.toJson(ctx: JsonContext): ObjectNode =
-    when (typeCase) {
+internal fun SecurityScheme.toJson(ctx: JsonContext): ObjectNode {
+    val node = when (typeCase) {
         SecurityScheme.TypeCase.API_KEY -> apiKey.toJson(ctx)
         SecurityScheme.TypeCase.HTTP -> http.toJson(ctx)
         SecurityScheme.TypeCase.MUTUAL_TLS -> mutualTls.toJson(ctx)
@@ -369,6 +386,9 @@ internal fun SecurityScheme.toJson(ctx: JsonContext): ObjectNode =
         SecurityScheme.TypeCase.OPEN_ID_CONNECT -> openIdConnect.toJson(ctx)
         else -> ctx.obj()
     }
+    extensionsMap.putExtensionsInto(node, ctx)
+    return node
+}
 
 internal fun APIKeySecurityScheme.toJson(ctx: JsonContext): ObjectNode {
     val node = ctx.obj()

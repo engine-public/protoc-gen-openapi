@@ -8,6 +8,7 @@ option java_multiple_files = true;
 import "engine/protoc/openapi/model/header_or_reference.proto";
 import "engine/protoc/openapi/model/link_or_reference.proto";
 import "engine/protoc/openapi/model/media_type.proto";
+import "google/protobuf/struct.proto";
 
 // Describes a single response from an API operation, including design-time, static `links` to operations based on the response.
 message ResponseObject {
@@ -30,4 +31,16 @@ message ResponseObject {
   // A map of operations links that can be followed from the response.
   // The key of the map is a short name for the link, following the naming constraints of the names for [Component Objects](https://swagger.io/specification/#components-object).
   map<string, .engine.protoc.openapi.model.LinkOrReference> links = 4;
+
+  // Extensions (also referred to as specification extensions or vendor extensions) are custom
+  // properties that start with x-, such as x-logo. These are used to add extra information or
+  // functionality that the OpenAPI standard doesn't include by default. For example, many tools
+  // including Amazon API Gateway, ReDoc, APIMatic, and Fern use extensions to include details
+  // specific to their products.
+  // Extensions are supported on the root level of the API spec and in the following places:
+  //   info section, paths section, individual paths and operations, operation parameters,
+  //   responses, tags, and security schemes.
+  // The extension value can be a primitive, an array, an object or null. If the value is an
+  // object or array of objects, the object's property names do not need to start with x-.
+  map<string, google.protobuf.Value> extensions = 5;
 }

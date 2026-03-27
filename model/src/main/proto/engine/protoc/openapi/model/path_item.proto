@@ -8,6 +8,7 @@ option java_multiple_files = true;
 import "engine/protoc/openapi/operation.proto";
 import "engine/protoc/openapi/model/parameter_or_reference.proto";
 import "engine/protoc/openapi/model/server.proto";
+import "google/protobuf/struct.proto";
 
 // Describes the operations available on a single path.
 // A Path Item MAY be empty, due to [ACL constraints](https://swagger.io/specification/#security-filtering).
@@ -71,4 +72,16 @@ message PathItem {
   // A unique parameter is defined by a combination of a [name](https://swagger.io/specification/#parameter-name) and [location](https://swagger.io/specification/#parameter-in).
   // The list can use the [Reference Object](https://swagger.io/specification/#reference-object) to link to parameters that are defined in the [OpenAPI Object's `components.parameters`](https://swagger.io/specification/#components-parameters).
   repeated .engine.protoc.openapi.model.ParameterOrReference parameters = 14;
+
+  // Extensions (also referred to as specification extensions or vendor extensions) are custom
+  // properties that start with x-, such as x-logo. These are used to add extra information or
+  // functionality that the OpenAPI standard doesn't include by default. For example, many tools
+  // including Amazon API Gateway, ReDoc, APIMatic, and Fern use extensions to include details
+  // specific to their products.
+  // Extensions are supported on the root level of the API spec and in the following places:
+  //   info section, paths section, individual paths and operations, operation parameters,
+  //   responses, tags, and security schemes.
+  // The extension value can be a primitive, an array, an object or null. If the value is an
+  // object or array of objects, the object's property names do not need to start with x-.
+  map<string, google.protobuf.Value> extensions = 15;
 }

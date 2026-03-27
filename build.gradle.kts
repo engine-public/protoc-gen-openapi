@@ -33,6 +33,7 @@ dependencies {
 
     implementation(libs.jackson.databind)
     implementation(libs.kotlin.reflect)
+    implementation(libs.networknt.json.schema.validator)
     implementation(libs.protobuf.java)
 }
 
@@ -237,9 +238,10 @@ protobuf {
              */
             if (name == "generate${this.sourceSet.name.capitalized()}Proto") {
                 dependsOn(":protoc-utils-recorder:nativeCompile")
-//                tasks.named("process${this.sourceSet.name.capitalized()}Resources").configure { dependsOn(this@all) }
                 plugins {
-                    create("recorder")
+                    create("recorder") {
+                        option("validateOutput=true")
+                    }
                 }
             }
         }

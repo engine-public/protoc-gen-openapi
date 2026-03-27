@@ -11,11 +11,15 @@ class PetStoreTest :
             ?: error("code-generator-request.binpb not found in test resources")
 
         val response = ProtocGenOpenAPI.from(request).compile()
-        val generatedFile = response.fileList.find { it.name == "swagger.openapi.json" }
+        val generatedFile = response.fileList.find { it.name == "swagger.PetService.openapi.json" }
         val mapper = ObjectMapper()
         val json = mapper.readTree(generatedFile!!.content)
 
-        test("generates a swagger.openapi.json file") {
+        test("has no validation errors") {
+            response.hasError() shouldBe false
+        }
+
+        test("generates a swagger.PetService.openapi.json file") {
             generatedFile shouldNotBe null
         }
 

@@ -6,6 +6,7 @@ import com.engine.protoc.openapi.compile.json.JsonContext
 import com.engine.protoc.openapi.compile.json.toJson
 import com.engine.protoc.util.file.FileDescriptorProtoWrapper
 import com.engine.protoc.util.service.MethodDescriptorProtoWrapper
+import com.engine.protoc.util.service.ServiceDescriptorProtoWrapper
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.google.api.AnnotationsProto
@@ -24,21 +25,24 @@ internal class PathsBuilder(
 ) {
 
     /** Collects all paths from [files] into a merged `paths` ObjectNode. */
-    fun build(files: List<FileDescriptorProtoWrapper>): ObjectNode {
+    fun build(files: List<FileDescriptorProtoWrapper>): ObjectNode = buildForServices(files.flatMap { it.services })
+
+    /** Collects paths for a single [service] into a `paths` ObjectNode. */
+    fun buildForService(service: ServiceDescriptorProtoWrapper): ObjectNode = buildForServices(listOf(service))
+
+    private fun buildForServices(services: List<ServiceDescriptorProtoWrapper>): ObjectNode {
         val byPath = LinkedHashMap<String, ObjectNode>()
 
-        for (file in files) {
-            for (service in file.services) {
-                for (method in service.methods) {
-                    val httpRule = method.options
-                        ?.findExtension(AnnotationsProto.http)?.value
-                        ?: continue
+        for (service in services) {
+            for (method in service.methods) {
+                val httpRule = method.options
+                    ?.findExtension(AnnotationsProto.http)?.value
+                    ?: continue
 
-                    val binding = httpRule.primaryBinding() ?: continue
-                    val operationNode = buildOperation(method, binding, httpRule)
-                    val pathItem = byPath.getOrPut(binding.path) { ctx.obj() }
-                    pathItem.set<JsonNode>(binding.httpMethod, operationNode)
-                }
+                val binding = httpRule.primaryBinding() ?: continue
+                val operationNode = buildOperation(method, binding, httpRule)
+                val pathItem = byPath.getOrPut(binding.path) { ctx.obj() }
+                pathItem.set<JsonNode>(binding.httpMethod, operationNode)
             }
         }
 

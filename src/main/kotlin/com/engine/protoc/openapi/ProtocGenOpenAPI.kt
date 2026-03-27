@@ -66,5 +66,5 @@ public class ProtocGenOpenAPI(
         }
     }
 
-    public fun compile(): PluginProtos.CodeGeneratorResponse = Compiler(request).compile()
+    public fun compile(): PluginProtos.CodeGeneratorResponse = Compiler(request, options).compile()
 }

@@ -9,18 +9,23 @@ public class CodeGeneratorResponseWrapper {
 
     public val hasErrors: Boolean get() = errors.isNotEmpty()
 
-    public fun addError(message: String): CodeGeneratorResponseWrapper = apply {
-        errors.add(message)
-    }
+    public fun addError(message: String): CodeGeneratorResponseWrapper =
+        apply {
+            errors.add(message)
+        }
 
-    public fun addFile(name: String, content: String): CodeGeneratorResponseWrapper = apply {
-        files.add(
-            PluginProtos.CodeGeneratorResponse.File.newBuilder()
-                .setName(name)
-                .setContent(content)
-                .build(),
-        )
-    }
+    public fun addFile(
+        name: String,
+        content: String,
+    ): CodeGeneratorResponseWrapper =
+        apply {
+            files.add(
+                PluginProtos.CodeGeneratorResponse.File.newBuilder()
+                    .setName(name)
+                    .setContent(content)
+                    .build(),
+            )
+        }
 
     public fun build(): PluginProtos.CodeGeneratorResponse {
         val builder = PluginProtos.CodeGeneratorResponse.newBuilder()

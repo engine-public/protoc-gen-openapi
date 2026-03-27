@@ -40,8 +40,8 @@ internal class PathsBuilder(
                     ?: continue
 
                 val binding = httpRule.primaryBinding() ?: continue
-                val operationNode = buildOperation(method, binding, httpRule)
-                val pathItem = byPath.getOrPut(binding.path) { ctx.obj() }
+                val (effectivePath, operationNode) = buildOperation(method, binding, httpRule)
+                val pathItem = byPath.getOrPut(effectivePath) { ctx.obj() }
                 pathItem.set<JsonNode>(binding.httpMethod, operationNode)
             }
         }
@@ -58,7 +58,7 @@ internal class PathsBuilder(
         method: MethodDescriptorProtoWrapper,
         binding: HttpBinding,
         httpRule: HttpRule,
-    ): ObjectNode {
+    ): Pair<String, ObjectNode> {
         val defaultInstance = Operation.getDefaultInstance()
         val annotation: Operation? = method.options
             ?.findExtension(Annotations.method)?.value
@@ -93,10 +93,18 @@ internal class PathsBuilder(
         }
 
         // ---- Parameters -------------------------------------------------
-        val pathParamNodes = inferPathParameters(binding.path, inputTypeName)
-        val annotationParamNodes = (annotation?.parametersList ?: emptyList())
-            .map { it.toJson(ctx) }
-        val allParams = pathParamNodes + annotationParamNodes
+        val annotatedPathParams = (annotation?.parametersList ?: emptyList())
+            .filter { it.hasParameter() && it.parameter.`in` == "path" }
+        val annotatedNonPathParams = (annotation?.parametersList ?: emptyList())
+            .filter { !it.hasParameter() || it.parameter.`in` != "path" }
+
+        val (effectivePath, pathParamNodes) = if (annotatedPathParams.isEmpty()) {
+            binding.path to inferPathParameters(binding.path, inputTypeName)
+        } else {
+            buildAnnotatedPathParams(binding.path, inputTypeName, annotatedPathParams)
+        }
+
+        val allParams = pathParamNodes + annotatedNonPathParams.map { it.toJson(ctx) }
         if (allParams.isNotEmpty()) {
             val arr = ctx.mapper.createArrayNode()
             for (p in allParams) arr.add(p)
@@ -107,7 +115,9 @@ internal class PathsBuilder(
         val body = httpRule.body
         when {
             annotation?.hasRequestBody() == true -> {
-                node.set<JsonNode>("requestBody", annotation.requestBody.toJson(ctx))
+                val requestBodyNode = annotation.requestBody.toJson(ctx)
+                injectMissingRef(requestBodyNode.get("content") as? ObjectNode, inputTypeName)
+                node.set<JsonNode>("requestBody", requestBodyNode)
                 if (annotation.requestBody.hasRequestBody()) {
                     annotation.requestBody.requestBody.contentMap.values.forEach { mt ->
                         if (mt.hasSchema()) collector.collectFromSchema(mt.schema)
@@ -138,7 +148,74 @@ internal class PathsBuilder(
         }
         if (annotation?.hasDeprecated() == true) node.put("deprecated", annotation.deprecated)
 
-        return node
+        return effectivePath to node
+    }
+
+    // ---- Annotated path parameter merging --------------------------------
+
+    /**
+     * Aligns [annotatedParams] positionally against path parameters inferred from
+     * [originalPath]/[inputTypeName].  For each (inferred, annotated) pair:
+     *   - the annotated parameter's fields override the inferred ones
+     *   - schemas are deep-merged (inferred as base, annotation overrides on top)
+     *   - the path template key is rewritten to use the annotated parameter name
+     *
+     * Any inferred parameters beyond the length of [annotatedParams] are appended unchanged.
+     */
+    private fun buildAnnotatedPathParams(
+        originalPath: String,
+        inputTypeName: String,
+        annotatedParams: List<com.engine.protoc.openapi.model.ParameterOrReference>,
+    ): Pair<String, List<ObjectNode>> {
+        val inferredNodes = inferPathParameters(originalPath, inputTypeName)
+        val inferredNames = pathParamRegex.findAll(originalPath).map { it.groupValues[1] }.toList()
+
+        var rewrittenPath = originalPath
+        val mergedNodes = annotatedParams.mapIndexed { i, annotatedParam ->
+            val inferredNode = inferredNodes.getOrNull(i) ?: ctx.obj()
+            val annotatedNode = annotatedParam.toJson(ctx)
+
+            val annotatedName = annotatedNode.path("name").asText("")
+            val inferredName = inferredNames.getOrNull(i) ?: ""
+            if (annotatedName.isNotEmpty() && inferredName.isNotEmpty() && annotatedName != inferredName) {
+                rewrittenPath = rewrittenPath.replace("{$inferredName}", "{$annotatedName}")
+            }
+
+            // Deep-merge schemas: inferred as base, annotation overrides on top
+            val mergedSchema = (inferredNode.get("schema") as? ObjectNode)?.deepCopy() ?: ctx.obj()
+            (annotatedNode.get("schema") as? ObjectNode)?.also { annotatedSchema ->
+                with(ctx) { mergedSchema.deepMerge(annotatedSchema) }
+            }
+
+            // Build merged param: inferred fields as base, annotation fields override
+            val merged = ctx.obj()
+            for ((k, v) in inferredNode.fields()) if (k != "schema") merged.set<JsonNode>(k, v)
+            for ((k, v) in annotatedNode.fields()) if (k != "schema") merged.set<JsonNode>(k, v)
+            if (mergedSchema.size() > 0) merged.set<JsonNode>("schema", mergedSchema)
+            merged
+        }
+
+        // Keep any inferred params beyond what the annotation covers
+        val remaining = inferredNodes.drop(annotatedParams.size)
+        return rewrittenPath to (mergedNodes + remaining)
+    }
+
+    // ---- $ref injection --------------------------------------------------
+
+    /**
+     * For each media type in [contentNode] whose `schema` lacks a `$ref`, injects one derived
+     * from [inputTypeName].  No-ops for well-known scalar wrapper types since those inline
+     * directly rather than referencing a component schema.
+     */
+    private fun injectMissingRef(contentNode: ObjectNode?, inputTypeName: String) {
+        if (contentNode == null) return
+        if (ctx.wellKnownScalarSchema(inputTypeName) != null) return
+        val ref = "#/components/schemas/${ctx.messageIndex.simpleNameOf(inputTypeName)}"
+        for ((_, mediaTypeNode) in contentNode.fields()) {
+            if (mediaTypeNode !is ObjectNode) continue
+            val schemaNode = mediaTypeNode.get("schema") as? ObjectNode ?: continue
+            if (!schemaNode.has("\$ref")) schemaNode.put("\$ref", ref)
+        }
     }
 
     // ---- Path parameter inference ----------------------------------------

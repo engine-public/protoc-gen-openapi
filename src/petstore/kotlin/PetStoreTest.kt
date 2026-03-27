@@ -93,16 +93,15 @@ class PetStoreTest : FunSpec({
         post!!.get("operationId").asText() shouldBe "addPet"
     }
 
-    test("paths contains GET /pet/{value} with path parameter") {
+    test("paths contains GET /pet/{petId} with path parameter") {
         val paths = json.get("paths")
-        // GetPetById uses Int64Value, path is /pet/{value}
-        val getPetPath = paths.get("/pet/{value}")
+        val getPetPath = paths.get("/pet/{petId}")
         getPetPath shouldNotBe null
         val get = getPetPath!!.get("get")
         get shouldNotBe null
         val params = get.get("parameters")
         params shouldNotBe null
-        params[0].get("name").asText() shouldBe "value"
+        params[0].get("name").asText() shouldBe "petId"
         params[0].get("in").asText() shouldBe "path"
         params[0].get("required").asBoolean() shouldBe true
         params[0].get("schema").get("type").asText() shouldBe "integer"

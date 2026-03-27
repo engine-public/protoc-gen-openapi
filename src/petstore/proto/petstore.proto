@@ -302,7 +302,7 @@ service PetService {
                                     schema: {
                                         object: {
                                             proto_ref: { [type.googleapis.com/swagger.Pet] {} }
-                                            description: "A Pet in JSON Format"
+                                            description: "A Pet in JSON format"
                                             read_only: true
                                         }
                                     }
@@ -337,7 +337,87 @@ service PetService {
             body: ""
         };
         option (.engine.protoc.openapi.method) = {
-
+            parameters: [
+                {
+                    parameter: {
+                        name: "petId",
+                        in: "path",
+                        description: "ID of pet that needs to be fetched"
+                        required: true
+                        schema: {
+                            schema: {
+                                object: {
+                                    description: "param ID of pet that needs to be fetched"
+                                    exclusive_maximum: 10
+                                    exclusive_minimum: 1
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+            responses: {
+                default: {
+                    response_object: {
+                        description: "Unexpected error"
+                    }
+                }
+                codes: {
+                    key: "200"
+                    value: {
+                        response_object: {
+                            description: "The pet"
+                            content: {
+                                key: "application/xml"
+                                value: {
+                                    schema: {
+                                        object: {
+                                            description: "A Pet in XML Format"
+                                        }
+                                    }
+                                }
+                            }
+                            content: {
+                                key: "application/json"
+                                value: {
+                                    schema: {
+                                        object: {
+                                            description: "A Pet in JSON format"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                codes: {
+                    key: "400"
+                    value: {
+                        response_object: {
+                            description: "Invalid ID supplied"
+                        }
+                    }
+                }
+                codes: {
+                    key: "404"
+                    value: {
+                        response_object: {
+                            description: "Pet not found"
+                        }
+                    }
+                }
+            }
+            security: {
+                names: {
+                    key: "petstore_auth"
+                    value {
+                        values: ["write:pets", "read:pets"]
+                    }
+                }
+                names: {
+                    key: "api_key"
+                }
+            }
         };
     }
 }

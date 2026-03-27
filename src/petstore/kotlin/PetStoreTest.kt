@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.kotest.assertions.assertSoftly
 import io.kotest.assertions.withClue
 import io.kotest.core.spec.style.FunSpec
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import java.io.File
 
 private data class JsonDiff(val path: String, val expected: JsonNode?, val actual: JsonNode?)
 
@@ -40,17 +42,15 @@ private fun collectJsonDiffs(path: String, expected: JsonNode, actual: JsonNode)
 
 class PetStoreTest : FunSpec({
 
-    val request = PetStoreTest::class.java.getResourceAsStream("/code-generator-request.binpb")
-        ?: error("code-generator-request.binpb not found in test resources")
-
+    val request = PetStoreTest::class.java.getResourceAsStream("/code-generator-request.binpb").shouldNotBeNull()
     val response = ProtocGenOpenAPI.from(request) {
         merge = false
         validateOutput = true
         caseStrategy = ProtocGenOpenAPI.Options.CaseStrategy.CAMEL_CASE
     }.compile()
-    val generatedFile = response.fileList.find { it.name == "swagger.PetService.openapi.json" }
+    val generatedFile = response.fileList.find { it.name == "swagger.PetService.openapi.json" }.shouldNotBeNull()
     val mapper = ObjectMapper()
-    val json = mapper.readTree(generatedFile!!.content)
+    val json = mapper.readTree(generatedFile.content)
 
     test("has no validation errors") {
         response.hasError() shouldBe false

@@ -7,6 +7,9 @@ import com.engine.protoc.openapi.model.Components
 import com.engine.protoc.openapi.model.Contact
 import com.engine.protoc.openapi.model.ExternalDocumentation
 import com.engine.protoc.openapi.model.HTTPSecurityScheme
+import com.engine.protoc.openapi.model.Header
+import com.engine.protoc.openapi.model.HeaderOrReference
+import com.engine.protoc.openapi.model.HeaderSchema
 import com.engine.protoc.openapi.model.Info
 import com.engine.protoc.openapi.model.License
 import com.engine.protoc.openapi.model.MediaType
@@ -338,12 +341,43 @@ internal fun ResponseOrReference.toJson(ctx: JsonContext): ObjectNode =
 internal fun ResponseObject.toJson(ctx: JsonContext): ObjectNode {
     val node = ctx.obj()
     node.put("description", description)
+    if (headersMap.isNotEmpty()) {
+        val headersNode = ctx.obj()
+        for ((k, v) in headersMap) headersNode.set<JsonNode>(k, v.toJson(ctx))
+        node.set<JsonNode>("headers", headersNode)
+    }
     if (contentMap.isNotEmpty()) {
         val contentNode = ctx.obj()
         for ((k, v) in contentMap) contentNode.set<JsonNode>(k, v.toJson(ctx))
         node.set<JsonNode>("content", contentNode)
     }
     extensionsMap.putExtensionsInto(node, ctx)
+    return node
+}
+
+// ---------------------------------------------------------------------------
+// Headers
+// ---------------------------------------------------------------------------
+
+internal fun HeaderOrReference.toJson(ctx: JsonContext): ObjectNode =
+    when (typeCase) {
+        HeaderOrReference.TypeCase.HEADER -> header.toJson(ctx)
+        HeaderOrReference.TypeCase.REFERENCE -> reference.toJson(ctx)
+        else -> ctx.obj()
+    }
+
+internal fun Header.toJson(ctx: JsonContext): ObjectNode {
+    val node = ctx.obj()
+    if (hasDescription()) node.put("description", description)
+    if (hasRequired()) node.put("required", required)
+    if (hasDeprecated()) node.put("deprecated", deprecated)
+    // HeaderSchema is a proto wrapper that groups style/explode/schema together, but in the
+    // OpenAPI JSON output these fields are inlined directly at the Header object level.
+    if (hasSchema()) {
+        if (schema.hasStyle()) node.put("style", schema.style)
+        if (schema.hasExplode()) node.put("explode", schema.explode)
+        if (schema.hasSchema()) node.set<JsonNode>("schema", schema.schema.toJson(ctx))
+    }
     return node
 }
 
@@ -368,6 +402,11 @@ internal fun SecurityRequirement.toJson(ctx: JsonContext): ObjectNode {
 
 internal fun Components.toJson(ctx: JsonContext): ObjectNode {
     val node = ctx.obj()
+    if (requestBodiesMap.isNotEmpty()) {
+        val rbNode = ctx.obj()
+        for ((k, v) in requestBodiesMap) rbNode.set<JsonNode>(k, v.toJson(ctx))
+        node.set<JsonNode>("requestBodies", rbNode)
+    }
     if (securitySchemesMap.isNotEmpty()) {
         val ssNode = ctx.obj()
         for ((k, v) in securitySchemesMap) ssNode.set<JsonNode>(k, v.toJson(ctx))

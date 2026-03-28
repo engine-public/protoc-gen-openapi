@@ -66,6 +66,41 @@ option (.engine.protoc.openapi.file) = {
                 }
             }
         }
+        request_bodies: {
+            key: "Pet"
+            value: {
+                request_body: {
+                    description: "Pet object that needs to be added to the store"
+                    content: {
+                        key: "application/json"
+                        value: { schema: { object: { proto_ref: { [type.googleapis.com/swagger.api.Pet] {} } } } }
+                    }
+                    content: {
+                        key: "application/xml"
+                        value: { schema: { object: { proto_ref: { [type.googleapis.com/swagger.api.Pet] {} } } } }
+                    }
+                }
+            }
+        }
+        request_bodies: {
+            key: "UserArray"
+            value: {
+                request_body: {
+                    description: "List of user object"
+                    content: {
+                        key: "application/json"
+                        value: {
+                            schema: {
+                                object: {
+                                    type: "array"
+                                    items: { object: { proto_ref: { [type.googleapis.com/swagger.api.User] {} } } }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 };
 
@@ -104,6 +139,8 @@ message Pet {
         object: {
             extensions: { key: "x-swagger-router-model" value: { string_value: "io.swagger.petstore.model.Pet" } }
             xml: { name: "pet" }
+            required: "name"
+            required: "photoUrls"
         }
     };
     int64 id = 1 [(.engine.protoc.openapi.field) = {
@@ -1007,6 +1044,25 @@ service PetService {
                     value: {
                         response_object: {
                             description: "successful operation"
+                            headers: {
+                                key: "X-Rate-Limit"
+                                value: {
+                                    header: {
+                                        description: "calls per hour allowed by the user"
+                                        schema: { schema: { object: { type: "integer" format: "int32" } } }
+                                    }
+                                }
+                            }
+                            headers: {
+                                key: "X-Expires-After"
+                                value: {
+                                    header: {
+                                        description: "date in UTC when token expires"
+                                        schema: { schema: { object: { type: "string" format: "date-time" } } }
+                                    }
+                                }
+                            }
+
                             content: {
                                 key: "application/xml"
                                 value: { schema: { object: { type: "string" } } }

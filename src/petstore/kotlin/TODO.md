@@ -288,7 +288,7 @@ JSON field names (`photoUrls` not `photo_urls`).
 | [X]  | H     | 9     | `ship_date` comment treated as description, not format | 2      | Proto annotation gap |
 | [X]  | I     | 11    | XML annotations missing from messages/fields           | 8      | Proto annotation gap |
 | [X]  | J     | 8     | Internal request-wrapper messages leak into components | 10     | Design issue         |
-| [ ]  | K     | 13    | `components.requestBodies` not populated               | 1      | Proto annotation gap |
+| [X]  | K     | 13    | `components.requestBodies` not populated               | 1      | Proto annotation gap |
 | [ ]  | L     | 7     | Empty `parameters: []` emitted as null                 | 1      | Compiler/test gap    |
-| [ ]  | M     | 12    | `loginUser` 200 response headers missing               | 1      | Proto annotation gap |
-| [ ]  | N     | 14    | `Pet.required` (`name`, `photoUrls`) missing           | 1      | Proto annotation gap |
+| [X]  | M     | 12    | `loginUser` 200 response headers missing               | 1      | Proto annotation gap |
+| [X]  | N     | 14    | `Pet.required` (`name`, `photoUrls`) missing           | 1      | Proto annotation gap |

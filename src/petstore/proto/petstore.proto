@@ -77,6 +77,7 @@ message Category {
     option (.engine.protoc.openapi.message) = {
         object: {
             extensions: { key: "x-swagger-router-model" value: { string_value: "io.swagger.petstore.model.Category" } }
+            xml: { name: "category" }
         }
     };
     int64 id = 1 [(.engine.protoc.openapi.field) = {
@@ -91,6 +92,7 @@ message Tag {
     option (.engine.protoc.openapi.message) = {
         object: {
             extensions: { key: "x-swagger-router-model" value: { string_value: "io.swagger.petstore.model.Tag" } }
+            xml: { name: "tag" }
         }
     };
     int64 id = 1;
@@ -101,6 +103,7 @@ message Pet {
     option (.engine.protoc.openapi.message) = {
         object: {
             extensions: { key: "x-swagger-router-model" value: { string_value: "io.swagger.petstore.model.Pet" } }
+            xml: { name: "pet" }
         }
     };
     int64 id = 1 [(.engine.protoc.openapi.field) = {
@@ -110,8 +113,15 @@ message Pet {
         object: { example: { [type.googleapis.com/google.protobuf.Value] { string_value: "doggie" } } }
     }];
     .swagger.api.Category category = 3;
-    repeated string photo_urls = 4;
-    repeated .swagger.api.Tag tags = 5;
+    repeated string photo_urls = 4 [(.engine.protoc.openapi.field) = {
+        object: {
+            xml: { wrapped: true }
+            items: { object: { xml: { name: "photoUrl" } } }
+        }
+    }];
+    repeated .swagger.api.Tag tags = 5 [(.engine.protoc.openapi.field) = {
+        object: { xml: { wrapped: true } }
+    }];
     // pet status in the store
     string status = 6 [(.engine.protoc.openapi.field) = {
         object: {
@@ -126,6 +136,7 @@ message Order {
     option (.engine.protoc.openapi.message) = {
         object: {
             extensions: { key: "x-swagger-router-model" value: { string_value: "io.swagger.petstore.model.Order" } }
+            xml: { name: "order" }
         }
     };
     int64 id = 1 [(.engine.protoc.openapi.field) = {
@@ -156,6 +167,7 @@ message User {
     option (.engine.protoc.openapi.message) = {
         object: {
             extensions: { key: "x-swagger-router-model" value: { string_value: "io.swagger.petstore.model.User" } }
+            xml: { name: "user" }
         }
     };
     int64 id = 1 [(.engine.protoc.openapi.field) = {
@@ -186,6 +198,9 @@ message User {
 }
 
 message ApiResponse {
+    option (.engine.protoc.openapi.message) = {
+        object: { xml: { name: "##default" } }
+    };
     int32 code = 1;
     string type = 2;
     string message = 3;

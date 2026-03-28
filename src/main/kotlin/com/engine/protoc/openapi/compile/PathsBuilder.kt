@@ -68,9 +68,33 @@ internal class PathsBuilder(
         val inputTypeName = method.proto.inputType
         val outputTypeName = method.proto.outputType
 
-        // Seed the collector so schemas are generated for in/out types
-        collector.collect(inputTypeName)
+        // Always collect the output type — it is an API entity that clients receive.
         collector.collect(outputTypeName)
+
+        // Only collect the input type as a component schema when it will actually be
+        // referenced as a named $ref in the OpenAPI output.  This happens in exactly one
+        // case: when the HTTP binding has body == "*" AND no explicit `requestBody`
+        // annotation is present, causing `inferRequestBody()` to emit a $ref to the input
+        // type.
+        //
+        // In all other cases the input type should be suppressed:
+        //
+        //   body == ""  — The input message is a pure parameter bag; its fields become
+        //                 path/query/header parameters.  It has no presence in the REST API
+        //                 surface and should not appear as a component schema.
+        //
+        //   body == "*" with explicit requestBody annotation — The annotation provides its
+        //                 own schema (possibly referencing a different type entirely), so the
+        //                 input message is again just a parameter carrier and is not $ref'd.
+        //
+        //   body == "<field>" — Only the named field's type ends up in the request body, not
+        //                 the input message itself.  The message index is consulted for field
+        //                 lookup independently of the collector, so skipping collect() here
+        //                 is safe and prevents the wrapper from leaking into schemas.
+        val hasExplicitRequestBody = annotation?.hasRequestBody() == true
+        if (binding.body == "*" && !hasExplicitRequestBody) {
+            collector.collect(inputTypeName)
+        }
 
         val node = ctx.obj()
 

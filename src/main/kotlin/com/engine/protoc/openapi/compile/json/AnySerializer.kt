@@ -64,7 +64,13 @@ internal fun Value.toJson(ctx: JsonContext): JsonNode =
 
         Value.KindCase.BOOL_VALUE -> ctx.mapper.nodeFactory.booleanNode(boolValue)
 
-        Value.KindCase.NUMBER_VALUE -> ctx.mapper.nodeFactory.numberNode(numberValue)
+        Value.KindCase.NUMBER_VALUE -> numberValue.let { n ->
+            if (n == kotlin.math.floor(n) && n.isFinite() && n >= Long.MIN_VALUE.toDouble() && n <= Long.MAX_VALUE.toDouble()) {
+                ctx.mapper.nodeFactory.numberNode(n.toLong())
+            } else {
+                ctx.mapper.nodeFactory.numberNode(n)
+            }
+        }
 
         Value.KindCase.STRING_VALUE -> ctx.mapper.nodeFactory.textNode(stringValue)
 

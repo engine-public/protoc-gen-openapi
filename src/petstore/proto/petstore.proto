@@ -79,8 +79,12 @@ message Category {
             extensions: { key: "x-swagger-router-model" value: { string_value: "io.swagger.petstore.model.Category" } }
         }
     };
-    int64 id = 1;
-    string name = 2;
+    int64 id = 1 [(.engine.protoc.openapi.field) = {
+        object: { example: { [type.googleapis.com/google.protobuf.Value] { number_value: 1 } } }
+    }];
+    string name = 2 [(.engine.protoc.openapi.field) = {
+        object: { example: { [type.googleapis.com/google.protobuf.Value] { string_value: "Dogs" } } }
+    }];
 }
 
 message Tag {
@@ -99,8 +103,12 @@ message Pet {
             extensions: { key: "x-swagger-router-model" value: { string_value: "io.swagger.petstore.model.Pet" } }
         }
     };
-    int64 id = 1;
-    string name = 2;
+    int64 id = 1 [(.engine.protoc.openapi.field) = {
+        object: { example: { [type.googleapis.com/google.protobuf.Value] { number_value: 10 } } }
+    }];
+    string name = 2 [(.engine.protoc.openapi.field) = {
+        object: { example: { [type.googleapis.com/google.protobuf.Value] { string_value: "doggie" } } }
+    }];
     .swagger.api.Category category = 3;
     repeated string photo_urls = 4;
     repeated .swagger.api.Tag tags = 5;
@@ -120,9 +128,15 @@ message Order {
             extensions: { key: "x-swagger-router-model" value: { string_value: "io.swagger.petstore.model.Order" } }
         }
     };
-    int64 id = 1;
-    int64 pet_id = 2;
-    int32 quantity = 3;
+    int64 id = 1 [(.engine.protoc.openapi.field) = {
+        object: { example: { [type.googleapis.com/google.protobuf.Value] { number_value: 10 } } }
+    }];
+    int64 pet_id = 2 [(.engine.protoc.openapi.field) = {
+        object: { example: { [type.googleapis.com/google.protobuf.Value] { number_value: 198772 } } }
+    }];
+    int32 quantity = 3 [(.engine.protoc.openapi.field) = {
+        object: { example: { [type.googleapis.com/google.protobuf.Value] { number_value: 7 } } }
+    }];
     // date-time
     string ship_date = 4;
     // Order Status
@@ -131,6 +145,7 @@ message Order {
             enum: { [type.googleapis.com/google.protobuf.Value] { string_value: "placed" } }
             enum: { [type.googleapis.com/google.protobuf.Value] { string_value: "approved" } }
             enum: { [type.googleapis.com/google.protobuf.Value] { string_value: "delivered" } }
+            example: { [type.googleapis.com/google.protobuf.Value] { string_value: "approved" } }
         }
     }];
     bool complete = 6;
@@ -142,15 +157,31 @@ message User {
             extensions: { key: "x-swagger-router-model" value: { string_value: "io.swagger.petstore.model.User" } }
         }
     };
-    int64 id = 1;
-    string username = 2;
-    string first_name = 3;
-    string last_name = 4;
-    string email = 5;
-    string password = 6;
-    string phone = 7;
+    int64 id = 1 [(.engine.protoc.openapi.field) = {
+        object: { example: { [type.googleapis.com/google.protobuf.Value] { number_value: 10 } } }
+    }];
+    string username = 2 [(.engine.protoc.openapi.field) = {
+        object: { example: { [type.googleapis.com/google.protobuf.Value] { string_value: "theUser" } } }
+    }];
+    string first_name = 3 [(.engine.protoc.openapi.field) = {
+        object: { example: { [type.googleapis.com/google.protobuf.Value] { string_value: "John" } } }
+    }];
+    string last_name = 4 [(.engine.protoc.openapi.field) = {
+        object: { example: { [type.googleapis.com/google.protobuf.Value] { string_value: "James" } } }
+    }];
+    string email = 5 [(.engine.protoc.openapi.field) = {
+        object: { example: { [type.googleapis.com/google.protobuf.Value] { string_value: "john@email.com" } } }
+    }];
+    string password = 6 [(.engine.protoc.openapi.field) = {
+        object: { example: { [type.googleapis.com/google.protobuf.Value] { string_value: "12345" } } }
+    }];
+    string phone = 7 [(.engine.protoc.openapi.field) = {
+        object: { example: { [type.googleapis.com/google.protobuf.Value] { string_value: "12345" } } }
+    }];
     // User Status
-    int32 user_status = 8;
+    int32 user_status = 8 [(.engine.protoc.openapi.field) = {
+        object: { example: { [type.googleapis.com/google.protobuf.Value] { number_value: 1 } } }
+    }];
 }
 
 message ApiResponse {

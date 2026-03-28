@@ -284,7 +284,7 @@ JSON field names (`photoUrls` not `photo_urls`).
 | [X]  | D     | 2     | Stray `$ref` injected into explicit content schemas    | 1      | Compiler bug         |
 | [X]  | E     | 1     | Operation-level `x-*` extensions not emitted           | 9      | Compiler gap         |
 | [X]  | F     | 4     | Schema-level `extensions` not in model or serializer   | 5      | Model + compiler gap |
-| [ ]  | G     | 10    | Field `example` annotations missing from proto         | 16     | Proto annotation gap |
+| [X]  | G     | 10    | Field `example` annotations missing from proto         | 16     | Proto annotation gap |
 | [ ]  | H     | 9     | `ship_date` comment treated as description, not format | 2      | Proto annotation gap |
 | [ ]  | I     | 11    | XML annotations missing from messages/fields           | 8      | Proto annotation gap |
 | [ ]  | J     | 8     | Internal request-wrapper messages leak into components | 10     | Design issue         |

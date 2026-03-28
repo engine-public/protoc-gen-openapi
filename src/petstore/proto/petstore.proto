@@ -137,8 +137,9 @@ message Order {
     int32 quantity = 3 [(.engine.protoc.openapi.field) = {
         object: { example: { [type.googleapis.com/google.protobuf.Value] { number_value: 7 } } }
     }];
-    // date-time
-    string ship_date = 4;
+    string ship_date = 4 [(.engine.protoc.openapi.field) = {
+        object: { format: "date-time" }
+    }];
     // Order Status
     string status = 5 [(.engine.protoc.openapi.field) = {
         object: {

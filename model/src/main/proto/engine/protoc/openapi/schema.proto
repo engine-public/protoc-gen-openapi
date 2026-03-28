@@ -9,6 +9,7 @@ import "engine/protoc/openapi/model/discriminator.proto";
 import "engine/protoc/openapi/model/external_documentation.proto";
 import "engine/protoc/openapi/model/xml.proto";
 import "google/protobuf/any.proto";
+import "google/protobuf/struct.proto";
 
 // The Schema Object allows the definition of input and output data types.
 // These types can be objects, but also primitives and arrays.
@@ -435,4 +436,9 @@ message SchemaObject {
   // See https://json-schema.org/draft/2020-12/json-schema-core#section-8.2.2
   // This field maps to $dynamicAnchor in the output document.
   optional string dynamic_anchor = 59;
+
+  // OpenAPI extension fields (x-* properties).
+  // Keys must begin with "x-"; values may be any JSON-compatible scalar, array, or object.
+  // See https://spec.openapis.org/oas/v3.1.0#specification-extensions
+  map<string, google.protobuf.Value> extensions = 60;
 }

@@ -7,6 +7,7 @@ import com.engine.protoc.openapi.model.ExternalDocumentation
 import com.engine.protoc.openapi.model.XML
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
+import com.google.protobuf.Value
 
 // ---------------------------------------------------------------------------
 // Schema (oneof bool | SchemaObject)
@@ -169,6 +170,7 @@ internal fun SchemaObject.toJson(ctx: JsonContext): ObjectNode {
     if (hasDiscriminator()) node.set<JsonNode>("discriminator", discriminator.toJson(ctx))
     if (hasXml()) node.set<JsonNode>("xml", xml.toJson(ctx))
     if (hasExternalDocs()) node.set<JsonNode>("externalDocs", externalDocs.toJson(ctx))
+    extensionsMap.putExtensionsInto(node, ctx)
 
     return node
 }

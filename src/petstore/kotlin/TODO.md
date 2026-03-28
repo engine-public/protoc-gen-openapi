@@ -279,11 +279,11 @@ JSON field names (`photoUrls` not `photo_urls`).
 | Done | Group | Order | Description                                            | Errors | Type                 |
 |------|-------|-------|--------------------------------------------------------|--------|----------------------|
 | [X]  | A     | 5     | `openapi` version (3.0.4 vs 3.1.0)                     | 1      | YAML mismatch        |
-| [ ]  | B     | 3     | `explode` not serialized from `ParameterSchema`        | 2      | Compiler bug         |
-| [ ]  | C     | 6     | DeletePet params emitted in wrong order                | 12     | Compiler bug         |
-| [ ]  | D     | 2     | Stray `$ref` injected into explicit content schemas    | 1      | Compiler bug         |
-| [ ]  | E     | 1     | Operation-level `x-*` extensions not emitted           | 9      | Compiler gap         |
-| [ ]  | F     | 4     | Schema-level `extensions` not in model or serializer   | 5      | Model + compiler gap |
+| [X]  | B     | 3     | `explode` not serialized from `ParameterSchema`        | 2      | Compiler bug         |
+| [X]  | C     | 6     | DeletePet params emitted in wrong order                | 12     | Compiler bug         |
+| [X]  | D     | 2     | Stray `$ref` injected into explicit content schemas    | 1      | Compiler bug         |
+| [X]  | E     | 1     | Operation-level `x-*` extensions not emitted           | 9      | Compiler gap         |
+| [X]  | F     | 4     | Schema-level `extensions` not in model or serializer   | 5      | Model + compiler gap |
 | [ ]  | G     | 10    | Field `example` annotations missing from proto         | 16     | Proto annotation gap |
 | [ ]  | H     | 9     | `ship_date` comment treated as description, not format | 2      | Proto annotation gap |
 | [ ]  | I     | 11    | XML annotations missing from messages/fields           | 8      | Proto annotation gap |

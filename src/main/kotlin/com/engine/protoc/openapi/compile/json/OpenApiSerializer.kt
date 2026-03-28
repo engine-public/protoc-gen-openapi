@@ -102,7 +102,7 @@ internal fun OpenAPI.mergeInto(
 // ---------------------------------------------------------------------------
 
 /** Writes each entry of an extensions map as a top-level key on [node], unwrapping values. */
-private fun Map<String, Value>.putExtensionsInto(
+internal fun Map<String, Value>.putExtensionsInto(
     node: ObjectNode,
     ctx: JsonContext,
 ) {
@@ -271,12 +271,16 @@ internal fun Parameter.toJson(ctx: JsonContext): ObjectNode {
     if (hasRequired()) node.put("required", required)
     if (hasDeprecated()) node.put("deprecated", deprecated)
     if (hasAllowEmptyValue()) node.put("allowEmptyValue", allowEmptyValue)
-    if (hasSchema()) node.set<JsonNode>("schema", schema.schema.toJson(ctx))
+    if (hasSchema()) {
+        if (schema.hasStyle()) node.put("style", schema.style)
+        if (schema.hasExplode()) node.put("explode", schema.explode)
+        if (schema.hasAllowReserved()) node.put("allowReserved", schema.allowReserved)
+        if (schema.hasSchema()) node.set<JsonNode>("schema", schema.schema.toJson(ctx))
+    }
     extensionsMap.putExtensionsInto(node, ctx)
     return node
 }
 
-// Unused but kept for potential future use
 @Suppress("UnusedParameter", "unused")
 internal fun ParameterSchema.toJson(ctx: JsonContext): ObjectNode {
     val node = ctx.obj()

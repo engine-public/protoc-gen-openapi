@@ -3,6 +3,7 @@ package com.engine.protoc.openapi.compile
 import com.engine.protoc.openapi.Annotations
 import com.engine.protoc.openapi.Operation
 import com.engine.protoc.openapi.compile.json.JsonContext
+import com.engine.protoc.openapi.compile.json.putExtensionsInto
 import com.engine.protoc.openapi.compile.json.toJson
 import com.engine.protoc.util.file.FileDescriptorProtoWrapper
 import com.engine.protoc.util.service.MethodDescriptorProtoWrapper
@@ -93,10 +94,9 @@ internal class PathsBuilder(
         }
 
         // ---- Parameters -------------------------------------------------
-        val annotatedPathParams = (annotation?.parametersList ?: emptyList())
+        val annotatedParams = annotation?.parametersList ?: emptyList()
+        val annotatedPathParams = annotatedParams
             .filter { it.hasParameter() && it.parameter.`in` == "path" }
-        val annotatedNonPathParams = (annotation?.parametersList ?: emptyList())
-            .filter { !it.hasParameter() || it.parameter.`in` != "path" }
 
         val (effectivePath, pathParamNodes) = if (annotatedPathParams.isEmpty()) {
             binding.path to inferPathParameters(binding.path, inputTypeName)
@@ -104,7 +104,22 @@ internal class PathsBuilder(
             buildAnnotatedPathParams(binding.path, inputTypeName, annotatedPathParams)
         }
 
-        val allParams = pathParamNodes + annotatedNonPathParams.map { it.toJson(ctx) }
+        val allParams = if (annotatedPathParams.isEmpty()) {
+            // No annotated path params: inferred path params first, then annotated non-path params
+            val annotatedNonPathParams = annotatedParams
+                .filter { !it.hasParameter() || it.parameter.`in` != "path" }
+            pathParamNodes + annotatedNonPathParams.map { it.toJson(ctx) }
+        } else {
+            // Annotated path params exist: preserve full annotation order
+            var pathParamIndex = 0
+            annotatedParams.map { param ->
+                if (param.hasParameter() && param.parameter.`in` == "path") {
+                    pathParamNodes[pathParamIndex++]
+                } else {
+                    param.toJson(ctx)
+                }
+            }
+        }
         if (allParams.isNotEmpty()) {
             val arr = ctx.mapper.createArrayNode()
             for (p in allParams) arr.add(p)
@@ -147,6 +162,7 @@ internal class PathsBuilder(
             node.set<JsonNode>("security", arr)
         }
         if (annotation?.hasDeprecated() == true) node.put("deprecated", annotation.deprecated)
+        annotation?.extensionsMap?.putExtensionsInto(node, ctx)
 
         return effectivePath to node
     }
@@ -217,7 +233,7 @@ internal class PathsBuilder(
         for ((_, mediaTypeNode) in contentNode.fields()) {
             if (mediaTypeNode !is ObjectNode) continue
             val schemaNode = mediaTypeNode.get("schema") as? ObjectNode ?: continue
-            if (!schemaNode.has("\$ref")) schemaNode.put("\$ref", ref)
+            if (schemaNode.size() == 0) schemaNode.put("\$ref", ref)
         }
     }
 

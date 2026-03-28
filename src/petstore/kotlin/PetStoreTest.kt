@@ -45,6 +45,9 @@ private fun collectJsonDiffs(
                 val act = actual.get(field)
                 when {
                     exp == null -> diffs.add(JsonDiff("$path.$field", null, act))
+                    // A missing field is semantically equivalent to an empty array in OpenAPI
+                    // (e.g. `parameters: []` and omitting `parameters` are identical).
+                    act == null && exp.isArray && exp.size() == 0 -> {}
                     act == null -> diffs.add(JsonDiff("$path.$field", exp, null))
                     else -> diffs.addAll(collectJsonDiffs("$path.$field", exp, act))
                 }

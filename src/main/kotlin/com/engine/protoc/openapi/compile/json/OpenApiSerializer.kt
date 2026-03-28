@@ -499,7 +499,7 @@ internal fun Reference.toJson(ctx: JsonContext): ObjectNode {
     val node = ctx.obj()
     when (refTypeCase) {
         Reference.RefTypeCase.URI_REF -> node.put("\$ref", uriRef)
-        Reference.RefTypeCase.PROTO_REF -> node.put("\$ref", ctx.resolveProtoRef(protoRef))
+        Reference.RefTypeCase.PROTO_RPC_REF -> node.put("\$ref", ctx.resolveProtoRef(protoRpcRef))
         else -> {}
     }
     if (hasSummary()) node.put("summary", summary)

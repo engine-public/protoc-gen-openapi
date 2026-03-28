@@ -1,0 +1,8 @@
+* look for gaps between model and compiler, implement
+* look for uncovered compiler/model generate goofball proto for it
+* generate oops-all-conventions.proto
+* generate new readme
+* double check caseStrategy?
+* implement namespacing component models
+* support implicit methods (see envoy docs)
+*

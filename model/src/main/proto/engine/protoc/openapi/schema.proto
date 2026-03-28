@@ -388,7 +388,10 @@ message SchemaObject {
         // See https://json-schema.org/draft/2020-12/json-schema-core#section-8.2.3.1
         string uri_ref = 52;
 
-        .google.protobuf.Any proto_ref = 53;
+        // A reference to a proto message type, resolved at compile time to an OpenAPI `$ref` into
+        // `#/components/schemas`. Use the Any type-URL syntax:
+        // `[type.googleapis.com/my.package.MyMessage] {}`
+        .google.protobuf.Any proto_message_ref = 53;
     }
 
   // A map of reusable schema definitions, scoped to this schema.

@@ -28,7 +28,7 @@ internal class JsonContext(
     }
 
     /**
-     * Resolves a `proto_ref` type URL to an OpenAPI `$ref` string pointing into
+     * Resolves a `proto_message_ref` type URL to an OpenAPI `$ref` string pointing into
      * `#/components/schemas`.
      *
      * The type URL format is `type.googleapis.com/<package>.<MessageName>`.

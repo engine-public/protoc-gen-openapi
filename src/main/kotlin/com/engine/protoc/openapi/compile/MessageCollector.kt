@@ -6,7 +6,7 @@ import com.google.protobuf.DescriptorProtos
 
 /**
  * Collects every proto message type that must appear in `components/schemas`, starting from
- * explicit seeds (RPC input/output types, proto_ref URLs) and transitively following all
+ * explicit seeds (RPC input/output types, proto_message_ref URLs) and transitively following all
  * message-typed fields.
  *
  * Well-known types from `google.protobuf.*` are excluded — they are handled inline wherever they
@@ -34,7 +34,7 @@ internal class MessageCollector(private val index: MessageIndex) {
     }
 
     /**
-     * Walk a [Schema] proto from an annotation and seed any `proto_ref` type URLs encountered,
+     * Walk a [Schema] proto from an annotation and seed any `proto_message_ref` type URLs encountered,
      * plus any nested schema references.
      */
     fun collectFromSchema(schema: Schema?) {
@@ -45,9 +45,9 @@ internal class MessageCollector(private val index: MessageIndex) {
     }
 
     private fun collectFromSchemaObject(obj: SchemaObject) {
-        if (obj.refTypeCase == SchemaObject.RefTypeCase.PROTO_REF) {
+        if (obj.refTypeCase == SchemaObject.RefTypeCase.PROTO_MESSAGE_REF) {
             // type URL is like "type.googleapis.com/swagger.Pet" → ".swagger.Pet"
-            val typeName = ".${obj.protoRef.typeUrl.substringAfterLast('/')}"
+            val typeName = ".${obj.protoMessageRef.typeUrl.substringAfterLast('/')}"
             collect(typeName)
         }
         obj.propertiesMap.values.forEach { collectFromSchema(it) }

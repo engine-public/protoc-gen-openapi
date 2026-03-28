@@ -31,7 +31,7 @@ internal fun SchemaObject.toJson(ctx: JsonContext): ObjectNode {
     // ---- $ref (oneof ref_type) -------------------------------------------
     when (refTypeCase) {
         SchemaObject.RefTypeCase.URI_REF -> node.put("\$ref", uriRef)
-        SchemaObject.RefTypeCase.PROTO_REF -> node.put("\$ref", ctx.resolveProtoRef(protoRef.typeUrl))
+        SchemaObject.RefTypeCase.PROTO_MESSAGE_REF -> node.put("\$ref", ctx.resolveProtoRef(protoMessageRef.typeUrl))
         else -> {}
     }
 

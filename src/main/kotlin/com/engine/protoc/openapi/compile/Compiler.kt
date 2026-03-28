@@ -26,7 +26,7 @@ import com.networknt.schema.SpecificationVersion
  *    OpenAPI document (later files overwrite earlier ones for conflicting keys).
  * 2. Services are traversed to build the `paths` section from `google.api.http` and
  *    `engine.protoc.openapi.method` annotations.
- * 3. All message types reachable from RPC inputs/outputs and `proto_ref` usages are collected and
+ * 3. All message types reachable from RPC inputs/outputs and `proto_message_ref` usages are collected and
  *    turned into `components/schemas` entries.
  *
  * When [ProtocGenOpenAPI.Options.merge] is true the output is a single file covering all target

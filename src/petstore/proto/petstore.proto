@@ -73,11 +73,11 @@ option (.engine.protoc.openapi.file) = {
                     description: "Pet object that needs to be added to the store"
                     content: {
                         key: "application/json"
-                        value: { schema: { object: { proto_ref: { [type.googleapis.com/swagger.api.Pet] {} } } } }
+                        value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.Pet] {} } } } }
                     }
                     content: {
                         key: "application/xml"
-                        value: { schema: { object: { proto_ref: { [type.googleapis.com/swagger.api.Pet] {} } } } }
+                        value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.Pet] {} } } } }
                     }
                 }
             }
@@ -93,7 +93,7 @@ option (.engine.protoc.openapi.file) = {
                             schema: {
                                 object: {
                                     type: "array"
-                                    items: { object: { proto_ref: { [type.googleapis.com/swagger.api.User] {} } } }
+                                    items: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.User] {} } } }
                                 }
                             }
                         }
@@ -313,15 +313,15 @@ service PetService {
                     required: true
                     content: {
                         key: "application/json"
-                        value: { schema: { object: { proto_ref: { [type.googleapis.com/swagger.api.Pet] {} } } } }
+                        value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.Pet] {} } } } }
                     }
                     content: {
                         key: "application/xml"
-                        value: { schema: { object: { proto_ref: { [type.googleapis.com/swagger.api.Pet] {} } } } }
+                        value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.Pet] {} } } } }
                     }
                     content: {
                         key: "application/x-www-form-urlencoded"
-                        value: { schema: { object: { proto_ref: { [type.googleapis.com/swagger.api.Pet] {} } } } }
+                        value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.Pet] {} } } } }
                     }
                 }
             }
@@ -333,11 +333,11 @@ service PetService {
                             description: "Successful operation"
                             content: {
                                 key: "application/json"
-                                value: { schema: { object: { proto_ref: { [type.googleapis.com/swagger.api.Pet] {} } } } }
+                                value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.Pet] {} } } } }
                             }
                             content: {
                                 key: "application/xml"
-                                value: { schema: { object: { proto_ref: { [type.googleapis.com/swagger.api.Pet] {} } } } }
+                                value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.Pet] {} } } } }
                             }
                         }
                     }
@@ -367,15 +367,15 @@ service PetService {
                     required: true
                     content: {
                         key: "application/json"
-                        value: { schema: { object: { proto_ref: { [type.googleapis.com/swagger.api.Pet] {} } } } }
+                        value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.Pet] {} } } } }
                     }
                     content: {
                         key: "application/xml"
-                        value: { schema: { object: { proto_ref: { [type.googleapis.com/swagger.api.Pet] {} } } } }
+                        value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.Pet] {} } } } }
                     }
                     content: {
                         key: "application/x-www-form-urlencoded"
-                        value: { schema: { object: { proto_ref: { [type.googleapis.com/swagger.api.Pet] {} } } } }
+                        value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.Pet] {} } } } }
                     }
                 }
             }
@@ -387,11 +387,11 @@ service PetService {
                             description: "Successful operation"
                             content: {
                                 key: "application/json"
-                                value: { schema: { object: { proto_ref: { [type.googleapis.com/swagger.api.Pet] {} } } } }
+                                value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.Pet] {} } } } }
                             }
                             content: {
                                 key: "application/xml"
-                                value: { schema: { object: { proto_ref: { [type.googleapis.com/swagger.api.Pet] {} } } } }
+                                value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.Pet] {} } } } }
                             }
                         }
                     }
@@ -446,7 +446,7 @@ service PetService {
                                     schema: {
                                         object: {
                                             type: "array"
-                                            items: { object: { proto_ref: { [type.googleapis.com/swagger.api.Pet] {} } } }
+                                            items: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.Pet] {} } } }
                                         }
                                     }
                                 }
@@ -457,7 +457,7 @@ service PetService {
                                     schema: {
                                         object: {
                                             type: "array"
-                                            items: { object: { proto_ref: { [type.googleapis.com/swagger.api.Pet] {} } } }
+                                            items: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.Pet] {} } } }
                                         }
                                     }
                                 }
@@ -511,7 +511,7 @@ service PetService {
                                     schema: {
                                         object: {
                                             type: "array"
-                                            items: { object: { proto_ref: { [type.googleapis.com/swagger.api.Pet] {} } } }
+                                            items: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.Pet] {} } } }
                                         }
                                     }
                                 }
@@ -522,7 +522,7 @@ service PetService {
                                     schema: {
                                         object: {
                                             type: "array"
-                                            items: { object: { proto_ref: { [type.googleapis.com/swagger.api.Pet] {} } } }
+                                            items: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.Pet] {} } } }
                                         }
                                     }
                                 }
@@ -566,11 +566,11 @@ service PetService {
                             description: "successful operation"
                             content: {
                                 key: "application/json"
-                                value: { schema: { object: { proto_ref: { [type.googleapis.com/swagger.api.Pet] {} } } } }
+                                value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.Pet] {} } } } }
                             }
                             content: {
                                 key: "application/xml"
-                                value: { schema: { object: { proto_ref: { [type.googleapis.com/swagger.api.Pet] {} } } } }
+                                value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.Pet] {} } } } }
                             }
                         }
                     }
@@ -635,11 +635,11 @@ service PetService {
                             description: "successful operation"
                             content: {
                                 key: "application/json"
-                                value: { schema: { object: { proto_ref: { [type.googleapis.com/swagger.api.Pet] {} } } } }
+                                value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.Pet] {} } } } }
                             }
                             content: {
                                 key: "application/xml"
-                                value: { schema: { object: { proto_ref: { [type.googleapis.com/swagger.api.Pet] {} } } } }
+                                value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.Pet] {} } } } }
                             }
                         }
                     }
@@ -744,7 +744,7 @@ service PetService {
                             description: "successful operation"
                             content: {
                                 key: "application/json"
-                                value: { schema: { object: { proto_ref: { [type.googleapis.com/swagger.api.ApiResponse] {} } } } }
+                                value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.ApiResponse] {} } } } }
                             }
                         }
                     }
@@ -807,15 +807,15 @@ service PetService {
                 request_body: {
                     content: {
                         key: "application/json"
-                        value: { schema: { object: { proto_ref: { [type.googleapis.com/swagger.api.Order] {} } } } }
+                        value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.Order] {} } } } }
                     }
                     content: {
                         key: "application/xml"
-                        value: { schema: { object: { proto_ref: { [type.googleapis.com/swagger.api.Order] {} } } } }
+                        value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.Order] {} } } } }
                     }
                     content: {
                         key: "application/x-www-form-urlencoded"
-                        value: { schema: { object: { proto_ref: { [type.googleapis.com/swagger.api.Order] {} } } } }
+                        value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.Order] {} } } } }
                     }
                 }
             }
@@ -827,7 +827,7 @@ service PetService {
                             description: "successful operation"
                             content: {
                                 key: "application/json"
-                                value: { schema: { object: { proto_ref: { [type.googleapis.com/swagger.api.Order] {} } } } }
+                                value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.Order] {} } } } }
                             }
                         }
                     }
@@ -867,11 +867,11 @@ service PetService {
                             description: "successful operation"
                             content: {
                                 key: "application/json"
-                                value: { schema: { object: { proto_ref: { [type.googleapis.com/swagger.api.Order] {} } } } }
+                                value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.Order] {} } } } }
                             }
                             content: {
                                 key: "application/xml"
-                                value: { schema: { object: { proto_ref: { [type.googleapis.com/swagger.api.Order] {} } } } }
+                                value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.Order] {} } } } }
                             }
                         }
                     }
@@ -926,15 +926,15 @@ service PetService {
                     description: "Created user object"
                     content: {
                         key: "application/json"
-                        value: { schema: { object: { proto_ref: { [type.googleapis.com/swagger.api.User] {} } } } }
+                        value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.User] {} } } } }
                     }
                     content: {
                         key: "application/xml"
-                        value: { schema: { object: { proto_ref: { [type.googleapis.com/swagger.api.User] {} } } } }
+                        value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.User] {} } } } }
                     }
                     content: {
                         key: "application/x-www-form-urlencoded"
-                        value: { schema: { object: { proto_ref: { [type.googleapis.com/swagger.api.User] {} } } } }
+                        value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.User] {} } } } }
                     }
                 }
             }
@@ -946,11 +946,11 @@ service PetService {
                             description: "successful operation"
                             content: {
                                 key: "application/json"
-                                value: { schema: { object: { proto_ref: { [type.googleapis.com/swagger.api.User] {} } } } }
+                                value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.User] {} } } } }
                             }
                             content: {
                                 key: "application/xml"
-                                value: { schema: { object: { proto_ref: { [type.googleapis.com/swagger.api.User] {} } } } }
+                                value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.User] {} } } } }
                             }
                         }
                     }
@@ -977,7 +977,7 @@ service PetService {
                             schema: {
                                 object: {
                                     type: "array"
-                                    items: { object: { proto_ref: { [type.googleapis.com/swagger.api.User] {} } } }
+                                    items: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.User] {} } } }
                                 }
                             }
                         }
@@ -992,11 +992,11 @@ service PetService {
                             description: "Successful operation"
                             content: {
                                 key: "application/json"
-                                value: { schema: { object: { proto_ref: { [type.googleapis.com/swagger.api.User] {} } } } }
+                                value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.User] {} } } } }
                             }
                             content: {
                                 key: "application/xml"
-                                value: { schema: { object: { proto_ref: { [type.googleapis.com/swagger.api.User] {} } } } }
+                                value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.User] {} } } } }
                             }
                         }
                     }
@@ -1122,11 +1122,11 @@ service PetService {
                             description: "successful operation"
                             content: {
                                 key: "application/json"
-                                value: { schema: { object: { proto_ref: { [type.googleapis.com/swagger.api.User] {} } } } }
+                                value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.User] {} } } } }
                             }
                             content: {
                                 key: "application/xml"
-                                value: { schema: { object: { proto_ref: { [type.googleapis.com/swagger.api.User] {} } } } }
+                                value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.User] {} } } } }
                             }
                         }
                     }
@@ -1163,15 +1163,15 @@ service PetService {
                     description: "Update an existent user in the store"
                     content: {
                         key: "application/json"
-                        value: { schema: { object: { proto_ref: { [type.googleapis.com/swagger.api.User] {} } } } }
+                        value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.User] {} } } } }
                     }
                     content: {
                         key: "application/xml"
-                        value: { schema: { object: { proto_ref: { [type.googleapis.com/swagger.api.User] {} } } } }
+                        value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.User] {} } } } }
                     }
                     content: {
                         key: "application/x-www-form-urlencoded"
-                        value: { schema: { object: { proto_ref: { [type.googleapis.com/swagger.api.User] {} } } } }
+                        value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.User] {} } } } }
                     }
                 }
             }

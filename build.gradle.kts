@@ -32,6 +32,7 @@ dependencies {
     implementation(projects.protocUtils)
 
     implementation(libs.jackson.databind)
+    implementation(libs.jackson.dataformat.yaml)
     implementation(libs.kotlin.reflect)
     implementation(libs.networknt.json.schema.validator)
     implementation(libs.protobuf.java)

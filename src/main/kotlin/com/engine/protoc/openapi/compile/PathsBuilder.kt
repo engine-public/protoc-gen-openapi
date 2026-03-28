@@ -207,7 +207,10 @@ internal class PathsBuilder(
      * from [inputTypeName].  No-ops for well-known scalar wrapper types since those inline
      * directly rather than referencing a component schema.
      */
-    private fun injectMissingRef(contentNode: ObjectNode?, inputTypeName: String) {
+    private fun injectMissingRef(
+        contentNode: ObjectNode?,
+        inputTypeName: String,
+    ) {
         if (contentNode == null) return
         if (ctx.wellKnownScalarSchema(inputTypeName) != null) return
         val ref = "#/components/schemas/${ctx.messageIndex.simpleNameOf(inputTypeName)}"

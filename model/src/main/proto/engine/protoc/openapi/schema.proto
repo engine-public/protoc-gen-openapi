@@ -401,6 +401,7 @@ message SchemaObject {
   // Must be an absolute URI. Should be unique across all schemas in the document.
   // Typically used on top-level named schemas in `components/schemas` to establish a stable,
   // addressable identity.
+  // This field maps to $id in the output document.
   // See https://json-schema.org/draft/2020-12/json-schema-core#section-8.2.1
   optional string id = 55;
 
@@ -410,12 +411,14 @@ message SchemaObject {
   // Override this per-schema only if you need a different dialect; the document-level default
   // can be set via the root `OpenAPI.json_schema_dialect` field instead.
   // See https://json-schema.org/draft/2020-12/json-schema-core#section-8.1.1
-  optional string schema_dialect = 56;
+  // This field maps to $schema in the output document.
+  optional string schema = 56;
 
   // A plain string that establishes a schema identifier that other schemas can target with
   // `$dynamicRef`. Unlike `$id`, `$anchor` does not affect `$ref` resolution.
   // Must match the pattern `^[A-Za-z_][-A-Za-z0-9._]*$`.
   // See https://json-schema.org/draft/2020-12/json-schema-core#section-8.2.2
+  // This field maps to $anchor in the output document.
   optional string anchor = 57;
 
   // A URI reference to a schema, where the final resolution target is determined at runtime
@@ -423,11 +426,13 @@ message SchemaObject {
   // Used to build extensible, recursive schema libraries.
   // The URI MUST contain a fragment, which SHOULD be a plain name fragment (matching an anchor).
   // See https://json-schema.org/draft/2020-12/json-schema-core#section-8.2.3.2
+  // This field maps to $dynamicRef in the output document.
   optional string dynamic_ref = 58;
 
   // Defines a dynamic anchor that `$dynamicRef` can resolve to.
   // Like `$anchor`, but participates in dynamic scope resolution.
   // Must match the same naming pattern as `$anchor`.
   // See https://json-schema.org/draft/2020-12/json-schema-core#section-8.2.2
+  // This field maps to $dynamicAnchor in the output document.
   optional string dynamic_anchor = 59;
 }

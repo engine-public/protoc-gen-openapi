@@ -102,7 +102,10 @@ internal fun OpenAPI.mergeInto(
 // ---------------------------------------------------------------------------
 
 /** Writes each entry of an extensions map as a top-level key on [node], unwrapping values. */
-private fun Map<String, Value>.putExtensionsInto(node: ObjectNode, ctx: JsonContext) {
+private fun Map<String, Value>.putExtensionsInto(
+    node: ObjectNode,
+    ctx: JsonContext,
+) {
     for ((key, value) in this) node.set<JsonNode>(key, value.toJson(ctx))
 }
 

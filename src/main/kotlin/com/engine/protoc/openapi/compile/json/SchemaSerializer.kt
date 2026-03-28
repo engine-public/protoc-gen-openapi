@@ -36,7 +36,7 @@ internal fun SchemaObject.toJson(ctx: JsonContext): ObjectNode {
 
     // ---- JSON Schema $-prefixed keywords ---------------------------------
     if (hasId()) node.put("\$id", id)
-    if (hasSchemaDialect()) node.put("\$schema", schemaDialect)
+    if (hasSchema()) node.put("\$schema", schema)
     if (hasAnchor()) node.put("\$anchor", anchor)
     if (hasDynamicRef()) node.put("\$dynamicRef", dynamicRef)
     if (hasDynamicAnchor()) node.put("\$dynamicAnchor", dynamicAnchor)

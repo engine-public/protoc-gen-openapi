@@ -29,6 +29,7 @@ dependencyResolutionManagement {
 
             library("google.api.grpc.googleCommonProtos", "com.google.api.grpc", "proto-google-common-protos").version("2.22.0")
             library("jackson.databind", "com.fasterxml.jackson.core", "jackson-databind").versionRef(jackson)
+            library("jackson.dataformat.yaml", "com.fasterxml.jackson.dataformat", "jackson-dataformat-yaml").versionRef(jackson)
             library("kotlin.reflect", "org.jetbrains.kotlin", "kotlin-reflect").versionRef(kotlin)
             library("networknt.json.schema.validator", "com.networknt", "json-schema-validator").versionRef(networknt)
             library("protobuf.java", "com.google.protobuf", "protobuf-java").versionRef(protobuf)

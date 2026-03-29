@@ -515,10 +515,31 @@ internal fun SecurityRequirement.toJson(ctx: JsonContext): ObjectNode {
 
 internal fun Components.toJson(ctx: JsonContext): ObjectNode {
     val node = ctx.obj()
+    // schemas are merged in separately by SchemaBuilder — intentionally omitted here
+    if (responsesMap.isNotEmpty()) {
+        val respNode = ctx.obj()
+        for ((k, v) in responsesMap) respNode.set<JsonNode>(k, v.toJson(ctx))
+        node.set<JsonNode>("responses", respNode)
+    }
+    if (parametersMap.isNotEmpty()) {
+        val paramNode = ctx.obj()
+        for ((k, v) in parametersMap) paramNode.set<JsonNode>(k, v.toJson(ctx))
+        node.set<JsonNode>("parameters", paramNode)
+    }
+    if (examplesMap.isNotEmpty()) {
+        val exNode = ctx.obj()
+        for ((k, v) in examplesMap) exNode.set<JsonNode>(k, v.toJson(ctx))
+        node.set<JsonNode>("examples", exNode)
+    }
     if (requestBodiesMap.isNotEmpty()) {
         val rbNode = ctx.obj()
         for ((k, v) in requestBodiesMap) rbNode.set<JsonNode>(k, v.toJson(ctx))
         node.set<JsonNode>("requestBodies", rbNode)
+    }
+    if (headersMap.isNotEmpty()) {
+        val hdrsNode = ctx.obj()
+        for ((k, v) in headersMap) hdrsNode.set<JsonNode>(k, v.toJson(ctx))
+        node.set<JsonNode>("headers", hdrsNode)
     }
     if (securitySchemesMap.isNotEmpty()) {
         val ssNode = ctx.obj()
@@ -535,7 +556,11 @@ internal fun Components.toJson(ctx: JsonContext): ObjectNode {
         for ((k, v) in callbacksMap) cbNode.set<JsonNode>(k, v.toJson(ctx))
         node.set<JsonNode>("callbacks", cbNode)
     }
-    // schemas are merged in separately by SchemaBuilder
+    if (pathItemsMap.isNotEmpty()) {
+        val piNode = ctx.obj()
+        for ((k, v) in pathItemsMap) piNode.set<JsonNode>(k, v.toJson(ctx))
+        node.set<JsonNode>("pathItems", piNode)
+    }
     return node
 }
 

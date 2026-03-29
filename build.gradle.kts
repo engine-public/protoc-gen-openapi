@@ -7,6 +7,7 @@ import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 plugins {
     application
     idea
+    `java-test-fixtures`
     kotlin("jvm")
     id("com.google.osdetector")
     id("com.google.protobuf")
@@ -36,6 +37,8 @@ dependencies {
     implementation(libs.kotlin.reflect)
     implementation(libs.networknt.json.schema.validator)
     implementation(libs.protobuf.java)
+
+    testFixturesImplementation(libs.jackson.databind)
 }
 
 allprojects {
@@ -172,8 +175,16 @@ testing {
         /*
          * then one line here per protoc compilation run...
          */
-        register<JvmTestSuite>("petstore")
-        register<JvmTestSuite>("complete")
+        register<JvmTestSuite>("petstore") {
+            dependencies {
+                implementation(testFixtures(project()))
+            }
+        }
+        register<JvmTestSuite>("complete") {
+            dependencies {
+                implementation(testFixtures(project()))
+            }
+        }
     }
 }
 

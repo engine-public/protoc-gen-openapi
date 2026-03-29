@@ -186,6 +186,19 @@ internal class PathsBuilder(
             node.set<JsonNode>("security", arr)
         }
         if (annotation?.hasDeprecated() == true) node.put("deprecated", annotation.deprecated)
+        if (annotation?.hasExternalDocs() == true) {
+            node.set<JsonNode>("externalDocs", annotation.externalDocs.toJson(ctx))
+        }
+        if (annotation?.callbacksMap?.isNotEmpty() == true) {
+            val cbNode = ctx.obj()
+            for ((k, v) in annotation.callbacksMap) cbNode.set<JsonNode>(k, v.toJson(ctx))
+            node.set<JsonNode>("callbacks", cbNode)
+        }
+        if (annotation?.serversList?.isNotEmpty() == true) {
+            val arr = ctx.mapper.createArrayNode()
+            for (s in annotation.serversList) arr.add(s.toJson(ctx))
+            node.set<JsonNode>("servers", arr)
+        }
         annotation?.extensionsMap?.putExtensionsInto(node, ctx)
 
         return effectivePath to node

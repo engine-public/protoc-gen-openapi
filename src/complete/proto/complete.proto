@@ -1,0 +1,1023 @@
+syntax = "proto3";
+
+package sporting.goods;
+
+option java_package = "com.sporting.goods";
+option java_multiple_files = true;
+
+import "engine/protoc/openapi/annotations.proto";
+import "google/api/annotations.proto";
+import "google/protobuf/any.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/struct.proto";
+import "google/protobuf/wrappers.proto";
+
+// File-level OpenAPI annotation exercising every root-level field and all
+// components sub-maps added in the gap-fix TODO items (§1–§12).
+option (.engine.protoc.openapi.file) = {
+    info: {
+        title: "Sporting Goods Storefront API"
+        summary: "Fictitious sporting goods catalog and ordering API"
+        description: "A complete demonstration API for a fictional sporting goods store, exercising every OpenAPI v3.1 annotation option."
+        termsOfService: "https://example.com/terms"
+        contact: {
+            name: "Sporting Goods Support"
+            url: "https://example.com/support"
+            email: "support@example.com"
+        }
+        license: {
+            name: "Apache 2.0"
+            url: "https://www.apache.org/licenses/LICENSE-2.0.html"
+        }
+        version: "1.0.0"
+    }
+
+    // Servers with variables
+    servers: [
+        {
+            url: "https://{region}.api.example.com/v1"
+            description: "Production (multi-region)"
+            variables: {
+                key: "region"
+                value: {
+                    default: "us-east-1"
+                    enum: ["us-east-1", "us-west-2", "eu-west-1"]
+                    description: "AWS region for the API endpoint"
+                }
+            }
+        },
+        {
+            url: "https://sandbox.example.com/v1"
+            description: "Sandbox"
+        }
+    ]
+
+    // Tags with external_docs
+    tags: [
+        {
+            name: "products"
+            description: "Operations on the product catalog"
+            external_docs: {
+                description: "Product catalog docs"
+                url: "https://example.com/docs/products"
+            }
+        },
+        {
+            name: "orders"
+            description: "Order management operations"
+        },
+        {
+            name: "inventory"
+            description: "Inventory and stock queries"
+        }
+    ]
+
+    external_docs: {
+        description: "Full API reference"
+        url: "https://example.com/docs/api"
+    }
+
+    // Root-level security
+    security: { names: { key: "bearerAuth" value: {} } }
+
+    // Webhooks (PathItemOrReference map)
+    webhooks: {
+        key: "stockAlert"
+        value: {
+            path_item: {
+                summary: "Stock level alert"
+                description: "Fired when a product's stock drops below the threshold."
+                post: {
+                    operationId: "stockAlertWebhook"
+                    summary: "Receive a stock alert"
+                    request_body: {
+                        request_body: {
+                            description: "Alert payload"
+                            content: {
+                                key: "application/json"
+                                value: {
+                                    schema: {
+                                        object: {
+                                            type: "object"
+                                            properties: {
+                                                key: "productId"
+                                                value: { object: { type: "string" } }
+                                            }
+                                            properties: {
+                                                key: "currentStock"
+                                                value: { object: { type: "integer" } }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    responses: {
+                        default: { response_object: { description: "Webhook received" } }
+                    }
+                }
+            }
+        }
+    }
+
+    components: {
+        // §1 — Reusable responses (ResponseOrReference map)
+        responses: {
+            key: "NotFound"
+            value: {
+                response_object: {
+                    description: "The requested resource was not found"
+                    headers: {
+                        key: "X-Request-Id"
+                        value: {
+                            header: {
+                                description: "Unique request identifier"
+                                required: true
+                                schema: { schema: { object: { type: "string" } } }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        responses: {
+            key: "Unauthorized"
+            value: {
+                response_object: { description: "Authentication required" }
+            }
+        }
+        responses: {
+            key: "ValidationError"
+            value: {
+                response_object: {
+                    description: "Request validation failed"
+                    content: {
+                        key: "application/json"
+                        value: {
+                            schema: {
+                                object: {
+                                    type: "object"
+                                    properties: {
+                                        key: "errors"
+                                        value: { object: { type: "array" items: { object: { type: "string" } } } }
+                                    }
+                                }
+                            }
+                            // §7 — MediaType.examples (ExampleOrReferenceMap)
+                            examples: {
+                                examples: {
+                                    key: "missingField"
+                                    value: {
+                                        example: {
+                                            summary: "Missing required field"
+                                            external_value: "https://example.com/samples/validation-error.json"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // §1 — Reusable parameters (ParameterOrReference map)
+        parameters: {
+            key: "ProductId"
+            value: {
+                parameter: {
+                    name: "productId"
+                    in: "path"
+                    description: "Unique product identifier"
+                    required: true
+                    // §9 — ParameterSchema.example
+                    schema: {
+                        schema: { object: { type: "string" format: "uuid" } }
+                        example: {
+                            [type.googleapis.com/google.protobuf.StringValue] { value: "a1b2c3d4-e5f6-7890-abcd-ef1234567890" }
+                        }
+                    }
+                }
+            }
+        }
+        parameters: {
+            key: "PageSize"
+            value: {
+                parameter: {
+                    name: "pageSize"
+                    in: "query"
+                    description: "Number of results per page"
+                    // §9 — ParameterSchema.examples (ExampleOrReferenceMap)
+                    schema: {
+                        style: "form"
+                        explode: false
+                        allow_reserved: false
+                        schema: { object: { type: "integer" format: "int32" } }
+                        examples: {
+                            examples: {
+                                key: "small"
+                                value: {
+                                    example: {
+                                        summary: "Small page"
+                                        value: { [type.googleapis.com/google.protobuf.StringValue] { value: "10" } }
+                                    }
+                                }
+                            }
+                            examples: {
+                                key: "large"
+                                value: {
+                                    example: {
+                                        summary: "Large page"
+                                        value: { [type.googleapis.com/google.protobuf.StringValue] { value: "100" } }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        // §11 — Parameter.content variant
+        parameters: {
+            key: "FilterContext"
+            value: {
+                parameter: {
+                    name: "X-Filter-Context"
+                    in: "header"
+                    description: "Structured filter context, serialized as JSON"
+                    content: {
+                        content: {
+                            key: "application/json"
+                            value: {
+                                schema: { object: { type: "object" } }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // §1 — Reusable examples (ExampleOrReference map)
+        // §4 — Example.value (embedded literal)
+        examples: {
+            key: "ProductExample"
+            value: {
+                example: {
+                    summary: "A typical running shoe"
+                    description: "Canonical example of a product resource"
+                    value: {
+                        [type.googleapis.com/google.protobuf.Value] {
+                            struct_value: {
+                                fields: { key: "id" value: { string_value: "abc-123" } }
+                                fields: { key: "name" value: { string_value: "UltraRun Pro" } }
+                                fields: { key: "price" value: { number_value: 129.99 } }
+                                fields: { key: "category" value: { string_value: "footwear" } }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        // §4 — Example.external_value
+        examples: {
+            key: "ExternalProductExample"
+            value: {
+                example: {
+                    summary: "Complex product (external)"
+                    external_value: "https://example.com/samples/product.json"
+                }
+            }
+        }
+
+        // §1 — Reusable request bodies (RequestBodyOrReference map)
+        // §7, §8 — MediaType.encoding with Encoding all fields
+        request_bodies: {
+            key: "CreateProductBody"
+            value: {
+                request_body: {
+                    description: "Product creation payload (multipart)"
+                    required: true
+                    content: {
+                        key: "multipart/form-data"
+                        value: {
+                            schema: {
+                                object: {
+                                    type: "object"
+                                    properties: {
+                                        key: "name"
+                                        value: { object: { type: "string" } }
+                                    }
+                                    properties: {
+                                        key: "image"
+                                        value: { object: { type: "string" format: "binary" } }
+                                    }
+                                    properties: {
+                                        key: "metadata"
+                                        value: { object: { type: "object" } }
+                                    }
+                                }
+                            }
+                            // §7 — MediaType.example (singular)
+                            example: {
+                                [type.googleapis.com/google.protobuf.Value] {
+                                    struct_value: {
+                                        fields: { key: "name" value: { string_value: "Trail Blazer Boots" } }
+                                    }
+                                }
+                            }
+                            // §7 — MediaType.encoding, §8 — Encoding all fields
+                            encoding: {
+                                key: "image"
+                                value: {
+                                    content_type: "image/png, image/jpeg"
+                                    // §8 — Encoding.headers (Reference map — circular dependency restriction)
+                                    headers: {
+                                        key: "X-Upload-Token"
+                                        value: { uri_ref: "#/components/headers/UploadToken" }
+                                    }
+                                    style: "form"
+                                    explode: false
+                                    allow_reserved: false
+                                }
+                            }
+                            encoding: {
+                                key: "metadata"
+                                value: {
+                                    content_type: "application/json"
+                                    style: "form"
+                                    explode: true
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // §1 — Reusable headers (HeaderOrReference map)
+        // §10 — HeaderSchema.example
+        headers: {
+            key: "RateLimitRemaining"
+            value: {
+                header: {
+                    description: "Number of requests remaining in the current rate-limit window"
+                    required: true
+                    schema: {
+                        style: "simple"
+                        explode: false
+                        schema: { object: { type: "integer" } }
+                        example: {
+                            [type.googleapis.com/google.protobuf.StringValue] { value: "42" }
+                        }
+                    }
+                }
+            }
+        }
+        // §10 — HeaderSchema.examples (ExampleOrReferenceMap)
+        headers: {
+            key: "RateLimitReset"
+            value: {
+                header: {
+                    description: "Unix timestamp at which the rate-limit window resets"
+                    schema: {
+                        schema: { object: { type: "integer" format: "int64" } }
+                        examples: {
+                            examples: {
+                                key: "future"
+                                value: {
+                                    example: {
+                                        summary: "One minute from now"
+                                        value: { [type.googleapis.com/google.protobuf.StringValue] { value: "1711666800" } }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        headers: {
+            key: "UploadToken"
+            value: {
+                header: {
+                    description: "Short-lived token authorizing a binary upload"
+                    required: true
+                    schema: { schema: { object: { type: "string" } } }
+                }
+            }
+        }
+        // §12 — Header.content variant
+        headers: {
+            key: "X-Structured-Meta"
+            value: {
+                header: {
+                    description: "Structured metadata serialized as JSON"
+                    content: {
+                        content: {
+                            key: "application/json"
+                            value: {
+                                schema: { object: { type: "object" } }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // §1, §5 — Reusable links (LinkOrReference map)
+        // §5 — Link.operation_id variant
+        links: {
+            key: "GetProductByIdLink"
+            value: {
+                link: {
+                    operation_id: "getProduct"
+                    description: "Retrieve the product that was just created"
+                    parameters: {
+                        key: "productId"
+                        value: { [type.googleapis.com/google.protobuf.StringValue] { value: "$response.body#/id" } }
+                    }
+                    server: { url: "https://api.example.com/v1" description: "Production" }
+                }
+            }
+        }
+        // §5 — Link.proto_rpc_ref variant
+        links: {
+            key: "GetOrderStatusLink"
+            value: {
+                link: {
+                    proto_rpc_ref: "sporting.goods.StorefrontService#GetOrderStatus"
+                    description: "Check the status of the placed order"
+                    parameters: {
+                        key: "order_id"
+                        value: { [type.googleapis.com/google.protobuf.StringValue] { value: "$response.body#/orderId" } }
+                    }
+                }
+            }
+        }
+
+        // §1, §6 — Reusable callbacks (CallbackOrReference map)
+        // §6 — Callback.callbacks map
+        callbacks: {
+            key: "OrderStatusCallback"
+            value: {
+                callback: {
+                    callbacks: {
+                        key: "{$request.body#/callbackUrl}"
+                        value: {
+                            path_item: {
+                                post: {
+                                    summary: "Order status update notification"
+                                    request_body: {
+                                        request_body: {
+                                            description: "Order status payload"
+                                            content: {
+                                                key: "application/json"
+                                                value: {
+                                                    schema: {
+                                                        object: {
+                                                            type: "object"
+                                                            properties: {
+                                                                key: "orderId"
+                                                                value: { object: { type: "string" } }
+                                                            }
+                                                            properties: {
+                                                                key: "status"
+                                                                value: { object: { type: "string" } }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    responses: {
+                                        default: { response_object: { description: "Callback received" } }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // §1, §3 — Reusable path items (PathItemOrReference map)
+        path_items: {
+            key: "HealthCheck"
+            value: {
+                path_item: {
+                    summary: "API health check"
+                    description: "Verifies that the API is operational."
+                    // §3 — PathItem.parameters
+                    parameters: [
+                        {
+                            parameter: {
+                                name: "X-Request-Id"
+                                in: "header"
+                                description: "Optional correlation ID"
+                                schema: { schema: { object: { type: "string" } } }
+                            }
+                        }
+                    ]
+                    get: {
+                        operationId: "healthCheck"
+                        summary: "Check API health"
+                        responses: {
+                            codes: { key: "200" value: { response_object: { description: "API is healthy" } } }
+                        }
+                    }
+                }
+            }
+        }
+
+        // §1 — Reusable security schemes (SecuritySchemeOrReference map)
+        security_schemes: {
+            key: "bearerAuth"
+            value: {
+                security_scheme: {
+                    description: "JWT bearer token authentication"
+                    http: { scheme: "bearer" bearer_format: "JWT" }
+                }
+            }
+        }
+        security_schemes: {
+            key: "apiKeyAuth"
+            value: {
+                security_scheme: {
+                    api_key: { name: "X-API-Key" in: "header" }
+                }
+            }
+        }
+    }
+
+    extensions: {
+        key: "x-logo"
+        value: { struct_value: {
+            fields: { key: "url" value: { string_value: "https://example.com/logo.png" } }
+            fields: { key: "altText" value: { string_value: "Sporting Goods Logo" } }
+        } }
+    }
+};
+
+// ----------------------------------------------------------------
+// Domain messages
+// ----------------------------------------------------------------
+
+message Product {
+    string id = 1;
+    string name = 2;
+    string description = 3;
+    double price = 4;
+    string category = 5;
+    repeated string tags = 6;
+    int32 stock_quantity = 7;
+}
+
+message ProductList {
+    repeated Product products = 1;
+    int32 total = 2;
+    int32 page = 3;
+    int32 page_size = 4;
+}
+
+message StockFilter {
+    bool in_stock_only = 1;
+    string category = 2;
+    double min_price = 3;
+    double max_price = 4;
+}
+
+message CreateProductRequest {
+    string name = 1;
+    string description = 2;
+    double price = 3;
+    string category = 4;
+    repeated string tags = 5;
+    int32 initial_stock = 6;
+}
+
+message UploadRequest {
+    string product_id = 1;
+    bytes image_data = 2;
+    string content_type = 3;
+}
+
+message OrderItem {
+    string product_id = 1;
+    int32 quantity = 2;
+}
+
+message CreateOrderRequest {
+    repeated OrderItem items = 1;
+    string shipping_address = 2;
+    string callback_url = 3;
+}
+
+message Order {
+    string order_id = 1;
+    repeated OrderItem items = 2;
+    string status = 3;
+    double total = 4;
+    string shipping_address = 5;
+}
+
+// ----------------------------------------------------------------
+// Service
+// ----------------------------------------------------------------
+
+// StorefrontService exposes the sporting goods product catalog and order flow.
+service StorefrontService {
+
+    // List products in the catalog with optional filtering.
+    rpc ListProducts(StockFilter) returns (ProductList) {
+        option (google.api.http) = { get: "/products" };
+        option (.engine.protoc.openapi.method) = {
+            tags: ["products", "inventory"]
+            summary: "List products"
+            description: "Returns a paginated list of products. Supports filtering by category, price range, and stock status."
+            operationId: "listProducts"
+            parameters: [
+                // $ref to a reusable component parameter
+                { reference: { uri_ref: "#/components/parameters/PageSize" } },
+                {
+                    parameter: {
+                        name: "category"
+                        in: "query"
+                        description: "Filter by product category"
+                        schema: {
+                            schema: { object: { type: "string" } }
+                        }
+                    }
+                },
+                // §11 — Parameter.content variant on an inline operation parameter
+                {
+                    parameter: {
+                        name: "X-Filter-Context"
+                        in: "header"
+                        description: "Structured filter context header"
+                        content: {
+                            content: {
+                                key: "application/json"
+                                value: { schema: { object: { type: "object" } } }
+                            }
+                        }
+                    }
+                }
+            ]
+            responses: {
+                codes: {
+                    key: "200"
+                    value: {
+                        response_object: {
+                            description: "Successful response"
+                            headers: {
+                                key: "X-Total-Count"
+                                value: {
+                                    header: {
+                                        description: "Total number of products matching the filter"
+                                        schema: { schema: { object: { type: "integer" } } }
+                                    }
+                                }
+                            }
+                            headers: {
+                                key: "X-Rate-Limit-Remaining"
+                                value: { reference: { uri_ref: "#/components/headers/RateLimitRemaining" } }
+                            }
+                            content: {
+                                key: "application/json"
+                                value: {
+                                    schema: {
+                                        object: { proto_message_ref: { [type.googleapis.com/sporting.goods.ProductList] {} } }
+                                    }
+                                    // §7 — MediaType.examples (ExampleOrReferenceMap with references)
+                                    examples: {
+                                        examples: {
+                                            key: "typical"
+                                            value: { reference: { uri_ref: "#/components/examples/ProductExample" } }
+                                        }
+                                        examples: {
+                                            key: "external"
+                                            value: { reference: { uri_ref: "#/components/examples/ExternalProductExample" } }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                codes: { key: "401" value: { reference: { uri_ref: "#/components/responses/Unauthorized" } } }
+            }
+            security: { names: { key: "bearerAuth" value: {} } }
+            extensions: { key: "x-rate-limit" value: { number_value: 100 } }
+        };
+    }
+
+    // Retrieve a single product by ID.
+    rpc GetProduct(Product) returns (Product) {
+        option (google.api.http) = { get: "/products/{id}" };
+        option (.engine.protoc.openapi.method) = {
+            tags: ["products"]
+            summary: "Get product"
+            description: "Returns a single product by its unique identifier."
+            operationId: "getProduct"
+            parameters: [
+                { reference: { uri_ref: "#/components/parameters/ProductId" } }
+            ]
+            responses: {
+                codes: {
+                    key: "200"
+                    value: {
+                        response_object: {
+                            description: "Product found"
+                            content: {
+                                key: "application/json"
+                                value: {
+                                    schema: {
+                                        object: { proto_message_ref: { [type.googleapis.com/sporting.goods.Product] {} } }
+                                    }
+                                    // §7 — MediaType.example (singular, inline)
+                                    example: {
+                                        [type.googleapis.com/google.protobuf.Value] {
+                                            struct_value: {
+                                                fields: { key: "id" value: { string_value: "abc-123" } }
+                                                fields: { key: "name" value: { string_value: "UltraRun Pro" } }
+                                                fields: { key: "price" value: { number_value: 129.99 } }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            headers: {
+                                key: "X-Rate-Limit-Remaining"
+                                value: { reference: { uri_ref: "#/components/headers/RateLimitRemaining" } }
+                            }
+                            headers: {
+                                key: "X-Rate-Limit-Reset"
+                                value: { reference: { uri_ref: "#/components/headers/RateLimitReset" } }
+                            }
+                            // §5 — ResponseObject.links (inline Link)
+                            links: {
+                                key: "PlaceOrder"
+                                value: {
+                                    link: {
+                                        operation_id: "placeOrder"
+                                        description: "Place an order for this product"
+                                        // §5 — Link.parameters (Any map)
+                                        parameters: {
+                                            key: "items[0].productId"
+                                            value: { [type.googleapis.com/google.protobuf.StringValue] { value: "$response.body#/id" } }
+                                        }
+                                    }
+                                }
+                            }
+                            // §5 — ResponseObject.links ($ref to component link)
+                            links: {
+                                key: "GetProduct"
+                                value: { reference: { uri_ref: "#/components/links/GetProductByIdLink" } }
+                            }
+                        }
+                    }
+                }
+                codes: { key: "404" value: { reference: { uri_ref: "#/components/responses/NotFound" } } }
+                codes: { key: "401" value: { reference: { uri_ref: "#/components/responses/Unauthorized" } } }
+            }
+        };
+    }
+
+    // Create a new product in the catalog.
+    rpc CreateProduct(CreateProductRequest) returns (Product) {
+        option (google.api.http) = { post: "/products" body: "*" };
+        option (.engine.protoc.openapi.method) = {
+            tags: ["products"]
+            summary: "Create product"
+            description: "Adds a new product to the catalog. Requires admin privileges."
+            operationId: "createProduct"
+            // $ref to a reusable request body
+            request_body: { reference: { uri_ref: "#/components/requestBodies/CreateProductBody" } }
+            responses: {
+                codes: {
+                    key: "201"
+                    value: {
+                        response_object: {
+                            description: "Product created successfully"
+                            content: {
+                                key: "application/json"
+                                value: {
+                                    schema: {
+                                        object: { proto_message_ref: { [type.googleapis.com/sporting.goods.Product] {} } }
+                                    }
+                                }
+                            }
+                            // §5 — ResponseObject.links ($ref variant)
+                            links: {
+                                key: "GetProduct"
+                                value: { reference: { uri_ref: "#/components/links/GetProductByIdLink" } }
+                            }
+                        }
+                    }
+                }
+                codes: { key: "400" value: { reference: { uri_ref: "#/components/responses/ValidationError" } } }
+                codes: { key: "401" value: { reference: { uri_ref: "#/components/responses/Unauthorized" } } }
+            }
+            security: { names: { key: "bearerAuth" value: {} } }
+            security: { names: { key: "apiKeyAuth" value: {} } }
+        };
+    }
+
+    // Upload a product image.
+    rpc UploadProductImage(UploadRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = { post: "/products/{product_id}/image" body: "*" };
+        option (.engine.protoc.openapi.method) = {
+            tags: ["products"]
+            summary: "Upload product image"
+            description: "Uploads a binary image for the given product (PNG or JPEG)."
+            operationId: "uploadProductImage"
+            parameters: [
+                {
+                    parameter: {
+                        name: "product_id"
+                        in: "path"
+                        required: true
+                        schema: { schema: { object: { type: "string" format: "uuid" } } }
+                    }
+                }
+            ]
+            request_body: {
+                request_body: {
+                    description: "Image upload (multipart)"
+                    required: true
+                    content: {
+                        key: "multipart/form-data"
+                        value: {
+                            schema: {
+                                object: {
+                                    type: "object"
+                                    properties: {
+                                        key: "image"
+                                        value: { object: { type: "string" format: "binary" } }
+                                    }
+                                }
+                            }
+                            // §7, §8 — MediaType.encoding with Encoding (all fields)
+                            encoding: {
+                                key: "image"
+                                value: {
+                                    content_type: "image/png, image/jpeg"
+                                    headers: {
+                                        key: "X-Upload-Token"
+                                        value: { uri_ref: "#/components/headers/UploadToken" }
+                                    }
+                                    style: "form"
+                                    explode: false
+                                    allow_reserved: false
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            responses: {
+                codes: {
+                    key: "204"
+                    value: {
+                        response_object: {
+                            description: "Image uploaded"
+                            headers: {
+                                // §12 — Header.content variant inside a response
+                                key: "X-Image-Meta"
+                                value: {
+                                    header: {
+                                        description: "Metadata about the uploaded image"
+                                        content: {
+                                            content: {
+                                                key: "application/json"
+                                                value: { schema: { object: { type: "object" } } }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                codes: { key: "400" value: { reference: { uri_ref: "#/components/responses/ValidationError" } } }
+            }
+        };
+    }
+
+    // Delete a product (deprecated).
+    rpc DeleteProduct(Product) returns (google.protobuf.Empty) {
+        option (google.api.http) = { delete: "/products/{id}" };
+        option (.engine.protoc.openapi.method) = {
+            tags: ["products"]
+            summary: "Delete product"
+            description: "Removes a product from the catalog. This action is irreversible."
+            operationId: "deleteProduct"
+            deprecated: true
+            parameters: [
+                { reference: { uri_ref: "#/components/parameters/ProductId" } }
+            ]
+            responses: {
+                codes: { key: "204" value: { response_object: { description: "Product deleted" } } }
+                codes: { key: "404" value: { reference: { uri_ref: "#/components/responses/NotFound" } } }
+            }
+            external_docs: {
+                description: "Deprecation notice"
+                url: "https://example.com/docs/deprecations"
+            }
+        };
+    }
+
+    // Place a new order.
+    rpc PlaceOrder(CreateOrderRequest) returns (Order) {
+        option (google.api.http) = { post: "/orders" body: "*" };
+        option (.engine.protoc.openapi.method) = {
+            tags: ["orders"]
+            summary: "Place order"
+            description: "Creates a new order. Triggers an async callback when order status changes."
+            operationId: "placeOrder"
+            request_body: {
+                request_body: {
+                    description: "Order creation payload"
+                    required: true
+                    content: {
+                        key: "application/json"
+                        value: {
+                            schema: {
+                                object: { proto_message_ref: { [type.googleapis.com/sporting.goods.CreateOrderRequest] {} } }
+                            }
+                        }
+                    }
+                }
+            }
+            // §2 — Operation.callbacks (Reference map — no inline Callback due to proto circular deps)
+            callbacks: { key: "onStatusChange" value: { uri_ref: "#/components/callbacks/OrderStatusCallback" } }
+            responses: {
+                codes: {
+                    key: "201"
+                    value: {
+                        response_object: {
+                            description: "Order placed"
+                            content: {
+                                key: "application/json"
+                                value: {
+                                    schema: {
+                                        object: { proto_message_ref: { [type.googleapis.com/sporting.goods.Order] {} } }
+                                    }
+                                }
+                            }
+                            // §5 — ResponseObject.links ($ref to component link using proto_rpc_ref)
+                            links: {
+                                key: "GetOrderStatus"
+                                value: { reference: { uri_ref: "#/components/links/GetOrderStatusLink" } }
+                            }
+                        }
+                    }
+                }
+                codes: { key: "400" value: { reference: { uri_ref: "#/components/responses/ValidationError" } } }
+            }
+            servers: [{ url: "https://orders.example.com/v1" description: "Dedicated order service" }]
+            external_docs: { description: "Order flow docs" url: "https://example.com/docs/orders" }
+        };
+    }
+
+    // Get the current status of an order.
+    rpc GetOrderStatus(Order) returns (Order) {
+        option (google.api.http) = { get: "/orders/{order_id}" };
+        option (.engine.protoc.openapi.method) = {
+            tags: ["orders"]
+            summary: "Get order status"
+            operationId: "getOrderStatus"
+            parameters: [
+                {
+                    parameter: {
+                        name: "order_id"
+                        in: "path"
+                        required: true
+                        schema: { schema: { object: { type: "string" format: "uuid" } } }
+                    }
+                }
+            ]
+            responses: {
+                codes: {
+                    key: "200"
+                    value: {
+                        response_object: {
+                            description: "Order details"
+                            content: {
+                                key: "application/json"
+                                value: {
+                                    schema: {
+                                        object: { proto_message_ref: { [type.googleapis.com/sporting.goods.Order] {} } }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                codes: { key: "404" value: { reference: { uri_ref: "#/components/responses/NotFound" } } }
+            }
+        };
+    }
+}

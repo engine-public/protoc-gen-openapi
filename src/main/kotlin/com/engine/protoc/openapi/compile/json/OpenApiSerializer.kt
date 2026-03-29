@@ -80,6 +80,11 @@ internal fun OpenAPI.mergeInto(
         for (t in tagsList) arr.add(t.toJson(ctx))
         dest.set<JsonNode>("tags", arr)
     }
+    if (securityList.isNotEmpty()) {
+        val arr = ctx.mapper.createArrayNode()
+        for (s in securityList) arr.add(s.toJson(ctx))
+        dest.set<JsonNode>("security", arr)
+    }
     if (hasExternalDocs()) dest.set<JsonNode>("externalDocs", externalDocs.toJson(ctx))
     if (hasComponents()) {
         val existing = dest.get("components") as? ObjectNode ?: ctx.obj().also {
@@ -314,13 +319,17 @@ internal fun Parameter.toJson(ctx: JsonContext): ObjectNode {
             when (schema.exampleTypeCase) {
                 ParameterSchema.ExampleTypeCase.EXAMPLE ->
                     node.set<JsonNode>("example", schema.example.toJson(ctx))
+
                 ParameterSchema.ExampleTypeCase.EXAMPLES ->
                     node.set<JsonNode>("examples", schema.examples.toJson(ctx))
+
                 else -> {}
             }
         }
+
         Parameter.ParameterDefinitionTypeCase.CONTENT ->
             node.set<JsonNode>("content", content.toJson(ctx))
+
         else -> {}
     }
     extensionsMap.putExtensionsInto(node, ctx)
@@ -450,11 +459,14 @@ internal fun Link.toJson(ctx: JsonContext): ObjectNode {
     when (operationLocatorTypeCase) {
         Link.OperationLocatorTypeCase.OPERATION_REF ->
             node.put("operationRef", operationRef)
+
         Link.OperationLocatorTypeCase.OPERATION_ID ->
             node.put("operationId", operationId)
+
         // proto_rpc_ref resolves to an operation path, emitted as operationRef
         Link.OperationLocatorTypeCase.PROTO_RPC_REF ->
             node.put("operationRef", ctx.resolveProtoRef(protoRpcRef))
+
         else -> {}
     }
     if (parametersMap.isNotEmpty()) {
@@ -512,13 +524,17 @@ internal fun Header.toJson(ctx: JsonContext): ObjectNode {
             when (schema.exampleTypeCase) {
                 HeaderSchema.ExampleTypeCase.EXAMPLE ->
                     node.set<JsonNode>("example", schema.example.toJson(ctx))
+
                 HeaderSchema.ExampleTypeCase.EXAMPLES ->
                     node.set<JsonNode>("examples", schema.examples.toJson(ctx))
+
                 else -> {}
             }
         }
+
         Header.HeaderDefinitionTypeCase.CONTENT ->
             node.set<JsonNode>("content", content.toJson(ctx))
+
         else -> {}
     }
     return node

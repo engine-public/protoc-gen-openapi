@@ -173,6 +173,7 @@ testing {
          * then one line here per protoc compilation run...
          */
         register<JvmTestSuite>("petstore")
+        register<JvmTestSuite>("complete")
     }
 }
 

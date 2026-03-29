@@ -257,6 +257,14 @@ internal fun Operation.toJson(ctx: JsonContext): ObjectNode {
     }
     if (hasRequestBody()) node.set<JsonNode>("requestBody", requestBody.toJson(ctx))
     if (hasResponses()) node.set<JsonNode>("responses", responses.toJson(ctx))
+    // callbacks is map<string, Reference> rather than map<string, CallbackOrReference> due to
+    // a protobuf circular-dependency constraint (Operation→Callback→PathItem→Operation).
+    // References must point to entries in components.callbacks.
+    if (callbacksMap.isNotEmpty()) {
+        val cbNode = ctx.obj()
+        for ((k, v) in callbacksMap) cbNode.set<JsonNode>(k, v.toJson(ctx))
+        node.set<JsonNode>("callbacks", cbNode)
+    }
     if (securityList.isNotEmpty()) {
         val arr = ctx.mapper.createArrayNode()
         for (s in securityList) arr.add(s.toJson(ctx))

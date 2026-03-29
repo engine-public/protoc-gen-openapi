@@ -359,6 +359,16 @@ internal fun RequestBody.toJson(ctx: JsonContext): ObjectNode {
 internal fun MediaType.toJson(ctx: JsonContext): ObjectNode {
     val node = ctx.obj()
     if (hasSchema()) node.set<JsonNode>("schema", schema.toJson(ctx))
+    when (exampleTypeCase) {
+        MediaType.ExampleTypeCase.EXAMPLE -> node.set<JsonNode>("example", example.toJson(ctx))
+        MediaType.ExampleTypeCase.EXAMPLES -> node.set<JsonNode>("examples", examples.toJson(ctx))
+        else -> {}
+    }
+    if (encodingMap.isNotEmpty()) {
+        val encNode = ctx.obj()
+        for ((k, v) in encodingMap) encNode.set<JsonNode>(k, v.toJson(ctx))
+        node.set<JsonNode>("encoding", encNode)
+    }
     return node
 }
 

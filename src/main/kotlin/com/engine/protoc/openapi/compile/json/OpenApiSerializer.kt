@@ -14,6 +14,7 @@ import com.engine.protoc.openapi.model.ExampleOrReferenceMap
 import com.engine.protoc.openapi.model.ExternalDocumentation
 import com.engine.protoc.openapi.model.HTTPSecurityScheme
 import com.engine.protoc.openapi.model.Header
+import com.engine.protoc.openapi.model.HeaderContent
 import com.engine.protoc.openapi.model.HeaderOrReference
 import com.engine.protoc.openapi.model.HeaderSchema
 import com.engine.protoc.openapi.model.Info
@@ -501,20 +502,32 @@ internal fun Header.toJson(ctx: JsonContext): ObjectNode {
     if (hasDescription()) node.put("description", description)
     if (hasRequired()) node.put("required", required)
     if (hasDeprecated()) node.put("deprecated", deprecated)
-    // HeaderSchema is a proto wrapper that groups style/explode/schema/example together, but in
-    // the OpenAPI JSON output these fields are inlined directly at the Header object level.
-    if (hasSchema()) {
-        if (schema.hasStyle()) node.put("style", schema.style)
-        if (schema.hasExplode()) node.put("explode", schema.explode)
-        if (schema.hasSchema()) node.set<JsonNode>("schema", schema.schema.toJson(ctx))
-        when (schema.exampleTypeCase) {
-            HeaderSchema.ExampleTypeCase.EXAMPLE ->
-                node.set<JsonNode>("example", schema.example.toJson(ctx))
-            HeaderSchema.ExampleTypeCase.EXAMPLES ->
-                node.set<JsonNode>("examples", schema.examples.toJson(ctx))
-            else -> {}
+    // A Header uses either schema-based or content-based serialization, never both.
+    when (headerDefinitionTypeCase) {
+        Header.HeaderDefinitionTypeCase.SCHEMA -> {
+            // HeaderSchema fields are inlined directly at the Header object level (no nesting).
+            if (schema.hasStyle()) node.put("style", schema.style)
+            if (schema.hasExplode()) node.put("explode", schema.explode)
+            if (schema.hasSchema()) node.set<JsonNode>("schema", schema.schema.toJson(ctx))
+            when (schema.exampleTypeCase) {
+                HeaderSchema.ExampleTypeCase.EXAMPLE ->
+                    node.set<JsonNode>("example", schema.example.toJson(ctx))
+                HeaderSchema.ExampleTypeCase.EXAMPLES ->
+                    node.set<JsonNode>("examples", schema.examples.toJson(ctx))
+                else -> {}
+            }
         }
+        Header.HeaderDefinitionTypeCase.CONTENT ->
+            node.set<JsonNode>("content", content.toJson(ctx))
+        else -> {}
     }
+    return node
+}
+
+/** A HeaderContent is a map from media-type string to MediaType; per spec it MUST have exactly one entry. */
+internal fun HeaderContent.toJson(ctx: JsonContext): ObjectNode {
+    val node = ctx.obj()
+    for ((k, v) in contentMap) node.set<JsonNode>(k, v.toJson(ctx))
     return node
 }
 

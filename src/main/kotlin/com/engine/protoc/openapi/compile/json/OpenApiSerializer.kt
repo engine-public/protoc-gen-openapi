@@ -3,6 +3,8 @@ package com.engine.protoc.openapi.compile.json
 import com.engine.protoc.openapi.OpenAPI
 import com.engine.protoc.openapi.Operation
 import com.engine.protoc.openapi.model.APIKeySecurityScheme
+import com.engine.protoc.openapi.model.Callback
+import com.engine.protoc.openapi.model.CallbackOrReference
 import com.engine.protoc.openapi.model.Components
 import com.engine.protoc.openapi.model.Contact
 import com.engine.protoc.openapi.model.Example
@@ -420,6 +422,24 @@ internal fun Link.toJson(ctx: JsonContext): ObjectNode {
 }
 
 // ---------------------------------------------------------------------------
+// Callbacks
+// ---------------------------------------------------------------------------
+
+internal fun CallbackOrReference.toJson(ctx: JsonContext): ObjectNode =
+    when (typeCase) {
+        CallbackOrReference.TypeCase.CALLBACK -> callback.toJson(ctx)
+        CallbackOrReference.TypeCase.REFERENCE -> reference.toJson(ctx)
+        else -> ctx.obj()
+    }
+
+/** A Callback is a map from runtime-expression key to PathItem. */
+internal fun Callback.toJson(ctx: JsonContext): ObjectNode {
+    val node = ctx.obj()
+    for ((k, v) in callbacksMap) node.set<JsonNode>(k, v.toJson(ctx))
+    return node
+}
+
+// ---------------------------------------------------------------------------
 // Headers
 // ---------------------------------------------------------------------------
 
@@ -509,6 +529,11 @@ internal fun Components.toJson(ctx: JsonContext): ObjectNode {
         val linksNode = ctx.obj()
         for ((k, v) in linksMap) linksNode.set<JsonNode>(k, v.toJson(ctx))
         node.set<JsonNode>("links", linksNode)
+    }
+    if (callbacksMap.isNotEmpty()) {
+        val cbNode = ctx.obj()
+        for ((k, v) in callbacksMap) cbNode.set<JsonNode>(k, v.toJson(ctx))
+        node.set<JsonNode>("callbacks", cbNode)
     }
     // schemas are merged in separately by SchemaBuilder
     return node

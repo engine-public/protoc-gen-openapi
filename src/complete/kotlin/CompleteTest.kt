@@ -1,15 +1,24 @@
 import com.engine.protoc.openapi.ProtocGenOpenAPI
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.networknt.schema.InputFormat
+import com.networknt.schema.SchemaLocation
+import com.networknt.schema.SchemaRegistry
+import com.networknt.schema.SpecificationVersion
 import io.kotest.assertions.assertSoftly
 import io.kotest.assertions.withClue
 import io.kotest.core.spec.style.FunSpec
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import tools.jackson.dataformat.yaml.YAMLMapper
+import java.io.File
 
 class CompleteTest :
     FunSpec({
+
+        assertSoftly = true
 
         val request = CompleteTest::class.java.getResourceAsStream("/code-generator-request.binpb").shouldNotBeNull()
         val response = ProtocGenOpenAPI.from(request) {
@@ -25,6 +34,26 @@ class CompleteTest :
             .find { it.name == "sporting.goods.StorefrontService.openapi.json" }
             .shouldNotBeNull()
         val doc: JsonNode = mapper.readTree(generatedFile.content)
+
+        val expected = CompleteTest::class.java.getResourceAsStream("sporting.goods.openapi.yaml").shouldNotBeNull().reader().readText()
+
+        test("validate reference file") {
+            val oasSchema by lazy {
+                SchemaRegistry.withDefaultDialect(SpecificationVersion.DRAFT_2020_12) {
+                    it.schemaIdResolvers {
+                        it.mapPrefix(
+                            "https://spec.openapis.org/oas/3.1",
+                            "classpath:schemas/spec.openapis.org/oas/3.1",
+                        )
+                    }
+                }
+                    .getSchema(SchemaLocation.of("https://spec.openapis.org/oas/3.1/schema-base/2022-10-07"))
+            }
+
+            oasSchema.validate(expected, InputFormat.YAML) { ctx ->
+                ctx.executionConfig { cfg -> cfg.formatAssertionsEnabled(true) }
+            }.shouldBeEmpty()
+        }
 
         test("no errors") {
             response.hasError() shouldBe false

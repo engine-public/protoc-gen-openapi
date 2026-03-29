@@ -1,0 +1,828 @@
+{
+  "openapi" : "3.1.0",
+  "info" : {
+    "title" : "Sporting Goods Storefront API",
+    "description" : "A complete demonstration API for a fictional sporting goods store, exercising every OpenAPI v3.1 annotation option.",
+    "summary" : "Fictitious sporting goods catalog and ordering API",
+    "termsOfService" : "https://example.com/terms",
+    "contact" : {
+      "name" : "Sporting Goods Support",
+      "url" : "https://example.com/support",
+      "email" : "support@example.com"
+    },
+    "license" : {
+      "name" : "Apache 2.0",
+      "url" : "https://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "version" : "1.0.0"
+  },
+  "servers" : [ {
+    "url" : "https://{region}.api.example.com/v1",
+    "description" : "Production (multi-region)",
+    "variables" : {
+      "region" : {
+        "enum" : [ "us-east-1", "us-west-2", "eu-west-1" ],
+        "default" : "us-east-1",
+        "description" : "AWS region for the API endpoint"
+      }
+    }
+  }, {
+    "url" : "https://sandbox.example.com/v1",
+    "description" : "Sandbox"
+  } ],
+  "tags" : [ {
+    "name" : "products",
+    "description" : "Operations on the product catalog",
+    "externalDocs" : {
+      "description" : "Product catalog docs",
+      "url" : "https://example.com/docs/products"
+    }
+  }, {
+    "name" : "orders",
+    "description" : "Order management operations"
+  }, {
+    "name" : "inventory",
+    "description" : "Inventory and stock queries"
+  } ],
+  "security" : [ {
+    "bearerAuth" : [ ]
+  } ],
+  "externalDocs" : {
+    "description" : "Full API reference",
+    "url" : "https://example.com/docs/api"
+  },
+  "components" : {
+    "responses" : {
+      "NotFound" : {
+        "description" : "The requested resource was not found",
+        "headers" : {
+          "X-Request-Id" : {
+            "description" : "Unique request identifier",
+            "required" : true,
+            "schema" : {
+              "type" : "string"
+            }
+          }
+        }
+      },
+      "Unauthorized" : {
+        "description" : "Authentication required"
+      },
+      "ValidationError" : {
+        "description" : "Request validation failed",
+        "content" : {
+          "application/json" : {
+            "schema" : {
+              "type" : "object",
+              "properties" : {
+                "errors" : {
+                  "type" : "array",
+                  "items" : {
+                    "type" : "string"
+                  }
+                }
+              }
+            },
+            "examples" : {
+              "missingField" : {
+                "summary" : "Missing required field",
+                "externalValue" : "https://example.com/samples/validation-error.json"
+              }
+            }
+          }
+        }
+      }
+    },
+    "parameters" : {
+      "ProductId" : {
+        "name" : "productId",
+        "in" : "path",
+        "description" : "Unique product identifier",
+        "required" : true,
+        "schema" : {
+          "type" : "string",
+          "format" : "uuid"
+        },
+        "example" : "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+      },
+      "PageSize" : {
+        "name" : "pageSize",
+        "in" : "query",
+        "description" : "Number of results per page",
+        "style" : "form",
+        "explode" : false,
+        "allowReserved" : false,
+        "schema" : {
+          "type" : "integer",
+          "format" : "int32"
+        },
+        "examples" : {
+          "small" : {
+            "summary" : "Small page",
+            "value" : "10"
+          },
+          "large" : {
+            "summary" : "Large page",
+            "value" : "100"
+          }
+        }
+      },
+      "FilterContext" : {
+        "name" : "X-Filter-Context",
+        "in" : "header",
+        "description" : "Structured filter context, serialized as JSON",
+        "content" : {
+          "application/json" : {
+            "schema" : {
+              "type" : "object"
+            }
+          }
+        }
+      }
+    },
+    "examples" : {
+      "ProductExample" : {
+        "summary" : "A typical running shoe",
+        "description" : "Canonical example of a product resource",
+        "value" : {
+          "id" : "abc-123",
+          "name" : "UltraRun Pro",
+          "price" : 129.99,
+          "category" : "footwear"
+        }
+      },
+      "ExternalProductExample" : {
+        "summary" : "Complex product (external)",
+        "externalValue" : "https://example.com/samples/product.json"
+      }
+    },
+    "requestBodies" : {
+      "CreateProductBody" : {
+        "description" : "Product creation payload (multipart)",
+        "content" : {
+          "multipart/form-data" : {
+            "schema" : {
+              "type" : "object",
+              "properties" : {
+                "name" : {
+                  "type" : "string"
+                },
+                "image" : {
+                  "type" : "string",
+                  "format" : "binary"
+                },
+                "metadata" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "example" : {
+              "name" : "Trail Blazer Boots"
+            },
+            "encoding" : {
+              "image" : {
+                "contentType" : "image/png, image/jpeg",
+                "headers" : {
+                  "X-Upload-Token" : {
+                    "$ref" : "#/components/headers/UploadToken"
+                  }
+                },
+                "style" : "form",
+                "explode" : false,
+                "allowReserved" : false
+              },
+              "metadata" : {
+                "contentType" : "application/json",
+                "style" : "form",
+                "explode" : true
+              }
+            }
+          }
+        },
+        "required" : true
+      }
+    },
+    "headers" : {
+      "RateLimitRemaining" : {
+        "description" : "Number of requests remaining in the current rate-limit window",
+        "required" : true,
+        "style" : "simple",
+        "explode" : false,
+        "schema" : {
+          "type" : "integer"
+        },
+        "example" : "42"
+      },
+      "RateLimitReset" : {
+        "description" : "Unix timestamp at which the rate-limit window resets",
+        "schema" : {
+          "type" : "integer",
+          "format" : "int64"
+        },
+        "examples" : {
+          "future" : {
+            "summary" : "One minute from now",
+            "value" : "1711666800"
+          }
+        }
+      },
+      "UploadToken" : {
+        "description" : "Short-lived token authorizing a binary upload",
+        "required" : true,
+        "schema" : {
+          "type" : "string"
+        }
+      },
+      "X-Structured-Meta" : {
+        "description" : "Structured metadata serialized as JSON",
+        "content" : {
+          "application/json" : {
+            "schema" : {
+              "type" : "object"
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes" : {
+      "bearerAuth" : {
+        "type" : "http",
+        "scheme" : "bearer",
+        "bearerFormat" : "JWT"
+      },
+      "apiKeyAuth" : {
+        "type" : "apiKey",
+        "name" : "X-API-Key",
+        "in" : "header"
+      }
+    },
+    "links" : {
+      "GetProductByIdLink" : {
+        "operationId" : "getProduct",
+        "parameters" : {
+          "productId" : "$response.body#/id"
+        },
+        "description" : "Retrieve the product that was just created",
+        "server" : {
+          "url" : "https://api.example.com/v1",
+          "description" : "Production"
+        }
+      },
+      "GetOrderStatusLink" : {
+        "operationRef" : "#/components/schemas/StorefrontService#GetOrderStatus",
+        "parameters" : {
+          "order_id" : "$response.body#/orderId"
+        },
+        "description" : "Check the status of the placed order"
+      }
+    },
+    "callbacks" : {
+      "OrderStatusCallback" : {
+        "{$request.body#/callbackUrl}" : {
+          "post" : {
+            "summary" : "Order status update notification",
+            "requestBody" : {
+              "description" : "Order status payload",
+              "content" : {
+                "application/json" : {
+                  "schema" : {
+                    "type" : "object",
+                    "properties" : {
+                      "orderId" : {
+                        "type" : "string"
+                      },
+                      "status" : {
+                        "type" : "string"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "responses" : {
+              "default" : {
+                "description" : "Callback received"
+              }
+            }
+          }
+        }
+      }
+    },
+    "pathItems" : {
+      "HealthCheck" : {
+        "summary" : "API health check",
+        "description" : "Verifies that the API is operational.",
+        "get" : {
+          "summary" : "Check API health",
+          "operationId" : "healthCheck",
+          "responses" : {
+            "200" : {
+              "description" : "API is healthy"
+            }
+          }
+        },
+        "parameters" : [ {
+          "name" : "X-Request-Id",
+          "in" : "header",
+          "description" : "Optional correlation ID",
+          "schema" : {
+            "type" : "string"
+          }
+        } ]
+      }
+    },
+    "schemas" : {
+      "ProductList" : {
+        "type" : "object",
+        "properties" : {
+          "products" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Product"
+            }
+          },
+          "total" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "page" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "pageSize" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
+      "Product" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "price" : {
+            "type" : "number",
+            "format" : "double"
+          },
+          "category" : {
+            "type" : "string"
+          },
+          "tags" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "stockQuantity" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
+      "Order" : {
+        "type" : "object",
+        "properties" : {
+          "orderId" : {
+            "type" : "string"
+          },
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/OrderItem"
+            }
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "total" : {
+            "type" : "number",
+            "format" : "double"
+          },
+          "shippingAddress" : {
+            "type" : "string"
+          }
+        }
+      },
+      "OrderItem" : {
+        "type" : "object",
+        "properties" : {
+          "productId" : {
+            "type" : "string"
+          },
+          "quantity" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
+      "CreateOrderRequest" : {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/OrderItem"
+            }
+          },
+          "shippingAddress" : {
+            "type" : "string"
+          },
+          "callbackUrl" : {
+            "type" : "string"
+          }
+        }
+      }
+    }
+  },
+  "webhooks" : {
+    "stockAlert" : {
+      "summary" : "Stock level alert",
+      "description" : "Fired when a product's stock drops below the threshold.",
+      "post" : {
+        "summary" : "Receive a stock alert",
+        "operationId" : "stockAlertWebhook",
+        "requestBody" : {
+          "description" : "Alert payload",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "productId" : {
+                    "type" : "string"
+                  },
+                  "currentStock" : {
+                    "type" : "integer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "default" : {
+            "description" : "Webhook received"
+          }
+        }
+      }
+    }
+  },
+  "x-logo" : {
+    "url" : "https://example.com/logo.png",
+    "altText" : "Sporting Goods Logo"
+  },
+  "paths" : {
+    "/products" : {
+      "get" : {
+        "summary" : "List products",
+        "description" : "Returns a paginated list of products. Supports filtering by category, price range, and stock status.",
+        "operationId" : "listProducts",
+        "tags" : [ "products", "inventory" ],
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/PageSize"
+        }, {
+          "name" : "category",
+          "in" : "query",
+          "description" : "Filter by product category",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "X-Filter-Context",
+          "in" : "header",
+          "description" : "Structured filter context header",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "object"
+              }
+            }
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Successful response",
+            "headers" : {
+              "X-Total-Count" : {
+                "description" : "Total number of products matching the filter",
+                "schema" : {
+                  "type" : "integer"
+                }
+              },
+              "X-Rate-Limit-Remaining" : {
+                "$ref" : "#/components/headers/RateLimitRemaining"
+              }
+            },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProductList"
+                },
+                "examples" : {
+                  "typical" : {
+                    "$ref" : "#/components/examples/ProductExample"
+                  },
+                  "external" : {
+                    "$ref" : "#/components/examples/ExternalProductExample"
+                  }
+                }
+              }
+            }
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "x-rate-limit" : 100
+      },
+      "post" : {
+        "summary" : "Create product",
+        "description" : "Adds a new product to the catalog. Requires admin privileges.",
+        "operationId" : "createProduct",
+        "tags" : [ "products" ],
+        "requestBody" : {
+          "$ref" : "#/components/requestBodies/CreateProductBody"
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Product created successfully",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Product"
+                }
+              }
+            },
+            "links" : {
+              "GetProduct" : {
+                "$ref" : "#/components/links/GetProductByIdLink"
+              }
+            }
+          },
+          "400" : {
+            "$ref" : "#/components/responses/ValidationError"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        }, {
+          "apiKeyAuth" : [ ]
+        } ]
+      }
+    },
+    "/products/{id}" : {
+      "get" : {
+        "summary" : "Get product",
+        "description" : "Returns a single product by its unique identifier.",
+        "operationId" : "getProduct",
+        "tags" : [ "products" ],
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "$ref" : "#/components/parameters/ProductId"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Product found",
+            "headers" : {
+              "X-Rate-Limit-Remaining" : {
+                "$ref" : "#/components/headers/RateLimitRemaining"
+              },
+              "X-Rate-Limit-Reset" : {
+                "$ref" : "#/components/headers/RateLimitReset"
+              }
+            },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Product"
+                },
+                "example" : {
+                  "id" : "abc-123",
+                  "name" : "UltraRun Pro",
+                  "price" : 129.99
+                }
+              }
+            },
+            "links" : {
+              "PlaceOrder" : {
+                "operationId" : "placeOrder",
+                "parameters" : {
+                  "items[0].productId" : "$response.body#/id"
+                },
+                "description" : "Place an order for this product"
+              },
+              "GetProduct" : {
+                "$ref" : "#/components/links/GetProductByIdLink"
+              }
+            }
+          },
+          "404" : {
+            "$ref" : "#/components/responses/NotFound"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          }
+        }
+      },
+      "delete" : {
+        "summary" : "Delete product",
+        "description" : "Removes a product from the catalog. This action is irreversible.",
+        "operationId" : "deleteProduct",
+        "tags" : [ "products" ],
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "$ref" : "#/components/parameters/ProductId"
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "Product deleted"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/NotFound"
+          }
+        },
+        "deprecated" : true,
+        "externalDocs" : {
+          "description" : "Deprecation notice",
+          "url" : "https://example.com/docs/deprecations"
+        }
+      }
+    },
+    "/products/{product_id}/image" : {
+      "post" : {
+        "summary" : "Upload product image",
+        "description" : "Uploads a binary image for the given product (PNG or JPEG).",
+        "operationId" : "uploadProductImage",
+        "tags" : [ "products" ],
+        "parameters" : [ {
+          "name" : "product_id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "description" : "Image upload (multipart)",
+          "content" : {
+            "multipart/form-data" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "image" : {
+                    "type" : "string",
+                    "format" : "binary"
+                  }
+                }
+              },
+              "encoding" : {
+                "image" : {
+                  "contentType" : "image/png, image/jpeg",
+                  "headers" : {
+                    "X-Upload-Token" : {
+                      "$ref" : "#/components/headers/UploadToken"
+                    }
+                  },
+                  "style" : "form",
+                  "explode" : false,
+                  "allowReserved" : false
+                }
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "204" : {
+            "description" : "Image uploaded",
+            "headers" : {
+              "X-Image-Meta" : {
+                "description" : "Metadata about the uploaded image",
+                "content" : {
+                  "application/json" : {
+                    "schema" : {
+                      "type" : "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "$ref" : "#/components/responses/ValidationError"
+          }
+        }
+      }
+    },
+    "/orders" : {
+      "post" : {
+        "summary" : "Place order",
+        "description" : "Creates a new order. Triggers an async callback when order status changes.",
+        "operationId" : "placeOrder",
+        "tags" : [ "orders" ],
+        "requestBody" : {
+          "description" : "Order creation payload",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreateOrderRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Order placed",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Order"
+                }
+              }
+            },
+            "links" : {
+              "GetOrderStatus" : {
+                "$ref" : "#/components/links/GetOrderStatusLink"
+              }
+            }
+          },
+          "400" : {
+            "$ref" : "#/components/responses/ValidationError"
+          }
+        },
+        "externalDocs" : {
+          "description" : "Order flow docs",
+          "url" : "https://example.com/docs/orders"
+        },
+        "callbacks" : {
+          "onStatusChange" : {
+            "$ref" : "#/components/callbacks/OrderStatusCallback"
+          }
+        },
+        "servers" : [ {
+          "url" : "https://orders.example.com/v1",
+          "description" : "Dedicated order service"
+        } ]
+      }
+    },
+    "/orders/{order_id}" : {
+      "get" : {
+        "summary" : "Get order status",
+        "description" : "Get the current status of an order.",
+        "operationId" : "getOrderStatus",
+        "tags" : [ "orders" ],
+        "parameters" : [ {
+          "name" : "order_id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Order details",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Order"
+                }
+              }
+            }
+          },
+          "404" : {
+            "$ref" : "#/components/responses/NotFound"
+          }
+        }
+      }
+    }
+  }
+}

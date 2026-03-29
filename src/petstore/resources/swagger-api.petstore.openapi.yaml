@@ -1,4 +1,4 @@
-openapi: 3.0.4
+openapi: 3.1.0 # this has been modified from the original so we can validate this file against the oas 3.1 schema
 info:
   title: Swagger Petstore - OpenAPI 3.0
   description: |-

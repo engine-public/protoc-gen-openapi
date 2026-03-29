@@ -178,15 +178,15 @@ HeaderContent content }`. Only the `schema` variant is handled.
 
 | Done | #  | Order | Affected message(s)                                      | Severity | Depends on                   |
 |------|----|-------|----------------------------------------------------------|----------|------------------------------|
-| [ ]  | 1  | 6     | `Components` (5 missing map fields)                      | High     | §4, §5, §6 for full coverage |
-| [ ]  | 2  | 4     | `Operation.callbacks`                                    | Medium   | —                            |
-| [ ]  | 3  | 3     | `PathItem.parameters`, `PathItem.$ref`                   | Medium   | —                            |
-| [ ]  | 4  | 1     | `Example`, `ExampleOrReference`, `ExampleOrReferenceMap` | High     | —                            |
-| [ ]  | 5  | 2     | `Link`, `LinkOrReference`                                | High     | —                            |
-| [ ]  | 6  | 5     | `Callback`, `CallbackOrReference`                        | Medium   | —                            |
-| [ ]  | 7  | 9     | `MediaType.example/examples/encoding`                    | High     | §4, §8                       |
-| [ ]  | 8  | 8     | `Encoding`                                               | Medium   | —                            |
-| [ ]  | 9  | 10    | `ParameterSchema.example/examples`                       | Low      | §4                           |
-| [ ]  | 10 | 11    | `HeaderSchema.example/examples`                          | Low      | §4                           |
-| [ ]  | 11 | 7     | `Parameter.content` variant                              | Low      | —                            |
-| [ ]  | 12 | 12    | `Header.content` variant                                 | Low      | —                            |
+| [x]  | 1  | 6     | `Components` (5 missing map fields)                      | High     | §4, §5, §6 for full coverage |
+| [x]  | 2  | 4     | `Operation.callbacks`                                    | Medium   | —                            |
+| [x]  | 3  | 3     | `PathItem.parameters`, `PathItem.$ref`                   | Medium   | —                            |
+| [x]  | 4  | 1     | `Example`, `ExampleOrReference`, `ExampleOrReferenceMap` | High     | —                            |
+| [x]  | 5  | 2     | `Link`, `LinkOrReference`                                | High     | —                            |
+| [x]  | 6  | 5     | `Callback`, `CallbackOrReference`                        | Medium   | —                            |
+| [x]  | 7  | 9     | `MediaType.example/examples/encoding`                    | High     | §4, §8                       |
+| [x]  | 8  | 8     | `Encoding`                                               | Medium   | —                            |
+| [x]  | 9  | 10    | `ParameterSchema.example/examples`                       | Low      | §4                           |
+| [x]  | 10 | 11    | `HeaderSchema.example/examples`                          | Low      | §4                           |
+| [x]  | 11 | 7     | `Parameter.content` variant                              | Low      | —                            |
+| [x]  | 12 | 12    | `Header.content` variant                                 | Low      | —                            |

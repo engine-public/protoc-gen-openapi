@@ -7,6 +7,7 @@ import com.engine.protoc.openapi.model.Callback
 import com.engine.protoc.openapi.model.CallbackOrReference
 import com.engine.protoc.openapi.model.Components
 import com.engine.protoc.openapi.model.Contact
+import com.engine.protoc.openapi.model.Encoding
 import com.engine.protoc.openapi.model.Example
 import com.engine.protoc.openapi.model.ExampleOrReference
 import com.engine.protoc.openapi.model.ExampleOrReferenceMap
@@ -358,6 +359,20 @@ internal fun RequestBody.toJson(ctx: JsonContext): ObjectNode {
 internal fun MediaType.toJson(ctx: JsonContext): ObjectNode {
     val node = ctx.obj()
     if (hasSchema()) node.set<JsonNode>("schema", schema.toJson(ctx))
+    return node
+}
+
+internal fun Encoding.toJson(ctx: JsonContext): ObjectNode {
+    val node = ctx.obj()
+    if (hasContentType()) node.put("contentType", contentType)
+    if (headersMap.isNotEmpty()) {
+        val hdrsNode = ctx.obj()
+        for ((k, v) in headersMap) hdrsNode.set<JsonNode>(k, v.toJson(ctx))
+        node.set<JsonNode>("headers", hdrsNode)
+    }
+    if (hasStyle()) node.put("style", style)
+    if (hasExplode()) node.put("explode", explode)
+    if (hasAllowReserved()) node.put("allowReserved", allowReserved)
     return node
 }
 

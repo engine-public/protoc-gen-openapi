@@ -501,12 +501,19 @@ internal fun Header.toJson(ctx: JsonContext): ObjectNode {
     if (hasDescription()) node.put("description", description)
     if (hasRequired()) node.put("required", required)
     if (hasDeprecated()) node.put("deprecated", deprecated)
-    // HeaderSchema is a proto wrapper that groups style/explode/schema together, but in the
-    // OpenAPI JSON output these fields are inlined directly at the Header object level.
+    // HeaderSchema is a proto wrapper that groups style/explode/schema/example together, but in
+    // the OpenAPI JSON output these fields are inlined directly at the Header object level.
     if (hasSchema()) {
         if (schema.hasStyle()) node.put("style", schema.style)
         if (schema.hasExplode()) node.put("explode", schema.explode)
         if (schema.hasSchema()) node.set<JsonNode>("schema", schema.schema.toJson(ctx))
+        when (schema.exampleTypeCase) {
+            HeaderSchema.ExampleTypeCase.EXAMPLE ->
+                node.set<JsonNode>("example", schema.example.toJson(ctx))
+            HeaderSchema.ExampleTypeCase.EXAMPLES ->
+                node.set<JsonNode>("examples", schema.examples.toJson(ctx))
+            else -> {}
+        }
     }
     return node
 }

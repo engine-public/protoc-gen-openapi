@@ -15,6 +15,8 @@ import com.engine.protoc.openapi.model.HeaderOrReference
 import com.engine.protoc.openapi.model.HeaderSchema
 import com.engine.protoc.openapi.model.Info
 import com.engine.protoc.openapi.model.License
+import com.engine.protoc.openapi.model.Link
+import com.engine.protoc.openapi.model.LinkOrReference
 import com.engine.protoc.openapi.model.MediaType
 import com.engine.protoc.openapi.model.MutualTLSSecurityScheme
 import com.engine.protoc.openapi.model.OAuthFlow
@@ -354,7 +356,46 @@ internal fun ResponseObject.toJson(ctx: JsonContext): ObjectNode {
         for ((k, v) in contentMap) contentNode.set<JsonNode>(k, v.toJson(ctx))
         node.set<JsonNode>("content", contentNode)
     }
+    if (linksMap.isNotEmpty()) {
+        val linksNode = ctx.obj()
+        for ((k, v) in linksMap) linksNode.set<JsonNode>(k, v.toJson(ctx))
+        node.set<JsonNode>("links", linksNode)
+    }
     extensionsMap.putExtensionsInto(node, ctx)
+    return node
+}
+
+// ---------------------------------------------------------------------------
+// Links
+// ---------------------------------------------------------------------------
+
+internal fun LinkOrReference.toJson(ctx: JsonContext): ObjectNode =
+    when (typeCase) {
+        LinkOrReference.TypeCase.LINK -> link.toJson(ctx)
+        LinkOrReference.TypeCase.REFERENCE -> reference.toJson(ctx)
+        else -> ctx.obj()
+    }
+
+internal fun Link.toJson(ctx: JsonContext): ObjectNode {
+    val node = ctx.obj()
+    when (operationLocatorTypeCase) {
+        Link.OperationLocatorTypeCase.OPERATION_REF ->
+            node.put("operationRef", operationRef)
+        Link.OperationLocatorTypeCase.OPERATION_ID ->
+            node.put("operationId", operationId)
+        // proto_rpc_ref resolves to an operation path, emitted as operationRef
+        Link.OperationLocatorTypeCase.PROTO_RPC_REF ->
+            node.put("operationRef", ctx.resolveProtoRef(protoRpcRef))
+        else -> {}
+    }
+    if (parametersMap.isNotEmpty()) {
+        val paramsNode = ctx.obj()
+        for ((k, v) in parametersMap) paramsNode.set<JsonNode>(k, v.toJson(ctx))
+        node.set<JsonNode>("parameters", paramsNode)
+    }
+    if (hasRequestBody()) node.set<JsonNode>("requestBody", requestBody.toJson(ctx))
+    if (hasDescription()) node.put("description", description)
+    if (hasServer()) node.set<JsonNode>("server", server.toJson(ctx))
     return node
 }
 
@@ -443,6 +484,11 @@ internal fun Components.toJson(ctx: JsonContext): ObjectNode {
         val ssNode = ctx.obj()
         for ((k, v) in securitySchemesMap) ssNode.set<JsonNode>(k, v.toJson(ctx))
         node.set<JsonNode>("securitySchemes", ssNode)
+    }
+    if (linksMap.isNotEmpty()) {
+        val linksNode = ctx.obj()
+        for ((k, v) in linksMap) linksNode.set<JsonNode>(k, v.toJson(ctx))
+        node.set<JsonNode>("links", linksNode)
     }
     // schemas are merged in separately by SchemaBuilder
     return node

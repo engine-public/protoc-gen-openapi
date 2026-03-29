@@ -310,6 +310,13 @@ internal fun Parameter.toJson(ctx: JsonContext): ObjectNode {
             if (schema.hasExplode()) node.put("explode", schema.explode)
             if (schema.hasAllowReserved()) node.put("allowReserved", schema.allowReserved)
             if (schema.hasSchema()) node.set<JsonNode>("schema", schema.schema.toJson(ctx))
+            when (schema.exampleTypeCase) {
+                ParameterSchema.ExampleTypeCase.EXAMPLE ->
+                    node.set<JsonNode>("example", schema.example.toJson(ctx))
+                ParameterSchema.ExampleTypeCase.EXAMPLES ->
+                    node.set<JsonNode>("examples", schema.examples.toJson(ctx))
+                else -> {}
+            }
         }
         Parameter.ParameterDefinitionTypeCase.CONTENT ->
             node.set<JsonNode>("content", content.toJson(ctx))

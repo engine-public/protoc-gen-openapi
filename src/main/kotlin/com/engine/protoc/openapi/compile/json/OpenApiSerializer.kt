@@ -26,6 +26,7 @@ import com.engine.protoc.openapi.model.OAuthFlows
 import com.engine.protoc.openapi.model.OAuthSecurityScheme
 import com.engine.protoc.openapi.model.OpenIDConnectSecurityScheme
 import com.engine.protoc.openapi.model.Parameter
+import com.engine.protoc.openapi.model.ParameterContent
 import com.engine.protoc.openapi.model.ParameterOrReference
 import com.engine.protoc.openapi.model.ParameterSchema
 import com.engine.protoc.openapi.model.PathItem
@@ -301,13 +302,26 @@ internal fun Parameter.toJson(ctx: JsonContext): ObjectNode {
     if (hasRequired()) node.put("required", required)
     if (hasDeprecated()) node.put("deprecated", deprecated)
     if (hasAllowEmptyValue()) node.put("allowEmptyValue", allowEmptyValue)
-    if (hasSchema()) {
-        if (schema.hasStyle()) node.put("style", schema.style)
-        if (schema.hasExplode()) node.put("explode", schema.explode)
-        if (schema.hasAllowReserved()) node.put("allowReserved", schema.allowReserved)
-        if (schema.hasSchema()) node.set<JsonNode>("schema", schema.schema.toJson(ctx))
+    // A Parameter uses either schema-based or content-based serialization, never both.
+    when (parameterDefinitionTypeCase) {
+        Parameter.ParameterDefinitionTypeCase.SCHEMA -> {
+            if (schema.hasStyle()) node.put("style", schema.style)
+            if (schema.hasExplode()) node.put("explode", schema.explode)
+            if (schema.hasAllowReserved()) node.put("allowReserved", schema.allowReserved)
+            if (schema.hasSchema()) node.set<JsonNode>("schema", schema.schema.toJson(ctx))
+        }
+        Parameter.ParameterDefinitionTypeCase.CONTENT ->
+            node.set<JsonNode>("content", content.toJson(ctx))
+        else -> {}
     }
     extensionsMap.putExtensionsInto(node, ctx)
+    return node
+}
+
+/** A ParameterContent is a map from media-type string to MediaType; per spec it MUST have exactly one entry. */
+internal fun ParameterContent.toJson(ctx: JsonContext): ObjectNode {
+    val node = ctx.obj()
+    for ((k, v) in contentMap) node.set<JsonNode>(k, v.toJson(ctx))
     return node
 }
 

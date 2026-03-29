@@ -204,6 +204,13 @@ internal fun PathItemOrReference.toJson(ctx: JsonContext): ObjectNode =
 
 internal fun PathItem.toJson(ctx: JsonContext): ObjectNode {
     val node = ctx.obj()
+    // A PathItem may itself carry a $ref (per spec: "Allows for a referenced definition of
+    // this path item"). Emit it first so it is easily visible at the top of the object.
+    when (refTypeCase) {
+        PathItem.RefTypeCase.URI_REF -> node.put("\$ref", uriRef)
+        PathItem.RefTypeCase.PROTO_RPC_REF -> node.put("\$ref", ctx.resolveProtoRef(protoRpcRef))
+        else -> {}
+    }
     if (hasSummary()) node.put("summary", summary)
     if (hasDescription()) node.put("description", description)
     if (hasGet()) node.set<JsonNode>("get", get.toJson(ctx))
@@ -218,6 +225,11 @@ internal fun PathItem.toJson(ctx: JsonContext): ObjectNode {
         val arr = ctx.mapper.createArrayNode()
         for (s in serversList) arr.add(s.toJson(ctx))
         node.set<JsonNode>("servers", arr)
+    }
+    if (parametersList.isNotEmpty()) {
+        val arr = ctx.mapper.createArrayNode()
+        for (p in parametersList) arr.add(p.toJson(ctx))
+        node.set<JsonNode>("parameters", arr)
     }
     extensionsMap.putExtensionsInto(node, ctx)
     return node

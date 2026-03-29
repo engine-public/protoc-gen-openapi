@@ -5,6 +5,9 @@ import com.engine.protoc.openapi.Operation
 import com.engine.protoc.openapi.model.APIKeySecurityScheme
 import com.engine.protoc.openapi.model.Components
 import com.engine.protoc.openapi.model.Contact
+import com.engine.protoc.openapi.model.Example
+import com.engine.protoc.openapi.model.ExampleOrReference
+import com.engine.protoc.openapi.model.ExampleOrReferenceMap
 import com.engine.protoc.openapi.model.ExternalDocumentation
 import com.engine.protoc.openapi.model.HTTPSecurityScheme
 import com.engine.protoc.openapi.model.Header
@@ -377,6 +380,35 @@ internal fun Header.toJson(ctx: JsonContext): ObjectNode {
         if (schema.hasStyle()) node.put("style", schema.style)
         if (schema.hasExplode()) node.put("explode", schema.explode)
         if (schema.hasSchema()) node.set<JsonNode>("schema", schema.schema.toJson(ctx))
+    }
+    return node
+}
+
+// ---------------------------------------------------------------------------
+// Example
+// ---------------------------------------------------------------------------
+
+internal fun ExampleOrReferenceMap.toJson(ctx: JsonContext): ObjectNode {
+    val node = ctx.obj()
+    for ((k, v) in examplesMap) node.set<JsonNode>(k, v.toJson(ctx))
+    return node
+}
+
+internal fun ExampleOrReference.toJson(ctx: JsonContext): ObjectNode =
+    when (typeCase) {
+        ExampleOrReference.TypeCase.EXAMPLE -> example.toJson(ctx)
+        ExampleOrReference.TypeCase.REFERENCE -> reference.toJson(ctx)
+        else -> ctx.obj()
+    }
+
+internal fun Example.toJson(ctx: JsonContext): ObjectNode {
+    val node = ctx.obj()
+    if (hasSummary()) node.put("summary", summary)
+    if (hasDescription()) node.put("description", description)
+    when (typeCase) {
+        Example.TypeCase.VALUE -> node.set<JsonNode>("value", value.toJson(ctx))
+        Example.TypeCase.EXTERNAL_VALUE -> node.put("externalValue", externalValue)
+        else -> {}
     }
     return node
 }

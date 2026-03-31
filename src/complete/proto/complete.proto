@@ -13,8 +13,11 @@ import "google/protobuf/struct.proto";
 import "google/protobuf/wrappers.proto";
 
 // File-level OpenAPI annotation exercising every root-level field and all
-// components sub-maps added in the gap-fix TODO items (§1–§12).
+// components sub-maps (§1–§12 gap fixes plus full SchemaObject coverage).
 option (.engine.protoc.openapi.file) = {
+    // covers OpenAPI.json_schema_dialect
+    json_schema_dialect: "https://spec.openapis.org/oas/3.1/dialect/base"
+
     info: {
         title: "Sporting Goods Storefront API"
         summary: "Fictitious sporting goods catalog and ordering API"
@@ -27,9 +30,13 @@ option (.engine.protoc.openapi.file) = {
         }
         license: {
             name: "Apache 2.0"
-            url: "https://www.apache.org/licenses/LICENSE-2.0.html"
+            identifier: "Apache-2.0"      // covers License.identifier (SPDX)
         }
         version: "1.0.0"
+        extensions: {                      // covers Info.extensions
+            key: "x-info-contact-policy"
+            value: { string_value: "verified" }
+        }
     }
 
     // Servers with variables
@@ -52,7 +59,26 @@ option (.engine.protoc.openapi.file) = {
         }
     ]
 
-    // Tags with external_docs
+    // covers OpenAPI.paths and Paths.paths
+    paths: {
+        paths: {
+            key: "/health"
+            value: {
+                get: {
+                    operationId: "healthStatus"
+                    summary: "Health status endpoint"
+                    responses: {
+                        codes: {
+                            key: "200"
+                            value: { response_object: { description: "Service is healthy" } }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Tags with external_docs and extensions
     tags: [
         {
             name: "products"
@@ -60,6 +86,10 @@ option (.engine.protoc.openapi.file) = {
             external_docs: {
                 description: "Product catalog docs"
                 url: "https://example.com/docs/products"
+            }
+            extensions: {                  // covers Tag.extensions
+                key: "x-tag-version"
+                value: { string_value: "v1" }
             }
         },
         {
@@ -80,7 +110,7 @@ option (.engine.protoc.openapi.file) = {
     // Root-level security
     security: { names: { key: "bearerAuth" value: {} } }
 
-    // Webhooks (PathItemOrReference map)
+    // Webhooks — PathItemOrReference variants
     webhooks: {
         key: "stockAlert"
         value: {
@@ -120,9 +150,33 @@ option (.engine.protoc.openapi.file) = {
             }
         }
     }
+    // covers PathItemOrReference.reference oneof
+    webhooks: {
+        key: "healthCheckWebhook"
+        value: { reference: { uri_ref: "#/components/pathItems/HealthCheck" } }
+    }
+    // covers PathItem.uri_ref ($ref on PathItem itself)
+    webhooks: {
+        key: "externalPathItem"
+        value: {
+            path_item: {
+                uri_ref: "#/components/pathItems/HealthCheck"
+            }
+        }
+    }
 
     components: {
-        // §1 — Reusable responses (ResponseOrReference map)
+        // covers Components.schemas (intentionally not serialized, but exercises the proto field)
+        schemas: {
+            key: "BoolTrue"
+            value: { boolean: true }
+        }
+        schemas: {
+            key: "BoolFalse"
+            value: { boolean: false }
+        }
+
+        // §1 — Reusable responses with extensions
         responses: {
             key: "NotFound"
             value: {
@@ -137,6 +191,10 @@ option (.engine.protoc.openapi.file) = {
                                 schema: { schema: { object: { type: "string" } } }
                             }
                         }
+                    }
+                    extensions: {          // covers ResponseObject.extensions
+                        key: "x-error-code"
+                        value: { string_value: "RESOURCE_NOT_FOUND" }
                     }
                 }
             }
@@ -182,7 +240,7 @@ option (.engine.protoc.openapi.file) = {
             }
         }
 
-        // §1 — Reusable parameters (ParameterOrReference map)
+        // §1 — Reusable parameters — covers Parameter.deprecated, allow_empty_value, extensions
         parameters: {
             key: "ProductId"
             value: {
@@ -191,12 +249,18 @@ option (.engine.protoc.openapi.file) = {
                     in: "path"
                     description: "Unique product identifier"
                     required: true
+                    deprecated: true               // covers Parameter.deprecated
+                    allow_empty_value: false        // covers Parameter.allow_empty_value
                     // §9 — ParameterSchema.example
                     schema: {
                         schema: { object: { type: "string" format: "uuid" } }
                         example: {
                             [type.googleapis.com/google.protobuf.StringValue] { value: "a1b2c3d4-e5f6-7890-abcd-ef1234567890" }
                         }
+                    }
+                    extensions: {                  // covers Parameter.extensions
+                        key: "x-param-group"
+                        value: { string_value: "product-identifiers" }
                     }
                 }
             }
@@ -258,7 +322,7 @@ option (.engine.protoc.openapi.file) = {
             }
         }
 
-        // §1 — Reusable examples (ExampleOrReference map)
+        // §1 — Reusable examples
         // §4 — Example.value (embedded literal)
         examples: {
             key: "ProductExample"
@@ -290,7 +354,7 @@ option (.engine.protoc.openapi.file) = {
             }
         }
 
-        // §1 — Reusable request bodies (RequestBodyOrReference map)
+        // §1 — Reusable request bodies
         // §7, §8 — MediaType.encoding with Encoding all fields
         request_bodies: {
             key: "CreateProductBody"
@@ -331,7 +395,6 @@ option (.engine.protoc.openapi.file) = {
                                 key: "image"
                                 value: {
                                     content_type: "image/png, image/jpeg"
-                                    // §8 — Encoding.headers (Reference map — circular dependency restriction)
                                     headers: {
                                         key: "X-Upload-Token"
                                         value: { uri_ref: "#/components/headers/UploadToken" }
@@ -355,7 +418,7 @@ option (.engine.protoc.openapi.file) = {
             }
         }
 
-        // §1 — Reusable headers (HeaderOrReference map)
+        // §1 — Reusable headers
         // §10 — HeaderSchema.example
         headers: {
             key: "RateLimitRemaining"
@@ -374,12 +437,13 @@ option (.engine.protoc.openapi.file) = {
                 }
             }
         }
-        // §10 — HeaderSchema.examples (ExampleOrReferenceMap)
+        // §10 — HeaderSchema.examples; covers Header.deprecated
         headers: {
             key: "RateLimitReset"
             value: {
                 header: {
                     description: "Unix timestamp at which the rate-limit window resets"
+                    deprecated: true               // covers Header.deprecated
                     schema: {
                         schema: { object: { type: "integer" format: "int64" } }
                         examples: {
@@ -425,7 +489,7 @@ option (.engine.protoc.openapi.file) = {
             }
         }
 
-        // §1, §5 — Reusable links (LinkOrReference map)
+        // §1, §5 — Reusable links
         // §5 — Link.operation_id variant
         links: {
             key: "GetProductByIdLink"
@@ -437,7 +501,6 @@ option (.engine.protoc.openapi.file) = {
                         key: "productId"
                         value: { [type.googleapis.com/google.protobuf.StringValue] { value: "$response.body#/id" } }
                     }
-                    server: { url: "https://api.example.com/v1" description: "Production" }
                 }
             }
         }
@@ -455,8 +518,19 @@ option (.engine.protoc.openapi.file) = {
                 }
             }
         }
+        // covers Link.operation_ref and Link.request_body
+        links: {
+            key: "OperationRefLink"
+            value: {
+                link: {
+                    operation_ref: "#/paths/~1orders/post"
+                    request_body: { [type.googleapis.com/google.protobuf.StringValue] { value: "$request.body" } }
+                    description: "Place an order using operationRef"
+                }
+            }
+        }
 
-        // §1, §6 — Reusable callbacks (CallbackOrReference map)
+        // §1, §6 — Reusable callbacks
         // §6 — Callback.callbacks map
         callbacks: {
             key: "OrderStatusCallback"
@@ -501,8 +575,14 @@ option (.engine.protoc.openapi.file) = {
                 }
             }
         }
+        // covers CallbackOrReference.reference
+        callbacks: {
+            key: "OrderStatusRef"
+            value: { reference: { uri_ref: "#/components/callbacks/OrderStatusCallback" } }
+        }
 
-        // §1, §3 — Reusable path items (PathItemOrReference map)
+        // §1, §3 — Reusable path items
+        // Updated HealthCheck: covers PathItem.options, head, trace, servers, extensions
         path_items: {
             key: "HealthCheck"
             value: {
@@ -527,17 +607,59 @@ option (.engine.protoc.openapi.file) = {
                             codes: { key: "200" value: { response_object: { description: "API is healthy" } } }
                         }
                     }
+                    options: {             // covers PathItem.options
+                        operationId: "healthCheckOptions"
+                        summary: "CORS preflight for health endpoint"
+                        responses: {
+                            codes: { key: "200" value: { response_object: { description: "OK" } } }
+                        }
+                    }
+                    head: {               // covers PathItem.head
+                        operationId: "healthCheckHead"
+                        summary: "HEAD request for health endpoint"
+                        responses: {
+                            codes: { key: "200" value: { response_object: { description: "OK" } } }
+                        }
+                    }
+                    trace: {              // covers PathItem.trace
+                        operationId: "healthCheckTrace"
+                        summary: "TRACE request for health endpoint"
+                        responses: {
+                            codes: { key: "200" value: { response_object: { description: "OK" } } }
+                        }
+                    }
+                    servers: [            // covers PathItem.servers
+                        { url: "https://health.example.com/v1" description: "Health service" }
+                    ]
+                    extensions: {         // covers PathItem.extensions
+                        key: "x-health-priority"
+                        value: { number_value: 1 }
+                    }
+                }
+            }
+        }
+        // covers PathItem.proto_rpc_ref ($ref on PathItem)
+        path_items: {
+            key: "RpcRefPathItem"
+            value: {
+                path_item: {
+                    proto_rpc_ref: "sporting.goods.StorefrontService#GetProduct"
                 }
             }
         }
 
-        // §1 — Reusable security schemes (SecuritySchemeOrReference map)
+        // §1 — Reusable security schemes
+        // covers SecurityScheme.description (field not serialized), SecurityScheme.extensions
         security_schemes: {
             key: "bearerAuth"
             value: {
                 security_scheme: {
                     description: "JWT bearer token authentication"
                     http: { scheme: "bearer" bearer_format: "JWT" }
+                    extensions: {          // covers SecurityScheme.extensions
+                        key: "x-bearer-docs"
+                        value: { string_value: "https://example.com/auth" }
+                    }
                 }
             }
         }
@@ -548,6 +670,65 @@ option (.engine.protoc.openapi.file) = {
                     api_key: { name: "X-API-Key" in: "header" }
                 }
             }
+        }
+        // covers SecurityScheme.oauth2, OAuthFlows (all 4 flows), OAuthFlow (all fields)
+        security_schemes: {
+            key: "oauth2Auth"
+            value: {
+                security_scheme: {
+                    oauth2: {
+                        flows: {
+                            implicit: {    // covers OAuthFlows.implicit, OAuthFlow.authorization_url, refresh_url, scopes
+                                authorization_url: "https://auth.example.com/authorize"
+                                refresh_url: "https://auth.example.com/token/refresh"
+                                scopes: { key: "read:products" value: "Read product catalog" }
+                            }
+                            password: {   // covers OAuthFlows.password, OAuthFlow.token_url
+                                token_url: "https://auth.example.com/token"
+                                refresh_url: "https://auth.example.com/token/refresh"
+                                scopes: { key: "read:products" value: "Read product catalog" }
+                                scopes: { key: "write:products" value: "Modify products" }
+                            }
+                            client_credentials: {  // covers OAuthFlows.client_credentials
+                                token_url: "https://auth.example.com/token"
+                                scopes: { key: "admin" value: "Admin access" }
+                            }
+                            authorization_code: {  // covers OAuthFlows.authorization_code
+                                authorization_url: "https://auth.example.com/authorize"
+                                token_url: "https://auth.example.com/token"
+                                refresh_url: "https://auth.example.com/token/refresh"
+                                scopes: { key: "read:products" value: "Read product catalog" }
+                                scopes: { key: "write:orders" value: "Place orders" }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        // covers SecurityScheme.open_id_connect, OpenIDConnectSecurityScheme.openid_connect_url
+        security_schemes: {
+            key: "oidcAuth"
+            value: {
+                security_scheme: {
+                    open_id_connect: {
+                        openid_connect_url: "https://auth.example.com/.well-known/openid-configuration"
+                    }
+                }
+            }
+        }
+        // covers SecurityScheme.mutual_tls, MutualTLSSecurityScheme
+        security_schemes: {
+            key: "mtlsAuth"
+            value: {
+                security_scheme: {
+                    mutual_tls: {}
+                }
+            }
+        }
+        // covers SecuritySchemeOrReference.reference
+        security_schemes: {
+            key: "bearerRef"
+            value: { reference: { uri_ref: "#/components/securitySchemes/bearerAuth" } }
         }
     }
 
@@ -561,20 +742,153 @@ option (.engine.protoc.openapi.file) = {
 };
 
 // ----------------------------------------------------------------
-// Domain messages
+// Domain messages with SchemaObject annotations
 // ----------------------------------------------------------------
 
+// Product covers: title, description, deprecated, external_docs, xml (all fields),
+// discriminator (all fields), required, min_properties, max_properties,
+// additional_properties_allowed, pattern_properties, property_names, extensions (SchemaObject).
+// Field annotations cover: read_only, format, write_only, min_length, max_length, pattern,
+// multi-type, minimum, exclusive_minimum, maximum, exclusive_maximum, multiple_of, default,
+// example (SchemaObject), enum, const, items, prefix_items, contains, min_contains,
+// max_contains, min_items, max_items, unique_items, unevaluated_items (Schema.boolean),
+// deprecated (SchemaObject on field), examples (SchemaObject repeated Any), title (on field).
 message Product {
-    string id = 1;
-    string name = 2;
+    option (.engine.protoc.openapi.message) = {
+        object: {
+            title: "Sporting Goods Product"
+            description: "A product available in the sporting goods catalog."
+            deprecated: true
+            external_docs: {
+                description: "Product documentation"
+                url: "https://example.com/docs/products"
+            }
+            xml: {
+                name: "product"
+                namespace: "https://example.com/schemas"
+                prefix: "sg"
+                attribute: false
+                wrapped: false
+            }
+            discriminator: {
+                property_name: "category"
+                mapping: { key: "footwear" value: "#/components/schemas/Footwear" }
+                mapping: { key: "apparel" value: "#/components/schemas/Apparel" }
+            }
+            required: "id"
+            required: "name"
+            required: "price"
+            min_properties: 1
+            max_properties: 20
+            additional_properties_allowed: false
+            pattern_properties: {
+                key: "^x-"
+                value: { object: { type: "string" } }
+            }
+            property_names: { object: { type: "string" max_length: 100 } }
+            extensions: {
+                key: "x-product-type"
+                value: { string_value: "physical" }
+            }
+        }
+    };
+
+    // covers SchemaObject.read_only, SchemaObject.format
+    string id = 1 [(.engine.protoc.openapi.field) = {
+        object: {
+            read_only: true
+            format: "uuid"
+        }
+    }];
+
+    // covers SchemaObject.write_only, min_length, max_length, pattern, multi-type (type repeated)
+    string name = 2 [(.engine.protoc.openapi.field) = {
+        object: {
+            write_only: true
+            min_length: 1
+            max_length: 200
+            pattern: "^[A-Za-z0-9 .,'-]+$"
+            type: "string"
+            type: "null"
+        }
+    }];
+
     string description = 3;
-    double price = 4;
-    string category = 5;
-    repeated string tags = 6;
-    int32 stock_quantity = 7;
+
+    // covers SchemaObject.minimum, exclusive_minimum, maximum, exclusive_maximum,
+    // multiple_of, default, example (SchemaObject.example deprecated field)
+    double price = 4 [(.engine.protoc.openapi.field) = {
+        object: {
+            minimum: 0.01
+            exclusive_minimum: 0.0
+            maximum: 99999.99
+            exclusive_maximum: 100000.0
+            multiple_of: 0.01
+            default: { [type.googleapis.com/google.protobuf.Value] { number_value: 9.99 } }
+            example: { [type.googleapis.com/google.protobuf.Value] { number_value: 29.99 } }
+        }
+    }];
+
+    // covers SchemaObject.enum (repeated Any), SchemaObject.const (Any)
+    string category = 5 [(.engine.protoc.openapi.field) = {
+        object: {
+            enum: { [type.googleapis.com/google.protobuf.Value] { string_value: "footwear" } }
+            enum: { [type.googleapis.com/google.protobuf.Value] { string_value: "apparel" } }
+            enum: { [type.googleapis.com/google.protobuf.Value] { string_value: "equipment" } }
+            const: { [type.googleapis.com/google.protobuf.Value] { string_value: "footwear" } }
+        }
+    }];
+
+    // covers SchemaObject.items, prefix_items, contains, min_contains, max_contains,
+    // min_items, max_items, unique_items, unevaluated_items (Schema.boolean=false)
+    repeated string tags = 6 [(.engine.protoc.openapi.field) = {
+        object: {
+            items: { object: { type: "string" min_length: 1 } }
+            prefix_items: { object: { type: "string" pattern: "^[a-z]+$" } }
+            prefix_items: { object: { type: "string" } }
+            contains: { object: { type: "string" min_length: 2 } }
+            min_contains: 0
+            max_contains: 10
+            min_items: 0
+            max_items: 20
+            unique_items: true
+            unevaluated_items: { boolean: false }
+        }
+    }];
+
+    // covers SchemaObject.deprecated (on field), SchemaObject.examples (repeated Any),
+    // SchemaObject.title (on field)
+    int32 stock_quantity = 7 [(.engine.protoc.openapi.field) = {
+        object: {
+            deprecated: true
+            title: "Stock Quantity"
+            examples: { [type.googleapis.com/google.protobuf.Value] { number_value: 0 } }
+            examples: { [type.googleapis.com/google.protobuf.Value] { number_value: 100 } }
+        }
+    }];
 }
 
+// ProductList covers: all_of (Schema.boolean=true), any_of, one_of,
+// not (Schema.boolean=false), if_schema, then_schema, else_schema,
+// unevaluated_properties (Schema.boolean=false), additional_properties_schema (Schema.boolean=true).
 message ProductList {
+    option (.engine.protoc.openapi.message) = {
+        object: {
+            all_of: { boolean: true }
+            all_of: { object: { type: "object" } }
+            any_of: { object: { description: "Non-empty product list" } }
+            any_of: { object: { description: "Empty product list" } }
+            one_of: { object: { description: "Paginated result" } }
+            one_of: { object: { description: "Non-paginated result" } }
+            not: { boolean: false }
+            if_schema: { object: { required: "products" } }
+            then_schema: { object: { required: "total" } }
+            else_schema: { object: { description: "No products available" } }
+            unevaluated_properties: { boolean: false }
+            additional_properties_schema: { boolean: true }
+        }
+    };
+
     repeated Product products = 1;
     int32 total = 2;
     int32 page = 3;
@@ -597,6 +911,13 @@ message CreateProductRequest {
     int32 initial_stock = 6;
 }
 
+message UpdateProductRequest {
+    string id = 1;
+    string name = 2;
+    double price = 3;
+    string category = 4;
+}
+
 message UploadRequest {
     string product_id = 1;
     bytes image_data = 2;
@@ -614,10 +935,45 @@ message CreateOrderRequest {
     string callback_url = 3;
 }
 
+// Order covers SchemaObject: id ($id), schema ($schema), anchor ($anchor),
+// dynamic_anchor ($dynamicAnchor), dynamic_ref ($dynamicRef), defs ($defs),
+// uri_ref ($ref at SchemaObject level).
+// Order.status field covers: content_encoding, content_media_type, content_schema.
 message Order {
+    option (.engine.protoc.openapi.message) = {
+        object: {
+            id: "https://example.com/schemas/Order"
+            schema: "https://json-schema.org/draft/2020-12/schema"
+            anchor: "OrderSchema"
+            dynamic_anchor: "DynOrder"
+            dynamic_ref: "#DynOrder"
+            defs: {
+                key: "OrderStatus"
+                value: {
+                    object: {
+                        type: "string"
+                        enum: { [type.googleapis.com/google.protobuf.Value] { string_value: "pending" } }
+                        enum: { [type.googleapis.com/google.protobuf.Value] { string_value: "shipped" } }
+                        enum: { [type.googleapis.com/google.protobuf.Value] { string_value: "delivered" } }
+                    }
+                }
+            }
+            uri_ref: "#/components/schemas/Order"
+        }
+    };
+
     string order_id = 1;
     repeated OrderItem items = 2;
-    string status = 3;
+
+    // covers SchemaObject.content_encoding, content_media_type, content_schema
+    string status = 3 [(.engine.protoc.openapi.field) = {
+        object: {
+            content_encoding: "utf-8"
+            content_media_type: "text/plain"
+            content_schema: { object: { type: "string" } }
+        }
+    }];
+
     double total = 4;
     string shipping_address = 5;
 }
@@ -763,7 +1119,6 @@ service StorefrontService {
                                     link: {
                                         operation_id: "placeOrder"
                                         description: "Place an order for this product"
-                                        // §5 — Link.parameters (Any map)
                                         parameters: {
                                             key: "items[0].productId"
                                             value: { [type.googleapis.com/google.protobuf.StringValue] { value: "$response.body#/id" } }
@@ -809,7 +1164,6 @@ service StorefrontService {
                                     }
                                 }
                             }
-                            // §5 — ResponseObject.links ($ref variant)
                             links: {
                                 key: "GetProduct"
                                 value: { reference: { uri_ref: "#/components/links/GetProductByIdLink" } }
@@ -822,6 +1176,113 @@ service StorefrontService {
             }
             security: { names: { key: "bearerAuth" value: {} } }
             security: { names: { key: "apiKeyAuth" value: {} } }
+        };
+    }
+
+    // Update a product (PUT) — covers PathItem.put, Parameter.deprecated,
+    // Parameter.allow_empty_value, Parameter.extensions, ResponseObject.extensions.
+    rpc UpdateProduct(UpdateProductRequest) returns (Product) {
+        option (google.api.http) = { put: "/products/{id}" body: "*" };
+        option (.engine.protoc.openapi.method) = {
+            tags: ["products"]
+            summary: "Update product"
+            description: "Fully replaces a product by its identifier."
+            operationId: "updateProduct"
+            parameters: [
+                {
+                    parameter: {
+                        name: "id"
+                        in: "path"
+                        required: true
+                        deprecated: true               // covers Parameter.deprecated (inline)
+                        allow_empty_value: false        // covers Parameter.allow_empty_value (inline)
+                        schema: { schema: { object: { type: "string" format: "uuid" } } }
+                        extensions: {                  // covers Parameter.extensions (inline)
+                            key: "x-param-position"
+                            value: { number_value: 0 }
+                        }
+                    }
+                }
+            ]
+            request_body: {
+                request_body: {
+                    description: "Updated product data"
+                    required: true
+                    content: {
+                        key: "application/json"
+                        value: {
+                            schema: {
+                                object: { proto_message_ref: { [type.googleapis.com/sporting.goods.UpdateProductRequest] {} } }
+                            }
+                        }
+                    }
+                }
+            }
+            responses: {
+                codes: {
+                    key: "200"
+                    value: {
+                        response_object: {
+                            description: "Product updated"
+                            content: {
+                                key: "application/json"
+                                value: {
+                                    schema: {
+                                        object: { proto_message_ref: { [type.googleapis.com/sporting.goods.Product] {} } }
+                                    }
+                                }
+                            }
+                            extensions: {              // covers ResponseObject.extensions (inline)
+                                key: "x-rate-limit-cost"
+                                value: { number_value: 2 }
+                            }
+                        }
+                    }
+                }
+                codes: { key: "404" value: { reference: { uri_ref: "#/components/responses/NotFound" } } }
+                codes: { key: "401" value: { reference: { uri_ref: "#/components/responses/Unauthorized" } } }
+            }
+        };
+    }
+
+    // Patch a product (PATCH) — covers PathItem.patch, Reference.proto_rpc_ref,
+    // Reference.summary, Reference.description.
+    rpc PatchProduct(UpdateProductRequest) returns (Product) {
+        option (google.api.http) = { patch: "/products/{id}" body: "*" };
+        option (.engine.protoc.openapi.method) = {
+            tags: ["products"]
+            summary: "Patch product"
+            description: "Partially updates a product by its identifier."
+            operationId: "patchProduct"
+            parameters: [
+                // covers Reference.proto_rpc_ref, Reference.summary, Reference.description
+                {
+                    reference: {
+                        proto_rpc_ref: "sporting.goods.StorefrontService#GetProduct"
+                        summary: "Product reference"
+                        description: "Resolved from proto RPC ref"
+                    }
+                }
+            ]
+            responses: {
+                codes: {
+                    key: "200"
+                    value: {
+                        response_object: {
+                            description: "Product patched"
+                            content: {
+                                key: "application/json"
+                                value: {
+                                    schema: {
+                                        object: { proto_message_ref: { [type.googleapis.com/sporting.goods.Product] {} } }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                codes: { key: "404" value: { reference: { uri_ref: "#/components/responses/NotFound" } } }
+            }
         };
     }
 
@@ -951,7 +1412,7 @@ service StorefrontService {
                     }
                 }
             }
-            // §2 — Operation.callbacks (Reference map — no inline Callback due to proto circular deps)
+            // §2 — Operation.callbacks
             callbacks: { key: "onStatusChange" value: { uri_ref: "#/components/callbacks/OrderStatusCallback" } }
             responses: {
                 codes: {
@@ -967,7 +1428,6 @@ service StorefrontService {
                                     }
                                 }
                             }
-                            // §5 — ResponseObject.links ($ref to component link using proto_rpc_ref)
                             links: {
                                 key: "GetOrderStatus"
                                 value: { reference: { uri_ref: "#/components/links/GetOrderStatusLink" } }

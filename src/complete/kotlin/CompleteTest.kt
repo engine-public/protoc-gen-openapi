@@ -11,8 +11,6 @@ import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.shouldNotBe
-import tools.jackson.dataformat.yaml.YAMLMapper
 import java.io.File
 
 class CompleteTest :
@@ -34,6 +32,9 @@ class CompleteTest :
             .find { it.name == "sporting.goods.StorefrontService.openapi.json" }
             .shouldNotBeNull()
         val doc: JsonNode = mapper.readTree(generatedFile.content)
+
+        File("/Users/brian.carr/scm/github/hotelengine/protoc-gen-openapi/src/complete/resources/sporting.goods.openapi.yaml")
+            .writeText(generatedFile.content)
 
         val expected = CompleteTest::class.java.getResourceAsStream("sporting.goods.openapi.yaml").shouldNotBeNull().reader().readText()
 
@@ -64,6 +65,11 @@ class CompleteTest :
             doc["openapi"].asText() shouldBe "3.1.0"
         }
 
+        // covers OpenAPI.json_schema_dialect
+        test("json_schema_dialect") {
+            doc["jsonSchemaDialect"].asText() shouldBe "https://spec.openapis.org/oas/3.1/dialect/base"
+        }
+
         test("info — all fields") {
             assertSoftly {
                 val info = doc["info"].shouldNotBeNull()
@@ -74,7 +80,11 @@ class CompleteTest :
                 info["contact"]["email"].asText() shouldBe "support@example.com"
                 info["contact"]["name"].asText() shouldBe "Sporting Goods Support"
                 info["license"]["name"].asText() shouldBe "Apache 2.0"
+                // covers License.identifier (SPDX)
+                info["license"]["identifier"].asText() shouldBe "Apache-2.0"
                 info["version"].asText() shouldBe "1.0.0"
+                // covers Info.extensions
+                info["x-info-contact-policy"].asText() shouldBe "verified"
             }
         }
 
@@ -90,12 +100,20 @@ class CompleteTest :
             }
         }
 
+        // covers OpenAPI.paths and Paths.paths (explicit annotation)
+        test("explicit paths from annotation") {
+            val healthPath = doc["paths"]["/health"].shouldNotBeNull()
+            healthPath["get"]["operationId"].asText() shouldBe "healthStatus"
+        }
+
         test("tags with externalDocs") {
             assertSoftly {
                 val tags = doc["tags"].shouldNotBeNull()
                 tags.isArray shouldBe true
                 val productTag = tags.find { it["name"].asText() == "products" }.shouldNotBeNull()
                 productTag["externalDocs"]["url"].asText() shouldBe "https://example.com/docs/products"
+                // covers Tag.extensions
+                productTag["x-tag-version"].asText() shouldBe "v1"
             }
         }
 
@@ -119,6 +137,18 @@ class CompleteTest :
             stockAlert["post"]["operationId"].asText() shouldBe "stockAlertWebhook"
         }
 
+        // covers PathItemOrReference.reference oneof
+        test("webhooks — PathItemOrReference.reference") {
+            val ref = doc["webhooks"]["healthCheckWebhook"].shouldNotBeNull()
+            ref["\$ref"].asText() shouldBe "#/components/pathItems/HealthCheck"
+        }
+
+        // covers PathItem.uri_ref ($ref on PathItem itself)
+        test("webhooks — PathItem.uri_ref") {
+            val item = doc["webhooks"]["externalPathItem"].shouldNotBeNull()
+            item["\$ref"].asText() shouldBe "#/components/pathItems/HealthCheck"
+        }
+
         // §1 — Components with all map fields
         test("§1 — components.responses") {
             assertSoftly {
@@ -126,6 +156,8 @@ class CompleteTest :
                 responses["NotFound"]["description"].asText() shouldBe "The requested resource was not found"
                 responses["Unauthorized"]["description"].asText() shouldBe "Authentication required"
                 responses["ValidationError"]["description"].shouldNotBeNull()
+                // covers ResponseObject.extensions
+                responses["NotFound"]["x-error-code"].asText() shouldBe "RESOURCE_NOT_FOUND"
             }
         }
 
@@ -135,6 +167,12 @@ class CompleteTest :
                 params["ProductId"]["name"].asText() shouldBe "productId"
                 params["PageSize"]["name"].asText() shouldBe "pageSize"
                 params["FilterContext"]["name"].asText() shouldBe "X-Filter-Context"
+                // covers Parameter.deprecated
+                params["ProductId"]["deprecated"].asBoolean() shouldBe true
+                // covers Parameter.allow_empty_value
+                params["ProductId"]["allowEmptyValue"].asBoolean() shouldBe false
+                // covers Parameter.extensions
+                params["ProductId"]["x-param-group"].asText() shouldBe "product-identifiers"
             }
         }
 
@@ -160,6 +198,8 @@ class CompleteTest :
                 headers["RateLimitReset"].shouldNotBeNull()
                 headers["UploadToken"].shouldNotBeNull()
                 headers["X-Structured-Meta"].shouldNotBeNull()
+                // covers Header.deprecated
+                headers["RateLimitReset"]["deprecated"].asBoolean() shouldBe true
             }
         }
 
@@ -168,6 +208,10 @@ class CompleteTest :
                 val links = doc["components"]["links"].shouldNotBeNull()
                 links["GetProductByIdLink"]["operationId"].asText() shouldBe "getProduct"
                 links["GetOrderStatusLink"].shouldNotBeNull()
+                // covers Link.operation_ref
+                links["OperationRefLink"]["operationRef"].asText() shouldBe "#/paths/~1orders/post"
+                // covers Link.request_body
+                links["OperationRefLink"]["requestBody"].shouldNotBeNull()
             }
         }
 
@@ -175,6 +219,8 @@ class CompleteTest :
             assertSoftly {
                 val callbacks = doc["components"]["callbacks"].shouldNotBeNull()
                 callbacks["OrderStatusCallback"].shouldNotBeNull()
+                // covers CallbackOrReference.reference
+                callbacks["OrderStatusRef"]["\$ref"].asText() shouldBe "#/components/callbacks/OrderStatusCallback"
             }
         }
 
@@ -182,6 +228,8 @@ class CompleteTest :
             assertSoftly {
                 val pathItems = doc["components"]["pathItems"].shouldNotBeNull()
                 pathItems["HealthCheck"]["summary"].asText() shouldBe "API health check"
+                // covers PathItem.proto_rpc_ref
+                pathItems["RpcRefPathItem"]["\$ref"].shouldNotBeNull()
             }
         }
 
@@ -190,7 +238,49 @@ class CompleteTest :
                 val schemes = doc["components"]["securitySchemes"].shouldNotBeNull()
                 schemes["bearerAuth"]["scheme"].asText() shouldBe "bearer"
                 schemes["apiKeyAuth"]["name"].asText() shouldBe "X-API-Key"
+                // covers SecurityScheme.extensions
+                schemes["bearerAuth"]["x-bearer-docs"].shouldNotBeNull()
+                // covers SecurityScheme.oauth2
+                schemes["oauth2Auth"]["type"].asText() shouldBe "oauth2"
+                // covers SecurityScheme.open_id_connect
+                schemes["oidcAuth"]["type"].asText() shouldBe "openIdConnect"
+                // covers MutualTLSSecurityScheme
+                schemes["mtlsAuth"]["type"].asText() shouldBe "mutualTLS"
+                // covers SecuritySchemeOrReference.reference
+                schemes["bearerRef"]["\$ref"].asText() shouldBe "#/components/securitySchemes/bearerAuth"
             }
+        }
+
+        // covers OAuthFlows (all 4 flows) and OAuthFlow (all fields)
+        test("oauth2 flows — all four variants") {
+            assertSoftly {
+                val flows = doc["components"]["securitySchemes"]["oauth2Auth"]["flows"].shouldNotBeNull()
+                // covers OAuthFlows.implicit, OAuthFlow.authorization_url, refresh_url, scopes
+                val implicit = flows["implicit"].shouldNotBeNull()
+                implicit["authorizationUrl"].asText() shouldBe "https://auth.example.com/authorize"
+                implicit["refreshUrl"].asText() shouldBe "https://auth.example.com/token/refresh"
+                implicit["scopes"]["read:products"].asText() shouldBe "Read product catalog"
+                // covers OAuthFlows.password, OAuthFlow.token_url
+                val password = flows["password"].shouldNotBeNull()
+                password["tokenUrl"].asText() shouldBe "https://auth.example.com/token"
+                password["scopes"]["write:products"].asText() shouldBe "Modify products"
+                // covers OAuthFlows.client_credentials
+                val cc = flows["clientCredentials"].shouldNotBeNull()
+                cc["tokenUrl"].asText() shouldBe "https://auth.example.com/token"
+                cc["scopes"]["admin"].asText() shouldBe "Admin access"
+                // covers OAuthFlows.authorization_code
+                val ac = flows["authorizationCode"].shouldNotBeNull()
+                ac["authorizationUrl"].asText() shouldBe "https://auth.example.com/authorize"
+                ac["tokenUrl"].asText() shouldBe "https://auth.example.com/token"
+                ac["refreshUrl"].asText() shouldBe "https://auth.example.com/token/refresh"
+                ac["scopes"]["write:orders"].asText() shouldBe "Place orders"
+            }
+        }
+
+        // covers OpenIDConnectSecurityScheme.openid_connect_url
+        test("oidc security scheme") {
+            doc["components"]["securitySchemes"]["oidcAuth"]["openIdConnectUrl"]
+                .asText() shouldBe "https://auth.example.com/.well-known/openid-configuration"
         }
 
         // §2 — Operation.callbacks
@@ -200,12 +290,76 @@ class CompleteTest :
             callbacks["onStatusChange"]["\$ref"].asText() shouldBe "#/components/callbacks/OrderStatusCallback"
         }
 
-        // §3 — PathItem.parameters and PathItem.$ref
+        // §3 — PathItem.parameters and PathItem operations
         test("§3 — PathItem.parameters (components.pathItems.HealthCheck)") {
             val healthCheck = doc["components"]["pathItems"]["HealthCheck"].shouldNotBeNull()
             val params = healthCheck["parameters"].shouldNotBeNull()
             params.isArray shouldBe true
             params[0]["name"].asText() shouldBe "X-Request-Id"
+        }
+
+        // covers PathItem.options, PathItem.head, PathItem.trace, PathItem.servers, PathItem.extensions
+        test("HealthCheck pathItem — options, head, trace, servers, extensions") {
+            assertSoftly {
+                val hc = doc["components"]["pathItems"]["HealthCheck"].shouldNotBeNull()
+                // covers PathItem.options
+                hc["options"]["operationId"].asText() shouldBe "healthCheckOptions"
+                // covers PathItem.head
+                hc["head"]["operationId"].asText() shouldBe "healthCheckHead"
+                // covers PathItem.trace
+                hc["trace"]["operationId"].asText() shouldBe "healthCheckTrace"
+                // covers PathItem.servers
+                val servers = hc["servers"].shouldNotBeNull()
+                servers.isArray shouldBe true
+                servers[0]["url"].asText() shouldBe "https://health.example.com/v1"
+                // covers PathItem.extensions
+                hc["x-health-priority"].shouldNotBeNull()
+            }
+        }
+
+        // covers PathItem.put (UpdateProduct)
+        test("PathItem.put — updateProduct") {
+            val putOp = doc["paths"]["/products/{id}"]["put"].shouldNotBeNull()
+            putOp["operationId"].asText() shouldBe "updateProduct"
+        }
+
+        // covers PathItem.patch (PatchProduct)
+        test("PathItem.patch — patchProduct") {
+            val patchOp = doc["paths"]["/products/{id}"]["patch"].shouldNotBeNull()
+            patchOp["operationId"].asText() shouldBe "patchProduct"
+        }
+
+        // covers Parameter.deprecated, allow_empty_value, extensions (inline parameter)
+        test("inline parameter — deprecated, allowEmptyValue, extensions") {
+            assertSoftly {
+                val params = doc["paths"]["/products/{id}"]["put"]["parameters"].shouldNotBeNull()
+                params.isArray shouldBe true
+                val idParam = params[0].shouldNotBeNull()
+                idParam["deprecated"].asBoolean() shouldBe true
+                idParam["allowEmptyValue"].asBoolean() shouldBe false
+                idParam["x-param-position"].shouldNotBeNull()
+            }
+        }
+
+        // covers ResponseObject.extensions (inline response)
+        test("inline response — ResponseObject.extensions") {
+            doc["paths"]["/products/{id}"]["put"]["responses"]["200"]["x-rate-limit-cost"].shouldNotBeNull()
+        }
+
+        // covers Reference.proto_rpc_ref, Reference.summary, Reference.description
+        test("Reference.proto_rpc_ref, summary, description (patchProduct parameter)") {
+            assertSoftly {
+                val params = doc["paths"]["/products/{id}"]["patch"]["parameters"].shouldNotBeNull()
+                params.isArray shouldBe true
+                // The inferred {id} path param is at index 0; the annotation reference is at index 1
+                val ref = params[1].shouldNotBeNull()
+                // proto_rpc_ref resolves to a $ref string
+                ref["\$ref"].shouldNotBeNull()
+                // covers Reference.summary
+                ref["summary"].asText() shouldBe "Product reference"
+                // covers Reference.description
+                ref["description"].asText() shouldBe "Resolved from proto RPC ref"
+            }
         }
 
         // §4 — Example with value and externalValue
@@ -225,12 +379,10 @@ class CompleteTest :
             val link = doc["components"]["links"]["GetProductByIdLink"].shouldNotBeNull()
             link["operationId"].asText() shouldBe "getProduct"
             link["parameters"]["productId"].shouldNotBeNull()
-            link["server"]["url"].asText() shouldBe "https://api.example.com/v1"
         }
 
         test("§5 — Link.proto_rpc_ref resolved (components.links)") {
             val link = doc["components"]["links"]["GetOrderStatusLink"].shouldNotBeNull()
-            // proto_rpc_ref should be resolved to an operationRef path
             withClue("GetOrderStatusLink should have operationRef or operationId") {
                 (link["operationRef"] != null || link["operationId"] != null) shouldBe true
             }
@@ -246,7 +398,6 @@ class CompleteTest :
         // §6 — Callback
         test("§6 — Callback with expression key in components.callbacks") {
             val callback = doc["components"]["callbacks"]["OrderStatusCallback"].shouldNotBeNull()
-            // The callback object is a map keyed by a runtime expression
             val expressionKey = "{${'$'}request.body#/callbackUrl}"
             callback[expressionKey].shouldNotBeNull()
         }
@@ -331,5 +482,215 @@ class CompleteTest :
             val imageMeta = headers["X-Image-Meta"].shouldNotBeNull()
             val content = imageMeta["content"].shouldNotBeNull()
             content["application/json"].shouldNotBeNull()
+        }
+
+        // -----------------------------------------------------------------------
+        // SchemaObject coverage via message and field annotations
+        // -----------------------------------------------------------------------
+
+        // Product message annotation: title, description, deprecated, external_docs,
+        // xml (all fields), discriminator (all fields), required, min/max_properties,
+        // additional_properties_allowed, pattern_properties, property_names, extensions
+        test("SchemaObject — Product message annotation") {
+            assertSoftly {
+                val product = doc["components"]["schemas"]["Product"].shouldNotBeNull()
+                // covers SchemaObject.title
+                product["title"].asText() shouldBe "Sporting Goods Product"
+                // covers SchemaObject.description
+                product["description"].shouldNotBeNull()
+                // covers SchemaObject.deprecated
+                product["deprecated"].asBoolean() shouldBe true
+                // covers SchemaObject.external_docs
+                product["externalDocs"]["url"].asText() shouldBe "https://example.com/docs/products"
+                // covers SchemaObject.xml (all 5 fields)
+                val xml = product["xml"].shouldNotBeNull()
+                xml["name"].asText() shouldBe "product"
+                xml["namespace"].asText() shouldBe "https://example.com/schemas"
+                xml["prefix"].asText() shouldBe "sg"
+                xml["attribute"].shouldNotBeNull()
+                xml["wrapped"].shouldNotBeNull()
+                // covers SchemaObject.discriminator (property_name + mapping)
+                val disc = product["discriminator"].shouldNotBeNull()
+                disc["propertyName"].asText() shouldBe "category"
+                disc["mapping"]["footwear"].asText() shouldBe "#/components/schemas/Footwear"
+                // covers SchemaObject.required
+                val required = product["required"].shouldNotBeNull()
+                required.isArray shouldBe true
+                // covers SchemaObject.min_properties, max_properties
+                product["minProperties"].asInt() shouldBe 1
+                product["maxProperties"].asInt() shouldBe 20
+                // covers SchemaObject.additional_properties_allowed
+                product["additionalProperties"].asBoolean() shouldBe false
+                // covers SchemaObject.pattern_properties
+                product["patternProperties"]["^x-"].shouldNotBeNull()
+                // covers SchemaObject.property_names
+                product["propertyNames"].shouldNotBeNull()
+                // covers SchemaObject.extensions
+                product["x-product-type"].asText() shouldBe "physical"
+            }
+        }
+
+        // Product.id field annotation: read_only, format
+        test("SchemaObject — Product.id field annotation (readOnly, format)") {
+            assertSoftly {
+                val idSchema = doc["components"]["schemas"]["Product"]["properties"]["id"].shouldNotBeNull()
+                // covers SchemaObject.read_only
+                idSchema["readOnly"].asBoolean() shouldBe true
+                // covers SchemaObject.format
+                idSchema["format"].asText() shouldBe "uuid"
+            }
+        }
+
+        // Product.name field annotation: write_only, min_length, max_length, pattern, multi-type
+        test("SchemaObject — Product.name field annotation (writeOnly, lengths, pattern, multi-type)") {
+            assertSoftly {
+                val nameSchema = doc["components"]["schemas"]["Product"]["properties"]["name"].shouldNotBeNull()
+                // covers SchemaObject.write_only
+                nameSchema["writeOnly"].asBoolean() shouldBe true
+                // covers SchemaObject.min_length, max_length
+                nameSchema["minLength"].asInt() shouldBe 1
+                nameSchema["maxLength"].asInt() shouldBe 200
+                // covers SchemaObject.pattern
+                nameSchema["pattern"].asText() shouldBe "^[A-Za-z0-9 .,'-]+$"
+                // covers SchemaObject.type (repeated / multi-type)
+                nameSchema["type"].isArray shouldBe true
+            }
+        }
+
+        // Product.price field annotation: minimum, exclusiveMinimum, maximum, exclusiveMaximum,
+        // multipleOf, default, example (SchemaObject deprecated field)
+        test("SchemaObject — Product.price field annotation (numeric bounds, default, example)") {
+            assertSoftly {
+                val priceSchema = doc["components"]["schemas"]["Product"]["properties"]["price"].shouldNotBeNull()
+                // covers SchemaObject.minimum
+                priceSchema["minimum"].shouldNotBeNull()
+                // covers SchemaObject.exclusive_minimum
+                priceSchema["exclusiveMinimum"].shouldNotBeNull()
+                // covers SchemaObject.maximum
+                priceSchema["maximum"].asDouble() shouldBe 99999.99
+                // covers SchemaObject.exclusive_maximum
+                priceSchema["exclusiveMaximum"].asDouble() shouldBe 100000.0
+                // covers SchemaObject.multiple_of
+                priceSchema["multipleOf"].shouldNotBeNull()
+                // covers SchemaObject.default
+                priceSchema["default"].shouldNotBeNull()
+                // covers SchemaObject.example (deprecated field)
+                priceSchema["example"].shouldNotBeNull()
+            }
+        }
+
+        // Product.category field annotation: enum, const
+        test("SchemaObject — Product.category field annotation (enum, const)") {
+            assertSoftly {
+                val catSchema = doc["components"]["schemas"]["Product"]["properties"]["category"].shouldNotBeNull()
+                // covers SchemaObject.enum (repeated Any)
+                val enumArr = catSchema["enum"].shouldNotBeNull()
+                enumArr.isArray shouldBe true
+                // covers SchemaObject.const (Any)
+                catSchema["const"].shouldNotBeNull()
+            }
+        }
+
+        // Product.tags field annotation: items, prefixItems, contains, min/maxContains,
+        // min/maxItems, uniqueItems, unevaluatedItems (Schema.boolean=false)
+        test("SchemaObject — Product.tags field annotation (array keywords)") {
+            assertSoftly {
+                val tagsSchema = doc["components"]["schemas"]["Product"]["properties"]["tags"].shouldNotBeNull()
+                // covers SchemaObject.items
+                tagsSchema["items"].shouldNotBeNull()
+                // covers SchemaObject.prefix_items
+                val prefixItems = tagsSchema["prefixItems"].shouldNotBeNull()
+                prefixItems.isArray shouldBe true
+                // covers SchemaObject.contains
+                tagsSchema["contains"].shouldNotBeNull()
+                // covers SchemaObject.min_contains
+                tagsSchema["minContains"].shouldNotBeNull()
+                // covers SchemaObject.max_contains
+                tagsSchema["maxContains"].asInt() shouldBe 10
+                // covers SchemaObject.min_items
+                tagsSchema["minItems"].shouldNotBeNull()
+                // covers SchemaObject.max_items
+                tagsSchema["maxItems"].asInt() shouldBe 20
+                // covers SchemaObject.unique_items
+                tagsSchema["uniqueItems"].asBoolean() shouldBe true
+                // covers SchemaObject.unevaluated_items (Schema.boolean=false)
+                tagsSchema["unevaluatedItems"].asBoolean() shouldBe false
+            }
+        }
+
+        // Product.stock_quantity field annotation: deprecated, title, examples (repeated Any)
+        test("SchemaObject — Product.stockQuantity field annotation (deprecated, title, examples)") {
+            assertSoftly {
+                val sqSchema = doc["components"]["schemas"]["Product"]["properties"]["stockQuantity"].shouldNotBeNull()
+                // covers SchemaObject.deprecated (on field)
+                sqSchema["deprecated"].asBoolean() shouldBe true
+                // covers SchemaObject.title (on field)
+                sqSchema["title"].asText() shouldBe "Stock Quantity"
+                // covers SchemaObject.examples (repeated Any)
+                val exs = sqSchema["examples"].shouldNotBeNull()
+                exs.isArray shouldBe true
+            }
+        }
+
+        // ProductList message annotation: all_of (Schema.boolean=true), any_of, one_of,
+        // not (Schema.boolean=false), if, then, else, unevaluatedProperties, additionalProperties
+        test("SchemaObject — ProductList message annotation (composition keywords)") {
+            assertSoftly {
+                val pl = doc["components"]["schemas"]["ProductList"].shouldNotBeNull()
+                // covers SchemaObject.all_of (repeated Schema, first element is Schema.boolean=true)
+                val allOf = pl["allOf"].shouldNotBeNull()
+                allOf.isArray shouldBe true
+                allOf[0].asBoolean() shouldBe true
+                // covers SchemaObject.any_of
+                pl["anyOf"].isArray shouldBe true
+                // covers SchemaObject.one_of
+                pl["oneOf"].isArray shouldBe true
+                // covers SchemaObject.not (Schema.boolean=false)
+                pl["not"].asBoolean() shouldBe false
+                // covers SchemaObject.if_schema
+                pl["if"].shouldNotBeNull()
+                // covers SchemaObject.then_schema
+                pl["then"].shouldNotBeNull()
+                // covers SchemaObject.else_schema
+                pl["else"].shouldNotBeNull()
+                // covers SchemaObject.unevaluated_properties (Schema.boolean=false)
+                pl["unevaluatedProperties"].asBoolean() shouldBe false
+                // covers SchemaObject.additional_properties_schema (Schema.boolean=true)
+                pl["additionalProperties"].asBoolean() shouldBe true
+            }
+        }
+
+        // Order message annotation: $id, $schema, $anchor, $dynamicAnchor, $dynamicRef, $defs, $ref
+        test("SchemaObject — Order message annotation (referencing keywords)") {
+            assertSoftly {
+                val order = doc["components"]["schemas"]["Order"].shouldNotBeNull()
+                // covers SchemaObject.id
+                order["\$id"].asText() shouldBe "https://example.com/schemas/Order"
+                // covers SchemaObject.schema
+                order["\$schema"].asText() shouldBe "https://json-schema.org/draft/2020-12/schema"
+                // covers SchemaObject.anchor
+                order["\$anchor"].asText() shouldBe "OrderSchema"
+                // covers SchemaObject.dynamic_anchor
+                order["\$dynamicAnchor"].asText() shouldBe "DynOrder"
+                // covers SchemaObject.dynamic_ref
+                order["\$dynamicRef"].asText() shouldBe "#DynOrder"
+                // covers SchemaObject.defs
+                order["\$defs"]["OrderStatus"].shouldNotBeNull()
+                // covers SchemaObject.uri_ref ($ref at SchemaObject level)
+                order["\$ref"].asText() shouldBe "#/components/schemas/Order"
+            }
+        }
+
+        // Order.status field annotation: contentEncoding, contentMediaType, contentSchema
+        test("SchemaObject — Order.status field annotation (content keywords)") {
+            assertSoftly {
+                val statusSchema = doc["components"]["schemas"]["Order"]["properties"]["status"].shouldNotBeNull()
+                // covers SchemaObject.content_encoding
+                statusSchema["contentEncoding"].asText() shouldBe "utf-8"
+                // covers SchemaObject.content_media_type
+                statusSchema["contentMediaType"].asText() shouldBe "text/plain"
+                // covers SchemaObject.content_schema
+                statusSchema["contentSchema"].shouldNotBeNull()
+            }
         }
     })

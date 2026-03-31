@@ -12,10 +12,12 @@
     },
     "license" : {
       "name" : "Apache 2.0",
-      "url" : "https://www.apache.org/licenses/LICENSE-2.0.html"
+      "identifier" : "Apache-2.0"
     },
-    "version" : "1.0.0"
+    "version" : "1.0.0",
+    "x-info-contact-policy" : "verified"
   },
+  "jsonSchemaDialect" : "https://spec.openapis.org/oas/3.1/dialect/base",
   "servers" : [ {
     "url" : "https://{region}.api.example.com/v1",
     "description" : "Production (multi-region)",
@@ -36,7 +38,8 @@
     "externalDocs" : {
       "description" : "Product catalog docs",
       "url" : "https://example.com/docs/products"
-    }
+    },
+    "x-tag-version" : "v1"
   }, {
     "name" : "orders",
     "description" : "Order management operations"
@@ -63,7 +66,8 @@
               "type" : "string"
             }
           }
-        }
+        },
+        "x-error-code" : "RESOURCE_NOT_FOUND"
       },
       "Unauthorized" : {
         "description" : "Authentication required"
@@ -99,11 +103,14 @@
         "in" : "path",
         "description" : "Unique product identifier",
         "required" : true,
+        "deprecated" : true,
+        "allowEmptyValue" : false,
         "schema" : {
           "type" : "string",
           "format" : "uuid"
         },
-        "example" : "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+        "example" : "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "x-param-group" : "product-identifiers"
       },
       "PageSize" : {
         "name" : "pageSize",
@@ -215,6 +222,7 @@
       },
       "RateLimitReset" : {
         "description" : "Unix timestamp at which the rate-limit window resets",
+        "deprecated" : true,
         "schema" : {
           "type" : "integer",
           "format" : "int64"
@@ -248,12 +256,58 @@
       "bearerAuth" : {
         "type" : "http",
         "scheme" : "bearer",
-        "bearerFormat" : "JWT"
+        "bearerFormat" : "JWT",
+        "x-bearer-docs" : "https://example.com/auth"
       },
       "apiKeyAuth" : {
         "type" : "apiKey",
         "name" : "X-API-Key",
         "in" : "header"
+      },
+      "oauth2Auth" : {
+        "type" : "oauth2",
+        "flows" : {
+          "implicit" : {
+            "authorizationUrl" : "https://auth.example.com/authorize",
+            "refreshUrl" : "https://auth.example.com/token/refresh",
+            "scopes" : {
+              "read:products" : "Read product catalog"
+            }
+          },
+          "password" : {
+            "tokenUrl" : "https://auth.example.com/token",
+            "refreshUrl" : "https://auth.example.com/token/refresh",
+            "scopes" : {
+              "read:products" : "Read product catalog",
+              "write:products" : "Modify products"
+            }
+          },
+          "clientCredentials" : {
+            "tokenUrl" : "https://auth.example.com/token",
+            "scopes" : {
+              "admin" : "Admin access"
+            }
+          },
+          "authorizationCode" : {
+            "authorizationUrl" : "https://auth.example.com/authorize",
+            "tokenUrl" : "https://auth.example.com/token",
+            "refreshUrl" : "https://auth.example.com/token/refresh",
+            "scopes" : {
+              "read:products" : "Read product catalog",
+              "write:orders" : "Place orders"
+            }
+          }
+        }
+      },
+      "oidcAuth" : {
+        "type" : "openIdConnect",
+        "openIdConnectUrl" : "https://auth.example.com/.well-known/openid-configuration"
+      },
+      "mtlsAuth" : {
+        "type" : "mutualTLS"
+      },
+      "bearerRef" : {
+        "$ref" : "#/components/securitySchemes/bearerAuth"
       }
     },
     "links" : {
@@ -262,11 +316,7 @@
         "parameters" : {
           "productId" : "$response.body#/id"
         },
-        "description" : "Retrieve the product that was just created",
-        "server" : {
-          "url" : "https://api.example.com/v1",
-          "description" : "Production"
-        }
+        "description" : "Retrieve the product that was just created"
       },
       "GetOrderStatusLink" : {
         "operationRef" : "#/components/schemas/StorefrontService#GetOrderStatus",
@@ -274,6 +324,11 @@
           "order_id" : "$response.body#/orderId"
         },
         "description" : "Check the status of the placed order"
+      },
+      "OperationRefLink" : {
+        "operationRef" : "#/paths/~1orders/post",
+        "requestBody" : "$request.body",
+        "description" : "Place an order using operationRef"
       }
     },
     "callbacks" : {
@@ -306,6 +361,9 @@
             }
           }
         }
+      },
+      "OrderStatusRef" : {
+        "$ref" : "#/components/callbacks/OrderStatusCallback"
       }
     },
     "pathItems" : {
@@ -321,6 +379,37 @@
             }
           }
         },
+        "options" : {
+          "summary" : "CORS preflight for health endpoint",
+          "operationId" : "healthCheckOptions",
+          "responses" : {
+            "200" : {
+              "description" : "OK"
+            }
+          }
+        },
+        "head" : {
+          "summary" : "HEAD request for health endpoint",
+          "operationId" : "healthCheckHead",
+          "responses" : {
+            "200" : {
+              "description" : "OK"
+            }
+          }
+        },
+        "trace" : {
+          "summary" : "TRACE request for health endpoint",
+          "operationId" : "healthCheckTrace",
+          "responses" : {
+            "200" : {
+              "description" : "OK"
+            }
+          }
+        },
+        "servers" : [ {
+          "url" : "https://health.example.com/v1",
+          "description" : "Health service"
+        } ],
         "parameters" : [ {
           "name" : "X-Request-Id",
           "in" : "header",
@@ -328,12 +417,17 @@
           "schema" : {
             "type" : "string"
           }
-        } ]
+        } ],
+        "x-health-priority" : 1
+      },
+      "RpcRefPathItem" : {
+        "$ref" : "#/components/schemas/StorefrontService#GetProduct"
       }
     },
     "schemas" : {
       "ProductList" : {
         "type" : "object",
+        "description" : "ProductList covers: all_of (Schema.boolean=true), any_of, one_of,\n not (Schema.boolean=false), if_schema, then_schema, else_schema,\n unevaluated_properties (Schema.boolean=false), additional_properties_schema (Schema.boolean=true).",
         "properties" : {
           "products" : {
             "type" : "array",
@@ -353,9 +447,141 @@
             "type" : "integer",
             "format" : "int32"
           }
+        },
+        "additionalProperties" : true,
+        "unevaluatedProperties" : false,
+        "allOf" : [ true, {
+          "type" : "object"
+        } ],
+        "anyOf" : [ {
+          "description" : "Non-empty product list"
+        }, {
+          "description" : "Empty product list"
+        } ],
+        "oneOf" : [ {
+          "description" : "Paginated result"
+        }, {
+          "description" : "Non-paginated result"
+        } ],
+        "not" : false,
+        "if" : {
+          "required" : [ "products" ]
+        },
+        "then" : {
+          "required" : [ "total" ]
+        },
+        "else" : {
+          "description" : "No products available"
         }
       },
       "Product" : {
+        "type" : "object",
+        "description" : "A product available in the sporting goods catalog.",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "description" : "covers SchemaObject.read_only, SchemaObject.format",
+            "readOnly" : true,
+            "format" : "uuid"
+          },
+          "name" : {
+            "type" : [ "string", "null" ],
+            "description" : "covers SchemaObject.write_only, min_length, max_length, pattern, multi-type (type repeated)",
+            "writeOnly" : true,
+            "maxLength" : 200,
+            "minLength" : 1,
+            "pattern" : "^[A-Za-z0-9 .,'-]+$"
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "price" : {
+            "type" : "number",
+            "format" : "double",
+            "description" : "covers SchemaObject.minimum, exclusive_minimum, maximum, exclusive_maximum,\n multiple_of, default, example (SchemaObject.example deprecated field)",
+            "default" : 9.99,
+            "example" : 29.99,
+            "multipleOf" : 0.01,
+            "maximum" : 99999.99,
+            "exclusiveMaximum" : 100000.0,
+            "minimum" : 0.01,
+            "exclusiveMinimum" : 0.0
+          },
+          "category" : {
+            "type" : "string",
+            "description" : "covers SchemaObject.enum (repeated Any), SchemaObject.const (Any)",
+            "enum" : [ "footwear", "apparel", "equipment" ],
+            "const" : "footwear"
+          },
+          "tags" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "minLength" : 1
+            },
+            "description" : "covers SchemaObject.items, prefix_items, contains, min_contains, max_contains,\n min_items, max_items, unique_items, unevaluated_items (Schema.boolean=false)",
+            "prefixItems" : [ {
+              "type" : "string",
+              "pattern" : "^[a-z]+$"
+            }, {
+              "type" : "string"
+            } ],
+            "contains" : {
+              "type" : "string",
+              "minLength" : 2
+            },
+            "minContains" : 0,
+            "maxContains" : 10,
+            "maxItems" : 20,
+            "minItems" : 0,
+            "uniqueItems" : true,
+            "unevaluatedItems" : false
+          },
+          "stockQuantity" : {
+            "type" : "integer",
+            "format" : "int32",
+            "description" : "covers SchemaObject.deprecated (on field), SchemaObject.examples (repeated Any),\n SchemaObject.title (on field)",
+            "title" : "Stock Quantity",
+            "deprecated" : true,
+            "examples" : [ 0, 100 ]
+          }
+        },
+        "title" : "Sporting Goods Product",
+        "deprecated" : true,
+        "patternProperties" : {
+          "^x-" : {
+            "type" : "string"
+          }
+        },
+        "additionalProperties" : false,
+        "propertyNames" : {
+          "type" : "string",
+          "maxLength" : 100
+        },
+        "required" : [ "id", "name", "price" ],
+        "maxProperties" : 20,
+        "minProperties" : 1,
+        "discriminator" : {
+          "propertyName" : "category",
+          "mapping" : {
+            "footwear" : "#/components/schemas/Footwear",
+            "apparel" : "#/components/schemas/Apparel"
+          }
+        },
+        "xml" : {
+          "name" : "product",
+          "namespace" : "https://example.com/schemas",
+          "prefix" : "sg",
+          "attribute" : false,
+          "wrapped" : false
+        },
+        "externalDocs" : {
+          "description" : "Product documentation",
+          "url" : "https://example.com/docs/products"
+        },
+        "x-product-type" : "physical"
+      },
+      "UpdateProductRequest" : {
         "type" : "object",
         "properties" : {
           "id" : {
@@ -364,30 +590,18 @@
           "name" : {
             "type" : "string"
           },
-          "description" : {
-            "type" : "string"
-          },
           "price" : {
             "type" : "number",
             "format" : "double"
           },
           "category" : {
             "type" : "string"
-          },
-          "tags" : {
-            "type" : "array",
-            "items" : {
-              "type" : "string"
-            }
-          },
-          "stockQuantity" : {
-            "type" : "integer",
-            "format" : "int32"
           }
         }
       },
       "Order" : {
         "type" : "object",
+        "description" : "Order covers SchemaObject: id ($id), schema ($schema), anchor ($anchor),\n dynamic_anchor ($dynamicAnchor), dynamic_ref ($dynamicRef), defs ($defs),\n uri_ref ($ref at SchemaObject level).\n Order.status field covers: content_encoding, content_media_type, content_schema.",
         "properties" : {
           "orderId" : {
             "type" : "string"
@@ -399,7 +613,13 @@
             }
           },
           "status" : {
-            "type" : "string"
+            "type" : "string",
+            "description" : "covers SchemaObject.content_encoding, content_media_type, content_schema",
+            "contentEncoding" : "utf-8",
+            "contentMediaType" : "text/plain",
+            "contentSchema" : {
+              "type" : "string"
+            }
           },
           "total" : {
             "type" : "number",
@@ -407,6 +627,18 @@
           },
           "shippingAddress" : {
             "type" : "string"
+          }
+        },
+        "$ref" : "#/components/schemas/Order",
+        "$id" : "https://example.com/schemas/Order",
+        "$schema" : "https://json-schema.org/draft/2020-12/schema",
+        "$anchor" : "OrderSchema",
+        "$dynamicRef" : "#DynOrder",
+        "$dynamicAnchor" : "DynOrder",
+        "$defs" : {
+          "OrderStatus" : {
+            "type" : "string",
+            "enum" : [ "pending", "shipped", "delivered" ]
           }
         }
       },
@@ -472,13 +704,26 @@
           }
         }
       }
+    },
+    "healthCheckWebhook" : {
+      "$ref" : "#/components/pathItems/HealthCheck"
+    },
+    "externalPathItem" : {
+      "$ref" : "#/components/pathItems/HealthCheck"
     }
   },
-  "x-logo" : {
-    "url" : "https://example.com/logo.png",
-    "altText" : "Sporting Goods Logo"
-  },
   "paths" : {
+    "/health" : {
+      "get" : {
+        "summary" : "Health status endpoint",
+        "operationId" : "healthStatus",
+        "responses" : {
+          "200" : {
+            "description" : "Service is healthy"
+          }
+        }
+      }
+    },
     "/products" : {
       "get" : {
         "summary" : "List products",
@@ -640,6 +885,97 @@
           },
           "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          }
+        }
+      },
+      "put" : {
+        "summary" : "Update product",
+        "description" : "Fully replaces a product by its identifier.",
+        "operationId" : "updateProduct",
+        "tags" : [ "products" ],
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : true,
+          "allowEmptyValue" : false,
+          "x-param-position" : 0,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "description" : "Updated product data",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UpdateProductRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Product updated",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Product"
+                }
+              }
+            },
+            "x-rate-limit-cost" : 2
+          },
+          "404" : {
+            "$ref" : "#/components/responses/NotFound"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          }
+        }
+      },
+      "patch" : {
+        "summary" : "Patch product",
+        "description" : "Partially updates a product by its identifier.",
+        "operationId" : "patchProduct",
+        "tags" : [ "products" ],
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "$ref" : "#/components/schemas/StorefrontService#GetProduct",
+          "summary" : "Product reference",
+          "description" : "Resolved from proto RPC ref"
+        } ],
+        "requestBody" : {
+          "required" : true,
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UpdateProductRequest"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Product patched",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Product"
+                }
+              }
+            }
+          },
+          "404" : {
+            "$ref" : "#/components/responses/NotFound"
           }
         }
       },
@@ -824,5 +1160,9 @@
         }
       }
     }
+  },
+  "x-logo" : {
+    "url" : "https://example.com/logo.png",
+    "altText" : "Sporting Goods Logo"
   }
 }

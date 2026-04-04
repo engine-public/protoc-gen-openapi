@@ -323,7 +323,11 @@
         "parameters" : {
           "order_id" : "$response.body#/orderId"
         },
-        "description" : "Check the status of the placed order"
+        "description" : "Check the status of the placed order",
+        "server" : {
+          "url" : "https://orders.example.com/v1",
+          "description" : "Dedicated order service"
+        }
       },
       "OperationRefLink" : {
         "operationRef" : "#/paths/~1orders/post",
@@ -421,7 +425,7 @@
         "x-health-priority" : 1
       },
       "RpcRefPathItem" : {
-        "$ref" : "#/components/pathItems/HealthCheck"
+        "$ref" : "#/paths/~1products~1%7Bid%7D"
       }
     },
     "schemas" : {
@@ -706,7 +710,7 @@
       }
     },
     "healthCheckWebhook" : {
-      "$ref" : "#/components/pathItems/HealthCheck"
+      "$ref" : "#/paths/~1products~1%7Bid%7D"
     },
     "externalPathItem" : {
       "$ref" : "#/components/pathItems/HealthCheck"
@@ -886,7 +890,10 @@
           "401" : {
             "$ref" : "#/components/responses/Unauthorized"
           }
-        }
+        },
+        "security" : [ {
+          "oauth2Auth" : [ "read:products" ]
+        } ]
       },
       "put" : {
         "summary" : "Update product",

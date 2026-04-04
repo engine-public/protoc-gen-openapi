@@ -1,6 +1,7 @@
 package com.engine.protoc.openapi.compile.json
 
 import com.engine.protoc.openapi.compile.MessageIndex
+import com.engine.protoc.openapi.compile.RpcIndex
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ObjectNode
 
@@ -8,6 +9,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 internal class JsonContext(
     val mapper: ObjectMapper,
     val messageIndex: MessageIndex,
+    val rpcIndex: RpcIndex,
 ) {
     fun obj(): ObjectNode = mapper.createObjectNode()
 
@@ -36,6 +38,26 @@ internal class JsonContext(
     fun resolveProtoRef(typeUrl: String): String {
         val simpleName = messageIndex.simpleNameOf(".${typeUrl.substringAfterLast('/')}")
         return "#/components/schemas/$simpleName"
+    }
+
+    /**
+     * Resolves a `proto_rpc_ref` service method reference (format `package.Service#Method`) to
+     * a valid RFC 3986 URI-reference pointing into `#/paths`.
+     *
+     * When [includeMethod] is true the HTTP method is appended (for `Link.operationRef`).
+     * When false only the path item pointer is returned (for PathItem `$ref` and Reference `$ref`).
+     *
+     * Path template variables (e.g. `{id}`) are percent-encoded in the URI fragment so that
+     * `{` and `}` do not violate the URI-reference syntax.
+     */
+    fun resolveProtoRpcRef(rpcRef: String, includeMethod: Boolean): String {
+        val binding = rpcIndex.findBinding(rpcRef) ?: return "#/paths/unknown"
+        val pointer = binding.path
+            .replace("~", "~0")
+            .replace("/", "~1")
+            .replace("{", "%7B")
+            .replace("}", "%7D")
+        return if (includeMethod) "#/paths/$pointer/${binding.httpMethod}" else "#/paths/$pointer"
     }
 
     /** Returns an inline JSON Schema for a well-known protobuf scalar wrapper type, or null. */

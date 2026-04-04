@@ -218,7 +218,7 @@ internal fun PathItem.toJson(ctx: JsonContext): ObjectNode {
     // this path item"). Emit it first so it is easily visible at the top of the object.
     when (refTypeCase) {
         PathItem.RefTypeCase.URI_REF -> node.put("\$ref", uriRef)
-        PathItem.RefTypeCase.PROTO_RPC_REF -> node.put("\$ref", ctx.resolveProtoRef(protoRpcRef))
+        PathItem.RefTypeCase.PROTO_RPC_REF -> node.put("\$ref", ctx.resolveProtoRpcRef(protoRpcRef, includeMethod = false))
         else -> {}
     }
     if (hasSummary()) node.put("summary", summary)
@@ -465,7 +465,7 @@ internal fun Link.toJson(ctx: JsonContext): ObjectNode {
 
         // proto_rpc_ref resolves to an operation path, emitted as operationRef
         Link.OperationLocatorTypeCase.PROTO_RPC_REF ->
-            node.put("operationRef", ctx.resolveProtoRef(protoRpcRef))
+            node.put("operationRef", ctx.resolveProtoRpcRef(protoRpcRef, includeMethod = true))
 
         else -> {}
     }
@@ -729,7 +729,7 @@ internal fun Reference.toJson(ctx: JsonContext): ObjectNode {
     val node = ctx.obj()
     when (refTypeCase) {
         Reference.RefTypeCase.URI_REF -> node.put("\$ref", uriRef)
-        Reference.RefTypeCase.PROTO_RPC_REF -> node.put("\$ref", ctx.resolveProtoRef(protoRpcRef))
+        Reference.RefTypeCase.PROTO_RPC_REF -> node.put("\$ref", ctx.resolveProtoRpcRef(protoRpcRef, includeMethod = false))
         else -> {}
     }
     if (hasSummary()) node.put("summary", summary)

@@ -964,7 +964,7 @@
         "description": {
           "type": "string"
         },
-        "body": {
+        "server": {
           "$ref": "#/$defs/server"
         }
       },

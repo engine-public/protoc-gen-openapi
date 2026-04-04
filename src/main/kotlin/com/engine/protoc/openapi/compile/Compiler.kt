@@ -194,7 +194,8 @@ internal class Compiler(
     private fun setup(): Setup {
         val mapper = ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
         val messageIndex = MessageIndex(request.protoFiles)
-        val ctx = JsonContext(mapper, messageIndex)
+        val rpcIndex = RpcIndex(request.protoFiles)
+        val ctx = JsonContext(mapper, messageIndex, rpcIndex)
         val targetFiles = request.filesToGenerate.mapNotNull { name ->
             request.protoFiles.find { it.name == name }
         }

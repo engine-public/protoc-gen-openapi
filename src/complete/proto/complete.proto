@@ -150,10 +150,10 @@ option (.engine.protoc.openapi.file) = {
             }
         }
     }
-    // covers PathItemOrReference.reference oneof
+    // covers PathItemOrReference.reference oneof, Reference.proto_rpc_ref
     webhooks: {
         key: "healthCheckWebhook"
-        value: { reference: { uri_ref: "#/components/pathItems/HealthCheck" } }
+        value: { reference: { proto_rpc_ref: "sporting.goods.StorefrontService#GetProduct" } }
     }
     // covers PathItem.uri_ref ($ref on PathItem itself)
     webhooks: {
@@ -504,17 +504,18 @@ option (.engine.protoc.openapi.file) = {
                 }
             }
         }
-        // §5 — Link.operation_ref variant (proto_rpc_ref would generate invalid URIs; use operation_ref)
+        // §5 — Link.proto_rpc_ref variant (emitted as operationRef), Link.server
         links: {
             key: "GetOrderStatusLink"
             value: {
                 link: {
-                    operation_ref: "#/paths/~1orders~1%7Border_id%7D/get"
+                    proto_rpc_ref: "sporting.goods.StorefrontService#GetOrderStatus"
                     description: "Check the status of the placed order"
                     parameters: {
                         key: "order_id"
                         value: { [type.googleapis.com/google.protobuf.StringValue] { value: "$response.body#/orderId" } }
                     }
+                    server: { url: "https://orders.example.com/v1" description: "Dedicated order service" }
                 }
             }
         }
@@ -638,12 +639,12 @@ option (.engine.protoc.openapi.file) = {
                 }
             }
         }
-        // covers PathItem.uri_ref ($ref on PathItem pointing to another component)
+        // covers PathItem.proto_rpc_ref ($ref resolved from RPC binding)
         path_items: {
             key: "RpcRefPathItem"
             value: {
                 path_item: {
-                    uri_ref: "#/components/pathItems/HealthCheck"
+                    proto_rpc_ref: "sporting.goods.StorefrontService#GetProduct"
                 }
             }
         }
@@ -1137,6 +1138,8 @@ service StorefrontService {
                 codes: { key: "404" value: { reference: { uri_ref: "#/components/responses/NotFound" } } }
                 codes: { key: "401" value: { reference: { uri_ref: "#/components/responses/Unauthorized" } } }
             }
+            // covers SecurityRequirementValues.values (non-empty scope list)
+            security: { names: { key: "oauth2Auth" value: { values: "read:products" } } }
         };
     }
 

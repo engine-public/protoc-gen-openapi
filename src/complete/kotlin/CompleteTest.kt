@@ -123,6 +123,16 @@ class CompleteTest :
             sec[0]["bearerAuth"].shouldNotBeNull()
         }
 
+        // covers SecurityRequirementValues.values (non-empty scope list)
+        test("security requirement with scopes (getProduct)") {
+            val security = doc["paths"]["/products/{id}"]["get"]["security"].shouldNotBeNull()
+            security.isArray shouldBe true
+            val oauth2Req = security.find { it["oauth2Auth"] != null }.shouldNotBeNull()
+            val scopes = oauth2Req["oauth2Auth"].shouldNotBeNull()
+            scopes.isArray shouldBe true
+            scopes[0].asText() shouldBe "read:products"
+        }
+
         test("extensions") {
             doc["x-logo"].shouldNotBeNull()
         }
@@ -133,10 +143,10 @@ class CompleteTest :
             stockAlert["post"]["operationId"].asText() shouldBe "stockAlertWebhook"
         }
 
-        // covers PathItemOrReference.reference oneof
+        // covers PathItemOrReference.reference oneof, Reference.proto_rpc_ref
         test("webhooks — PathItemOrReference.reference") {
             val ref = doc["webhooks"]["healthCheckWebhook"].shouldNotBeNull()
-            ref["\$ref"].asText() shouldBe "#/components/pathItems/HealthCheck"
+            ref["\$ref"].asText() shouldBe "#/paths/~1products~1%7Bid%7D"
         }
 
         // covers PathItem.uri_ref ($ref on PathItem itself)
@@ -224,8 +234,8 @@ class CompleteTest :
             assertSoftly {
                 val pathItems = doc["components"]["pathItems"].shouldNotBeNull()
                 pathItems["HealthCheck"]["summary"].asText() shouldBe "API health check"
-                // covers PathItem.uri_ref ($ref on PathItem)
-                pathItems["RpcRefPathItem"]["\$ref"].asText() shouldBe "#/components/pathItems/HealthCheck"
+                // covers PathItem.proto_rpc_ref ($ref resolved from RPC binding)
+                pathItems["RpcRefPathItem"]["\$ref"].asText() shouldBe "#/paths/~1products~1%7Bid%7D"
             }
         }
 
@@ -375,9 +385,15 @@ class CompleteTest :
             link["parameters"]["productId"].shouldNotBeNull()
         }
 
-        test("§5 — Link.operationRef in components.links (GetOrderStatusLink)") {
-            val link = doc["components"]["links"]["GetOrderStatusLink"].shouldNotBeNull()
-            link["operationRef"].asText() shouldBe "#/paths/~1orders~1%7Border_id%7D/get"
+        // covers Link.proto_rpc_ref (emitted as operationRef), Link.server
+        test("§5 — Link.proto_rpc_ref in components.links (GetOrderStatusLink)") {
+            assertSoftly {
+                val link = doc["components"]["links"]["GetOrderStatusLink"].shouldNotBeNull()
+                link["operationRef"].asText() shouldBe "#/paths/~1orders~1%7Border_id%7D/get"
+                // covers Link.server
+                link["server"]["url"].asText() shouldBe "https://orders.example.com/v1"
+                link["server"]["description"].asText() shouldBe "Dedicated order service"
+            }
         }
 
         test("§5 — ResponseObject.links (getProduct)") {

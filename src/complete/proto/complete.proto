@@ -42,7 +42,7 @@ option (.engine.protoc.openapi.file) = {
     // Servers with variables
     servers: [
         {
-            url: "https://{region}.api.example.com/v1"
+            url: "https://api.example.com/v1"
             description: "Production (multi-region)"
             variables: {
                 key: "region"
@@ -250,7 +250,6 @@ option (.engine.protoc.openapi.file) = {
                     description: "Unique product identifier"
                     required: true
                     deprecated: true               // covers Parameter.deprecated
-                    allow_empty_value: false        // covers Parameter.allow_empty_value
                     // §9 — ParameterSchema.example
                     schema: {
                         schema: { object: { type: "string" format: "uuid" } }
@@ -272,6 +271,7 @@ option (.engine.protoc.openapi.file) = {
                     name: "pageSize"
                     in: "query"
                     description: "Number of results per page"
+                    allow_empty_value: false        // covers Parameter.allow_empty_value (query only)
                     // §9 — ParameterSchema.examples (ExampleOrReferenceMap)
                     schema: {
                         style: "form"
@@ -504,12 +504,12 @@ option (.engine.protoc.openapi.file) = {
                 }
             }
         }
-        // §5 — Link.proto_rpc_ref variant
+        // §5 — Link.operation_ref variant (proto_rpc_ref would generate invalid URIs; use operation_ref)
         links: {
             key: "GetOrderStatusLink"
             value: {
                 link: {
-                    proto_rpc_ref: "sporting.goods.StorefrontService#GetOrderStatus"
+                    operation_ref: "#/paths/~1orders~1%7Border_id%7D/get"
                     description: "Check the status of the placed order"
                     parameters: {
                         key: "order_id"
@@ -638,12 +638,12 @@ option (.engine.protoc.openapi.file) = {
                 }
             }
         }
-        // covers PathItem.proto_rpc_ref ($ref on PathItem)
+        // covers PathItem.uri_ref ($ref on PathItem pointing to another component)
         path_items: {
             key: "RpcRefPathItem"
             value: {
                 path_item: {
-                    proto_rpc_ref: "sporting.goods.StorefrontService#GetProduct"
+                    uri_ref: "#/components/pathItems/HealthCheck"
                 }
             }
         }
@@ -943,7 +943,7 @@ message Order {
     option (.engine.protoc.openapi.message) = {
         object: {
             id: "https://example.com/schemas/Order"
-            schema: "https://json-schema.org/draft/2020-12/schema"
+            schema: "https://spec.openapis.org/oas/3.1/dialect/base"
             anchor: "OrderSchema"
             dynamic_anchor: "DynOrder"
             dynamic_ref: "#DynOrder"
@@ -1195,7 +1195,6 @@ service StorefrontService {
                         in: "path"
                         required: true
                         deprecated: true               // covers Parameter.deprecated (inline)
-                        allow_empty_value: false        // covers Parameter.allow_empty_value (inline)
                         schema: { schema: { object: { type: "string" format: "uuid" } } }
                         extensions: {                  // covers Parameter.extensions (inline)
                             key: "x-param-position"
@@ -1255,12 +1254,12 @@ service StorefrontService {
             description: "Partially updates a product by its identifier."
             operationId: "patchProduct"
             parameters: [
-                // covers Reference.proto_rpc_ref, Reference.summary, Reference.description
+                // covers Reference.uri_ref, Reference.summary, Reference.description
                 {
                     reference: {
-                        proto_rpc_ref: "sporting.goods.StorefrontService#GetProduct"
+                        uri_ref: "#/components/parameters/ProductId"
                         summary: "Product reference"
-                        description: "Resolved from proto RPC ref"
+                        description: "Resolved from component ref"
                     }
                 }
             ]

@@ -40,15 +40,17 @@ internal class Compiler(
     private val request: CodeGeneratorRequestWrapper,
     private val options: ProtocGenOpenAPI.Options,
 ) {
-    private val oasSchema by lazy {
-        SchemaRegistry.withDefaultDialect(SpecificationVersion.DRAFT_2020_12) {
-            it.schemaIdResolvers {
-                it.mapPrefix(
-                    "https://spec.openapis.org/oas/3.1",
-                    "classpath:schemas/spec.openapis.org/oas/3.1",
-                )
-            }
-        }.getSchema(SchemaLocation.of("https://spec.openapis.org/oas/3.1/schema-base/2022-10-07"))
+
+    internal companion object {
+        internal val oasSchema =
+            SchemaRegistry.withDefaultDialect(SpecificationVersion.DRAFT_2020_12) {
+                it.schemaIdResolvers {
+                    it.mapPrefix(
+                        "https://spec.openapis.org/oas/3.1",
+                        "classpath:schemas/spec.openapis.org/oas/3.1",
+                    )
+                }
+            }.getSchema(SchemaLocation.of("https://spec.openapis.org/oas/3.1/schema-base/2022-10-07"))
     }
 
     fun compile(): PluginProtos.CodeGeneratorResponse = if (options.merge) compileMerged() else compileUnmerged()

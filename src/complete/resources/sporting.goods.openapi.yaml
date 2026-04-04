@@ -19,7 +19,7 @@
   },
   "jsonSchemaDialect" : "https://spec.openapis.org/oas/3.1/dialect/base",
   "servers" : [ {
-    "url" : "https://{region}.api.example.com/v1",
+    "url" : "https://api.example.com/v1",
     "description" : "Production (multi-region)",
     "variables" : {
       "region" : {
@@ -104,7 +104,6 @@
         "description" : "Unique product identifier",
         "required" : true,
         "deprecated" : true,
-        "allowEmptyValue" : false,
         "schema" : {
           "type" : "string",
           "format" : "uuid"
@@ -116,6 +115,7 @@
         "name" : "pageSize",
         "in" : "query",
         "description" : "Number of results per page",
+        "allowEmptyValue" : false,
         "style" : "form",
         "explode" : false,
         "allowReserved" : false,
@@ -319,7 +319,7 @@
         "description" : "Retrieve the product that was just created"
       },
       "GetOrderStatusLink" : {
-        "operationRef" : "#/components/schemas/StorefrontService#GetOrderStatus",
+        "operationRef" : "#/paths/~1orders~1%7Border_id%7D/get",
         "parameters" : {
           "order_id" : "$response.body#/orderId"
         },
@@ -421,7 +421,7 @@
         "x-health-priority" : 1
       },
       "RpcRefPathItem" : {
-        "$ref" : "#/components/schemas/StorefrontService#GetProduct"
+        "$ref" : "#/components/pathItems/HealthCheck"
       }
     },
     "schemas" : {
@@ -631,7 +631,7 @@
         },
         "$ref" : "#/components/schemas/Order",
         "$id" : "https://example.com/schemas/Order",
-        "$schema" : "https://json-schema.org/draft/2020-12/schema",
+        "$schema" : "https://spec.openapis.org/oas/3.1/dialect/base",
         "$anchor" : "OrderSchema",
         "$dynamicRef" : "#DynOrder",
         "$dynamicAnchor" : "DynOrder",
@@ -898,7 +898,6 @@
           "in" : "path",
           "required" : true,
           "deprecated" : true,
-          "allowEmptyValue" : false,
           "x-param-position" : 0,
           "schema" : {
             "type" : "string",
@@ -949,9 +948,9 @@
             "type" : "string"
           }
         }, {
-          "$ref" : "#/components/schemas/StorefrontService#GetProduct",
+          "$ref" : "#/components/parameters/ProductId",
           "summary" : "Product reference",
-          "description" : "Resolved from proto RPC ref"
+          "description" : "Resolved from component ref"
         } ],
         "requestBody" : {
           "required" : true,

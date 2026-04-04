@@ -6,7 +6,6 @@ import com.networknt.schema.SchemaLocation
 import com.networknt.schema.SchemaRegistry
 import com.networknt.schema.SpecificationVersion
 import io.kotest.assertions.assertSoftly
-import io.kotest.assertions.withClue
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -21,10 +20,7 @@ class CompleteTest :
         val request = CompleteTest::class.java.getResourceAsStream("/code-generator-request.binpb").shouldNotBeNull()
         val response = ProtocGenOpenAPI.from(request) {
             merge = false
-            // Some $refs point into components that are not auto-collected from proto messages
-            // (e.g. headers, links defined only in the file annotation), so full OAS validation
-            // is intentionally disabled here.
-            validateOutput = false
+            validateOutput = true
         }.compile()
 
         val mapper = ObjectMapper()
@@ -93,7 +89,7 @@ class CompleteTest :
                 val servers = doc["servers"].shouldNotBeNull()
                 servers.isArray shouldBe true
                 val first = servers[0]
-                first["url"].asText() shouldBe "https://{region}.api.example.com/v1"
+                first["url"].asText() shouldBe "https://api.example.com/v1"
                 val regionVar = first["variables"]["region"]
                 regionVar["default"].asText() shouldBe "us-east-1"
                 regionVar["enum"].isArray shouldBe true
@@ -169,8 +165,8 @@ class CompleteTest :
                 params["FilterContext"]["name"].asText() shouldBe "X-Filter-Context"
                 // covers Parameter.deprecated
                 params["ProductId"]["deprecated"].asBoolean() shouldBe true
-                // covers Parameter.allow_empty_value
-                params["ProductId"]["allowEmptyValue"].asBoolean() shouldBe false
+                // covers Parameter.allow_empty_value (only valid on query params per OAS 3.1)
+                params["PageSize"]["allowEmptyValue"].asBoolean() shouldBe false
                 // covers Parameter.extensions
                 params["ProductId"]["x-param-group"].asText() shouldBe "product-identifiers"
             }
@@ -228,8 +224,8 @@ class CompleteTest :
             assertSoftly {
                 val pathItems = doc["components"]["pathItems"].shouldNotBeNull()
                 pathItems["HealthCheck"]["summary"].asText() shouldBe "API health check"
-                // covers PathItem.proto_rpc_ref
-                pathItems["RpcRefPathItem"]["\$ref"].shouldNotBeNull()
+                // covers PathItem.uri_ref ($ref on PathItem)
+                pathItems["RpcRefPathItem"]["\$ref"].asText() shouldBe "#/components/pathItems/HealthCheck"
             }
         }
 
@@ -329,14 +325,13 @@ class CompleteTest :
             patchOp["operationId"].asText() shouldBe "patchProduct"
         }
 
-        // covers Parameter.deprecated, allow_empty_value, extensions (inline parameter)
-        test("inline parameter — deprecated, allowEmptyValue, extensions") {
+        // covers Parameter.deprecated, extensions (inline parameter)
+        test("inline parameter — deprecated, extensions") {
             assertSoftly {
                 val params = doc["paths"]["/products/{id}"]["put"]["parameters"].shouldNotBeNull()
                 params.isArray shouldBe true
                 val idParam = params[0].shouldNotBeNull()
                 idParam["deprecated"].asBoolean() shouldBe true
-                idParam["allowEmptyValue"].asBoolean() shouldBe false
                 idParam["x-param-position"].shouldNotBeNull()
             }
         }
@@ -346,19 +341,18 @@ class CompleteTest :
             doc["paths"]["/products/{id}"]["put"]["responses"]["200"]["x-rate-limit-cost"].shouldNotBeNull()
         }
 
-        // covers Reference.proto_rpc_ref, Reference.summary, Reference.description
-        test("Reference.proto_rpc_ref, summary, description (patchProduct parameter)") {
+        // covers Reference.uri_ref, Reference.summary, Reference.description
+        test("Reference.uri_ref, summary, description (patchProduct parameter)") {
             assertSoftly {
                 val params = doc["paths"]["/products/{id}"]["patch"]["parameters"].shouldNotBeNull()
                 params.isArray shouldBe true
                 // The inferred {id} path param is at index 0; the annotation reference is at index 1
                 val ref = params[1].shouldNotBeNull()
-                // proto_rpc_ref resolves to a $ref string
-                ref["\$ref"].shouldNotBeNull()
+                ref["\$ref"].asText() shouldBe "#/components/parameters/ProductId"
                 // covers Reference.summary
                 ref["summary"].asText() shouldBe "Product reference"
                 // covers Reference.description
-                ref["description"].asText() shouldBe "Resolved from proto RPC ref"
+                ref["description"].asText() shouldBe "Resolved from component ref"
             }
         }
 
@@ -381,11 +375,9 @@ class CompleteTest :
             link["parameters"]["productId"].shouldNotBeNull()
         }
 
-        test("§5 — Link.proto_rpc_ref resolved (components.links)") {
+        test("§5 — Link.operationRef in components.links (GetOrderStatusLink)") {
             val link = doc["components"]["links"]["GetOrderStatusLink"].shouldNotBeNull()
-            withClue("GetOrderStatusLink should have operationRef or operationId") {
-                (link["operationRef"] != null || link["operationId"] != null) shouldBe true
-            }
+            link["operationRef"].asText() shouldBe "#/paths/~1orders~1%7Border_id%7D/get"
         }
 
         test("§5 — ResponseObject.links (getProduct)") {
@@ -667,7 +659,7 @@ class CompleteTest :
                 // covers SchemaObject.id
                 order["\$id"].asText() shouldBe "https://example.com/schemas/Order"
                 // covers SchemaObject.schema
-                order["\$schema"].asText() shouldBe "https://json-schema.org/draft/2020-12/schema"
+                order["\$schema"].asText() shouldBe "https://spec.openapis.org/oas/3.1/dialect/base"
                 // covers SchemaObject.anchor
                 order["\$anchor"].asText() shouldBe "OrderSchema"
                 // covers SchemaObject.dynamic_anchor

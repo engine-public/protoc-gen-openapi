@@ -165,7 +165,6 @@ testing {
                 }
             }
             val testSuiteName = this.name
-            logger.quiet("Test suite for $testSuiteName")
             tasks.named("process${testSuiteName.capitalized()}Resources", ProcessResources::class) {
                 dependsOn("generate${testSuiteName.capitalized()}Proto")
                 from(project.layout.buildDirectory.dir("generated/source/proto/$testSuiteName/recorder").map { it.file("code-generator-request.binpb") })

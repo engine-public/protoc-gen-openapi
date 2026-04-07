@@ -1,11 +1,13 @@
 import com.engine.protoc.openapi.ProtocGenOpenAPI
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
 import com.networknt.schema.InputFormat
 import com.networknt.schema.SchemaLocation
 import com.networknt.schema.SchemaRegistry
 import com.networknt.schema.SpecificationVersion
 import io.kotest.assertions.assertSoftly
+import io.kotest.assertions.withClue
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -28,10 +30,6 @@ class CompleteTest :
             .find { it.name == "sporting.goods.StorefrontService.openapi.json" }
             .shouldNotBeNull()
         val doc: JsonNode = mapper.readTree(generatedFile.content)
-
-        File("/Users/brian.carr/scm/github/hotelengine/protoc-gen-openapi/src/complete/resources/sporting.goods.openapi.yaml")
-            .writeText(generatedFile.content)
-
         val expected = CompleteTest::class.java.getResourceAsStream("sporting.goods.openapi.yaml").shouldNotBeNull().reader().readText()
 
         test("validate reference file") {
@@ -699,6 +697,21 @@ class CompleteTest :
                 statusSchema["contentMediaType"].asText() shouldBe "text/plain"
                 // covers SchemaObject.content_schema
                 statusSchema["contentSchema"].shouldNotBeNull()
+            }
+        }
+
+        test("matches expected output") {
+            val expected = YAMLMapper().readTree(expected)
+            assertSoftly {
+                collectJsonDiffs(
+                    expected,
+                    doc,
+                    "$.openapi", // our compiler is 3.1.0, and the comp is 3.0.4, but this is intentional and not a problem
+                ).forEach { (path, exp, act) ->
+                    withClue("at $path — expected: $exp, actual: $act") {
+                        act shouldBe exp
+                    }
+                }
             }
         }
     })

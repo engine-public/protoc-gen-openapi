@@ -50,7 +50,10 @@ internal class JsonContext(
      * Path template variables (e.g. `{id}`) are percent-encoded in the URI fragment so that
      * `{` and `}` do not violate the URI-reference syntax.
      */
-    fun resolveProtoRpcRef(rpcRef: String, includeMethod: Boolean): String {
+    fun resolveProtoRpcRef(
+        rpcRef: String,
+        includeMethod: Boolean,
+    ): String {
         val binding = rpcIndex.findBinding(rpcRef) ?: return "#/paths/unknown"
         val pointer = binding.path
             .replace("~", "~0")

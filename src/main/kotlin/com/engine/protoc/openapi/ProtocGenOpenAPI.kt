@@ -48,6 +48,7 @@ public class ProtocGenOpenAPI(
 
         public class Builder private constructor(parameters: Parameters) {
             public var merge: Boolean = parameters.get<Boolean>("merge") ?: false
+
 //            public var caseStrategy: CaseStrategy = parameters.get<CaseStrategy>("caseStrategy") ?: CaseStrategy.UNMODIFIED
             public var validateOutput: Boolean = true
 //            public var outputFormat: OutputFormat = parameters.get<OutputFormat>("outputFormat") ?: OutputFormat.JSON

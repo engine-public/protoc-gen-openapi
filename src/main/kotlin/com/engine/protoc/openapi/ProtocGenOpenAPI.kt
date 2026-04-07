@@ -19,9 +19,21 @@ public class ProtocGenOpenAPI(
      */
     public data class Options(
         val merge: Boolean,
-        val caseStrategy: CaseStrategy,
+//        val caseStrategy: CaseStrategy,
+        /**
+         * Validates the output against the official OAS 3.1.1 schema.
+         * Please note, some features described in the OAS 3.1 documentation produces
+         * OAS files that do not pass validation of the spec.
+         *
+         * Known "invalid" features include:
+         * * variables in URI references
+         *   OpenAPI allows you to specify a variable for inclusion of a URI.
+         *   For example, `https://{region}.api.example.com`.
+         *   However, the OAS schema document requires the URI fields to e a valid
+         *   RFC 3986 URI-reference, which may not contain curly-braces in the host.
+         */
         val validateOutput: Boolean,
-        val outputFormat: OutputFormat,
+//        val outputFormat: OutputFormat,
     ) {
         public enum class CaseStrategy {
             UNMODIFIED,
@@ -29,16 +41,16 @@ public class ProtocGenOpenAPI(
             SNAKE_CASE,
         }
 
-        public enum class OutputFormat {
-            JSON,
-            YAML,
-        }
+//        public enum class OutputFormat {
+//            JSON,
+//            YAML,
+//        }
 
         public class Builder private constructor(parameters: Parameters) {
             public var merge: Boolean = parameters.get<Boolean>("merge") ?: false
-            public var caseStrategy: CaseStrategy = parameters.get<CaseStrategy>("caseStrategy") ?: CaseStrategy.UNMODIFIED
+//            public var caseStrategy: CaseStrategy = parameters.get<CaseStrategy>("caseStrategy") ?: CaseStrategy.UNMODIFIED
             public var validateOutput: Boolean = true
-            public var outputFormat: OutputFormat = parameters.get<OutputFormat>("outputFormat") ?: OutputFormat.JSON
+//            public var outputFormat: OutputFormat = parameters.get<OutputFormat>("outputFormat") ?: OutputFormat.JSON
 
             public companion object {
                 public fun from(parameters: Parameters): Builder = Builder(parameters)
@@ -46,10 +58,10 @@ public class ProtocGenOpenAPI(
 
             public fun build(): Options =
                 Options(
-                    merge,
-                    caseStrategy,
-                    validateOutput,
-                    outputFormat,
+                    merge = merge,
+//                    caseStrategy,
+                    validateOutput = validateOutput,
+//                    outputFormat,
                 )
         }
     }

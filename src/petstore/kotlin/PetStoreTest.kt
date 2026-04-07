@@ -22,7 +22,6 @@ class PetStoreTest :
         val response = ProtocGenOpenAPI.from(request) {
             merge = false
             validateOutput = true
-            caseStrategy = ProtocGenOpenAPI.Options.CaseStrategy.CAMEL_CASE
         }.compile()
         val generatedFile = response.fileList.find { it.name == "swagger.api.PetService.openapi.json" }.shouldNotBeNull()
         val mapper = ObjectMapper()

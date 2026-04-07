@@ -42,6 +42,10 @@ option (.engine.protoc.openapi.file) = {
     // Servers with variables
     servers: [
         {
+            // this would ideally be...
+            // "https://{region}.api.example.com/v1"
+            // but this causes validation to fail because curly braces are not
+            // allowed in an RFC 3986 host component.
             url: "https://api.example.com/v1"
             description: "Production (multi-region)"
             variables: {

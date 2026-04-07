@@ -343,13 +343,6 @@ internal fun ParameterContent.toJson(ctx: JsonContext): ObjectNode {
     return node
 }
 
-@Suppress("UnusedParameter", "unused")
-internal fun ParameterSchema.toJson(ctx: JsonContext): ObjectNode {
-    val node = ctx.obj()
-    if (hasSchema()) node.set<JsonNode>("schema", schema.toJson(ctx))
-    return node
-}
-
 // ---------------------------------------------------------------------------
 // RequestBody
 // ---------------------------------------------------------------------------
@@ -682,7 +675,6 @@ internal fun HTTPSecurityScheme.toJson(ctx: JsonContext): ObjectNode {
     return node
 }
 
-@Suppress("UnusedParameter")
 internal fun MutualTLSSecurityScheme.toJson(ctx: JsonContext): ObjectNode = ctx.obj().also { it.put("type", "mutualTLS") }
 
 internal fun OAuthSecurityScheme.toJson(ctx: JsonContext): ObjectNode {

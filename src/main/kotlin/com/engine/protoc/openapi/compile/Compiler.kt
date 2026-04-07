@@ -94,7 +94,15 @@ internal class Compiler(
 
         if (!response.hasErrors) {
             try {
-                response.addFile(outputFileName(targetFiles), mapper.writeValueAsString(doc))
+                val content = mapper.writeValueAsString(doc)
+                response.addFile(outputFileName(targetFiles), content)
+                if (options.validateOutput) {
+                    oasSchema.validate(content, InputFormat.JSON) { ctx ->
+                        ctx.executionConfig { cfg -> cfg.formatAssertionsEnabled(true) }
+                    }.forEach {
+                        response.addError(it.toString())
+                    }
+                }
             } catch (e: Exception) {
                 response.addError("Error serializing output: ${e.detail()}")
             }
@@ -264,7 +272,10 @@ internal class Compiler(
             file.services.map { svc -> file.`package`?.value.orEmpty() to svc.name?.value.orEmpty() }
         }
         return when (services.size) {
-            1 -> "${services[0].first}.${services[0].second}.openapi.json"
+            // Use filter+join so an empty package doesn't produce a leading dot.
+            1 -> listOf(services[0].first, services[0].second)
+                .filter { it.isNotEmpty() }
+                .joinToString(".") + ".openapi.json"
 
             else -> {
                 val packages = services.map { it.first }

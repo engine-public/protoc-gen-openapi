@@ -75,10 +75,8 @@ internal fun Value.toJson(ctx: JsonContext): JsonNode =
         Value.KindCase.STRING_VALUE -> ctx.mapper.nodeFactory.textNode(stringValue)
 
         Value.KindCase.STRUCT_VALUE -> {
-            val obj: ObjectNode = ctx.mapper.createObjectNode()
-            for ((k, v) in structValue.fieldsMap) {
-                obj.set<JsonNode>(k, v.toJson(ctx))
-            }
+            val obj = ctx.obj()
+            for ((k, v) in structValue.fieldsMap) obj.set<JsonNode>(k, v.toJson(ctx))
             obj
         }
 

@@ -4,6 +4,8 @@ import com.engine.protoc.openapi.Annotations
 import com.engine.protoc.openapi.Schema
 import com.engine.protoc.openapi.compile.json.JsonContext
 import com.engine.protoc.openapi.compile.json.toJson
+import com.engine.protoc.util.message.DescriptorProtoWrapper
+import com.engine.protoc.util.message.FieldDescriptorProtoWrapper
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.google.protobuf.DescriptorProtos
@@ -36,7 +38,7 @@ internal class SchemaBuilder(
     }
 
     private fun buildMessageSchema(
-        wrapper: com.engine.protoc.util.message.DescriptorProtoWrapper,
+        wrapper: DescriptorProtoWrapper,
         typeName: String,
     ): ObjectNode {
         val base = ctx.obj()
@@ -51,11 +53,6 @@ internal class SchemaBuilder(
         val propsNode = ctx.obj()
         for (fieldWrapper in wrapper.fields) {
             val field = fieldWrapper.proto
-            // Skip synthetic oneof/map-entry fields (they appear as fields on the parent)
-            if (field.hasOneofIndex() && !fieldWrapper.proto.proto3Optional) {
-                // Leave synthetic fields in — they will appear as optional properties
-            }
-
             val jsonName = field.jsonName.ifEmpty { field.name }
             val fieldSchema = buildFieldSchema(fieldWrapper)
             propsNode.set<JsonNode>(jsonName, fieldSchema)
@@ -85,9 +82,7 @@ internal class SchemaBuilder(
         }
     }
 
-    private fun buildFieldSchema(
-        fieldWrapper: com.engine.protoc.util.message.FieldDescriptorProtoWrapper,
-    ): ObjectNode {
+    private fun buildFieldSchema(fieldWrapper: FieldDescriptorProtoWrapper): ObjectNode {
         val field = fieldWrapper.proto
         val base = pathsBuilder.fieldTypeSchema(field)
 

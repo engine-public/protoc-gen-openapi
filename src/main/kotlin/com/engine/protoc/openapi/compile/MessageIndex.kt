@@ -24,19 +24,11 @@ internal class MessageIndex(protoFiles: List<FileDescriptorProtoWrapper>) {
         wrapper: DescriptorProtoWrapper,
         packagePrefix: String,
     ) {
-        val fqn = if (packagePrefix.isEmpty()) {
-            ".${wrapper.proto.name}"
-        } else {
-            ".$packagePrefix.${wrapper.proto.name}"
-        }
-        byTypeName[fqn] = wrapper
-        val nestedPrefix = if (packagePrefix.isEmpty()) {
-            wrapper.proto.name
-        } else {
-            "$packagePrefix.${wrapper.proto.name}"
-        }
+        val qualifiedName =
+            if (packagePrefix.isEmpty()) wrapper.proto.name else "$packagePrefix.${wrapper.proto.name}"
+        byTypeName[".$qualifiedName"] = wrapper
         for (nested in wrapper.nestedTypes) {
-            index(nested, nestedPrefix)
+            index(nested, qualifiedName)
         }
     }
 

@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package sporting.goods;
+package engine.protoc.openapi.example.complete;
 
-option java_package = "com.sporting.goods";
+option java_package = "com.engine.protoc.openapi.example.complete";
 option java_multiple_files = true;
 
 import "engine/protoc/openapi/annotations.proto";
@@ -157,7 +157,7 @@ option (.engine.protoc.openapi.file) = {
     // covers PathItemOrReference.reference oneof, Reference.proto_rpc_ref
     webhooks: {
         key: "healthCheckWebhook"
-        value: { reference: { proto_rpc_ref: "sporting.goods.StorefrontService#GetProduct" } }
+        value: { reference: { proto_rpc_ref: "engine.protoc.openapi.example.complete.StorefrontService#GetProduct" } }
     }
     // covers PathItem.uri_ref ($ref on PathItem itself)
     webhooks: {
@@ -513,7 +513,7 @@ option (.engine.protoc.openapi.file) = {
             key: "GetOrderStatusLink"
             value: {
                 link: {
-                    proto_rpc_ref: "sporting.goods.StorefrontService#GetOrderStatus"
+                    proto_rpc_ref: "engine.protoc.openapi.example.complete.StorefrontService#GetOrderStatus"
                     description: "Check the status of the placed order"
                     parameters: {
                         key: "order_id"
@@ -648,7 +648,7 @@ option (.engine.protoc.openapi.file) = {
             key: "RpcRefPathItem"
             value: {
                 path_item: {
-                    proto_rpc_ref: "sporting.goods.StorefrontService#GetProduct"
+                    proto_rpc_ref: "engine.protoc.openapi.example.complete.StorefrontService#GetProduct"
                 }
             }
         }
@@ -1049,7 +1049,7 @@ service StorefrontService {
                                 key: "application/json"
                                 value: {
                                     schema: {
-                                        object: { proto_message_ref: { [type.googleapis.com/sporting.goods.ProductList] {} } }
+                                        object: { proto_message_ref: { [type.googleapis.com/engine.protoc.openapi.example.complete.ProductList] {} } }
                                     }
                                     // §7 — MediaType.examples (ExampleOrReferenceMap with references)
                                     examples: {
@@ -1095,7 +1095,7 @@ service StorefrontService {
                                 key: "application/json"
                                 value: {
                                     schema: {
-                                        object: { proto_message_ref: { [type.googleapis.com/sporting.goods.Product] {} } }
+                                        object: { proto_message_ref: { [type.googleapis.com/engine.protoc.openapi.example.complete.Product] {} } }
                                     }
                                     // §7 — MediaType.example (singular, inline)
                                     example: {
@@ -1167,7 +1167,7 @@ service StorefrontService {
                                 key: "application/json"
                                 value: {
                                     schema: {
-                                        object: { proto_message_ref: { [type.googleapis.com/sporting.goods.Product] {} } }
+                                        object: { proto_message_ref: { [type.googleapis.com/engine.protoc.openapi.example.complete.Product] {} } }
                                     }
                                 }
                             }
@@ -1218,7 +1218,7 @@ service StorefrontService {
                         key: "application/json"
                         value: {
                             schema: {
-                                object: { proto_message_ref: { [type.googleapis.com/sporting.goods.UpdateProductRequest] {} } }
+                                object: { proto_message_ref: { [type.googleapis.com/engine.protoc.openapi.example.complete.UpdateProductRequest] {} } }
                             }
                         }
                     }
@@ -1234,7 +1234,7 @@ service StorefrontService {
                                 key: "application/json"
                                 value: {
                                     schema: {
-                                        object: { proto_message_ref: { [type.googleapis.com/sporting.goods.Product] {} } }
+                                        object: { proto_message_ref: { [type.googleapis.com/engine.protoc.openapi.example.complete.Product] {} } }
                                     }
                                 }
                             }
@@ -1280,7 +1280,7 @@ service StorefrontService {
                                 key: "application/json"
                                 value: {
                                     schema: {
-                                        object: { proto_message_ref: { [type.googleapis.com/sporting.goods.Product] {} } }
+                                        object: { proto_message_ref: { [type.googleapis.com/engine.protoc.openapi.example.complete.Product] {} } }
                                     }
                                 }
                             }
@@ -1412,7 +1412,7 @@ service StorefrontService {
                         key: "application/json"
                         value: {
                             schema: {
-                                object: { proto_message_ref: { [type.googleapis.com/sporting.goods.CreateOrderRequest] {} } }
+                                object: { proto_message_ref: { [type.googleapis.com/engine.protoc.openapi.example.complete.CreateOrderRequest] {} } }
                             }
                         }
                     }
@@ -1430,7 +1430,7 @@ service StorefrontService {
                                 key: "application/json"
                                 value: {
                                     schema: {
-                                        object: { proto_message_ref: { [type.googleapis.com/sporting.goods.Order] {} } }
+                                        object: { proto_message_ref: { [type.googleapis.com/engine.protoc.openapi.example.complete.Order] {} } }
                                     }
                                 }
                             }
@@ -1475,7 +1475,7 @@ service StorefrontService {
                                 key: "application/json"
                                 value: {
                                     schema: {
-                                        object: { proto_message_ref: { [type.googleapis.com/sporting.goods.Order] {} } }
+                                        object: { proto_message_ref: { [type.googleapis.com/engine.protoc.openapi.example.complete.Order] {} } }
                                     }
                                 }
                             }

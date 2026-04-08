@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package swagger.api;
+package engine.protoc.openapi.example.petstore;
 
-option java_package = "com.swagger.api";
+option java_package = "com.engine.protoc.openapi.example.petstore";
 option java_multiple_files = true;
 
 import "engine/protoc/openapi/annotations.proto";
@@ -73,11 +73,11 @@ option (.engine.protoc.openapi.file) = {
                     description: "Pet object that needs to be added to the store"
                     content: {
                         key: "application/json"
-                        value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.Pet] {} } } } }
+                        value: { schema: { object: { proto_message_ref: { [type.googleapis.com/engine.protoc.openapi.example.petstore.Pet] {} } } } }
                     }
                     content: {
                         key: "application/xml"
-                        value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.Pet] {} } } } }
+                        value: { schema: { object: { proto_message_ref: { [type.googleapis.com/engine.protoc.openapi.example.petstore.Pet] {} } } } }
                     }
                 }
             }
@@ -93,7 +93,7 @@ option (.engine.protoc.openapi.file) = {
                             schema: {
                                 object: {
                                     type: "array"
-                                    items: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.User] {} } } }
+                                    items: { object: { proto_message_ref: { [type.googleapis.com/engine.protoc.openapi.example.petstore.User] {} } } }
                                 }
                             }
                         }
@@ -149,14 +149,14 @@ message Pet {
     string name = 2 [(.engine.protoc.openapi.field) = {
         object: { example: { [type.googleapis.com/google.protobuf.Value] { string_value: "doggie" } } }
     }];
-    .swagger.api.Category category = 3;
+    .engine.protoc.openapi.example.petstore.Category category = 3;
     repeated string photo_urls = 4 [(.engine.protoc.openapi.field) = {
         object: {
             xml: { wrapped: true }
             items: { object: { xml: { name: "photoUrl" } } }
         }
     }];
-    repeated .swagger.api.Tag tags = 5 [(.engine.protoc.openapi.field) = {
+    repeated .engine.protoc.openapi.example.petstore.Tag tags = 5 [(.engine.protoc.openapi.field) = {
         object: { xml: { wrapped: true } }
     }];
     // pet status in the store
@@ -290,7 +290,7 @@ message UsernameRequest {
 
 // Used for list input (array of User)
 message UserListRequest {
-    repeated .swagger.api.User users = 1;
+    repeated .engine.protoc.openapi.example.petstore.User users = 1;
 }
 
 // ---------------------------------------------------------------------------
@@ -300,7 +300,7 @@ message UserListRequest {
 service PetService {
 
     // Update an existing pet by Id.
-    rpc UpdatePet(.swagger.api.Pet) returns (.swagger.api.Pet) {
+    rpc UpdatePet(.engine.protoc.openapi.example.petstore.Pet) returns (.engine.protoc.openapi.example.petstore.Pet) {
         option (.google.api.http) = { put: "/pet" body: "*" };
         option (.engine.protoc.openapi.method) = {
             tags: ["pet"]
@@ -313,15 +313,15 @@ service PetService {
                     required: true
                     content: {
                         key: "application/json"
-                        value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.Pet] {} } } } }
+                        value: { schema: { object: { proto_message_ref: { [type.googleapis.com/engine.protoc.openapi.example.petstore.Pet] {} } } } }
                     }
                     content: {
                         key: "application/xml"
-                        value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.Pet] {} } } } }
+                        value: { schema: { object: { proto_message_ref: { [type.googleapis.com/engine.protoc.openapi.example.petstore.Pet] {} } } } }
                     }
                     content: {
                         key: "application/x-www-form-urlencoded"
-                        value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.Pet] {} } } } }
+                        value: { schema: { object: { proto_message_ref: { [type.googleapis.com/engine.protoc.openapi.example.petstore.Pet] {} } } } }
                     }
                 }
             }
@@ -333,11 +333,11 @@ service PetService {
                             description: "Successful operation"
                             content: {
                                 key: "application/json"
-                                value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.Pet] {} } } } }
+                                value: { schema: { object: { proto_message_ref: { [type.googleapis.com/engine.protoc.openapi.example.petstore.Pet] {} } } } }
                             }
                             content: {
                                 key: "application/xml"
-                                value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.Pet] {} } } } }
+                                value: { schema: { object: { proto_message_ref: { [type.googleapis.com/engine.protoc.openapi.example.petstore.Pet] {} } } } }
                             }
                         }
                     }
@@ -354,7 +354,7 @@ service PetService {
     }
 
     // Add a new pet to the store.
-    rpc AddPet(.swagger.api.Pet) returns (.swagger.api.Pet) {
+    rpc AddPet(.engine.protoc.openapi.example.petstore.Pet) returns (.engine.protoc.openapi.example.petstore.Pet) {
         option (.google.api.http) = { post: "/pet" body: "*" };
         option (.engine.protoc.openapi.method) = {
             tags: ["pet"]
@@ -367,15 +367,15 @@ service PetService {
                     required: true
                     content: {
                         key: "application/json"
-                        value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.Pet] {} } } } }
+                        value: { schema: { object: { proto_message_ref: { [type.googleapis.com/engine.protoc.openapi.example.petstore.Pet] {} } } } }
                     }
                     content: {
                         key: "application/xml"
-                        value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.Pet] {} } } } }
+                        value: { schema: { object: { proto_message_ref: { [type.googleapis.com/engine.protoc.openapi.example.petstore.Pet] {} } } } }
                     }
                     content: {
                         key: "application/x-www-form-urlencoded"
-                        value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.Pet] {} } } } }
+                        value: { schema: { object: { proto_message_ref: { [type.googleapis.com/engine.protoc.openapi.example.petstore.Pet] {} } } } }
                     }
                 }
             }
@@ -387,11 +387,11 @@ service PetService {
                             description: "Successful operation"
                             content: {
                                 key: "application/json"
-                                value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.Pet] {} } } } }
+                                value: { schema: { object: { proto_message_ref: { [type.googleapis.com/engine.protoc.openapi.example.petstore.Pet] {} } } } }
                             }
                             content: {
                                 key: "application/xml"
-                                value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.Pet] {} } } } }
+                                value: { schema: { object: { proto_message_ref: { [type.googleapis.com/engine.protoc.openapi.example.petstore.Pet] {} } } } }
                             }
                         }
                     }
@@ -407,7 +407,7 @@ service PetService {
     }
 
     // Multiple status values can be provided with comma separated strings.
-    rpc FindPetsByStatus(.swagger.api.FindPetsByStatusRequest) returns (.swagger.api.Pet) {
+    rpc FindPetsByStatus(.engine.protoc.openapi.example.petstore.FindPetsByStatusRequest) returns (.engine.protoc.openapi.example.petstore.Pet) {
         option (.google.api.http) = { get: "/pet/findByStatus" };
         option (.engine.protoc.openapi.method) = {
             tags: ["pet"]
@@ -446,7 +446,7 @@ service PetService {
                                     schema: {
                                         object: {
                                             type: "array"
-                                            items: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.Pet] {} } } }
+                                            items: { object: { proto_message_ref: { [type.googleapis.com/engine.protoc.openapi.example.petstore.Pet] {} } } }
                                         }
                                     }
                                 }
@@ -457,7 +457,7 @@ service PetService {
                                     schema: {
                                         object: {
                                             type: "array"
-                                            items: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.Pet] {} } } }
+                                            items: { object: { proto_message_ref: { [type.googleapis.com/engine.protoc.openapi.example.petstore.Pet] {} } } }
                                         }
                                     }
                                 }
@@ -475,7 +475,7 @@ service PetService {
     }
 
     // Multiple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing.
-    rpc FindPetsByTags(.swagger.api.FindPetsByTagsRequest) returns (.swagger.api.Pet) {
+    rpc FindPetsByTags(.engine.protoc.openapi.example.petstore.FindPetsByTagsRequest) returns (.engine.protoc.openapi.example.petstore.Pet) {
         option (.google.api.http) = { get: "/pet/findByTags" };
         option (.engine.protoc.openapi.method) = {
             tags: ["pet"]
@@ -511,7 +511,7 @@ service PetService {
                                     schema: {
                                         object: {
                                             type: "array"
-                                            items: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.Pet] {} } } }
+                                            items: { object: { proto_message_ref: { [type.googleapis.com/engine.protoc.openapi.example.petstore.Pet] {} } } }
                                         }
                                     }
                                 }
@@ -522,7 +522,7 @@ service PetService {
                                     schema: {
                                         object: {
                                             type: "array"
-                                            items: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.Pet] {} } } }
+                                            items: { object: { proto_message_ref: { [type.googleapis.com/engine.protoc.openapi.example.petstore.Pet] {} } } }
                                         }
                                     }
                                 }
@@ -540,7 +540,7 @@ service PetService {
     }
 
     // Returns a single pet.
-    rpc GetPetById(.swagger.api.PetIdRequest) returns (.swagger.api.Pet) {
+    rpc GetPetById(.engine.protoc.openapi.example.petstore.PetIdRequest) returns (.engine.protoc.openapi.example.petstore.Pet) {
         option (.google.api.http) = { get: "/pet/{petId}" };
         option (.engine.protoc.openapi.method) = {
             tags: ["pet"]
@@ -566,11 +566,11 @@ service PetService {
                             description: "successful operation"
                             content: {
                                 key: "application/json"
-                                value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.Pet] {} } } } }
+                                value: { schema: { object: { proto_message_ref: { [type.googleapis.com/engine.protoc.openapi.example.petstore.Pet] {} } } } }
                             }
                             content: {
                                 key: "application/xml"
-                                value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.Pet] {} } } } }
+                                value: { schema: { object: { proto_message_ref: { [type.googleapis.com/engine.protoc.openapi.example.petstore.Pet] {} } } } }
                             }
                         }
                     }
@@ -587,7 +587,7 @@ service PetService {
     }
 
     // Updates a pet resource based on the form data.
-    rpc UpdatePetWithForm(.swagger.api.UpdatePetWithFormRequest) returns (.swagger.api.Pet) {
+    rpc UpdatePetWithForm(.engine.protoc.openapi.example.petstore.UpdatePetWithFormRequest) returns (.engine.protoc.openapi.example.petstore.Pet) {
         option (.google.api.http) = { post: "/pet/{petId}" };
         option (.engine.protoc.openapi.method) = {
             tags: ["pet"]
@@ -635,11 +635,11 @@ service PetService {
                             description: "successful operation"
                             content: {
                                 key: "application/json"
-                                value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.Pet] {} } } } }
+                                value: { schema: { object: { proto_message_ref: { [type.googleapis.com/engine.protoc.openapi.example.petstore.Pet] {} } } } }
                             }
                             content: {
                                 key: "application/xml"
-                                value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.Pet] {} } } } }
+                                value: { schema: { object: { proto_message_ref: { [type.googleapis.com/engine.protoc.openapi.example.petstore.Pet] {} } } } }
                             }
                         }
                     }
@@ -654,7 +654,7 @@ service PetService {
     }
 
     // Delete a pet.
-    rpc DeletePet(.swagger.api.DeletePetRequest) returns (.google.protobuf.Empty) {
+    rpc DeletePet(.engine.protoc.openapi.example.petstore.DeletePetRequest) returns (.google.protobuf.Empty) {
         option (.google.api.http) = { delete: "/pet/{petId}" };
         option (.engine.protoc.openapi.method) = {
             tags: ["pet"]
@@ -697,7 +697,7 @@ service PetService {
     }
 
     // Upload image of the pet.
-    rpc UploadFile(.swagger.api.UploadFileRequest) returns (.swagger.api.ApiResponse) {
+    rpc UploadFile(.engine.protoc.openapi.example.petstore.UploadFileRequest) returns (.engine.protoc.openapi.example.petstore.ApiResponse) {
         option (.google.api.http) = { post: "/pet/{petId}/uploadImage" body: "*" };
         option (.engine.protoc.openapi.method) = {
             tags: ["pet"]
@@ -744,7 +744,7 @@ service PetService {
                             description: "successful operation"
                             content: {
                                 key: "application/json"
-                                value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.ApiResponse] {} } } } }
+                                value: { schema: { object: { proto_message_ref: { [type.googleapis.com/engine.protoc.openapi.example.petstore.ApiResponse] {} } } } }
                             }
                         }
                     }
@@ -795,7 +795,7 @@ service PetService {
     }
 
     // Place a new order in the store.
-    rpc PlaceOrder(.swagger.api.Order) returns (.swagger.api.Order) {
+    rpc PlaceOrder(.engine.protoc.openapi.example.petstore.Order) returns (.engine.protoc.openapi.example.petstore.Order) {
         option (.google.api.http) = { post: "/store/order" body: "*" };
         option (.engine.protoc.openapi.method) = {
             tags: ["store"]
@@ -807,15 +807,15 @@ service PetService {
                 request_body: {
                     content: {
                         key: "application/json"
-                        value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.Order] {} } } } }
+                        value: { schema: { object: { proto_message_ref: { [type.googleapis.com/engine.protoc.openapi.example.petstore.Order] {} } } } }
                     }
                     content: {
                         key: "application/xml"
-                        value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.Order] {} } } } }
+                        value: { schema: { object: { proto_message_ref: { [type.googleapis.com/engine.protoc.openapi.example.petstore.Order] {} } } } }
                     }
                     content: {
                         key: "application/x-www-form-urlencoded"
-                        value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.Order] {} } } } }
+                        value: { schema: { object: { proto_message_ref: { [type.googleapis.com/engine.protoc.openapi.example.petstore.Order] {} } } } }
                     }
                 }
             }
@@ -827,7 +827,7 @@ service PetService {
                             description: "successful operation"
                             content: {
                                 key: "application/json"
-                                value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.Order] {} } } } }
+                                value: { schema: { object: { proto_message_ref: { [type.googleapis.com/engine.protoc.openapi.example.petstore.Order] {} } } } }
                             }
                         }
                     }
@@ -840,7 +840,7 @@ service PetService {
     }
 
     // For valid response try integer IDs with value <= 5 or > 10. Other values will generate exceptions.
-    rpc GetOrderById(.swagger.api.OrderIdRequest) returns (.swagger.api.Order) {
+    rpc GetOrderById(.engine.protoc.openapi.example.petstore.OrderIdRequest) returns (.engine.protoc.openapi.example.petstore.Order) {
         option (.google.api.http) = { get: "/store/order/{orderId}" };
         option (.engine.protoc.openapi.method) = {
             tags: ["store"]
@@ -867,11 +867,11 @@ service PetService {
                             description: "successful operation"
                             content: {
                                 key: "application/json"
-                                value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.Order] {} } } } }
+                                value: { schema: { object: { proto_message_ref: { [type.googleapis.com/engine.protoc.openapi.example.petstore.Order] {} } } } }
                             }
                             content: {
                                 key: "application/xml"
-                                value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.Order] {} } } } }
+                                value: { schema: { object: { proto_message_ref: { [type.googleapis.com/engine.protoc.openapi.example.petstore.Order] {} } } } }
                             }
                         }
                     }
@@ -884,7 +884,7 @@ service PetService {
     }
 
     // For valid response try integer IDs with value < 1000. Anything above 1000 or non-integers will generate API errors.
-    rpc DeleteOrder(.swagger.api.OrderIdRequest) returns (.google.protobuf.Empty) {
+    rpc DeleteOrder(.engine.protoc.openapi.example.petstore.OrderIdRequest) returns (.google.protobuf.Empty) {
         option (.google.api.http) = { delete: "/store/order/{orderId}" };
         option (.engine.protoc.openapi.method) = {
             tags: ["store"]
@@ -913,7 +913,7 @@ service PetService {
     }
 
     // This can only be done by the logged in user.
-    rpc CreateUser(.swagger.api.User) returns (.swagger.api.User) {
+    rpc CreateUser(.engine.protoc.openapi.example.petstore.User) returns (.engine.protoc.openapi.example.petstore.User) {
         option (.google.api.http) = { post: "/user" body: "*" };
         option (.engine.protoc.openapi.method) = {
             tags: ["user"]
@@ -926,15 +926,15 @@ service PetService {
                     description: "Created user object"
                     content: {
                         key: "application/json"
-                        value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.User] {} } } } }
+                        value: { schema: { object: { proto_message_ref: { [type.googleapis.com/engine.protoc.openapi.example.petstore.User] {} } } } }
                     }
                     content: {
                         key: "application/xml"
-                        value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.User] {} } } } }
+                        value: { schema: { object: { proto_message_ref: { [type.googleapis.com/engine.protoc.openapi.example.petstore.User] {} } } } }
                     }
                     content: {
                         key: "application/x-www-form-urlencoded"
-                        value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.User] {} } } } }
+                        value: { schema: { object: { proto_message_ref: { [type.googleapis.com/engine.protoc.openapi.example.petstore.User] {} } } } }
                     }
                 }
             }
@@ -946,11 +946,11 @@ service PetService {
                             description: "successful operation"
                             content: {
                                 key: "application/json"
-                                value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.User] {} } } } }
+                                value: { schema: { object: { proto_message_ref: { [type.googleapis.com/engine.protoc.openapi.example.petstore.User] {} } } } }
                             }
                             content: {
                                 key: "application/xml"
-                                value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.User] {} } } } }
+                                value: { schema: { object: { proto_message_ref: { [type.googleapis.com/engine.protoc.openapi.example.petstore.User] {} } } } }
                             }
                         }
                     }
@@ -961,7 +961,7 @@ service PetService {
     }
 
     // Creates list of users with given input array.
-    rpc CreateUsersWithListInput(.swagger.api.UserListRequest) returns (.swagger.api.User) {
+    rpc CreateUsersWithListInput(.engine.protoc.openapi.example.petstore.UserListRequest) returns (.engine.protoc.openapi.example.petstore.User) {
         option (.google.api.http) = { post: "/user/createWithList" body: "*" };
         option (.engine.protoc.openapi.method) = {
             tags: ["user"]
@@ -977,7 +977,7 @@ service PetService {
                             schema: {
                                 object: {
                                     type: "array"
-                                    items: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.User] {} } } }
+                                    items: { object: { proto_message_ref: { [type.googleapis.com/engine.protoc.openapi.example.petstore.User] {} } } }
                                 }
                             }
                         }
@@ -992,11 +992,11 @@ service PetService {
                             description: "Successful operation"
                             content: {
                                 key: "application/json"
-                                value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.User] {} } } } }
+                                value: { schema: { object: { proto_message_ref: { [type.googleapis.com/engine.protoc.openapi.example.petstore.User] {} } } } }
                             }
                             content: {
                                 key: "application/xml"
-                                value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.User] {} } } } }
+                                value: { schema: { object: { proto_message_ref: { [type.googleapis.com/engine.protoc.openapi.example.petstore.User] {} } } } }
                             }
                         }
                     }
@@ -1007,7 +1007,7 @@ service PetService {
     }
 
     // Log into the system.
-    rpc LoginUser(.swagger.api.LoginUserRequest) returns (.google.protobuf.Empty) {
+    rpc LoginUser(.engine.protoc.openapi.example.petstore.LoginUserRequest) returns (.google.protobuf.Empty) {
         option (.google.api.http) = { get: "/user/login" };
         option (.engine.protoc.openapi.method) = {
             tags: ["user"]
@@ -1096,7 +1096,7 @@ service PetService {
     }
 
     // Get user detail based on username.
-    rpc GetUserByName(.swagger.api.UsernameRequest) returns (.swagger.api.User) {
+    rpc GetUserByName(.engine.protoc.openapi.example.petstore.UsernameRequest) returns (.engine.protoc.openapi.example.petstore.User) {
         option (.google.api.http) = { get: "/user/{username}" };
         option (.engine.protoc.openapi.method) = {
             tags: ["user"]
@@ -1122,11 +1122,11 @@ service PetService {
                             description: "successful operation"
                             content: {
                                 key: "application/json"
-                                value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.User] {} } } } }
+                                value: { schema: { object: { proto_message_ref: { [type.googleapis.com/engine.protoc.openapi.example.petstore.User] {} } } } }
                             }
                             content: {
                                 key: "application/xml"
-                                value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.User] {} } } } }
+                                value: { schema: { object: { proto_message_ref: { [type.googleapis.com/engine.protoc.openapi.example.petstore.User] {} } } } }
                             }
                         }
                     }
@@ -1139,7 +1139,7 @@ service PetService {
     }
 
     // This can only be done by the logged in user.
-    rpc UpdateUser(.swagger.api.UsernameRequest) returns (.google.protobuf.Empty) {
+    rpc UpdateUser(.engine.protoc.openapi.example.petstore.UsernameRequest) returns (.google.protobuf.Empty) {
         option (.google.api.http) = { put: "/user/{username}" body: "*" };
         option (.engine.protoc.openapi.method) = {
             tags: ["user"]
@@ -1163,15 +1163,15 @@ service PetService {
                     description: "Update an existent user in the store"
                     content: {
                         key: "application/json"
-                        value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.User] {} } } } }
+                        value: { schema: { object: { proto_message_ref: { [type.googleapis.com/engine.protoc.openapi.example.petstore.User] {} } } } }
                     }
                     content: {
                         key: "application/xml"
-                        value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.User] {} } } } }
+                        value: { schema: { object: { proto_message_ref: { [type.googleapis.com/engine.protoc.openapi.example.petstore.User] {} } } } }
                     }
                     content: {
                         key: "application/x-www-form-urlencoded"
-                        value: { schema: { object: { proto_message_ref: { [type.googleapis.com/swagger.api.User] {} } } } }
+                        value: { schema: { object: { proto_message_ref: { [type.googleapis.com/engine.protoc.openapi.example.petstore.User] {} } } } }
                     }
                 }
             }
@@ -1185,7 +1185,7 @@ service PetService {
     }
 
     // This can only be done by the logged in user.
-    rpc DeleteUser(.swagger.api.UsernameRequest) returns (.google.protobuf.Empty) {
+    rpc DeleteUser(.engine.protoc.openapi.example.petstore.UsernameRequest) returns (.google.protobuf.Empty) {
         option (.google.api.http) = { delete: "/user/{username}" };
         option (.engine.protoc.openapi.method) = {
             tags: ["user"]

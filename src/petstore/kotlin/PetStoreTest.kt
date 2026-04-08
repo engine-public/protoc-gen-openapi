@@ -23,7 +23,7 @@ class PetStoreTest :
             merge = false
             validateOutput = true
         }.compile()
-        val generatedFile = response.fileList.find { it.name == "swagger.api.PetService.openapi.json" }.shouldNotBeNull()
+        val generatedFile = response.fileList.find { it.name == "engine.protoc.openapi.example.petstore.PetService.openapi.json" }.shouldNotBeNull()
         val mapper = ObjectMapper()
         val json = mapper.readTree(generatedFile.content)
 

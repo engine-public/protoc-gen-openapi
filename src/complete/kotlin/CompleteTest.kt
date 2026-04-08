@@ -27,7 +27,7 @@ class CompleteTest :
 
         val mapper = ObjectMapper()
         val generatedFile = response.fileList
-            .find { it.name == "sporting.goods.StorefrontService.openapi.json" }
+            .find { it.name == "engine.protoc.openapi.example.complete.StorefrontService.openapi.json" }
             .shouldNotBeNull()
         val doc: JsonNode = mapper.readTree(generatedFile.content)
         val expected = CompleteTest::class.java.getResourceAsStream("sporting.goods.openapi.yaml").shouldNotBeNull().reader().readText()

@@ -1,7 +1,7 @@
 - [x] look for gaps between model and compiler, implement
 - [x] look for uncovered compiler/model generate goofball proto for it
 - [x] fix packages for petstore and complete tests
-- [ ] test merged and unmerged paths
+- [x] test merged and unmerged paths
 - [ ] generate oops-all-conventions.proto
 - [ ] generate new readme
 - [ ] double check caseStrategy?

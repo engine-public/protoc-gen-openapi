@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package engine.protoc.openapi.example.unmerged;
+
+option java_package = "com.engine.protoc.openapi.example.unmerged";
+option java_multiple_files = true;
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "engine/protoc/openapi/annotations.proto";
+import "doodad.proto";
+
+// This guy does some really heavy stuff.
+service SecondaryService {
+    option (.engine.protoc.openapi.service) = {
+        info: {
+            version: "7.2.1"
+        }
+    };
+
+    rpc AnotherThingToDoWithDooDads(.google.protobuf.Empty) returns (DooDad) {
+        option (.google.api.http) = {
+            post: "/doodad"
+        };
+    };
+}

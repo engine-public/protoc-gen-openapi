@@ -65,6 +65,7 @@ internal class Compiler(
 
         val doc: ObjectNode = ctx.obj()
         doc.put("openapi", "3.1.0")
+        doc.set<JsonNode>("paths", ctx.obj())
 
         for (file in targetFiles) {
             try {
@@ -131,7 +132,10 @@ internal class Compiler(
                 // File-only output: emit when a file-level annotation exists, no services present.
                 if (fileAnnotation == null) continue
                 try {
-                    val doc = ctx.obj().also { it.put("openapi", "3.1.0") }
+                    val doc = ctx.obj().also {
+                        it.put("openapi", "3.1.0")
+                        it.set<JsonNode>("paths", ctx.obj())
+                    }
                     fileAnnotation.mergeInto(doc, ctx)
                     val pkg = file.`package`?.value.orEmpty()
                     val fileName = if (pkg.isEmpty()) "openapi.json" else "$pkg.openapi.json"
@@ -145,7 +149,10 @@ internal class Compiler(
             for (service in file.services) {
                 val svcLabel = "${file.name}/${service.name?.value}"
                 try {
-                    val doc = ctx.obj().also { it.put("openapi", "3.1.0") }
+                    val doc = ctx.obj().also {
+                        it.put("openapi", "3.1.0")
+                        it.set<JsonNode>("paths", ctx.obj())
+                    }
 
                     // Layer 1: attributes derived from the service itself (lowest priority)
                     applyServiceDerivedAttributes(doc, service, ctx)
@@ -215,7 +222,6 @@ internal class Compiler(
         pathsNode: ObjectNode,
         ctx: JsonContext,
     ) {
-        if (pathsNode.size() == 0) return
         val existingPaths = doc.get("paths") as? ObjectNode
             ?: ctx.obj().also { doc.set<JsonNode>("paths", it) }
         pathsNode.fields().forEach { (path, rpcPathItem) ->

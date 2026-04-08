@@ -366,7 +366,10 @@ internal class PathsBuilder(
 
     // ---- Response inference ---------------------------------------------
 
-    private fun inferResponses(outputTypeName: String, responseBodyField: String? = null): ObjectNode {
+    private fun inferResponses(
+        outputTypeName: String,
+        responseBodyField: String? = null,
+    ): ObjectNode {
         val responses = ctx.obj()
         val response = ctx.obj()
         response.put("description", "OK")
@@ -386,7 +389,10 @@ internal class PathsBuilder(
         return responses
     }
 
-    private fun collectResponseBodyFieldType(outputTypeName: String, fieldName: String) {
+    private fun collectResponseBodyFieldType(
+        outputTypeName: String,
+        fieldName: String,
+    ) {
         val msg = ctx.messageIndex.find(outputTypeName) ?: return
         val field = msg.proto.fieldList
             .find { it.name == fieldName || it.jsonName == fieldName } ?: return
@@ -395,7 +401,10 @@ internal class PathsBuilder(
         }
     }
 
-    private fun responseBodyFieldSchema(outputTypeName: String, fieldName: String): ObjectNode? {
+    private fun responseBodyFieldSchema(
+        outputTypeName: String,
+        fieldName: String,
+    ): ObjectNode? {
         val msg = ctx.messageIndex.find(outputTypeName) ?: return null
         val field = msg.proto.fieldList
             .find { it.name == fieldName || it.jsonName == fieldName } ?: return null

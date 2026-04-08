@@ -58,7 +58,6 @@ class MergedTest :
                 collectJsonDiffs(
                     expected,
                     json,
-                    "$.openapi", // our compiler is 3.1.0, and the comp is 3.0.4, but this is intentional and not a problem
                 ).forEach { (path, exp, act) ->
                     withClue("at $path — expected: $exp, actual: $act") {
                         act shouldBe exp

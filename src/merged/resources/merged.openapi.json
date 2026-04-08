@@ -33,7 +33,10 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/ListWidgetResponse"
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/Widget"
+                  }
                 }
               }
             }
@@ -83,17 +86,6 @@
           "isDoodad" : {
             "type" : "boolean",
             "description" : "If true, this widget is, in fact, also a DooDad"
-          }
-        }
-      },
-      "ListWidgetResponse" : {
-        "type" : "object",
-        "properties" : {
-          "widgets" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/Widget"
-            }
           }
         }
       }

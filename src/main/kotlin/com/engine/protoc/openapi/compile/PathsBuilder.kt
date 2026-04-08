@@ -68,8 +68,17 @@ internal class PathsBuilder(
         val inputTypeName = method.proto.inputType
         val outputTypeName = method.proto.outputType
 
+        // When response_body names a field, the HTTP response carries that field's value directly
+        // rather than the full output message.  The wrapper message is not referenced in the
+        // output schema, so we collect the field's type instead.
+        val responseBodyField = httpRule.responseBody.takeIf { it.isNotEmpty() }
+
         // Always collect the output type — it is an API entity that clients receive.
-        collector.collect(outputTypeName)
+        if (responseBodyField != null) {
+            collectResponseBodyFieldType(outputTypeName, responseBodyField)
+        } else {
+            collector.collect(outputTypeName)
+        }
 
         // Only collect the input type as a component schema when it will actually be
         // referenced as a named $ref in the OpenAPI output.  This happens in exactly one
@@ -176,7 +185,7 @@ internal class PathsBuilder(
         if (annotation?.hasResponses() == true) {
             node.set<JsonNode>("responses", annotation.responses.toJson(ctx))
         } else {
-            node.set<JsonNode>("responses", inferResponses(outputTypeName))
+            node.set<JsonNode>("responses", inferResponses(outputTypeName, responseBodyField))
         }
 
         // ---- Security / deprecated --------------------------------------
@@ -357,17 +366,40 @@ internal class PathsBuilder(
 
     // ---- Response inference ---------------------------------------------
 
-    private fun inferResponses(outputTypeName: String): ObjectNode {
+    private fun inferResponses(outputTypeName: String, responseBodyField: String? = null): ObjectNode {
         val responses = ctx.obj()
         val response = ctx.obj()
         response.put("description", "OK")
         if (outputTypeName.isNotEmpty() && outputTypeName != ".google.protobuf.Empty") {
             val content = ctx.obj()
-            content.set<JsonNode>("application/json", schemaMediaType(outputTypeName))
+            val mediaType = if (responseBodyField != null) {
+                responseBodyFieldSchema(outputTypeName, responseBodyField)
+                    ?.let { schema -> ctx.obj().also { it.set<JsonNode>("schema", schema) } }
+                    ?: schemaMediaType(outputTypeName)
+            } else {
+                schemaMediaType(outputTypeName)
+            }
+            content.set<JsonNode>("application/json", mediaType)
             response.set<JsonNode>("content", content)
         }
         responses.set<JsonNode>("200", response)
         return responses
+    }
+
+    private fun collectResponseBodyFieldType(outputTypeName: String, fieldName: String) {
+        val msg = ctx.messageIndex.find(outputTypeName) ?: return
+        val field = msg.proto.fieldList
+            .find { it.name == fieldName || it.jsonName == fieldName } ?: return
+        if (field.type == DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE) {
+            collector.collect(field.typeName)
+        }
+    }
+
+    private fun responseBodyFieldSchema(outputTypeName: String, fieldName: String): ObjectNode? {
+        val msg = ctx.messageIndex.find(outputTypeName) ?: return null
+        val field = msg.proto.fieldList
+            .find { it.name == fieldName || it.jsonName == fieldName } ?: return null
+        return fieldTypeSchema(field)
     }
 
     // ---- Field type → JSON Schema ----------------------------------------

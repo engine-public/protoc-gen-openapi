@@ -1,0 +1,102 @@
+{
+  "openapi" : "3.1.0",
+  "info" : {
+    "title" : "Example: Merged Proto Services",
+    "summary" : "Shows multiple Protobuf services merged into a single OpenAPI spec",
+    "version" : "1.2.3"
+  },
+  "servers" : [ {
+    "url" : "https://merged.example.com"
+  } ],
+  "paths" : {
+    "/widget" : {
+      "post" : {
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Widget"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get" : {
+        "summary" : "List all widgets in the system",
+        "description" : "List all widgets in the system",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ListWidgetResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/widget/{widget_id}" : {
+      "get" : {
+        "summary" : "Retrieve a single widget by its id",
+        "description" : "Retrieve a single widget by its id",
+        "parameters" : [ {
+          "name" : "widget_id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Widget"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "Widget" : {
+        "type" : "object",
+        "description" : "A canonical representation of an ACME Corp. Widget",
+        "properties" : {
+          "id" : {
+            "type" : "integer",
+            "format" : "int64",
+            "description" : "The unique identifier of this widget"
+          },
+          "isDoodad" : {
+            "type" : "boolean",
+            "description" : "If true, this widget is, in fact, also a DooDad"
+          }
+        }
+      },
+      "ListWidgetResponse" : {
+        "type" : "object",
+        "properties" : {
+          "widgets" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Widget"
+            }
+          }
+        }
+      }
+    }
+  }
+}

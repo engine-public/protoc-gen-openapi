@@ -184,6 +184,11 @@ testing {
                 implementation(testFixtures(project()))
             }
         }
+        register<JvmTestSuite>("merged") {
+            dependencies {
+                implementation(testFixtures(project()))
+            }
+        }
     }
 }
 

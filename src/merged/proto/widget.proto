@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+package engine.protoc.openapi.example.merged;
+
+option java_package = "com.engine.protoc.openapi.example.merged";
+option java_multiple_files = true;
+
+import "google/api/annotations.proto";
+
+// CRUD Operations on Widgets
+service WidgetService {
+    // List all widgets in the system
+    rpc ListWidgets(ListWidgetRequest) returns (ListWidgetResponse) {
+        option (.google.api.http) = {
+            get: "/widget"
+            response_body: "widgets"
+        };
+    };
+
+    // Retrieve a single widget by its id
+    rpc GetWidget(GetWidgetRequest) returns (Widget) {
+        option (.google.api.http) = {
+            get: "/widget/{widget_id}"
+        };
+    }
+}
+
+// A canonical representation of an ACME Corp. Widget
+message Widget {
+    // The unique identifier of this widget
+    int64 id = 1;
+
+    // If true, this widget is, in fact, also a DooDad
+    bool is_doodad = 2;
+}
+
+message ListWidgetRequest {
+}
+
+message ListWidgetResponse {
+    repeated Widget widgets = 1;
+}
+
+message GetWidgetRequest {
+    int64 widget_id = 1;
+}
+
+
+
+

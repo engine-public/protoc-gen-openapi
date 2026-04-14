@@ -78,7 +78,7 @@ internal class PathsBuilder(
         // If the field cannot be resolved the annotation is misconfigured; fail loudly so the
         // developer gets a clear error rather than a silently invalid spec.
         if (responseBodyField != null) {
-            if (!collectResponseBodyFieldType(outputTypeName, responseBodyField)) {
+            if (!collectBodyFieldType(outputTypeName, responseBodyField)) {
                 val outputSimpleName = ctx.messageIndex.simpleNameOf(outputTypeName)
                 throw IllegalArgumentException(
                     "response_body field '$responseBodyField' not found in $outputSimpleName",
@@ -111,7 +111,7 @@ internal class PathsBuilder(
         if (binding.body == "*" && !hasExplicitRequestBody) {
             collector.collect(inputTypeName)
         } else if (binding.body.isNotEmpty() && binding.body != "*" && !hasExplicitRequestBody) {
-            if (!collectRequestBodyFieldType(inputTypeName, binding.body)) {
+            if (!collectBodyFieldType(inputTypeName, binding.body)) {
                 val inputSimpleName = ctx.messageIndex.simpleNameOf(inputTypeName)
                 throw IllegalArgumentException(
                     "body field '${binding.body}' not found in $inputSimpleName",
@@ -404,37 +404,19 @@ internal class PathsBuilder(
     }
 
     /**
-     * Collects the type of [fieldName] within the message [outputTypeName].
-     * Returns `true` if the message and field were found (regardless of whether collection was
-     * needed — primitive/enum fields inline and need no schema entry).
-     * Returns `false` if the message or field could not be resolved; the caller must then fall
-     * back to collecting [outputTypeName] directly, mirroring the fallback in [inferResponses].
+     * Looks up [fieldName] (by proto name or JSON name) in the message identified by [typeName]
+     * and, if the field is message-typed, collects it.
+     *
+     * Returns `true` when the message and field were both found (regardless of whether collection
+     * was needed — primitive/enum fields inline and require no schema entry).
+     * Returns `false` when the message or field cannot be resolved; callers should treat this as
+     * a misconfigured annotation and emit a compile error.
      */
-    private fun collectResponseBodyFieldType(
-        outputTypeName: String,
+    private fun collectBodyFieldType(
+        typeName: String,
         fieldName: String,
     ): Boolean {
-        val msg = ctx.messageIndex.find(outputTypeName) ?: return false
-        val field = msg.proto.fieldList
-            .find { it.name == fieldName || it.jsonName == fieldName } ?: return false
-        if (field.type == DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE) {
-            collector.collect(field.typeName)
-        }
-        return true
-    }
-
-    /**
-     * Collects the type of [fieldName] within the request message [inputTypeName].
-     * Returns `true` if the message and field were found (primitive/enum fields inline and need
-     * no schema entry).
-     * Returns `false` if the message or field could not be resolved; the caller should then emit
-     * a compile error.
-     */
-    private fun collectRequestBodyFieldType(
-        inputTypeName: String,
-        fieldName: String,
-    ): Boolean {
-        val msg = ctx.messageIndex.find(inputTypeName) ?: return false
+        val msg = ctx.messageIndex.find(typeName) ?: return false
         val field = msg.proto.fieldList
             .find { it.name == fieldName || it.jsonName == fieldName } ?: return false
         if (field.type == DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE) {

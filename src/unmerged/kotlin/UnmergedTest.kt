@@ -10,6 +10,7 @@ import io.kotest.assertions.withClue
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.datatest.withData
 import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import java.io.File
@@ -26,10 +27,6 @@ class UnmergedTest :
         }.compile()
         val mapper = ObjectMapper()
 
-        response.fileList.forEach { file ->
-            File("/Users/brian.carr/scm/github/hotelengine/protoc-gen-openapi/src/unmerged/resources/${file.name}").writeText(file.content)
-        }
-
         val oasSchema by lazy {
             SchemaRegistry.withDefaultDialect(SpecificationVersion.DRAFT_2020_12) {
                 it.schemaIdResolvers {
@@ -40,6 +37,16 @@ class UnmergedTest :
                 }
             }
                 .getSchema(SchemaLocation.of("https://spec.openapis.org/oas/3.1/schema-base/2022-10-07"))
+        }
+
+        val expectedFiles = listOf(
+            "engine.protoc.openapi.example.unmerged.DooDadService.openapi.json",
+            "engine.protoc.openapi.example.unmerged.openapi.json",
+            "engine.protoc.openapi.example.unmerged.SecondaryService.openapi.json",
+        )
+
+        test("the right files were generated") {
+            response.fileList.map { it.name } shouldContainExactlyInAnyOrder expectedFiles
         }
 
         withData<PluginProtos.CodeGeneratorResponse.File>({ "validate reference: " + it.name }, response.fileList) { file ->

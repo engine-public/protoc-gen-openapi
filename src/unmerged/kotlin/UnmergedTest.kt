@@ -56,9 +56,6 @@ class UnmergedTest :
             }.shouldBeEmpty()
         }
 
-        test("validate reference file") {
-        }
-
         test("has no validation errors") {
             response.hasError() shouldBe false
             response.error shouldBe ""

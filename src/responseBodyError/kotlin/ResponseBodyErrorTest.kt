@@ -1,9 +1,9 @@
 import com.engine.protoc.openapi.ProtocGenOpenAPI
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
-import io.kotest.matchers.nulls.shouldNotBeNull
 
 /**
  * Verifies that `response_body` or `body` annotations whose field name does not exist on the

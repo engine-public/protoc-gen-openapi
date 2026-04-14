@@ -74,35 +74,49 @@ internal class PathsBuilder(
         val responseBodyField = httpRule.responseBody.takeIf { it.isNotEmpty() }
 
         // Always collect the output type — it is an API entity that clients receive.
+        // When response_body names a field, we collect that field's type instead of the wrapper.
+        // If the field cannot be resolved the annotation is misconfigured; fail loudly so the
+        // developer gets a clear error rather than a silently invalid spec.
         if (responseBodyField != null) {
-            collectResponseBodyFieldType(outputTypeName, responseBodyField)
+            if (!collectResponseBodyFieldType(outputTypeName, responseBodyField)) {
+                val outputSimpleName = ctx.messageIndex.simpleNameOf(outputTypeName)
+                throw IllegalArgumentException(
+                    "response_body field '$responseBodyField' not found in $outputSimpleName",
+                )
+            }
         } else {
             collector.collect(outputTypeName)
         }
 
-        // Only collect the input type as a component schema when it will actually be
-        // referenced as a named $ref in the OpenAPI output.  This happens in exactly one
-        // case: when the HTTP binding has body == "*" AND no explicit `requestBody`
-        // annotation is present, causing `inferRequestBody()` to emit a $ref to the input
-        // type.
-        //
-        // In all other cases the input type should be suppressed:
+        // Collect schema types for the request body, mirroring what the schema-emission
+        // phase will actually $ref.
         //
         //   body == ""  — The input message is a pure parameter bag; its fields become
-        //                 path/query/header parameters.  It has no presence in the REST API
-        //                 surface and should not appear as a component schema.
+        //                 path/query/header parameters.  No body schema is emitted, so
+        //                 nothing needs to be collected.
         //
         //   body == "*" with explicit requestBody annotation — The annotation provides its
-        //                 own schema (possibly referencing a different type entirely), so the
-        //                 input message is again just a parameter carrier and is not $ref'd.
+        //                 own schema, so the input message itself is not $ref'd.  Types
+        //                 referenced via proto_message_ref in the annotation are handled by
+        //                 collectFromSchema at the annotation-processing site.
         //
-        //   body == "<field>" — Only the named field's type ends up in the request body, not
-        //                 the input message itself.  The message index is consulted for field
-        //                 lookup independently of the collector, so skipping collect() here
-        //                 is safe and prevents the wrapper from leaking into schemas.
+        //   body == "*" without explicit requestBody annotation — inferRequestBody() emits a
+        //                 $ref to the full input type, so we must collect it.
+        //
+        //   body == "<field>" — inferRequestBodyField() emits a $ref to the named field's
+        //                 message type (if it is a message), so we must collect that type.
+        //                 If the field cannot be resolved the annotation is misconfigured;
+        //                 fail loudly rather than silently emitting an empty or dangling schema.
         val hasExplicitRequestBody = annotation?.hasRequestBody() == true
         if (binding.body == "*" && !hasExplicitRequestBody) {
             collector.collect(inputTypeName)
+        } else if (binding.body.isNotEmpty() && binding.body != "*" && !hasExplicitRequestBody) {
+            if (!collectRequestBodyFieldType(inputTypeName, binding.body)) {
+                val inputSimpleName = ctx.messageIndex.simpleNameOf(inputTypeName)
+                throw IllegalArgumentException(
+                    "body field '${binding.body}' not found in $inputSimpleName",
+                )
+            }
         }
 
         val node = ctx.obj()
@@ -389,16 +403,44 @@ internal class PathsBuilder(
         return responses
     }
 
+    /**
+     * Collects the type of [fieldName] within the message [outputTypeName].
+     * Returns `true` if the message and field were found (regardless of whether collection was
+     * needed — primitive/enum fields inline and need no schema entry).
+     * Returns `false` if the message or field could not be resolved; the caller must then fall
+     * back to collecting [outputTypeName] directly, mirroring the fallback in [inferResponses].
+     */
     private fun collectResponseBodyFieldType(
         outputTypeName: String,
         fieldName: String,
-    ) {
-        val msg = ctx.messageIndex.find(outputTypeName) ?: return
+    ): Boolean {
+        val msg = ctx.messageIndex.find(outputTypeName) ?: return false
         val field = msg.proto.fieldList
-            .find { it.name == fieldName || it.jsonName == fieldName } ?: return
+            .find { it.name == fieldName || it.jsonName == fieldName } ?: return false
         if (field.type == DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE) {
             collector.collect(field.typeName)
         }
+        return true
+    }
+
+    /**
+     * Collects the type of [fieldName] within the request message [inputTypeName].
+     * Returns `true` if the message and field were found (primitive/enum fields inline and need
+     * no schema entry).
+     * Returns `false` if the message or field could not be resolved; the caller should then emit
+     * a compile error.
+     */
+    private fun collectRequestBodyFieldType(
+        inputTypeName: String,
+        fieldName: String,
+    ): Boolean {
+        val msg = ctx.messageIndex.find(inputTypeName) ?: return false
+        val field = msg.proto.fieldList
+            .find { it.name == fieldName || it.jsonName == fieldName } ?: return false
+        if (field.type == DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE) {
+            collector.collect(field.typeName)
+        }
+        return true
     }
 
     private fun responseBodyFieldSchema(

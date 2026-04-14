@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package engine.protoc.openapi.example.responsebodyerror;
+
+option java_package = "com.engine.protoc.openapi.example.responsebodyerror";
+option java_multiple_files = true;
+
+import "google/api/annotations.proto";
+
+// A service whose response_body annotation names a field that does not exist on
+// the output message.  This must produce a compile error.
+service WidgetService {
+    rpc GetWidget(GetWidgetRequest) returns (GetWidgetResponse) {
+        option (.google.api.http) = {
+            get: "/widgets/{id}"
+            response_body: "this_field_does_not_exist"
+        };
+    }
+}
+
+// A service whose body annotation names a field that does not exist on the
+// input message.  This must also produce a compile error.
+service GadgetService {
+    rpc CreateGadget(CreateGadgetRequest) returns (CreateGadgetResponse) {
+        option (.google.api.http) = {
+            post: "/gadgets"
+            body: "this_body_field_does_not_exist"
+        };
+    }
+}
+
+message GetWidgetRequest {
+    string id = 1;
+}
+
+message GetWidgetResponse {
+    string name = 1;
+}
+
+message CreateGadgetRequest {
+    string name = 1;
+}
+
+message CreateGadgetResponse {
+    string id = 1;
+}

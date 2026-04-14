@@ -194,6 +194,11 @@ testing {
                 implementation(testFixtures(project()))
             }
         }
+        register<JvmTestSuite>("responseBodyError") {
+            dependencies {
+                implementation(testFixtures(project()))
+            }
+        }
     }
 }
 

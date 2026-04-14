@@ -1,3 +1,4 @@
+import org.gradle.internal.extensions.stdlib.capitalized
 import org.gradle.kotlin.dsl.configure
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 import org.jlleitschuh.gradle.ktlint.KtlintExtension
@@ -5,6 +6,8 @@ import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 
 plugins {
     application
+    idea
+    `java-test-fixtures`
     kotlin("jvm")
     id("com.google.osdetector")
     id("com.google.protobuf")
@@ -27,10 +30,15 @@ description = "protoc compiler to turn gRPC services into openapi v3.1 specs"
 
 dependencies {
     implementation(projects.protocGenOpenapiModel)
-
-    implementation(libs.kotlin.reflect)
-    implementation(libs.protobuf.java)
     implementation(projects.protocUtils)
+
+    implementation(libs.jackson.databind)
+    implementation(libs.jackson.dataformat.yaml)
+    implementation(libs.kotlin.reflect)
+    implementation(libs.networknt.json.schema.validator)
+    implementation(libs.protobuf.java)
+
+    testFixturesImplementation(libs.jackson.databind)
 }
 
 allprojects {
@@ -139,6 +147,46 @@ allprojects {
     }
 }
 
+testing {
+    suites {
+        /*
+         * we want the compiler to generate multiple CodeGeneratorRequests so we can
+         * isolate different types of proto files to be compiled in a single session.
+         * this block configures them all...
+         */
+        withType<JvmTestSuite> {
+            useJUnitJupiter()
+            dependencies {
+                implementation(project())
+
+                // Explicitly extend the implementation configuration
+                configurations.named(sources.implementationConfigurationName) {
+                    extendsFrom(project.configurations.getByName(JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME))
+                }
+            }
+            val testSuiteName = this.name
+            tasks.named("process${testSuiteName.capitalized()}Resources", ProcessResources::class) {
+                dependsOn("generate${testSuiteName.capitalized()}Proto")
+                from(project.layout.buildDirectory.dir("generated/source/proto/$testSuiteName/recorder").map { it.file("code-generator-request.binpb") })
+            }
+        }
+
+        /*
+         * then one line here per protoc compilation run...
+         */
+        register<JvmTestSuite>("petstore") {
+            dependencies {
+                implementation(testFixtures(project()))
+            }
+        }
+        register<JvmTestSuite>("complete") {
+            dependencies {
+                implementation(testFixtures(project()))
+            }
+        }
+    }
+}
+
 application {
     mainClass.set("com.engine.protoc.openapi.MainKt")
 }
@@ -148,7 +196,7 @@ graalvmNative {
     binaries {
         named("main") {
             imageName = "${project.name}-${osdetector.arch}"
-            mainClass = "com.engine.protoc.openapi.MainKt"
+            mainClass = application.mainClass
             sharedLibrary = false
             verbose = true
             resources.autodetect()
@@ -177,10 +225,6 @@ graalvmNative {
     }
 }
 
-val processTestResources = tasks.named("processTestResources", ProcessResources::class) {
-    from(project.layout.buildDirectory.dir("generated/source/proto/test/recorder").map { it.file("code-generator-request.binpb") })
-}
-
 protobuf {
     protoc {
         artifact = tools.protoc.compiler.get().toString()
@@ -196,14 +240,29 @@ protobuf {
                 .asFile
                 .absolutePath
         }
+//        create("openapi") {
+//            path = project
+//                .layout
+//                .buildDirectory
+//                .map { it.dir("native/nativeCompile").file("${project.name}-${osdetector.arch}") }
+//                .get()
+//                .asFile
+//                .absolutePath
+//        }
     }
     generateProtoTasks {
         all().all {
-            if (isTest) {
+            /*
+             * Matches all proto tasks except the main generateProto... unfortunately,
+             * the protobuf plugin doesn't recognize testsuites as "test" tasks, so
+             * isTest doesn't work.
+             */
+            if (name == "generate${this.sourceSet.name.capitalized()}Proto") {
                 dependsOn(":protoc-utils-recorder:nativeCompile")
-                processTestResources.configure { dependsOn(this@all) }
+//                dependsOn(":nativeCompile")
                 plugins {
                     create("recorder")
+//                    create("openapi")
                 }
             }
         }

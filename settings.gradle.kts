@@ -21,12 +21,17 @@ dependencyResolutionManagement {
 
     versionCatalogs {
         create("libs") {
+            val jackson = version("jackson", "2.21.2")
             val kotlin = version("kotlin", kotlinVersion)
+            val networknt = version("networknt", "3.0.1")
             val protobuf = version("protobuf", protobuf)
             val slf4j = version("slf4j", "2.0.17")
 
-            library("kotlin.reflect", "org.jetbrains.kotlin", "kotlin-reflect").versionRef(kotlin)
             library("google.api.grpc.googleCommonProtos", "com.google.api.grpc", "proto-google-common-protos").version("2.22.0")
+            library("jackson.databind", "com.fasterxml.jackson.core", "jackson-databind").versionRef(jackson)
+            library("jackson.dataformat.yaml", "com.fasterxml.jackson.dataformat", "jackson-dataformat-yaml").versionRef(jackson)
+            library("kotlin.reflect", "org.jetbrains.kotlin", "kotlin-reflect").versionRef(kotlin)
+            library("networknt.json.schema.validator", "com.networknt", "json-schema-validator").versionRef(networknt)
             library("protobuf.java", "com.google.protobuf", "protobuf-java").versionRef(protobuf)
             library("slf4j.api", "org.slf4j", "slf4j-api").versionRef(slf4j)
         }

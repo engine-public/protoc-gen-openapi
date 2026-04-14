@@ -1,12 +1,12 @@
 package com.engine.protoc.openapi
 
+import com.engine.protoc.openapi.compile.Compiler
 import com.engine.protoc.util.compiler.CodeGeneratorRequestWrapper
 import com.engine.protoc.util.compiler.Parameters
 import com.engine.protoc.util.extensions.wrap
 import com.google.api.AnnotationsProto
 import com.google.protobuf.ExtensionRegistry
 import com.google.protobuf.compiler.PluginProtos
-import engine.protoc.openapi.Annotations
 import java.io.InputStream
 
 public class ProtocGenOpenAPI(
@@ -19,7 +19,21 @@ public class ProtocGenOpenAPI(
      */
     public data class Options(
         val merge: Boolean,
-        val caseStrategy: CaseStrategy,
+//        val caseStrategy: CaseStrategy,
+        /**
+         * Validates the output against the official OAS 3.1.1 schema.
+         * Please note, some features described in the OAS 3.1 documentation produces
+         * OAS files that do not pass validation of the spec.
+         *
+         * Known "invalid" features include:
+         * * variables in URI references
+         *   OpenAPI allows you to specify a variable for inclusion of a URI.
+         *   For example, `https://{region}.api.example.com`.
+         *   However, the OAS schema document requires the URI fields to e a valid
+         *   RFC 3986 URI-reference, which may not contain curly-braces in the host.
+         */
+        val validateOutput: Boolean,
+//        val outputFormat: OutputFormat,
     ) {
         public enum class CaseStrategy {
             UNMODIFIED,
@@ -27,9 +41,17 @@ public class ProtocGenOpenAPI(
             SNAKE_CASE,
         }
 
+//        public enum class OutputFormat {
+//            JSON,
+//            YAML,
+//        }
+
         public class Builder private constructor(parameters: Parameters) {
             public var merge: Boolean = parameters.get<Boolean>("merge") ?: false
-            public var caseStrategy: CaseStrategy = parameters.get<CaseStrategy>("caseStrategy") ?: CaseStrategy.UNMODIFIED
+
+//            public var caseStrategy: CaseStrategy = parameters.get<CaseStrategy>("caseStrategy") ?: CaseStrategy.UNMODIFIED
+            public var validateOutput: Boolean = true
+//            public var outputFormat: OutputFormat = parameters.get<OutputFormat>("outputFormat") ?: OutputFormat.JSON
 
             public companion object {
                 public fun from(parameters: Parameters): Builder = Builder(parameters)
@@ -37,8 +59,10 @@ public class ProtocGenOpenAPI(
 
             public fun build(): Options =
                 Options(
-                    merge,
-                    caseStrategy,
+                    merge = merge,
+//                    caseStrategy,
+                    validateOutput = validateOutput,
+//                    outputFormat,
                 )
         }
     }
@@ -63,15 +87,5 @@ public class ProtocGenOpenAPI(
         }
     }
 
-    public fun compile(): PluginProtos.CodeGeneratorResponse {
-        // if requested, record the request
-        return PluginProtos.CodeGeneratorResponse.newBuilder().apply {
-            supportedFeatures = PluginProtos.CodeGeneratorResponse.Feature.FEATURE_PROTO3_OPTIONAL.number.toLong()
-            // TODO
-            //  look at every file that needs to be compiled
-            //  1. filter out any that have no services
-            //  2. transform that file into an openapi spec, if possible
-            //  3. spit out the openapi yaml for any files that survived
-        }.build()
-    }
+    public fun compile(): PluginProtos.CodeGeneratorResponse = Compiler(request, options).compile()
 }

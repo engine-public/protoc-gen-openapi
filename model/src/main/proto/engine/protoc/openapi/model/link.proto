@@ -2,6 +2,9 @@ syntax = "proto3";
 
 package engine.protoc.openapi.model;
 
+option java_package = "com.engine.protoc.openapi.model";
+option java_multiple_files = true;
+
 import "engine/protoc/openapi/model/server.proto";
 import "google/protobuf/any.proto";
 
@@ -23,8 +26,9 @@ message Link {
     // This field is mutually exclusive of the `operationRef` field.
     string operation_id = 2;
 
-    // TODO
-    string operation_proto_ref = 3;
+    // A fully-qualified proto RPC reference identifying the linked operation, in the form
+    // `my.package.MyService#MyMethod`. Resolved to an operation path at compile time.
+    string proto_rpc_ref = 3;
   }
 
   // A map representing parameters to pass to an operation as specified with `operationId` or identified via `operationRef`.

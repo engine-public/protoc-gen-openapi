@@ -2,6 +2,9 @@ syntax = "proto3";
 
 package engine.protoc.openapi.model;
 
+option java_package = "com.engine.protoc.openapi.model";
+option java_multiple_files = true;
+
 // A simple object to allow referencing other components in the OpenAPI Description, internally and externally.
 //
 // The `$ref` string value contains a URI [RFC3986](https://tools.ietf.org/html/rfc3986), which identifies the value being referenced.
@@ -15,12 +18,11 @@ message Reference {
     // This MUST be in the form of a URI.
     string uri_ref = 1;
 
-    // A fully qualified service and method name used to resolve a reference from the protoc
-    // compilation context, for example:
-    // `engine.shop.lodging.service.v1.LodgingShoppingService#FindBestOffers`
+    // A fully-qualified proto RPC reference in the form `my.package.MyService#MyMethod`,
+    // resolved to an operation path at compile time.
     // The referenced RPC must exist, have a `(google.api.http)` option, and be present in the
     // set of files passed to the current protoc invocation.
-    string proto_ref = 2;
+    string proto_rpc_ref = 2;
   }
 
   // A short summary which by default SHOULD override that of the referenced component.

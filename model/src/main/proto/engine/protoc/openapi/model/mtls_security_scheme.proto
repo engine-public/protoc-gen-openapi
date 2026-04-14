@@ -2,6 +2,9 @@ syntax = "proto3";
 
 package engine.protoc.openapi.model;
 
+option java_package = "com.engine.protoc.openapi.model";
+option java_multiple_files = true;
+
 // Mutual TLS security scheme. Added in OpenAPI 3.1.0 (not present in 3.0).
 //
 // This scheme type requires no additional configuration fields beyond the scheme `type`; the

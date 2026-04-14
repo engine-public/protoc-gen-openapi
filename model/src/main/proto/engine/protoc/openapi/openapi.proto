@@ -2,6 +2,10 @@ syntax = "proto3";
 
 package engine.protoc.openapi;
 
+option java_package = "com.engine.protoc.openapi";
+option java_multiple_files = true;
+option java_outer_classname = "OpenAPIProto";
+
 import "engine/protoc/openapi/model/components.proto";
 import "engine/protoc/openapi/model/external_documentation.proto";
 import "engine/protoc/openapi/model/info.proto";
@@ -10,6 +14,7 @@ import "engine/protoc/openapi/model/path_item_or_reference.proto";
 import "engine/protoc/openapi/model/security_requirement.proto";
 import "engine/protoc/openapi/model/server.proto";
 import "engine/protoc/openapi/model/tag.proto";
+import "google/protobuf/struct.proto";
 
 // This is the root object of the OpenAPI Description.
 // @See https://swagger.io/specification/#openapi-object
@@ -67,4 +72,16 @@ message OpenAPI {
 
   // Additional external documentation.
   .engine.protoc.openapi.model.ExternalDocumentation external_docs = 10;
+
+  // Extensions (also referred to as specification extensions or vendor extensions) are custom
+  // properties that start with x-, such as x-logo. These are used to add extra information or
+  // functionality that the OpenAPI standard doesn't include by default. For example, many tools
+  // including Amazon API Gateway, ReDoc, APIMatic, and Fern use extensions to include details
+  // specific to their products.
+  // Extensions are supported on the root level of the API spec and in the following places:
+  //   info section, paths section, individual paths and operations, operation parameters,
+  //   responses, tags, and security schemes.
+  // The extension value can be a primitive, an array, an object or null. If the value is an
+  // object or array of objects, the object's property names do not need to start with x-.
+  map<string, google.protobuf.Value> extensions = 11;
 }

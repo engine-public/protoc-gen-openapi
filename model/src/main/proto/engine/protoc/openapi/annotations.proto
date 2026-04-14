@@ -2,6 +2,9 @@ syntax = "proto3";
 
 package engine.protoc.openapi;
 
+option java_package = "com.engine.protoc.openapi";
+option java_multiple_files = true;
+
 import "engine/protoc/openapi/openapi.proto";
 import "engine/protoc/openapi/operation.proto";
 import "engine/protoc/openapi/schema.proto";

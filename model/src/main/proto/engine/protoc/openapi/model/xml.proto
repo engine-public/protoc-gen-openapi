@@ -2,6 +2,10 @@ syntax = "proto3";
 
 package engine.protoc.openapi.model;
 
+option java_package = "com.engine.protoc.openapi.model";
+option java_multiple_files = true;
+option java_outer_classname = "XMLProto";
+
 // A metadata object that allows for more fine-tuned XML model definitions.
 //
 // When using arrays, XML element names are not inferred (for singular/plural forms) and the `name` field SHOULD be used to add that information.

@@ -2,6 +2,10 @@ syntax = "proto3";
 
 package engine.protoc.openapi.model;
 
+option java_package = "com.engine.protoc.openapi.model";
+option java_multiple_files = true;
+option java_outer_classname = "OAuthFlowsProto";
+
 import "engine/protoc/openapi/model/oauth_flow.proto";
 
 // Allows configuration of the supported OAuth Flows.

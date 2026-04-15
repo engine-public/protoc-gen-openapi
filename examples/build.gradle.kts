@@ -49,6 +49,7 @@ testing {
         register<JvmTestSuite>("complete")
         register<JvmTestSuite>("merged")
         register<JvmTestSuite>("unmerged")
+        register<JvmTestSuite>("responseBodyError")
     }
 }
 

@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.dsl.ExplicitApiMode
 
 plugins {
-    id("com.google.protobuf")
+    alias(libs.plugins.protobuf)
 }
 
 description = "OpenAPI annotations for protobuf Messages, Enums, Services, and RPCs"

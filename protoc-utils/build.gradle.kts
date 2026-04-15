@@ -1,5 +1,5 @@
 plugins {
-    id("com.google.protobuf")
+    alias(libs.plugins.protobuf)
 }
 
 description = "Utilities to assist in the building of a protoc plugin."
@@ -7,11 +7,10 @@ description = "Utilities to assist in the building of a protoc plugin."
 dependencies {
     api(libs.protobuf.java)
     testImplementation(libs.protobuf.java)
-    testImplementation(testLibs.kotest.framework.datatest)
 }
 
 val processTestResources = tasks.named("processTestResources", ProcessResources::class) {
-    from(project.layout.buildDirectory.dir("generated/source/proto/test/recorder").map { it.file("code-generator-request.binpb") })
+    from(project.layout.buildDirectory.dir("generated/sources/proto/test/recorder").map { it.file("code-generator-request.binpb") })
 }
 
 protobuf {

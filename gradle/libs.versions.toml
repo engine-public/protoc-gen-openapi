@@ -1,0 +1,28 @@
+[versions]
+jackson = "2.21.2"
+kotlin = "2.3.20"
+networknt = "3.0.1"
+protobuf = "4.34.1"
+google-common-protos = "2.66.0"
+
+
+# plugin versions
+google-osdetector-plugin = "1.7.3"
+google-protobuf-plugin = "0.9.6"
+graalvm-native-plugin = "0.11.0"
+jlleitschuh-ktlint-plugin = "14.2.0"
+
+[libraries]
+google-api-grpc-googleCommonProtos = { group = "com.google.api.grpc", name = "proto-google-common-protos", version.ref = "google-common-protos" }
+jackson-databind = { group = "com.fasterxml.jackson.core", name = "jackson-databind", version.ref = "jackson" }
+jackson-dataformat-yaml = { group = "com.fasterxml.jackson.dataformat", name = "jackson-dataformat-yaml", version.ref = "jackson" }
+kotlin-reflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect", version.ref = "kotlin" }
+networknt-jsonSchemaValidator = { group = "com.networknt", name = "json-schema-validator", version.ref = "networknt" }
+protobuf-java = { group = "com.google.protobuf", name = "protobuf-java", version.ref = "protobuf" }
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+osdetector = { id = "com.google.osdetector", version.ref = "google-osdetector-plugin" }
+protobuf = { id = "com.google.protobuf", version.ref = "google-protobuf-plugin" }
+graalvm-native = { id = "org.graalvm.buildtools.native", version.ref = "graalvm-native-plugin" }
+ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "jlleitschuh-ktlint-plugin" }

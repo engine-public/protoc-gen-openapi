@@ -52,7 +52,7 @@ class MergedTest :
             response.error.shouldBe("")
         }
 
-        test("matches petstore.openapi.json") {
+        test("matches reference OAS spec") {
             val expected = YAMLMapper().readTree(expected)
             assertSoftly {
                 collectJsonDiffs(

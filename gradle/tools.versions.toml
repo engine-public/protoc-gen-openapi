@@ -1,0 +1,6 @@
+[versions]
+protobuf = "4.34.1"
+
+[libraries]
+protoc-compiler = { group = "com.google.protobuf", name = "protoc", version.ref = "protobuf" }
+protoc-gen-doc = { group = "io.github.pseudomuto", name = "protoc-gen-doc", version = "1.5.1" }

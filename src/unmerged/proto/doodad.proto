@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package engine.protoc.openapi.example.unmerged;
+
+option java_package = "com.engine.protoc.openapi.example.unmerged";
+option java_outer_classname = "DooDadProto";
+option java_multiple_files = true;
+
+import "google/api/annotations.proto";
+import "engine/protoc/openapi/annotations.proto";
+
+// CRUD Operations on DooDads
+service DooDadService {
+    option (.engine.protoc.openapi.service) = {
+        info {
+            version: "22.33.44"
+        }
+    };
+
+    // List all DooDads in the system
+    rpc ListDooDads(ListDooDadRequest) returns (ListDooDadResponse) {
+        option (.google.api.http) = {
+            get: "/doodad"
+            response_body: "doodads"
+        };
+    };
+
+    // Retrieve a single DooDad by its id
+    rpc GetDooDad(GetDooDadRequest) returns (DooDad) {
+        option (.google.api.http) = {
+            get: "/doodad/{doodad_id}"
+        };
+    }
+}
+
+// A canonical representation of an Umbrella Corporation Doo-Dad
+message DooDad {
+    // The unique identifier of this DooDad
+    int64 id = 1;
+
+    // If true, this DooDad is, in fact, also a DooDad
+    bool is_doodad = 2;
+}
+
+message ListDooDadRequest {
+}
+
+message ListDooDadResponse {
+    repeated DooDad doodads = 1;
+}
+
+message GetDooDadRequest {
+    int64 doodad_id = 1;
+}

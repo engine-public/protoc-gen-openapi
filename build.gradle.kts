@@ -184,6 +184,21 @@ testing {
                 implementation(testFixtures(project()))
             }
         }
+        register<JvmTestSuite>("merged") {
+            dependencies {
+                implementation(testFixtures(project()))
+            }
+        }
+        register<JvmTestSuite>("unmerged") {
+            dependencies {
+                implementation(testFixtures(project()))
+            }
+        }
+        register<JvmTestSuite>("responseBodyError") {
+            dependencies {
+                implementation(testFixtures(project()))
+            }
+        }
     }
 }
 

@@ -11,23 +11,23 @@ import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import kotlin.math.exp
+import java.io.File
 
-class PetStoreTest :
+class MergedTest :
     FunSpec({
 
         assertSoftly = true
 
-        val request = PetStoreTest::class.java.getResourceAsStream("/code-generator-request.binpb").shouldNotBeNull()
+        val request = MergedTest::class.java.getResourceAsStream("/code-generator-request.binpb").shouldNotBeNull()
         val response = ProtocGenOpenAPI.from(request) {
-            merge = false
+            merge = true
             validateOutput = true
         }.compile()
-        val generatedFile = response.fileList.find { it.name == "engine.protoc.openapi.example.petstore.PetService.openapi.json" }.shouldNotBeNull()
+        val generatedFile = response.fileList.find { it.name == "engine.protoc.openapi.example.merged.openapi.json" }.shouldNotBeNull()
         val mapper = ObjectMapper()
         val json = mapper.readTree(generatedFile.content)
 
-        val expected = PetStoreTest::class.java.getResourceAsStream("swagger-api.petstore.openapi.yaml").shouldNotBeNull().reader().readText()
+        val expected = MergedTest::class.java.getResourceAsStream("merged.openapi.json").shouldNotBeNull().reader().readText()
 
         test("validate reference file") {
             val oasSchema by lazy {

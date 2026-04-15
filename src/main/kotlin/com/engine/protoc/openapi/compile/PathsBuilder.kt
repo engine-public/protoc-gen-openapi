@@ -68,32 +68,55 @@ internal class PathsBuilder(
         val inputTypeName = method.proto.inputType
         val outputTypeName = method.proto.outputType
 
-        // Always collect the output type — it is an API entity that clients receive.
-        collector.collect(outputTypeName)
+        // When response_body names a field, the HTTP response carries that field's value directly
+        // rather than the full output message.  The wrapper message is not referenced in the
+        // output schema, so we collect the field's type instead.
+        val responseBodyField = httpRule.responseBody.takeIf { it.isNotEmpty() }
 
-        // Only collect the input type as a component schema when it will actually be
-        // referenced as a named $ref in the OpenAPI output.  This happens in exactly one
-        // case: when the HTTP binding has body == "*" AND no explicit `requestBody`
-        // annotation is present, causing `inferRequestBody()` to emit a $ref to the input
-        // type.
-        //
-        // In all other cases the input type should be suppressed:
+        // Always collect the output type — it is an API entity that clients receive.
+        // When response_body names a field, we collect that field's type instead of the wrapper.
+        // If the field cannot be resolved the annotation is misconfigured; fail loudly so the
+        // developer gets a clear error rather than a silently invalid spec.
+        if (responseBodyField != null) {
+            if (!collectBodyFieldType(outputTypeName, responseBodyField)) {
+                val outputSimpleName = ctx.messageIndex.simpleNameOf(outputTypeName)
+                throw IllegalArgumentException(
+                    "response_body field '$responseBodyField' not found in $outputSimpleName",
+                )
+            }
+        } else {
+            collector.collect(outputTypeName)
+        }
+
+        // Collect schema types for the request body, mirroring what the schema-emission
+        // phase will actually $ref.
         //
         //   body == ""  — The input message is a pure parameter bag; its fields become
-        //                 path/query/header parameters.  It has no presence in the REST API
-        //                 surface and should not appear as a component schema.
+        //                 path/query/header parameters.  No body schema is emitted, so
+        //                 nothing needs to be collected.
         //
         //   body == "*" with explicit requestBody annotation — The annotation provides its
-        //                 own schema (possibly referencing a different type entirely), so the
-        //                 input message is again just a parameter carrier and is not $ref'd.
+        //                 own schema, so the input message itself is not $ref'd.  Types
+        //                 referenced via proto_message_ref in the annotation are handled by
+        //                 collectFromSchema at the annotation-processing site.
         //
-        //   body == "<field>" — Only the named field's type ends up in the request body, not
-        //                 the input message itself.  The message index is consulted for field
-        //                 lookup independently of the collector, so skipping collect() here
-        //                 is safe and prevents the wrapper from leaking into schemas.
+        //   body == "*" without explicit requestBody annotation — inferRequestBody() emits a
+        //                 $ref to the full input type, so we must collect it.
+        //
+        //   body == "<field>" — inferRequestBodyField() emits a $ref to the named field's
+        //                 message type (if it is a message), so we must collect that type.
+        //                 If the field cannot be resolved the annotation is misconfigured;
+        //                 fail loudly rather than silently emitting an empty or dangling schema.
         val hasExplicitRequestBody = annotation?.hasRequestBody() == true
         if (binding.body == "*" && !hasExplicitRequestBody) {
             collector.collect(inputTypeName)
+        } else if (binding.body.isNotEmpty() && binding.body != "*" && !hasExplicitRequestBody) {
+            if (!collectBodyFieldType(inputTypeName, binding.body)) {
+                val inputSimpleName = ctx.messageIndex.simpleNameOf(inputTypeName)
+                throw IllegalArgumentException(
+                    "body field '${binding.body}' not found in $inputSimpleName",
+                )
+            }
         }
 
         val node = ctx.obj()
@@ -176,7 +199,7 @@ internal class PathsBuilder(
         if (annotation?.hasResponses() == true) {
             node.set<JsonNode>("responses", annotation.responses.toJson(ctx))
         } else {
-            node.set<JsonNode>("responses", inferResponses(outputTypeName))
+            node.set<JsonNode>("responses", inferResponses(outputTypeName, responseBodyField))
         }
 
         // ---- Security / deprecated --------------------------------------
@@ -357,17 +380,59 @@ internal class PathsBuilder(
 
     // ---- Response inference ---------------------------------------------
 
-    private fun inferResponses(outputTypeName: String): ObjectNode {
+    private fun inferResponses(
+        outputTypeName: String,
+        responseBodyField: String? = null,
+    ): ObjectNode {
         val responses = ctx.obj()
         val response = ctx.obj()
         response.put("description", "OK")
         if (outputTypeName.isNotEmpty() && outputTypeName != ".google.protobuf.Empty") {
             val content = ctx.obj()
-            content.set<JsonNode>("application/json", schemaMediaType(outputTypeName))
+            val mediaType = if (responseBodyField != null) {
+                responseBodyFieldSchema(outputTypeName, responseBodyField)
+                    ?.let { schema -> ctx.obj().also { it.set<JsonNode>("schema", schema) } }
+                    ?: schemaMediaType(outputTypeName)
+            } else {
+                schemaMediaType(outputTypeName)
+            }
+            content.set<JsonNode>("application/json", mediaType)
             response.set<JsonNode>("content", content)
         }
         responses.set<JsonNode>("200", response)
         return responses
+    }
+
+    /**
+     * Looks up [fieldName] (by proto name or JSON name) in the message identified by [typeName]
+     * and, if the field is message-typed, collects it.
+     *
+     * Returns `true` when the message and field were both found (regardless of whether collection
+     * was needed — primitive/enum fields inline and require no schema entry).
+     * Returns `false` when the message or field cannot be resolved; callers should treat this as
+     * a misconfigured annotation and emit a compile error.
+     */
+    private fun collectBodyFieldType(
+        typeName: String,
+        fieldName: String,
+    ): Boolean {
+        val msg = ctx.messageIndex.find(typeName) ?: return false
+        val field = msg.proto.fieldList
+            .find { it.name == fieldName || it.jsonName == fieldName } ?: return false
+        if (field.type == DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE) {
+            collector.collect(field.typeName)
+        }
+        return true
+    }
+
+    private fun responseBodyFieldSchema(
+        outputTypeName: String,
+        fieldName: String,
+    ): ObjectNode? {
+        val msg = ctx.messageIndex.find(outputTypeName) ?: return null
+        val field = msg.proto.fieldList
+            .find { it.name == fieldName || it.jsonName == fieldName } ?: return null
+        return fieldTypeSchema(field)
     }
 
     // ---- Field type → JSON Schema ----------------------------------------

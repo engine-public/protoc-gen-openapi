@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package engine.protoc.openapi.example.merged;
+
+option java_package = "com.engine.protoc.openapi.example.merged";
+option java_multiple_files = true;
+
+import "engine/protoc/openapi/annotations.proto";
+
+option (.engine.protoc.openapi.file) = {
+    info: {
+        title: "Example: Merged Proto Services"
+        summary: "Shows multiple Protobuf services merged into a single OpenAPI spec"
+        version: "1.2.3"
+    }
+    servers: {
+        url: "https://merged.example.com"
+    }
+};

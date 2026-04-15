@@ -27,10 +27,10 @@ class CompleteTest :
 
         val mapper = ObjectMapper()
         val generatedFile = response.fileList
-            .find { it.name == "sporting.goods.StorefrontService.openapi.json" }
+            .find { it.name == "engine.protoc.openapi.example.complete.StorefrontService.openapi.json" }
             .shouldNotBeNull()
         val doc: JsonNode = mapper.readTree(generatedFile.content)
-        val expected = CompleteTest::class.java.getResourceAsStream("sporting.goods.openapi.yaml").shouldNotBeNull().reader().readText()
+        val expected = CompleteTest::class.java.getResourceAsStream("engine.protoc.openapi.example.complete.StorefrontService.openapi.json").shouldNotBeNull().reader().readText()
 
         test("validate reference file") {
             val oasSchema by lazy {
@@ -706,7 +706,6 @@ class CompleteTest :
                 collectJsonDiffs(
                     expected,
                     doc,
-                    "$.openapi", // our compiler is 3.1.0, and the comp is 3.0.4, but this is intentional and not a problem
                 ).forEach { (path, exp, act) ->
                     withClue("at $path — expected: $exp, actual: $act") {
                         act shouldBe exp

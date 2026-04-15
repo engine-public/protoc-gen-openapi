@@ -45,9 +45,11 @@ dependencyResolutionManagement {
                 library(this, "io.kotest", "kotest-assertions-core").versionRef(kotest)
             }
 
-            library("kotest.framework.datatest", "io.kotest", "kotest-framework-datatest").versionRef(kotest)
+            val kfd = "kotest.framework.datatest".apply {
+                library(this, "io.kotest", "kotest-framework-datatest").versionRef(kotest)
+            }
 
-            bundle("kotest", listOf(krj5, kac))
+            bundle("kotest", listOf(krj5, kac, kfd))
         }
         create("tools") {
             val protobuf = version("protobuf", protobuf)

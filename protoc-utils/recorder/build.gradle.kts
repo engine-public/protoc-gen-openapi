@@ -1,7 +1,7 @@
 plugins {
     application
-    id("com.google.osdetector")
-    id("org.graalvm.buildtools.native")
+    alias(libs.plugins.osdetector)
+    alias(libs.plugins.graalvm.native)
 }
 
 dependencies {

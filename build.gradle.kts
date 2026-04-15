@@ -8,11 +8,11 @@ plugins {
     application
     idea
     `java-test-fixtures`
-    kotlin("jvm")
-    id("com.google.osdetector")
-    id("com.google.protobuf")
-    id("org.graalvm.buildtools.native")
-    id("org.jlleitschuh.gradle.ktlint")
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.osdetector)
+    alias(libs.plugins.protobuf)
+    alias(libs.plugins.graalvm.native)
+    alias(libs.plugins.ktlint)
 }
 
 fun calculateVersion(): String {
@@ -35,7 +35,7 @@ dependencies {
     implementation(libs.jackson.databind)
     implementation(libs.jackson.dataformat.yaml)
     implementation(libs.kotlin.reflect)
-    implementation(libs.networknt.json.schema.validator)
+    implementation(libs.networknt.jsonSchemaValidator)
     implementation(libs.protobuf.java)
 
     testFixturesImplementation(libs.jackson.databind)
@@ -167,7 +167,7 @@ testing {
             val testSuiteName = this.name
             tasks.named("process${testSuiteName.capitalized()}Resources", ProcessResources::class) {
                 dependsOn("generate${testSuiteName.capitalized()}Proto")
-                from(project.layout.buildDirectory.dir("generated/source/proto/$testSuiteName/recorder").map { it.file("code-generator-request.binpb") })
+                from(project.layout.buildDirectory.dir("generated/sources/proto/$testSuiteName/recorder").map { it.file("code-generator-request.binpb") })
             }
         }
 

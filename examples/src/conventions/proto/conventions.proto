@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+// Based on the helloworld example from the gRPC introduction.
+// Source: https://grpc.io/docs/what-is-grpc/introduction/
+package engine.protoc.openapi.example.conventions;
+
+option java_package = "com.engine.protoc.openapi.example.conventions";
+option java_multiple_files = true;
+
+import "google/api/annotations.proto";
+
+// The greeter service definition.
+service Greeter {
+    // Sends a greeting to the named person.
+    rpc SayHello(HelloRequest) returns (HelloReply) {
+        option (google.api.http) = {
+            get: "/hello/{name}"
+            response_body: "message"
+        };
+    }
+}
+
+// The request message containing the user's name.
+message HelloRequest {
+    string name = 1;
+}
+
+// The response message containing the greeting
+message HelloReply {
+    string message = 1;
+}

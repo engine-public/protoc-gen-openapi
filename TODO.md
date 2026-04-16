@@ -2,10 +2,17 @@
 - [x] look for uncovered compiler/model generate goofball proto for it
 - [x] fix packages for petstore and complete tests
 - [x] test merged and unmerged paths
-- [ ] generate oops-all-conventions.proto
-- [ ] generate new readme
-- [ ] double check caseStrategy?
-- [ ] implement namespacing component models
-- [ ] support implicit methods (see envoy docs)
+- [x] generate oops-all-conventions.proto
 - [ ] API version option with injection
-- [ ] tagging options
+- [ ] Support both yaml and json output, default json
+- [ ] implement namespacing component models
+- [ ] tagging options, especially on services
+- [envoy GrpcJsonTranscoder options](https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/filters/http/grpc_json_transcoder/v3/transcoder.proto)
+  - [ ] auto_mapping
+  - [ ] case_insensitive_enum_parsing
+- [envoy PrintOptions support options](https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/filters/http/grpc_json_transcoder/v3/transcoder.proto#envoy-v3-api-msg-extensions-filters-http-grpc-json-transcoder-v3-grpcjsontranscoder-printoptions)
+  - [ ] preserve_proto_field_names
+  - [ ] always_print_enums_as_ints
+  - [ ] stream_newline_delimited
+  - [ ] stream_sse_style_delimited
+- [ ] generate new readme

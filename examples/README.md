@@ -39,6 +39,10 @@ Demonstrates `merge = false` (per-service) mode: each service produces its own O
 
 An error-case test: verifies that `response_body` and `body` annotations whose field names do not exist on the corresponding message produce explicit compile errors rather than silently emitting a broken spec. Has no reference output files — it asserts that compilation fails and that the error message names the bad field.
 
+### [conventions](src/conventions/README.md)
+
+A minimal example based on the [helloworld Greeter service](https://grpc.io/docs/what-is-grpc/introduction/) from the gRPC introduction. Uses only `google.api.http` annotations — no engine annotations — to show the baseline conventions the plugin derives from plain HTTP binding rules: path parameter inference from URL templates, `response_body` field extraction, and service-derived `info` metadata.
+
 ## Adding a new example
 
 1. Create `src/<name>/proto/` with your `.proto` files.

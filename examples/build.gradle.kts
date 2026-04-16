@@ -50,6 +50,7 @@ testing {
         register<JvmTestSuite>("merged")
         register<JvmTestSuite>("unmerged")
         register<JvmTestSuite>("responseBodyError")
+        register<JvmTestSuite>("conventions")
     }
 }
 

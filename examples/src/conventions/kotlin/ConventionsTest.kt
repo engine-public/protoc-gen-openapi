@@ -33,12 +33,11 @@ class ConventionsTest :
                 .shouldNotBeNull()
         val json = mapper.readTree(generatedFile.content)
         val expected =
-                ConventionsTest::class.java
-                    .getResourceAsStream("/engine.protoc.openapi.example.conventions.Greeter.openapi.json")
-                    .shouldNotBeNull()
-                    .reader()
-                    .readText()
-
+            ConventionsTest::class.java
+                .getResourceAsStream("/engine.protoc.openapi.example.conventions.Greeter.openapi.json")
+                .shouldNotBeNull()
+                .reader()
+                .readText()
 
         test("validate reference file") {
             val oasSchema by lazy {
@@ -70,7 +69,7 @@ class ConventionsTest :
                     json,
                     // ignore the version, because no annotation is specified to provide
                     // version and the default version option is not utilized.
-                    "$.info.version"
+                    "$.info.version",
                 ).forEach { (path, exp, act) ->
                     withClue("at $path — expected: $exp, actual: $act") {
                         act shouldBe exp

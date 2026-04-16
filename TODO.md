@@ -3,7 +3,7 @@
 - [x] fix packages for petstore and complete tests
 - [x] test merged and unmerged paths
 - [x] generate oops-all-conventions.proto
-- [ ] API version option with injection
+- [x] API version option with injection
 - [ ] Support both yaml and json output, default json
 - [ ] implement namespacing component models
 - [ ] tagging options, especially on services

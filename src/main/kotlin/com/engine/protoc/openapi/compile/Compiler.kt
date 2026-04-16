@@ -30,8 +30,17 @@ import com.networknt.schema.SpecificationVersion
  *    turned into `components/schemas` entries.
  *
  * When [ProtocGenOpenAPI.Options.merge] is true the output is a single file covering all target
- * files.  When false each service produces its own output file; the annotation layering order is
- * file-level → service-derived attributes → service-level annotation.
+ * files.  When false each service produces its own output file.
+ *
+ * Priority layering for `info` fields in the unmerged path (lowest → highest):
+ *   1. Service-derived attributes — `info.title` from the service name, `info.description` from
+ *      its leading comment.
+ *   2. [ProtocGenOpenAPI.Options.version] — written to `info.version` as a global default.
+ *   3. File-level `engine.protoc.openapi.file` annotation — overwrites any keys it specifies.
+ *   4. Service-level `engine.protoc.openapi.service` annotation — highest priority; always wins.
+ *
+ * In the merged path the options version is applied before the annotation loop so that any
+ * file-level annotation can override it.
  *
  * The output file is named `<package>.<ServiceName>.openapi.json` when the compilation covers a
  * single service, or `<common-package-prefix>.openapi.json` when multiple services are merged.
@@ -66,6 +75,10 @@ internal class Compiler(
         val doc: ObjectNode = ctx.obj()
         doc.put("openapi", "3.1.0")
         doc.set<JsonNode>("paths", ctx.obj())
+
+        // Apply the options version before the annotation loop so that any file-level annotation
+        // that explicitly sets info.version will overwrite it (higher-priority layers win).
+        applyOptionsVersion(doc, ctx)
 
         for (file in targetFiles) {
             try {
@@ -136,6 +149,8 @@ internal class Compiler(
                         it.put("openapi", "3.1.0")
                         it.set<JsonNode>("paths", ctx.obj())
                     }
+                    // Apply options version before the annotation so the annotation can override it.
+                    applyOptionsVersion(doc, ctx)
                     fileAnnotation.mergeInto(doc, ctx)
                     val pkg = file.`package`?.value.orEmpty()
                     val fileName = if (pkg.isEmpty()) "openapi.json" else "$pkg.openapi.json"
@@ -157,10 +172,15 @@ internal class Compiler(
                     // Layer 1: attributes derived from the service itself (lowest priority)
                     applyServiceDerivedAttributes(doc, service, ctx)
 
-                    // Layer 2: file-level annotation overwrites derived values
+                    // Layer 2: options-provided version as a global default.
+                    // Applied after service-derived attributes (which never set info.version) and
+                    // before annotation layers so that annotations can override it.
+                    applyOptionsVersion(doc, ctx)
+
+                    // Layer 3: file-level annotation overwrites derived values
                     fileAnnotation?.mergeInto(doc, ctx)
 
-                    // Layer 3: explicit service-level annotation (highest priority)
+                    // Layer 4: explicit service-level annotation (highest priority)
                     service.options?.findExtension(Annotations.service)?.value
                         ?.mergeInto(doc, ctx)
 
@@ -259,6 +279,24 @@ internal class Compiler(
         service.name?.value?.let { infoNode.put("title", it) }
         service.location?.proto?.leadingComments?.trim()?.ifEmpty { null }
             ?.let { infoNode.put("description", it) }
+    }
+
+    /**
+     * Writes [ProtocGenOpenAPI.Options.version] into `doc.info.version` when the option is
+     * non-null.  This is always called before annotation layers so that any annotation that
+     * explicitly specifies `info.version` will overwrite the option value via [deepMerge].
+     *
+     * When the option is null this is a no-op; the resulting document will have no `info.version`
+     * unless an annotation supplies one.
+     */
+    private fun applyOptionsVersion(
+        doc: ObjectNode,
+        ctx: JsonContext,
+    ) {
+        val version = options.version ?: return
+        val infoNode = doc.get("info") as? ObjectNode
+            ?: ctx.obj().also { doc.set<JsonNode>("info", it) }
+        infoNode.put("version", version)
     }
 
     private fun Exception.detail(): String =

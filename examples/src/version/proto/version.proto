@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package engine.protoc.openapi.example.version;
+
+option java_package = "com.engine.protoc.openapi.example.version";
+option java_multiple_files = true;
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "engine/protoc/openapi/annotations.proto";
+
+// A service whose API version is pinned by an explicit service-level engine annotation.
+// Regardless of what options.version is set to, the annotation version always wins.
+service PinnedVersionService {
+    option (.engine.protoc.openapi.service) = {
+        info { version: "pinned-1.0.0" }
+    };
+
+    // Gets a widget by its identifier.
+    rpc DoIt(google.protobuf.Empty) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            get: "/DoIt"
+        };
+    }
+}
+
+// A service with no version annotation.
+// When options.version is set, the output receives that string as info.version.
+// When options.version is absent, the output has no info.version at all.
+service UnversionedService {
+    // Gets a gadget by its identifier.
+    rpc DoItAgain(google.protobuf.Empty) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            get: "/DoItAgain"
+        };
+    }
+}

@@ -18,8 +18,36 @@ public class ProtocGenOpenAPI(
      * Options that influence the compiler plugin
      */
     public data class Options(
+        /**
+         * When `true`, all target proto files are compiled into a single OpenAPI document.
+         * File-level annotations are merged left-to-right (later files overwrite earlier ones for
+         * conflicting keys), and every service's paths are combined into a shared `paths` object.
+         *
+         * When `false` (the default), each service produces its own output file named
+         * `<package>.<ServiceName>.openapi.json`.  File-level annotations are still applied to
+         * every service document they accompany, but services in different files are never merged
+         * together.
+         */
         val merge: Boolean,
-//        val caseStrategy: CaseStrategy,
+
+        /**
+         * A fallback API version string written to `info.version` of every generated document that
+         * does not already have a version supplied by an engine annotation.
+         *
+         * Priority (lowest to highest):
+         *   1. This option — applied before any annotation layer.
+         *   2. File-level `engine.protoc.openapi.file` annotation — overwrites the option value if
+         *      it specifies `info.version`.
+         *   3. Service-level `engine.protoc.openapi.service` annotation — highest priority; always
+         *      preserved when present.
+         *
+         * When `null` (the default) no fallback is injected.  Documents whose annotations do not
+         * supply a version will emit `info` without a `version` field, which is not valid OAS 3.1.
+         * Setting this option is therefore the recommended way to produce fully-valid documents
+         * for services that carry only `google.api.http` annotations and no engine annotations.
+         */
+        val version: String?,
+
         /**
          * Validates the output against the official OAS 3.1.1 schema.
          * Please note, some features described in the OAS 3.1 documentation produces
@@ -33,7 +61,6 @@ public class ProtocGenOpenAPI(
          *   RFC 3986 URI-reference, which may not contain curly-braces in the host.
          */
         val validateOutput: Boolean,
-//        val outputFormat: OutputFormat,
     ) {
         public enum class CaseStrategy {
             UNMODIFIED,
@@ -41,17 +68,22 @@ public class ProtocGenOpenAPI(
             SNAKE_CASE,
         }
 
-//        public enum class OutputFormat {
-//            JSON,
-//            YAML,
-//        }
-
         public class Builder private constructor(parameters: Parameters) {
+
+            /**
+             * @see [Options.merge]
+             */
             public var merge: Boolean = parameters.get<Boolean>("merge") ?: false
 
-//            public var caseStrategy: CaseStrategy = parameters.get<CaseStrategy>("caseStrategy") ?: CaseStrategy.UNMODIFIED
-            public var validateOutput: Boolean = true
-//            public var outputFormat: OutputFormat = parameters.get<OutputFormat>("outputFormat") ?: OutputFormat.JSON
+            /**
+             * @see [Options.version].
+             */
+            public var version: String? = parameters.get<String>("version")
+
+            /**
+             * @see [Options.validateOutput]
+             */
+            public var validateOutput: Boolean = parameters.get<Boolean>("validateOutput") ?: false
 
             public companion object {
                 public fun from(parameters: Parameters): Builder = Builder(parameters)
@@ -60,9 +92,8 @@ public class ProtocGenOpenAPI(
             public fun build(): Options =
                 Options(
                     merge = merge,
-//                    caseStrategy,
+                    version = version,
                     validateOutput = validateOutput,
-//                    outputFormat,
                 )
         }
     }

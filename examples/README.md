@@ -25,7 +25,7 @@ A re-expression of the canonical [Swagger Petstore](https://github.com/swagger-a
 
 ### [complete](src/complete/README.md)
 
-A purpose-built exhaustive exercise of every annotation field the plugin supports. Not a realistic API — it is a structured inventory of features. Covers the full `SchemaObject` keyword set, all component types, all security scheme types, composition keywords, JSON Schema referencing keywords, encoding objects, and every parameter/response/link variant. If you want to know whether a specific annotation field is wired correctly, look here.
+A purpose-built exhaustive exercise of every annotation field the plugin supports. Not a realistic API — it is a structured inventory of features. Covers the full `SchemaObject` keyword set, all component types, all security scheme types, composition keywords, JSON Schema referencing keywords, encoding objects, and every parameter/response/link variant. Also demonstrates `outputFormat = YAML` — the plugin generates a `.openapi.yaml` file instead of `.openapi.json`. If you want to know whether a specific annotation field is wired correctly, look here.
 
 ### [merged](src/merged/README.md)
 

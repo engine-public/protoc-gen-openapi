@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.node.ObjectNode
+import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
 import com.google.protobuf.compiler.PluginProtos
 import com.networknt.schema.InputFormat
 import com.networknt.schema.SchemaLocation
@@ -42,8 +43,8 @@ import com.networknt.schema.SpecificationVersion
  * In the merged path the options version is applied before the annotation loop so that any
  * file-level annotation can override it.
  *
- * The output file is named `<package>.<ServiceName>.openapi.json` when the compilation covers a
- * single service, or `<common-package-prefix>.openapi.json` when multiple services are merged.
+ * Output files are named `*.openapi.json` or `*.openapi.yaml` depending on
+ * [ProtocGenOpenAPI.Options.outputFormat].
  */
 internal class Compiler(
     private val request: CodeGeneratorRequestWrapper,
@@ -60,6 +61,24 @@ internal class Compiler(
                     )
                 }
             }.getSchema(SchemaLocation.of("https://spec.openapis.org/oas/3.1/schema-base/2022-10-07"))
+    }
+
+    /**
+     * File extension appended to every output filename (without leading dot).
+     * Derived from [ProtocGenOpenAPI.Options.outputFormat] at construction time.
+     */
+    private val outputExtension = when (options.outputFormat) {
+        ProtocGenOpenAPI.Options.OutputFormat.JSON -> "json"
+        ProtocGenOpenAPI.Options.OutputFormat.YAML -> "yaml"
+    }
+
+    /**
+     * Input format passed to the OAS schema validator.
+     * Must match [outputExtension] so the validator can parse the serialized content.
+     */
+    private val inputFormat = when (options.outputFormat) {
+        ProtocGenOpenAPI.Options.OutputFormat.JSON -> InputFormat.JSON
+        ProtocGenOpenAPI.Options.OutputFormat.YAML -> InputFormat.YAML
     }
 
     fun compile(): PluginProtos.CodeGeneratorResponse = if (options.merge) compileMerged() else compileUnmerged()
@@ -111,7 +130,7 @@ internal class Compiler(
                 val content = mapper.writeValueAsString(doc)
                 response.addFile(outputFileName(targetFiles), content)
                 if (options.validateOutput) {
-                    oasSchema.validate(content, InputFormat.JSON) { ctx ->
+                    oasSchema.validate(content, inputFormat) { ctx ->
                         ctx.executionConfig { cfg -> cfg.formatAssertionsEnabled(true) }
                     }.forEach {
                         response.addError(it.toString())
@@ -153,7 +172,8 @@ internal class Compiler(
                     applyOptionsVersion(doc, ctx)
                     fileAnnotation.mergeInto(doc, ctx)
                     val pkg = file.`package`?.value.orEmpty()
-                    val fileName = if (pkg.isEmpty()) "openapi.json" else "$pkg.openapi.json"
+                    val fileName =
+                        if (pkg.isEmpty()) "openapi.$outputExtension" else "$pkg.openapi.$outputExtension"
                     response.addFile(fileName, mapper.writeValueAsString(doc))
                 } catch (e: Exception) {
                     response.addError("[${file.name}] Error generating file-only output: ${e.detail()}")
@@ -196,12 +216,12 @@ internal class Compiler(
                     val svcName = service.name?.value.orEmpty()
                     val fileName = listOf(pkg, svcName)
                         .filter { it.isNotEmpty() }
-                        .joinToString(".") + ".openapi.json"
+                        .joinToString(".") + ".openapi.$outputExtension"
                     val content = mapper.writeValueAsString(doc)
                     response.addFile(fileName, content)
 
                     if (options.validateOutput) {
-                        oasSchema.validate(content, InputFormat.JSON) { ctx ->
+                        oasSchema.validate(content, inputFormat) { ctx ->
                             ctx.executionConfig { cfg -> cfg.formatAssertionsEnabled(true) }
                         }.forEach {
                             response.addError(it.toString())
@@ -227,7 +247,13 @@ internal class Compiler(
     )
 
     private fun setup(): Setup {
-        val mapper = ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
+        val mapper = when (options.outputFormat) {
+            ProtocGenOpenAPI.Options.OutputFormat.JSON ->
+                ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
+
+            ProtocGenOpenAPI.Options.OutputFormat.YAML ->
+                YAMLMapper().enable(SerializationFeature.INDENT_OUTPUT)
+        }
         val messageIndex = MessageIndex(request.protoFiles)
         val rpcIndex = RpcIndex(request.protoFiles)
         val ctx = JsonContext(mapper, messageIndex, rpcIndex)
@@ -319,13 +345,13 @@ internal class Compiler(
             // Use filter+join so an empty package doesn't produce a leading dot.
             1 -> listOf(services[0].first, services[0].second)
                 .filter { it.isNotEmpty() }
-                .joinToString(".") + ".openapi.json"
+                .joinToString(".") + ".openapi.$outputExtension"
 
             else -> {
                 val packages = services.map { it.first }
                     .ifEmpty { targetFiles.map { it.`package`?.value.orEmpty() } }
                 val prefix = commonPackagePrefix(packages)
-                if (prefix.isEmpty()) "openapi.json" else "$prefix.openapi.json"
+                if (prefix.isEmpty()) "openapi.$outputExtension" else "$prefix.openapi.$outputExtension"
             }
         }
     }

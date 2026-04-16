@@ -61,7 +61,32 @@ public class ProtocGenOpenAPI(
          *   RFC 3986 URI-reference, which may not contain curly-braces in the host.
          */
         val validateOutput: Boolean,
+
+        /**
+         * The serialization format of every generated OpenAPI document.
+         *
+         * [OutputFormat.JSON] produces pretty-printed JSON (the default); files are named
+         * `*.openapi.json`. [OutputFormat.YAML] produces YAML; files are named
+         * `*.openapi.yaml`.
+         *
+         * Passed via `--openapi_out=outputFormat=YAML:outdir` (case-insensitive).
+         */
+        val outputFormat: OutputFormat,
     ) {
+        /**
+         * The serialization format for generated OpenAPI documents.
+         *
+         * Values are matched case-insensitively when supplied via the `--openapi_out`
+         * parameter string (`outputFormat=yaml` and `outputFormat=YAML` are both valid).
+         */
+        public enum class OutputFormat {
+            /** Pretty-printed JSON. Output files are named `*.openapi.json`. */
+            JSON,
+
+            /** YAML. Output files are named `*.openapi.yaml`. */
+            YAML,
+        }
+
         public enum class CaseStrategy {
             UNMODIFIED,
             CAMEL_CASE,
@@ -85,6 +110,12 @@ public class ProtocGenOpenAPI(
              */
             public var validateOutput: Boolean = parameters.get<Boolean>("validateOutput") ?: false
 
+            /**
+             * @see [Options.outputFormat]
+             */
+            public var outputFormat: OutputFormat =
+                parameters.get<OutputFormat>("outputFormat") ?: OutputFormat.JSON
+
             public companion object {
                 public fun from(parameters: Parameters): Builder = Builder(parameters)
             }
@@ -94,6 +125,7 @@ public class ProtocGenOpenAPI(
                     merge = merge,
                     version = version,
                     validateOutput = validateOutput,
+                    outputFormat = outputFormat,
                 )
         }
     }

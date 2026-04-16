@@ -22,14 +22,15 @@ class CompleteTest :
         val response = ProtocGenOpenAPI.from(request) {
             merge = false
             validateOutput = true
+            outputFormat = ProtocGenOpenAPI.Options.OutputFormat.YAML
         }.compile()
 
-        val mapper = ObjectMapper()
+        val mapper = YAMLMapper()
         val generatedFile = response.fileList
-            .find { it.name == "engine.protoc.openapi.example.complete.StorefrontService.openapi.json" }
+            .find { it.name == "engine.protoc.openapi.example.complete.StorefrontService.openapi.yaml" }
             .shouldNotBeNull()
         val doc: JsonNode = mapper.readTree(generatedFile.content)
-        val expected = CompleteTest::class.java.getResourceAsStream("engine.protoc.openapi.example.complete.StorefrontService.openapi.json").shouldNotBeNull().reader().readText()
+        val expected = CompleteTest::class.java.getResourceAsStream("engine.protoc.openapi.example.complete.StorefrontService.openapi.yaml").shouldNotBeNull().reader().readText()
 
         test("validate reference file") {
             val oasSchema by lazy {

@@ -7,12 +7,11 @@ import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 plugins {
     application
     idea
-    `java-test-fixtures`
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.osdetector)
-    alias(libs.plugins.protobuf)
     alias(libs.plugins.graalvm.native)
     alias(libs.plugins.ktlint)
+    alias(libs.plugins.protobuf).apply(false)
 }
 
 fun calculateVersion(): String {
@@ -37,8 +36,6 @@ dependencies {
     implementation(libs.kotlin.reflect)
     implementation(libs.networknt.jsonSchemaValidator)
     implementation(libs.protobuf.java)
-
-    testFixturesImplementation(libs.jackson.databind)
 }
 
 allprojects {
@@ -147,61 +144,6 @@ allprojects {
     }
 }
 
-testing {
-    suites {
-        /*
-         * we want the compiler to generate multiple CodeGeneratorRequests so we can
-         * isolate different types of proto files to be compiled in a single session.
-         * this block configures them all...
-         */
-        withType<JvmTestSuite> {
-            useJUnitJupiter()
-            dependencies {
-                implementation(project())
-
-                // Explicitly extend the implementation configuration
-                configurations.named(sources.implementationConfigurationName) {
-                    extendsFrom(project.configurations.getByName(JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME))
-                }
-            }
-            val testSuiteName = this.name
-            tasks.named("process${testSuiteName.capitalized()}Resources", ProcessResources::class) {
-                dependsOn("generate${testSuiteName.capitalized()}Proto")
-                from(project.layout.buildDirectory.dir("generated/sources/proto/$testSuiteName/recorder").map { it.file("code-generator-request.binpb") })
-            }
-        }
-
-        /*
-         * then one line here per protoc compilation run...
-         */
-        register<JvmTestSuite>("petstore") {
-            dependencies {
-                implementation(testFixtures(project()))
-            }
-        }
-        register<JvmTestSuite>("complete") {
-            dependencies {
-                implementation(testFixtures(project()))
-            }
-        }
-        register<JvmTestSuite>("merged") {
-            dependencies {
-                implementation(testFixtures(project()))
-            }
-        }
-        register<JvmTestSuite>("unmerged") {
-            dependencies {
-                implementation(testFixtures(project()))
-            }
-        }
-        register<JvmTestSuite>("responseBodyError") {
-            dependencies {
-                implementation(testFixtures(project()))
-            }
-        }
-    }
-}
-
 application {
     mainClass.set("com.engine.protoc.openapi.MainKt")
 }
@@ -237,50 +179,6 @@ graalvmNative {
     metadataRepository {
         enabled = true
         version = "0.3.24"
-    }
-}
-
-protobuf {
-    protoc {
-        artifact = tools.protoc.compiler.get().toString()
-    }
-    plugins {
-        create("recorder") {
-            path = project
-                .project(projects.protocUtilsRecorder.path)
-                .layout
-                .buildDirectory
-                .map { it.dir("native/nativeCompile").file("${projects.protocUtilsRecorder.name}-${osdetector.arch}") }
-                .get()
-                .asFile
-                .absolutePath
-        }
-//        create("openapi") {
-//            path = project
-//                .layout
-//                .buildDirectory
-//                .map { it.dir("native/nativeCompile").file("${project.name}-${osdetector.arch}") }
-//                .get()
-//                .asFile
-//                .absolutePath
-//        }
-    }
-    generateProtoTasks {
-        all().all {
-            /*
-             * Matches all proto tasks except the main generateProto... unfortunately,
-             * the protobuf plugin doesn't recognize testsuites as "test" tasks, so
-             * isTest doesn't work.
-             */
-            if (name == "generate${this.sourceSet.name.capitalized()}Proto") {
-                dependsOn(":protoc-utils-recorder:nativeCompile")
-//                dependsOn(":nativeCompile")
-                plugins {
-                    create("recorder")
-//                    create("openapi")
-                }
-            }
-        }
     }
 }
 

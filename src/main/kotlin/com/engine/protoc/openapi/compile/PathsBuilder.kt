@@ -66,6 +66,9 @@ internal class PathsBuilder(
         for (service in services) {
             // Resolve the auto-tag name once per service; null when feature is disabled.
             val autoTagName = if (autoTagServices) service.name?.value else null
+            // Service-level tags applied to every operation in this service.
+            val serviceTags: List<String> = service.options?.proto?.getExtension(Annotations.tags)
+                ?: emptyList()
             var contributed = false
 
             for (method in service.methods) {
@@ -74,7 +77,7 @@ internal class PathsBuilder(
                     ?: continue
 
                 val binding = httpRule.primaryBinding() ?: continue
-                val (effectivePath, operationNode) = buildOperation(method, binding, httpRule, autoTagName)
+                val (effectivePath, operationNode) = buildOperation(method, binding, httpRule, autoTagName, serviceTags)
                 val pathItem = byPath.getOrPut(effectivePath) { ctx.obj() }
                 pathItem.set<JsonNode>(binding.httpMethod, operationNode)
                 contributed = true
@@ -102,6 +105,8 @@ internal class PathsBuilder(
         httpRule: HttpRule,
         // Non-null when autoTagServices is true; the service name becomes the first tag.
         autoTagName: String? = null,
+        // Tags from the service-level `engine.protoc.openapi.tags` option, applied to all methods.
+        serviceTags: List<String> = emptyList(),
     ): Pair<String, ObjectNode> {
         val defaultInstance = Operation.getDefaultInstance()
         val annotation: Operation? = method.options
@@ -177,10 +182,11 @@ internal class PathsBuilder(
         if (description != null) node.put("description", description)
         if (annotation?.hasOperationId() == true) node.put("operationId", annotation.operationId)
 
-        // Auto-tag (service name) is prepended; explicit annotation tags follow.
+        // Auto-tag (service name) is prepended; service-level tags follow; explicit annotation tags last.
         // Distinct preserves order while dropping any accidental duplicate.
         val allTags = buildList {
             autoTagName?.let { add(it) }
+            addAll(serviceTags)
             annotation?.tagsList?.forEach { add(it) }
         }.distinct()
         if (allTags.isNotEmpty()) {

@@ -11,27 +11,31 @@ import "engine/protoc/openapi/model/schema.proto";
 
 import "google/protobuf/descriptor.proto";
 
-// Adds the ability to add an OpenAPI definition to a proto file
 extend .google.protobuf.FileOptions {
-  .engine.protoc.openapi.OpenAPI file = 20231016;
+    // Adds the ability to add an OpenAPI definition to a proto file
+    .engine.protoc.openapi.OpenAPI file = 20231016;
 }
 
-// Adds the ability to add an OpenAPI definition to a proto `service`
 extend .google.protobuf.ServiceOptions {
-  .engine.protoc.openapi.OpenAPI service = 20231016;
+    // Adds the ability to add an OpenAPI definition to a proto `service`
+    .engine.protoc.openapi.OpenAPI service = 20231016;
+
+    // Adds the ability to define tags to be applied to all RPCs (OAS Operations) within a gRPC service.
+    // Fully enriched tags must be created within one of the available layers of OpenAPI annotation (at the file or service annotation).
+    repeated string tags = 202310162;
 }
 
-// Adds the ability to add an OpenAPI operation to a rpc in a proto `service`
 extend .google.protobuf.MethodOptions {
-  .engine.protoc.openapi.model.Operation method = 20231016;
+    // Adds the ability to add an OpenAPI operation to a rpc in a proto `service`
+    .engine.protoc.openapi.model.Operation method = 20231016;
 }
 
-// Adds the ability to add an OpenAPI schema to a proto `message`
 extend .google.protobuf.MessageOptions {
-  .engine.protoc.openapi.model.Schema message = 20231016;
+    // Adds the ability to add an OpenAPI schema to a proto `message`
+    .engine.protoc.openapi.model.Schema message = 20231016;
 }
 
-// Adds the ability to add an OpenAPI schema to a field in a proto `message`
 extend .google.protobuf.FieldOptions {
+    // Adds the ability to add an OpenAPI schema to a field in a proto `message`
     .engine.protoc.openapi.model.Schema field = 20231016;
 }

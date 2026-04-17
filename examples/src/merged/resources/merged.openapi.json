@@ -33,7 +33,7 @@
         }
       },
       "get" : {
-        "tags" : [ "WidgetService" ],
+        "tags" : [ "WidgetService", "foo", "bar", "baz" ],
         "summary" : "List all widgets in the system",
         "description" : "List all widgets in the system",
         "responses" : {
@@ -55,7 +55,7 @@
     },
     "/widget/{widget_id}" : {
       "get" : {
-        "tags" : [ "WidgetService" ],
+        "tags" : [ "WidgetService", "foo", "bar", "baz" ],
         "summary" : "Retrieve a single widget by its id",
         "description" : "Retrieve a single widget by its id",
         "parameters" : [ {

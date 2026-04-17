@@ -1,5 +1,6 @@
 package com.engine.protoc.openapi.compile.json
 
+import com.engine.protoc.openapi.OpenAPI
 import com.engine.protoc.openapi.model.APIKeySecurityScheme
 import com.engine.protoc.openapi.model.Callback
 import com.engine.protoc.openapi.model.CallbackOrReference
@@ -24,7 +25,6 @@ import com.engine.protoc.openapi.model.MutualTLSSecurityScheme
 import com.engine.protoc.openapi.model.OAuthFlow
 import com.engine.protoc.openapi.model.OAuthFlows
 import com.engine.protoc.openapi.model.OAuthSecurityScheme
-import com.engine.protoc.openapi.model.OpenAPI
 import com.engine.protoc.openapi.model.OpenIDConnectSecurityScheme
 import com.engine.protoc.openapi.model.Operation
 import com.engine.protoc.openapi.model.Parameter

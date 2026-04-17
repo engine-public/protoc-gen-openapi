@@ -8,9 +8,17 @@
   "servers" : [ {
     "url" : "https://merged.example.com"
   } ],
+  "tags" : [ {
+    "name" : "SecondaryService",
+    "description" : "This guy does some really heavy stuff."
+  }, {
+    "name" : "WidgetService",
+    "description" : "CRUD Operations on Widgets"
+  } ],
   "paths" : {
     "/widget" : {
       "post" : {
+        "tags" : [ "SecondaryService" ],
         "responses" : {
           "200" : {
             "description" : "OK",
@@ -25,6 +33,7 @@
         }
       },
       "get" : {
+        "tags" : [ "WidgetService" ],
         "summary" : "List all widgets in the system",
         "description" : "List all widgets in the system",
         "responses" : {
@@ -46,6 +55,7 @@
     },
     "/widget/{widget_id}" : {
       "get" : {
+        "tags" : [ "WidgetService" ],
         "summary" : "Retrieve a single widget by its id",
         "description" : "Retrieve a single widget by its id",
         "parameters" : [ {

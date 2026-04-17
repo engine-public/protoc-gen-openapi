@@ -72,6 +72,23 @@ public class ProtocGenOpenAPI(
          * Passed via `--openapi_out=outputFormat=YAML:outdir` (case-insensitive).
          */
         val outputFormat: OutputFormat,
+
+        /**
+         * When `true`, the service name is automatically applied as an OAS tag on every operation
+         * the service contributes to the `paths` section.  A top-level `tags` entry is also added
+         * for each participating service, using the service's leading proto comment as the tag
+         * description (when one is present).
+         *
+         * This provides out-of-the-box grouping in API tools (Swagger UI, Redoc, etc.) without
+         * requiring any `engine.protoc.openapi.method` annotation changes.  Auto-generated tags
+         * are prepended before any explicitly-set tags on the method annotation and deduplicated.
+         *
+         * When `false` (the default), tags must be set explicitly via the
+         * `engine.protoc.openapi.method` annotation's `tags` field.
+         *
+         * Passed via `--openapi_out=autoTagServices=true:outdir`.
+         */
+        val autoTagServices: Boolean,
     ) {
         /**
          * The serialization format for generated OpenAPI documents.
@@ -116,6 +133,12 @@ public class ProtocGenOpenAPI(
             public var outputFormat: OutputFormat =
                 parameters.get<OutputFormat>("outputFormat") ?: OutputFormat.JSON
 
+            /**
+             * @see [Options.autoTagServices]
+             */
+            public var autoTagServices: Boolean =
+                parameters.get<Boolean>("autoTagServices") ?: false
+
             public companion object {
                 public fun from(parameters: Parameters): Builder = Builder(parameters)
             }
@@ -126,6 +149,7 @@ public class ProtocGenOpenAPI(
                     version = version,
                     validateOutput = validateOutput,
                     outputFormat = outputFormat,
+                    autoTagServices = autoTagServices,
                 )
         }
     }

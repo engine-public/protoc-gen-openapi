@@ -5,8 +5,8 @@
 - [x] generate oops-all-conventions.proto
 - [x] API version option with injection
 - [x] Support both yaml and json output, default json
+- [x] tagging options, especially on services
 - [ ] implement namespacing component models
-- [ ] tagging options, especially on services
 - [envoy GrpcJsonTranscoder options](https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/filters/http/grpc_json_transcoder/v3/transcoder.proto)
   - [ ] auto_mapping
   - [ ] case_insensitive_enum_parsing

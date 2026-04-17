@@ -9,6 +9,7 @@ import com.engine.protoc.util.file.FileDescriptorProtoWrapper
 import com.engine.protoc.util.service.MethodDescriptorProtoWrapper
 import com.engine.protoc.util.service.ServiceDescriptorProtoWrapper
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.google.api.AnnotationsProto
 import com.google.api.HttpRule
@@ -19,11 +20,20 @@ import com.google.protobuf.DescriptorProtos
  * `google.api.http` + `engine.protoc.openapi.method` annotations.
  *
  * Paths with the same URL are merged so that multiple HTTP methods end up in a single path item.
+ *
+ * When [autoTagServices] is true, each operation automatically receives the name of its enclosing
+ * service as an OAS tag (prepended before any explicitly-annotated tags).  The set of services
+ * that contributed at least one operation is tracked so callers can retrieve tag metadata via
+ * [buildServiceTags].
  */
 internal class PathsBuilder(
     private val ctx: JsonContext,
     private val collector: MessageCollector,
+    private val autoTagServices: Boolean = false,
 ) {
+    // Services (name → leading comment) that contributed ≥1 operation, in encounter order.
+    // Only populated when autoTagServices is true.
+    private val contributingServices = LinkedHashMap<String, String?>()
 
     /** Collects all paths from [files] into a merged `paths` ObjectNode. */
     fun build(files: List<FileDescriptorProtoWrapper>): ObjectNode = buildForServices(files.flatMap { it.services })
@@ -31,19 +41,50 @@ internal class PathsBuilder(
     /** Collects paths for a single [service] into a `paths` ObjectNode. */
     fun buildForService(service: ServiceDescriptorProtoWrapper): ObjectNode = buildForServices(listOf(service))
 
+    /**
+     * Returns a JSON array of tag objects for every service that contributed at least one
+     * operation during previous [build] / [buildForService] calls.  Each entry has a `name`
+     * field and, when the service carries a leading proto comment, a `description` field.
+     *
+     * The returned array is empty when [autoTagServices] is false or when no operations were
+     * emitted.  Callers should merge the result into the document-level `tags` array.
+     */
+    internal fun buildServiceTags(): ArrayNode {
+        val arr = ctx.mapper.createArrayNode()
+        for ((name, description) in contributingServices) {
+            val tag = ctx.obj()
+            tag.put("name", name)
+            description?.let { tag.put("description", it) }
+            arr.add(tag)
+        }
+        return arr
+    }
+
     private fun buildForServices(services: List<ServiceDescriptorProtoWrapper>): ObjectNode {
         val byPath = LinkedHashMap<String, ObjectNode>()
 
         for (service in services) {
+            // Resolve the auto-tag name once per service; null when feature is disabled.
+            val autoTagName = if (autoTagServices) service.name?.value else null
+            var contributed = false
+
             for (method in service.methods) {
                 val httpRule = method.options
                     ?.findExtension(AnnotationsProto.http)?.value
                     ?: continue
 
                 val binding = httpRule.primaryBinding() ?: continue
-                val (effectivePath, operationNode) = buildOperation(method, binding, httpRule)
+                val (effectivePath, operationNode) = buildOperation(method, binding, httpRule, autoTagName)
                 val pathItem = byPath.getOrPut(effectivePath) { ctx.obj() }
                 pathItem.set<JsonNode>(binding.httpMethod, operationNode)
+                contributed = true
+            }
+
+            // Register this service as a tag source if it produced at least one operation.
+            if (autoTagServices && contributed) {
+                val name = service.name?.value ?: continue
+                val description = service.location?.proto?.leadingComments?.trim()?.ifEmpty { null }
+                contributingServices[name] = description
             }
         }
 
@@ -59,6 +100,8 @@ internal class PathsBuilder(
         method: MethodDescriptorProtoWrapper,
         binding: HttpBinding,
         httpRule: HttpRule,
+        // Non-null when autoTagServices is true; the service name becomes the first tag.
+        autoTagName: String? = null,
     ): Pair<String, ObjectNode> {
         val defaultInstance = Operation.getDefaultInstance()
         val annotation: Operation? = method.options
@@ -134,9 +177,15 @@ internal class PathsBuilder(
         if (description != null) node.put("description", description)
         if (annotation?.hasOperationId() == true) node.put("operationId", annotation.operationId)
 
-        if (annotation?.tagsList?.isNotEmpty() == true) {
+        // Auto-tag (service name) is prepended; explicit annotation tags follow.
+        // Distinct preserves order while dropping any accidental duplicate.
+        val allTags = buildList {
+            autoTagName?.let { add(it) }
+            annotation?.tagsList?.forEach { add(it) }
+        }.distinct()
+        if (allTags.isNotEmpty()) {
             val arr = ctx.mapper.createArrayNode()
-            for (t in annotation.tagsList) arr.add(t)
+            for (t in allTags) arr.add(t)
             node.set<JsonNode>("tags", arr)
         }
 

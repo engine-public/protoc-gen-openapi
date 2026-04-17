@@ -23,10 +23,17 @@ There are three intellij run configurations checked in to the repo to assist in 
 
 ## Plugin Options
 
-| name                          | type | default | description                                                                                     |
-|-------------------------------|------|---------|-------------------------------------------------------------------------------------------------|
-| `recordCodeGeneratorRequest`  | path |         | A path to which the Code Generator Request will be written after having been read from `stdin`. |
-| `recordCodeGeneratorResponse` | path |         | A path to which the Code Generator Response will be written, in addition to `stdout`.           |
+Options are passed via `--openapi_out=option=value,option2=value2:outdir`.
+
+| name                          | type    | default | description                                                                                                                                                                       |
+|-------------------------------|---------|---------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `merge`                       | boolean | `false` | Merge all services from all target files into a single OpenAPI document.                                                                                                          |
+| `version`                     | string  |         | Fallback `info.version` written to every generated document that does not already have a version from an annotation.                                                              |
+| `outputFormat`                | enum    | `JSON`  | Serialization format of generated documents. `JSON` (default) or `YAML` (case-insensitive).                                                                                      |
+| `autoTagServices`             | boolean | `false` | Automatically tag every operation with its enclosing service name, and emit a top-level `tags` entry per service using the service's proto comment as the description.            |
+| `validateOutput`              | boolean | `false` | Validate each generated document against the official OAS 3.1.1 schema and surface validation errors as compiler errors.                                                         |
+| `recordCodeGeneratorRequest`  | path    |         | A path to which the Code Generator Request will be written after having been read from `stdin`.                                                                                   |
+| `recordCodeGeneratorResponse` | path    |         | A path to which the Code Generator Response will be written, in addition to `stdout`.                                                                                             |
 
 ## Environment Variables
 

@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package engine.protoc.openapi;
+package engine.protoc.openapi.model;
 
-option java_package = "com.engine.protoc.openapi";
+option java_package = "com.engine.protoc.openapi.model";
 option java_multiple_files = true;
 option java_outer_classname = "OpenAPIProto";
 

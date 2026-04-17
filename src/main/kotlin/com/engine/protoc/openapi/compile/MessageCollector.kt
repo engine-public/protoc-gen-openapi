@@ -1,7 +1,7 @@
 package com.engine.protoc.openapi.compile
 
-import com.engine.protoc.openapi.Schema
-import com.engine.protoc.openapi.SchemaObject
+import com.engine.protoc.openapi.model.Schema
+import com.engine.protoc.openapi.model.SchemaObject
 import com.google.protobuf.DescriptorProtos
 
 /**

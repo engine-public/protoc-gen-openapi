@@ -5,7 +5,7 @@ package engine.protoc.openapi.model;
 option java_package = "com.engine.protoc.openapi.model";
 option java_multiple_files = true;
 
-import "engine/protoc/openapi/operation.proto";
+import "engine/protoc/openapi/model/operation.proto";
 import "engine/protoc/openapi/model/parameter_or_reference.proto";
 import "engine/protoc/openapi/model/server.proto";
 import "google/protobuf/struct.proto";
@@ -38,28 +38,28 @@ message PathItem {
   optional string description = 4;
 
   // A definition of a GET operation on this path.
-  .engine.protoc.openapi.Operation get = 5;
+  .engine.protoc.openapi.model.Operation get = 5;
 
   // A definition of a PUT operation on this path.
-  .engine.protoc.openapi.Operation put = 6;
+  .engine.protoc.openapi.model.Operation put = 6;
 
   // A definition of a POST operation on this path.
-  .engine.protoc.openapi.Operation post = 7;
+  .engine.protoc.openapi.model.Operation post = 7;
 
   // A definition of a DELETE operation on this path.
-  .engine.protoc.openapi.Operation delete = 8;
+  .engine.protoc.openapi.model.Operation delete = 8;
 
   // A definition of a OPTIONS operation on this path.
-  .engine.protoc.openapi.Operation options = 9;
+  .engine.protoc.openapi.model.Operation options = 9;
 
   // A definition of a HEAD operation on this path.
-  .engine.protoc.openapi.Operation head = 10;
+  .engine.protoc.openapi.model.Operation head = 10;
 
   // A definition of a PATCH operation on this path.
-  .engine.protoc.openapi.Operation patch = 11;
+  .engine.protoc.openapi.model.Operation patch = 11;
 
   // A definition of a TRACE operation on this path.
-  .engine.protoc.openapi.Operation trace = 12;
+  .engine.protoc.openapi.model.Operation trace = 12;
 
   // An alternative `servers` array to service all operations in this path.
   // If a `servers` array is specified at the [OpenAPI Object](https://swagger.io/specification/#oas-servers) level, it will be overridden by this value.

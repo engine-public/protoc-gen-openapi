@@ -1,9 +1,9 @@
 package com.engine.protoc.openapi.compile
 
 import com.engine.protoc.openapi.Annotations
-import com.engine.protoc.openapi.Schema
 import com.engine.protoc.openapi.compile.json.JsonContext
 import com.engine.protoc.openapi.compile.json.toJson
+import com.engine.protoc.openapi.model.Schema
 import com.engine.protoc.util.message.DescriptorProtoWrapper
 import com.engine.protoc.util.message.FieldDescriptorProtoWrapper
 import com.fasterxml.jackson.databind.JsonNode

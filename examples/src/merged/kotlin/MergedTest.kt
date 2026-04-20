@@ -21,6 +21,7 @@ class MergedTest :
         val response = ProtocGenOpenAPI.from(request) {
             merge = true
             validateOutput = true
+            autoTagServices = true
         }.compile()
         val generatedFile = response.fileList.find { it.name == "engine.protoc.openapi.example.merged.openapi.json" }.shouldNotBeNull()
         val mapper = ObjectMapper()

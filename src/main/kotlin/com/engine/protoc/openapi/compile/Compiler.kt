@@ -11,6 +11,7 @@ import com.engine.protoc.util.service.ServiceDescriptorProtoWrapper
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
 import com.google.protobuf.compiler.PluginProtos
@@ -109,7 +110,7 @@ internal class Compiler(
         }
 
         val collector = MessageCollector(ctx.messageIndex)
-        val pathsBuilder = PathsBuilder(ctx, collector)
+        val pathsBuilder = PathsBuilder(ctx, collector, options.autoTagServices)
 
         for (file in targetFiles) {
             try {
@@ -118,6 +119,8 @@ internal class Compiler(
                 response.addError("[${file.name}] Error building paths: ${e.detail()}")
             }
         }
+
+        applyServiceTags(doc, pathsBuilder, ctx)
 
         try {
             mergeSchemas(doc, SchemaBuilder(ctx, pathsBuilder).build(collector), ctx)
@@ -206,8 +209,10 @@ internal class Compiler(
 
                     // Paths — only this service's methods
                     val collector = MessageCollector(ctx.messageIndex)
-                    val pathsBuilder = PathsBuilder(ctx, collector)
+                    val pathsBuilder = PathsBuilder(ctx, collector, options.autoTagServices)
                     mergePaths(doc, pathsBuilder.buildForService(service), ctx)
+
+                    applyServiceTags(doc, pathsBuilder, ctx)
 
                     // Schemas — only messages responsive to this service
                     mergeSchemas(doc, SchemaBuilder(ctx, pathsBuilder).build(collector), ctx)
@@ -278,6 +283,24 @@ internal class Compiler(
                 existingPaths.set<JsonNode>(path, rpcPathItem)
             }
         }
+    }
+
+    /**
+     * Appends service-level tag metadata produced by [pathsBuilder] to the document's top-level
+     * `tags` array.  When [autoTagServices][ProtocGenOpenAPI.Options.autoTagServices] is false the
+     * builder returns an empty array and this is a no-op.  If a `tags` array already exists in
+     * [doc] (e.g. from a file-level annotation), the service tags are appended to it.
+     */
+    private fun applyServiceTags(
+        doc: ObjectNode,
+        pathsBuilder: PathsBuilder,
+        ctx: JsonContext,
+    ) {
+        val serviceTags = pathsBuilder.buildServiceTags()
+        if (serviceTags.size() == 0) return
+        val existing = doc.get("tags") as? ArrayNode
+            ?: ctx.mapper.createArrayNode().also { doc.set<JsonNode>("tags", it) }
+        serviceTags.forEach { existing.add(it) }
     }
 
     private fun mergeSchemas(

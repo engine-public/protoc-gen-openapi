@@ -16,6 +16,8 @@ When `merge = true`, the plugin combines all services from all files into one do
 
 **Metadata-only proto file.** `base.proto` has no service. It exists only to inject file-level OpenAPI metadata into the merged output. This pattern is useful when the API metadata (title, description, servers, security schemes) is maintained separately from the service definitions.
 
+**`autoTagServices`.** The test enables `autoTagServices = true`. Each operation automatically receives the name of its enclosing service as its first OAS tag, and a top-level `tags` array is written to the document with one entry per service. `SecondaryService` gets the description from its proto leading comment ("This guy does some really heavy stuff.") and `WidgetService` gets "CRUD Operations on Widgets". This requires no changes to the proto annotations — the plugin derives everything from the service descriptor.
+
 ## Peculiarities
 
 In merge mode the output file is named using the proto package (`engine.protoc.openapi.example.merged.openapi.json`) rather than a service name. If multiple files in the merge set have different file-level annotations, the plugin uses the metadata from the file whose annotation is encountered first.

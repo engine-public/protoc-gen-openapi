@@ -1,0 +1,92 @@
+{
+  "openapi" : "3.1.0",
+  "paths" : {
+    "/catalog/{id}" : {
+      "get" : {
+        "summary" : "Retrieve a catalog item by its identifier.",
+        "description" : "Retrieve a catalog item by its identifier.",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ENGINE_PROTOC_OPENAPI_EXAMPLE_NAMESPACING_CATALOG_V1_ITEM"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/inventory/{id}" : {
+      "get" : {
+        "summary" : "Retrieve inventory details for an item by its identifier.",
+        "description" : "Retrieve inventory details for an item by its identifier.",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ENGINE_PROTOC_OPENAPI_EXAMPLE_NAMESPACING_INVENTORY_V2_ITEM"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "ENGINE_PROTOC_OPENAPI_EXAMPLE_NAMESPACING_CATALOG_V1_ITEM" : {
+        "type" : "object",
+        "title" : "CatalogItem",
+        "description" : "A catalog item available for purchase.",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "description" : "Unique identifier of this item."
+          },
+          "name" : {
+            "type" : "string",
+            "description" : "Display name of this item."
+          }
+        }
+      },
+      "ENGINE_PROTOC_OPENAPI_EXAMPLE_NAMESPACING_INVENTORY_V2_ITEM" : {
+        "type" : "object",
+        "title" : "Item",
+        "description" : "An item tracked in the inventory system.",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "description" : "Unique identifier of this item."
+          },
+          "quantity" : {
+            "type" : "integer",
+            "format" : "int32",
+            "description" : "Current quantity in stock."
+          }
+        }
+      }
+    }
+  }
+}

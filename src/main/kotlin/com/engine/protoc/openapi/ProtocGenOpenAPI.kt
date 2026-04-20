@@ -89,6 +89,58 @@ public class ProtocGenOpenAPI(
          * Passed via `--openapi_out=autoTagServices=true:outdir`.
          */
         val autoTagServices: Boolean,
+
+        /**
+         * Controls which package segments are prepended to each schema key in
+         * `components/schemas` and the corresponding `$ref` strings.
+         *
+         * When two or more proto messages share the same simple name but live in different
+         * packages, the default [SchemaNamespaceStrategy.NONE] produces a key collision.
+         * Setting a non-`NONE` strategy makes every key globally unique within the generated
+         * document.
+         *
+         * Passed via `--openapi_out=schemaNamespaceStrategy=FULL_PACKAGE:outdir`.
+         */
+        val schemaNamespaceStrategy: SchemaNamespaceStrategy,
+
+        /**
+         * Separator character inserted between each segment of a namespaced schema key.
+         *
+         * Passed via `--openapi_out=schemaNamespaceSeparator=UNDERSCORE:outdir`.
+         */
+        val schemaNamespaceSeparator: SchemaNamespaceSeparator,
+
+        /**
+         * Case transformation applied to each package segment of a namespaced schema key.
+         * Version segments moved to the end by [schemaNamespaceVersionExtraction] are always
+         * kept lowercase regardless of this setting.
+         *
+         * Passed via `--openapi_out=schemaNamespaceCasing=CAPITALIZED:outdir`.
+         */
+        val schemaNamespaceCasing: SchemaNamespaceCasing,
+
+        /**
+         * When `true`, package segments that look like proto API version identifiers
+         * (matching `^v\d+[a-zA-Z0-9]*$`, e.g. `v1`, `v2beta1`) are removed from their
+         * original position in the key and appended at the end, separated by
+         * [schemaNamespaceSeparator].  Version segments are never capitalised regardless of
+         * [schemaNamespaceCasing].
+         *
+         * Passed via `--openapi_out=schemaNamespaceVersionExtraction=true:outdir`.
+         */
+        val schemaNamespaceVersionExtraction: Boolean,
+
+        /**
+         * When `true`, adds a `"title"` field to every schema in `components/schemas` set to
+         * the unqualified proto message name.  Useful when schema keys are namespaced (e.g. the
+         * key is `Catalog_Item_v1`) and consumers need a clean, stable label.
+         *
+         * If a schema has an `engine.protoc.openapi.message` annotation that explicitly sets
+         * `title`, the annotation value takes precedence over the auto-generated name.
+         *
+         * Passed via `--openapi_out=setSchemaTitleToMessageName=true:outdir`.
+         */
+        val setSchemaTitleToMessageName: Boolean,
     ) {
         /**
          * The serialization format for generated OpenAPI documents.
@@ -108,6 +160,57 @@ public class ProtocGenOpenAPI(
             UNMODIFIED,
             CAMEL_CASE,
             SNAKE_CASE,
+        }
+
+        /**
+         * Controls which package segments are incorporated into `components/schemas` keys.
+         * All values are matched case-insensitively in `--openapi_out` parameters.
+         */
+        public enum class SchemaNamespaceStrategy {
+            /** Simple unqualified message name only — current default behaviour. */
+            NONE,
+
+            /**
+             * All package segments are prepended to the message name.
+             * E.g. `.com.example.v1.Widget` → `com_example_v1_Widget` (with `UNDERSCORE`).
+             */
+            FULL_PACKAGE,
+
+            /**
+             * Like [FULL_PACKAGE] but the longest package prefix shared by **every** schema
+             * produced in the same output document is stripped first, reducing key verbosity
+             * while keeping keys unique.
+             * E.g. with common prefix `com.example`, `.com.example.catalog.v1.Widget` →
+             * `catalog_v1_Widget` (with `UNDERSCORE`).
+             */
+            SIMPLIFIED_PACKAGE,
+        }
+
+        /**
+         * Separator character placed between each segment of a namespaced schema key.
+         * All values are matched case-insensitively in `--openapi_out` parameters.
+         */
+        public enum class SchemaNamespaceSeparator {
+            /** No separator — segments are concatenated directly, e.g. `comexampleWidget`. */
+            NONE,
+            UNDERSCORE,
+            DASH,
+            DOT,
+        }
+
+        /**
+         * Case transformation applied to package segments of a namespaced schema key.
+         * All values are matched case-insensitively in `--openapi_out` parameters.
+         */
+        public enum class SchemaNamespaceCasing {
+            /** Leave each segment exactly as written in the proto source. */
+            NONE,
+
+            /** Capitalise the first character of each package segment, e.g. `catalog` → `Catalog`. */
+            CAPITALIZED,
+
+            /** Uppercase every character of each package segment, e.g. `catalog` → `CATALOG`. */
+            UPPER_CASE,
         }
 
         public class Builder private constructor(parameters: Parameters) {
@@ -139,6 +242,39 @@ public class ProtocGenOpenAPI(
             public var autoTagServices: Boolean =
                 parameters.get<Boolean>("autoTagServices") ?: false
 
+            /**
+             * @see [Options.schemaNamespaceStrategy]
+             */
+            public var schemaNamespaceStrategy: SchemaNamespaceStrategy =
+                parameters.get<SchemaNamespaceStrategy>("schemaNamespaceStrategy")
+                    ?: SchemaNamespaceStrategy.NONE
+
+            /**
+             * @see [Options.schemaNamespaceSeparator]
+             */
+            public var schemaNamespaceSeparator: SchemaNamespaceSeparator =
+                parameters.get<SchemaNamespaceSeparator>("schemaNamespaceSeparator")
+                    ?: SchemaNamespaceSeparator.NONE
+
+            /**
+             * @see [Options.schemaNamespaceCasing]
+             */
+            public var schemaNamespaceCasing: SchemaNamespaceCasing =
+                parameters.get<SchemaNamespaceCasing>("schemaNamespaceCasing")
+                    ?: SchemaNamespaceCasing.NONE
+
+            /**
+             * @see [Options.schemaNamespaceVersionExtraction]
+             */
+            public var schemaNamespaceVersionExtraction: Boolean =
+                parameters.get<Boolean>("schemaNamespaceVersionExtraction") ?: false
+
+            /**
+             * @see [Options.setSchemaTitleToMessageName]
+             */
+            public var setSchemaTitleToMessageName: Boolean =
+                parameters.get<Boolean>("setSchemaTitleToMessageName") ?: false
+
             public companion object {
                 public fun from(parameters: Parameters): Builder = Builder(parameters)
             }
@@ -150,6 +286,11 @@ public class ProtocGenOpenAPI(
                     validateOutput = validateOutput,
                     outputFormat = outputFormat,
                     autoTagServices = autoTagServices,
+                    schemaNamespaceStrategy = schemaNamespaceStrategy,
+                    schemaNamespaceSeparator = schemaNamespaceSeparator,
+                    schemaNamespaceCasing = schemaNamespaceCasing,
+                    schemaNamespaceVersionExtraction = schemaNamespaceVersionExtraction,
+                    setSchemaTitleToMessageName = setSchemaTitleToMessageName,
                 )
         }
     }

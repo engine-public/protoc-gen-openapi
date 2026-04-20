@@ -2,6 +2,7 @@ package com.engine.protoc.openapi.compile.json
 
 import com.engine.protoc.openapi.compile.MessageIndex
 import com.engine.protoc.openapi.compile.RpcIndex
+import com.engine.protoc.openapi.compile.SchemaKeyResolver
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ObjectNode
 
@@ -10,6 +11,7 @@ internal class JsonContext(
     val mapper: ObjectMapper,
     val messageIndex: MessageIndex,
     val rpcIndex: RpcIndex,
+    val schemaKeyResolver: SchemaKeyResolver,
 ) {
     fun obj(): ObjectNode = mapper.createObjectNode()
 
@@ -36,8 +38,8 @@ internal class JsonContext(
      * The type URL format is `type.googleapis.com/<package>.<MessageName>`.
      */
     fun resolveProtoRef(typeUrl: String): String {
-        val simpleName = messageIndex.simpleNameOf(".${typeUrl.substringAfterLast('/')}")
-        return "#/components/schemas/$simpleName"
+        val typeName = ".${typeUrl.substringAfterLast('/')}"
+        return "#/components/schemas/${schemaKeyResolver.buildPhaseKeyOf(typeName)}"
     }
 
     /**

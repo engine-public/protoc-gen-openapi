@@ -47,6 +47,10 @@ A minimal example based on the [helloworld Greeter service](https://grpc.io/docs
 
 Exercises the `options.version` fallback: a nullable string written to `info.version` of every document that does not already have a version from an engine annotation. Covers all four combinations of options version present/absent × annotation version present/absent, and documents the priority layering that lets annotation-pinned versions always win over the global option.
 
+### [namespacing](src/namespacing/README.md)
+
+Exercises the four `schemaNamespace*` options that control how proto package information is incorporated into `components/schemas` keys. Uses two proto packages (`catalog.v1` and `inventory.v2`) that both define an `Item` message — a collision that `NONE` (the default) cannot resolve. Three reference compilations cover `FULL_PACKAGE`, `SIMPLIFIED_PACKAGE + CAPITALIZED`, and `SIMPLIFIED_PACKAGE + CAPITALIZED + versionExtraction`.
+
 ## Adding a new example
 
 1. Create `src/<name>/proto/` with your `.proto` files.

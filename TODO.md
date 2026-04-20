@@ -6,11 +6,17 @@
 - [x] API version option with injection
 - [x] Support both yaml and json output, default json
 - [x] tagging options, especially on services
-- [ ] implement namespacing component models
-- [envoy GrpcJsonTranscoder options](https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/filters/http/grpc_json_transcoder/v3/transcoder.proto)
+- [x] implement namespacing component models
+  - [x] package, simplified package
+  - [x] version extraction
+  - [x] casing
+  - [x] separation
+  - [x] write simple title
+- [ ] include/exclude regex
+- [ ] [envoy GrpcJsonTranscoder options](https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/filters/http/grpc_json_transcoder/v3/transcoder.proto)
   - [ ] auto_mapping
   - [ ] case_insensitive_enum_parsing
-- [envoy PrintOptions support options](https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/filters/http/grpc_json_transcoder/v3/transcoder.proto#envoy-v3-api-msg-extensions-filters-http-grpc-json-transcoder-v3-grpcjsontranscoder-printoptions)
+- [ ] [envoy PrintOptions support options](https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/filters/http/grpc_json_transcoder/v3/transcoder.proto#envoy-v3-api-msg-extensions-filters-http-grpc-json-transcoder-v3-grpcjsontranscoder-printoptions)
   - [ ] preserve_proto_field_names
   - [ ] always_print_enums_as_ints
   - [ ] stream_newline_delimited

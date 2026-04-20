@@ -122,6 +122,11 @@ internal class Compiler(
 
         applyServiceTags(doc, pathsBuilder, ctx)
 
+        // For SIMPLIFIED_PACKAGE: compute the final key map and rewrite any build-phase
+        // FULL_PACKAGE $refs that were emitted during path building.
+        ctx.schemaKeyResolver.finalizeKeys(collector.collected)
+        ctx.schemaKeyResolver.rewriteRefs(doc)
+
         try {
             mergeSchemas(doc, SchemaBuilder(ctx, pathsBuilder).build(collector), ctx)
         } catch (e: Exception) {
@@ -214,6 +219,10 @@ internal class Compiler(
 
                     applyServiceTags(doc, pathsBuilder, ctx)
 
+                    // For SIMPLIFIED_PACKAGE: finalize key map and rewrite build-phase $refs.
+                    ctx.schemaKeyResolver.finalizeKeys(collector.collected)
+                    ctx.schemaKeyResolver.rewriteRefs(doc)
+
                     // Schemas — only messages responsive to this service
                     mergeSchemas(doc, SchemaBuilder(ctx, pathsBuilder).build(collector), ctx)
 
@@ -261,7 +270,15 @@ internal class Compiler(
         }
         val messageIndex = MessageIndex(request.protoFiles)
         val rpcIndex = RpcIndex(request.protoFiles)
-        val ctx = JsonContext(mapper, messageIndex, rpcIndex)
+        val resolver = SchemaKeyResolver(
+            options.schemaNamespaceStrategy,
+            options.schemaNamespaceSeparator,
+            options.schemaNamespaceCasing,
+            options.schemaNamespaceVersionExtraction,
+            options.setSchemaTitleToMessageName,
+            messageIndex,
+        )
+        val ctx = JsonContext(mapper, messageIndex, rpcIndex, resolver)
         val targetFiles = request.filesToGenerate.mapNotNull { name ->
             request.protoFiles.find { it.name == name }
         }

@@ -25,14 +25,14 @@ internal class SchemaBuilder(
     private val pathsBuilder: PathsBuilder,
 ) {
 
-    /** Returns an ObjectNode containing all component schemas keyed by simple message name. */
+    /** Returns an ObjectNode containing all component schemas keyed by schema name. */
     fun build(collector: MessageCollector): ObjectNode {
         val schemas = ctx.obj()
         for (typeName in collector.collected) {
             val wrapper = ctx.messageIndex.find(typeName) ?: continue
             if (wrapper.proto.options.mapEntry) continue
-            val simpleName = ctx.messageIndex.simpleNameOf(typeName)
-            schemas.set<JsonNode>(simpleName, buildMessageSchema(wrapper, typeName))
+            val schemaKey = ctx.schemaKeyResolver.keyOf(typeName)
+            schemas.set<JsonNode>(schemaKey, buildMessageSchema(wrapper, typeName))
         }
         return schemas
     }
@@ -43,6 +43,7 @@ internal class SchemaBuilder(
     ): ObjectNode {
         val base = ctx.obj()
         base.put("type", "object")
+        ctx.schemaKeyResolver.titleFor(typeName)?.let { base.put("title", it) }
 
         // ---- Leading comment → description ------------------------------
         val comment = wrapper.location?.proto?.leadingComments?.trim()?.ifEmpty { null }

@@ -172,19 +172,19 @@ internal class SchemaKeyResolver(
         return if (versions.isEmpty()) base else "$base$sep${versions.joinToString(sep)}"
     }
 
-    private fun commonPackagePrefix(types: Set<String>): String {
-        val packages = types
-            .map { messageIndex.packageOf(it) }
-            .filter { it.isNotEmpty() }
-            .distinct()
-        if (packages.isEmpty()) return ""
-        val parts = packages.map { it.split(".") }
-        val result = mutableListOf<String>()
-        for (i in parts[0].indices) {
-            if (parts.all { it.size > i && it[i] == parts[0][i] }) result += parts[0][i] else break
-        }
-        return result.joinToString(".")
+    private fun commonPackagePrefix(types: Set<String>): String = commonDotPrefix(types.map { messageIndex.packageOf(it) })
+}
+
+/** Returns the longest dot-segment prefix shared by all non-empty strings in [packages]. */
+internal fun commonDotPrefix(packages: Iterable<String>): String {
+    val nonEmpty = packages.filter { it.isNotEmpty() }
+    if (nonEmpty.isEmpty()) return ""
+    val parts = nonEmpty.map { it.split(".") }
+    val result = mutableListOf<String>()
+    for (i in parts[0].indices) {
+        if (parts.all { it.size > i && it[i] == parts[0][i] }) result += parts[0][i] else break
     }
+    return result.joinToString(".")
 }
 
 private fun ProtocGenOpenAPI.Options.SchemaNamespaceSeparator.asString(): String =

@@ -395,20 +395,9 @@ internal class Compiler(
             else -> {
                 val packages = services.map { it.first }
                     .ifEmpty { targetFiles.map { it.`package`?.value.orEmpty() } }
-                val prefix = commonPackagePrefix(packages)
+                val prefix = commonDotPrefix(packages)
                 if (prefix.isEmpty()) "openapi.$outputExtension" else "$prefix.openapi.$outputExtension"
             }
         }
-    }
-
-    private fun commonPackagePrefix(packages: List<String>): String {
-        val nonEmpty = packages.filter { it.isNotEmpty() }
-        if (nonEmpty.isEmpty()) return ""
-        val parts = nonEmpty.map { it.split(".") }
-        val common = mutableListOf<String>()
-        for (i in 0 until parts.minOf { it.size }) {
-            if (parts.all { it[i] == parts[0][i] }) common.add(parts[0][i]) else break
-        }
-        return common.joinToString(".")
     }
 }

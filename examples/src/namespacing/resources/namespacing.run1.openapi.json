@@ -69,6 +69,27 @@
             "type" : "integer",
             "format" : "int32",
             "description" : "Current quantity in stock."
+          },
+          "specs" : {
+            "$ref" : "#/components/schemas/Specs",
+            "description" : "Physical specifications for this item."
+          }
+        }
+      },
+      "Specs" : {
+        "type" : "object",
+        "title" : "Specs",
+        "description" : "Physical specifications of an inventory item.",
+        "properties" : {
+          "weightGrams" : {
+            "type" : "integer",
+            "format" : "int32",
+            "description" : "Weight in grams."
+          },
+          "volumeMl" : {
+            "type" : "integer",
+            "format" : "int32",
+            "description" : "Volume in millilitres."
           }
         }
       }

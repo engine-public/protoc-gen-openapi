@@ -122,16 +122,18 @@ internal class Compiler(
 
         applyServiceTags(doc, pathsBuilder, ctx)
 
-        // For SIMPLIFIED_PACKAGE: compute the final key map and rewrite any build-phase
-        // FULL_PACKAGE $refs that were emitted during path building.
+        // finalizeKeys must precede SchemaBuilder so keyOf() returns simplified names.
+        // rewriteRefs must follow mergeSchemas so that intra-schema property $refs
+        // (emitted by SchemaBuilder via buildPhaseKeyOf) are also rewritten.
         ctx.schemaKeyResolver.finalizeKeys(collector.collected)
-        ctx.schemaKeyResolver.rewriteRefs(doc)
 
         try {
             mergeSchemas(doc, SchemaBuilder(ctx, pathsBuilder).build(collector), ctx)
         } catch (e: Exception) {
             response.addError("Error building component schemas: ${e.detail()}")
         }
+
+        ctx.schemaKeyResolver.rewriteRefs(doc)
 
         if (!response.hasErrors) {
             try {
@@ -219,12 +221,15 @@ internal class Compiler(
 
                     applyServiceTags(doc, pathsBuilder, ctx)
 
-                    // For SIMPLIFIED_PACKAGE: finalize key map and rewrite build-phase $refs.
+                    // finalizeKeys must precede SchemaBuilder so keyOf() returns simplified names.
+                    // rewriteRefs must follow mergeSchemas so that intra-schema property $refs
+                    // (emitted by SchemaBuilder via buildPhaseKeyOf) are also rewritten.
                     ctx.schemaKeyResolver.finalizeKeys(collector.collected)
-                    ctx.schemaKeyResolver.rewriteRefs(doc)
 
                     // Schemas — only messages responsive to this service
                     mergeSchemas(doc, SchemaBuilder(ctx, pathsBuilder).build(collector), ctx)
+
+                    ctx.schemaKeyResolver.rewriteRefs(doc)
 
                     val pkg = file.`package`?.value.orEmpty()
                     val svcName = service.name?.value.orEmpty()

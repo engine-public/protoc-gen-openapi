@@ -5,7 +5,7 @@ package engine.protoc.openapi.model;
 option java_package = "com.engine.protoc.openapi.model";
 option java_multiple_files = true;
 
-import "engine/protoc/openapi/schema.proto";
+import "engine/protoc/openapi/model/schema.proto";
 import "engine/protoc/openapi/model/callback_or_reference.proto";
 import "engine/protoc/openapi/model/example_or_reference.proto";
 import "engine/protoc/openapi/model/header_or_reference.proto";
@@ -20,7 +20,7 @@ import "engine/protoc/openapi/model/security_scheme_or_reference.proto";
 // All objects defined within the Components Object will have no effect on the API unless they are explicitly referenced from outside the Components Object.
 message Components {
   // An object to hold reusable [Schema Objects](https://swagger.io/specification/#schema-object).
-  map<string, .engine.protoc.openapi.Schema> schemas = 1;
+  map<string, .engine.protoc.openapi.model.Schema> schemas = 1;
 
   // An object to hold reusable Response Objects.
   map<string, .engine.protoc.openapi.model.ResponseOrReference> responses = 2;

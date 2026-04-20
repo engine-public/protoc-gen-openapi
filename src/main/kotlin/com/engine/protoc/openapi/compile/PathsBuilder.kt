@@ -1,10 +1,10 @@
 package com.engine.protoc.openapi.compile
 
 import com.engine.protoc.openapi.Annotations
-import com.engine.protoc.openapi.Operation
 import com.engine.protoc.openapi.compile.json.JsonContext
 import com.engine.protoc.openapi.compile.json.putExtensionsInto
 import com.engine.protoc.openapi.compile.json.toJson
+import com.engine.protoc.openapi.model.Operation
 import com.engine.protoc.util.file.FileDescriptorProtoWrapper
 import com.engine.protoc.util.service.MethodDescriptorProtoWrapper
 import com.engine.protoc.util.service.ServiceDescriptorProtoWrapper

@@ -1,9 +1,9 @@
 package com.engine.protoc.openapi.compile.json
 
-import com.engine.protoc.openapi.Schema
-import com.engine.protoc.openapi.SchemaObject
 import com.engine.protoc.openapi.model.Discriminator
 import com.engine.protoc.openapi.model.ExternalDocumentation
+import com.engine.protoc.openapi.model.Schema
+import com.engine.protoc.openapi.model.SchemaObject
 import com.engine.protoc.openapi.model.XML
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode

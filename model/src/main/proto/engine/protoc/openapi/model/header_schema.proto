@@ -5,7 +5,7 @@ package engine.protoc.openapi.model;
 option java_package = "com.engine.protoc.openapi.model";
 option java_multiple_files = true;
 
-import "engine/protoc/openapi/schema.proto";
+import "engine/protoc/openapi/model/schema.proto";
 import "engine/protoc/openapi/model/example_or_reference.proto";
 import "engine/protoc/openapi/model/example_or_reference_map.proto";
 import "google/protobuf/any.proto";
@@ -28,7 +28,7 @@ message HeaderSchema {
   optional bool explode = 2;
 
   // The schema defining the type used for the parameter.
-  .engine.protoc.openapi.Schema schema = 3;
+  .engine.protoc.openapi.model.Schema schema = 3;
 
   oneof example_type {
     // Example of the parameter's potential value; see [Working With Examples](https://swagger.io/specification/#working-with-examples).

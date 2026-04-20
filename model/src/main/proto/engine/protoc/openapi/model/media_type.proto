@@ -5,7 +5,7 @@ package engine.protoc.openapi.model;
 option java_package = "com.engine.protoc.openapi.model";
 option java_multiple_files = true;
 
-import "engine/protoc/openapi/schema.proto";
+import "engine/protoc/openapi/model/schema.proto";
 import "engine/protoc/openapi/model/encoding.proto";
 import "engine/protoc/openapi/model/example_or_reference_map.proto";
 import "google/protobuf/any.proto";
@@ -17,7 +17,7 @@ import "google/protobuf/any.proto";
 // See Working With Examples for further guidance regarding the different ways of specifying examples, including non-JSON/YAML values.
 message MediaType {
   // The schema defining the content of the request, response, parameter, or header.
-  .engine.protoc.openapi.Schema schema = 1;
+  .engine.protoc.openapi.model.Schema schema = 1;
 
   oneof example_type {
     // Example of the media type; see [Working With Examples](https://swagger.io/specification/#working-with-examples).

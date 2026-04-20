@@ -86,12 +86,12 @@
             "description" : "Current quantity in stock."
           },
           "specs" : {
-            "$ref" : "#/components/schemas/ENGINE_PROTOC_OPENAPI_EXAMPLE_NAMESPACING_INVENTORY_V2_SPECS",
+            "$ref" : "#/components/schemas/ENGINE_PROTOC_OPENAPI_EXAMPLE_NAMESPACING_INVENTORY_V2_ITEM_SPECS",
             "description" : "Physical specifications for this item."
           }
         }
       },
-      "ENGINE_PROTOC_OPENAPI_EXAMPLE_NAMESPACING_INVENTORY_V2_SPECS" : {
+      "ENGINE_PROTOC_OPENAPI_EXAMPLE_NAMESPACING_INVENTORY_V2_ITEM_SPECS" : {
         "type" : "object",
         "title" : "Specs",
         "description" : "Physical specifications of an inventory item.",

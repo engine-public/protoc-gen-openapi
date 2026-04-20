@@ -203,9 +203,10 @@ class NamespacingTest :
 
         test("run6: intra-schema property \$refs use simplified keys") {
             val schemas = mapper.readTree(run6.fileList.first().content)["components"]["schemas"]
-            // inventory.Item.specs field references inventory.Specs — must use the simplified key,
-            // not the FULL_PACKAGE build-phase key used during path building.
+            // Item.specs references the nested type Item.Specs.  The simplified key must include
+            // the enclosing type name ("Item") so it is Inventory_Item_Specs_v2, not the
+            // FULL_PACKAGE build-phase key used during path building.
             schemas["Inventory_Item_v2"]["properties"]["specs"]["\$ref"].asText() shouldBe
-                "#/components/schemas/Inventory_Specs_v2"
+                "#/components/schemas/Inventory_Item_Specs_v2"
         }
     })

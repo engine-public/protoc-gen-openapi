@@ -129,7 +129,16 @@ internal class SchemaKeyResolver(
         commonPrefix: String,
     ): String {
         val protoPackage = messageIndex.packageOf(typeName)
-        val simpleName = messageIndex.simpleNameOf(typeName)
+        // Extract all message-path segments (enclosing type names + simple name) by removing the
+        // file-level proto package from the full type name.  For a top-level type like
+        // ".pkg.Item" this yields ["Item"]; for a nested type like ".pkg.Outer.Inner" this
+        // yields ["Outer", "Inner"], preserving the enclosing type name that simpleNameOf drops.
+        val fullName = typeName.removePrefix(".")
+        val messagePathSegments = if (protoPackage.isEmpty()) {
+            fullName.split(".")
+        } else {
+            fullName.removePrefix("$protoPackage.").split(".")
+        }
         val remaining = when {
             commonPrefix.isEmpty() -> protoPackage
             protoPackage == commonPrefix -> ""
@@ -137,7 +146,7 @@ internal class SchemaKeyResolver(
             else -> protoPackage
         }
         val segments = (if (remaining.isEmpty()) emptyList() else remaining.split(".")) +
-            listOf(simpleName)
+            messagePathSegments
         return applyTransform(segments)
     }
 

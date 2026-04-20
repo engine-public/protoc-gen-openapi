@@ -23,6 +23,15 @@ message GetItemRequest {
 
 // An item tracked in the inventory system.
 message Item {
+    // Physical specifications of an inventory item.
+    message Specs {
+        // Weight in grams.
+        int32 weight_grams = 1;
+
+        // Volume in millilitres.
+        int32 volume_ml = 2;
+    }
+
     // Unique identifier of this item.
     string id = 1;
 
@@ -31,13 +40,4 @@ message Item {
 
     // Physical specifications for this item.
     Specs specs = 3;
-}
-
-// Physical specifications of an inventory item.
-message Specs {
-    // Weight in grams.
-    int32 weight_grams = 1;
-
-    // Volume in millilitres.
-    int32 volume_ml = 2;
 }

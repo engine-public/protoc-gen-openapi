@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.node.ObjectNode
+import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
 import com.google.protobuf.compiler.PluginProtos
 import com.networknt.schema.InputFormat
 import com.networknt.schema.SchemaLocation
@@ -30,11 +31,20 @@ import com.networknt.schema.SpecificationVersion
  *    turned into `components/schemas` entries.
  *
  * When [ProtocGenOpenAPI.Options.merge] is true the output is a single file covering all target
- * files.  When false each service produces its own output file; the annotation layering order is
- * file-level → service-derived attributes → service-level annotation.
+ * files.  When false each service produces its own output file.
  *
- * The output file is named `<package>.<ServiceName>.openapi.json` when the compilation covers a
- * single service, or `<common-package-prefix>.openapi.json` when multiple services are merged.
+ * Priority layering for `info` fields in the unmerged path (lowest → highest):
+ *   1. Service-derived attributes — `info.title` from the service name, `info.description` from
+ *      its leading comment.
+ *   2. [ProtocGenOpenAPI.Options.version] — written to `info.version` as a global default.
+ *   3. File-level `engine.protoc.openapi.file` annotation — overwrites any keys it specifies.
+ *   4. Service-level `engine.protoc.openapi.service` annotation — highest priority; always wins.
+ *
+ * In the merged path the options version is applied before the annotation loop so that any
+ * file-level annotation can override it.
+ *
+ * Output files are named `*.openapi.json` or `*.openapi.yaml` depending on
+ * [ProtocGenOpenAPI.Options.outputFormat].
  */
 internal class Compiler(
     private val request: CodeGeneratorRequestWrapper,
@@ -53,6 +63,24 @@ internal class Compiler(
             }.getSchema(SchemaLocation.of("https://spec.openapis.org/oas/3.1/schema-base/2022-10-07"))
     }
 
+    /**
+     * File extension appended to every output filename (without leading dot).
+     * Derived from [ProtocGenOpenAPI.Options.outputFormat] at construction time.
+     */
+    private val outputExtension = when (options.outputFormat) {
+        ProtocGenOpenAPI.Options.OutputFormat.JSON -> "json"
+        ProtocGenOpenAPI.Options.OutputFormat.YAML -> "yaml"
+    }
+
+    /**
+     * Input format passed to the OAS schema validator.
+     * Must match [outputExtension] so the validator can parse the serialized content.
+     */
+    private val inputFormat = when (options.outputFormat) {
+        ProtocGenOpenAPI.Options.OutputFormat.JSON -> InputFormat.JSON
+        ProtocGenOpenAPI.Options.OutputFormat.YAML -> InputFormat.YAML
+    }
+
     fun compile(): PluginProtos.CodeGeneratorResponse = if (options.merge) compileMerged() else compileUnmerged()
 
     // -------------------------------------------------------------------------
@@ -66,6 +94,10 @@ internal class Compiler(
         val doc: ObjectNode = ctx.obj()
         doc.put("openapi", "3.1.0")
         doc.set<JsonNode>("paths", ctx.obj())
+
+        // Apply the options version before the annotation loop so that any file-level annotation
+        // that explicitly sets info.version will overwrite it (higher-priority layers win).
+        applyOptionsVersion(doc, ctx)
 
         for (file in targetFiles) {
             try {
@@ -98,7 +130,7 @@ internal class Compiler(
                 val content = mapper.writeValueAsString(doc)
                 response.addFile(outputFileName(targetFiles), content)
                 if (options.validateOutput) {
-                    oasSchema.validate(content, InputFormat.JSON) { ctx ->
+                    oasSchema.validate(content, inputFormat) { ctx ->
                         ctx.executionConfig { cfg -> cfg.formatAssertionsEnabled(true) }
                     }.forEach {
                         response.addError(it.toString())
@@ -136,9 +168,12 @@ internal class Compiler(
                         it.put("openapi", "3.1.0")
                         it.set<JsonNode>("paths", ctx.obj())
                     }
+                    // Apply options version before the annotation so the annotation can override it.
+                    applyOptionsVersion(doc, ctx)
                     fileAnnotation.mergeInto(doc, ctx)
                     val pkg = file.`package`?.value.orEmpty()
-                    val fileName = if (pkg.isEmpty()) "openapi.json" else "$pkg.openapi.json"
+                    val fileName =
+                        if (pkg.isEmpty()) "openapi.$outputExtension" else "$pkg.openapi.$outputExtension"
                     response.addFile(fileName, mapper.writeValueAsString(doc))
                 } catch (e: Exception) {
                     response.addError("[${file.name}] Error generating file-only output: ${e.detail()}")
@@ -157,10 +192,15 @@ internal class Compiler(
                     // Layer 1: attributes derived from the service itself (lowest priority)
                     applyServiceDerivedAttributes(doc, service, ctx)
 
-                    // Layer 2: file-level annotation overwrites derived values
+                    // Layer 2: options-provided version as a global default.
+                    // Applied after service-derived attributes (which never set info.version) and
+                    // before annotation layers so that annotations can override it.
+                    applyOptionsVersion(doc, ctx)
+
+                    // Layer 3: file-level annotation overwrites derived values
                     fileAnnotation?.mergeInto(doc, ctx)
 
-                    // Layer 3: explicit service-level annotation (highest priority)
+                    // Layer 4: explicit service-level annotation (highest priority)
                     service.options?.findExtension(Annotations.service)?.value
                         ?.mergeInto(doc, ctx)
 
@@ -176,12 +216,12 @@ internal class Compiler(
                     val svcName = service.name?.value.orEmpty()
                     val fileName = listOf(pkg, svcName)
                         .filter { it.isNotEmpty() }
-                        .joinToString(".") + ".openapi.json"
+                        .joinToString(".") + ".openapi.$outputExtension"
                     val content = mapper.writeValueAsString(doc)
                     response.addFile(fileName, content)
 
                     if (options.validateOutput) {
-                        oasSchema.validate(content, InputFormat.JSON) { ctx ->
+                        oasSchema.validate(content, inputFormat) { ctx ->
                             ctx.executionConfig { cfg -> cfg.formatAssertionsEnabled(true) }
                         }.forEach {
                             response.addError(it.toString())
@@ -207,7 +247,13 @@ internal class Compiler(
     )
 
     private fun setup(): Setup {
-        val mapper = ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
+        val mapper = when (options.outputFormat) {
+            ProtocGenOpenAPI.Options.OutputFormat.JSON ->
+                ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
+
+            ProtocGenOpenAPI.Options.OutputFormat.YAML ->
+                YAMLMapper().enable(SerializationFeature.INDENT_OUTPUT)
+        }
         val messageIndex = MessageIndex(request.protoFiles)
         val rpcIndex = RpcIndex(request.protoFiles)
         val ctx = JsonContext(mapper, messageIndex, rpcIndex)
@@ -261,6 +307,24 @@ internal class Compiler(
             ?.let { infoNode.put("description", it) }
     }
 
+    /**
+     * Writes [ProtocGenOpenAPI.Options.version] into `doc.info.version` when the option is
+     * non-null.  This is always called before annotation layers so that any annotation that
+     * explicitly specifies `info.version` will overwrite the option value via [deepMerge].
+     *
+     * When the option is null this is a no-op; the resulting document will have no `info.version`
+     * unless an annotation supplies one.
+     */
+    private fun applyOptionsVersion(
+        doc: ObjectNode,
+        ctx: JsonContext,
+    ) {
+        val version = options.version ?: return
+        val infoNode = doc.get("info") as? ObjectNode
+            ?: ctx.obj().also { doc.set<JsonNode>("info", it) }
+        infoNode.put("version", version)
+    }
+
     private fun Exception.detail(): String =
         buildString {
             append(this@detail.javaClass.simpleName)
@@ -281,13 +345,13 @@ internal class Compiler(
             // Use filter+join so an empty package doesn't produce a leading dot.
             1 -> listOf(services[0].first, services[0].second)
                 .filter { it.isNotEmpty() }
-                .joinToString(".") + ".openapi.json"
+                .joinToString(".") + ".openapi.$outputExtension"
 
             else -> {
                 val packages = services.map { it.first }
                     .ifEmpty { targetFiles.map { it.`package`?.value.orEmpty() } }
                 val prefix = commonPackagePrefix(packages)
-                if (prefix.isEmpty()) "openapi.json" else "$prefix.openapi.json"
+                if (prefix.isEmpty()) "openapi.$outputExtension" else "$prefix.openapi.$outputExtension"
             }
         }
     }

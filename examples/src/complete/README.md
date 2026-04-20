@@ -2,7 +2,9 @@
 
 The most comprehensive example in the suite. `complete.proto` is purpose-built to exercise every annotation field and OpenAPI v3.1 construct the plugin supports. It is not meant to model a realistic API — it is a structured inventory of features, organized section by section, used as the ground-truth acceptance test for the plugin.
 
-The test asserts individual values for most fields in the generated output before finally doing a full structural diff against the reference JSON.
+The test asserts individual values for most fields in the generated output before finally doing a full structural diff against the reference YAML.
+
+`complete.proto` uses `outputFormat = YAML` to demonstrate YAML output. The generated file is named `*.openapi.yaml` instead of `*.openapi.json`.
 
 ## What it exercises
 
@@ -66,4 +68,4 @@ Four messages cover the full `SchemaObject` keyword set:
 
 The `Schema.boolean` wrapper type (a `oneof` inside `SchemaObject`) is used to express bare `true` and `false` schemas for `allOf` items and `unevaluatedProperties`, which have no natural proto analog otherwise.
 
-`StorefrontService` is the only service declared in the file, and it generates a single OpenAPI file. The plugin runs in non-merge mode.
+`StorefrontService` is the only service declared in the file, and it generates a single OpenAPI file named `*.openapi.yaml`. The plugin runs in non-merge mode with `outputFormat = YAML`.

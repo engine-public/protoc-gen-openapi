@@ -25,7 +25,7 @@ A re-expression of the canonical [Swagger Petstore](https://github.com/swagger-a
 
 ### [complete](src/complete/README.md)
 
-A purpose-built exhaustive exercise of every annotation field the plugin supports. Not a realistic API — it is a structured inventory of features. Covers the full `SchemaObject` keyword set, all component types, all security scheme types, composition keywords, JSON Schema referencing keywords, encoding objects, and every parameter/response/link variant. If you want to know whether a specific annotation field is wired correctly, look here.
+A purpose-built exhaustive exercise of every annotation field the plugin supports. Not a realistic API — it is a structured inventory of features. Covers the full `SchemaObject` keyword set, all component types, all security scheme types, composition keywords, JSON Schema referencing keywords, encoding objects, and every parameter/response/link variant. Also demonstrates `outputFormat = YAML` — the plugin generates a `.openapi.yaml` file instead of `.openapi.json`. If you want to know whether a specific annotation field is wired correctly, look here.
 
 ### [merged](src/merged/README.md)
 
@@ -38,6 +38,14 @@ Demonstrates `merge = false` (per-service) mode: each service produces its own O
 ### [responseBodyError](src/responseBodyError/README.md)
 
 An error-case test: verifies that `response_body` and `body` annotations whose field names do not exist on the corresponding message produce explicit compile errors rather than silently emitting a broken spec. Has no reference output files — it asserts that compilation fails and that the error message names the bad field.
+
+### [conventions](src/conventions/README.md)
+
+A minimal example based on the [helloworld Greeter service](https://grpc.io/docs/what-is-grpc/introduction/) from the gRPC introduction. Uses only `google.api.http` annotations — no engine annotations — to show the baseline conventions the plugin derives from plain HTTP binding rules: path parameter inference from URL templates, `response_body` field extraction, and service-derived `info` metadata.
+
+### [version](src/version/README.md)
+
+Exercises the `options.version` fallback: a nullable string written to `info.version` of every document that does not already have a version from an engine annotation. Covers all four combinations of options version present/absent × annotation version present/absent, and documents the priority layering that lets annotation-pinned versions always win over the global option.
 
 ## Adding a new example
 

@@ -1,0 +1,38 @@
+{
+    "openapi": "3.1.0",
+    "paths": {
+        "/hello/{name}": {
+            "get": {
+                "summary": "Sends a greeting to the named person.",
+                "description": "Sends a greeting to the named person.",
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "info": {
+        "title": "Greeter",
+        "description": "The greeter service definition.",
+        "version": "1.0.0"
+    }
+}

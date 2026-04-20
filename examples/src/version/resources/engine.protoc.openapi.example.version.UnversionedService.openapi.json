@@ -1,0 +1,21 @@
+{
+  "openapi" : "3.1.0",
+  "paths" : {
+    "/DoItAgain" : {
+      "get" : {
+        "summary" : "Gets a gadget by its identifier.",
+        "description" : "Gets a gadget by its identifier.",
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          }
+        }
+      }
+    }
+  },
+  "info" : {
+    "title" : "UnversionedService",
+    "description" : "A service with no version annotation.\n When options.version is set, the output receives that string as info.version.\n When options.version is absent, the output has no info.version at all.",
+    "version" : "global-2.0.0"
+  }
+}

@@ -1,6 +1,5 @@
 import com.engine.protoc.openapi.ProtocGenOpenAPI
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
 import com.networknt.schema.InputFormat
 import com.networknt.schema.SchemaLocation
 import com.networknt.schema.SchemaRegistry
@@ -12,21 +11,33 @@ import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 
-class MergedTest :
+class ConventionsTest :
     FunSpec({
 
         assertSoftly = true
 
-        val request = MergedTest::class.java.getResourceAsStream("/code-generator-request.binpb").shouldNotBeNull()
-        val response = ProtocGenOpenAPI.from(request) {
-            merge = true
-            validateOutput = true
-        }.compile()
-        val generatedFile = response.fileList.find { it.name == "engine.protoc.openapi.example.merged.openapi.json" }.shouldNotBeNull()
-        val mapper = ObjectMapper()
-        val json = mapper.readTree(generatedFile.content)
+        val request =
+            ConventionsTest::class.java.getResourceAsStream("/code-generator-request.binpb").shouldNotBeNull()
+        val response =
+            ProtocGenOpenAPI.from(request) {
+                // The output omits info.version — that field requires an engine annotation and
+                // this example deliberately uses only google.api.http.  OAS schema validation is
+                // therefore skipped; structure is verified by the reference-file comparison below.
+                validateOutput = false
+            }.compile()
 
-        val expected = MergedTest::class.java.getResourceAsStream("merged.openapi.json").shouldNotBeNull().reader().readText()
+        val mapper = ObjectMapper()
+        val generatedFile =
+            response.fileList
+                .find { it.name == "engine.protoc.openapi.example.conventions.Greeter.openapi.json" }
+                .shouldNotBeNull()
+        val json = mapper.readTree(generatedFile.content)
+        val expected =
+            ConventionsTest::class.java
+                .getResourceAsStream("/engine.protoc.openapi.example.conventions.Greeter.openapi.json")
+                .shouldNotBeNull()
+                .reader()
+                .readText()
 
         test("validate reference file") {
             val oasSchema by lazy {
@@ -41,22 +52,24 @@ class MergedTest :
                     .getSchema(SchemaLocation.of("https://spec.openapis.org/oas/3.1/schema-base/2022-10-07"))
             }
 
-            oasSchema.validate(expected, InputFormat.YAML) { ctx ->
+            oasSchema.validate(expected, InputFormat.JSON) { ctx ->
                 ctx.executionConfig { cfg -> cfg.formatAssertionsEnabled(true) }
             }.shouldBeEmpty()
         }
 
-        test("has no validation errors") {
+        test("has no errors") {
             response.hasError() shouldBe false
-            response.error.shouldBe("")
+            response.error shouldBe ""
         }
 
-        test("matches reference OAS spec") {
-            val expected = YAMLMapper().readTree(expected)
+        test("matches reference output") {
             assertSoftly {
                 collectJsonDiffs(
-                    expected,
+                    mapper.readTree(expected),
                     json,
+                    // ignore the version, because no annotation is specified to provide
+                    // version and the default version option is not utilized.
+                    "$.info.version",
                 ).forEach { (path, exp, act) ->
                     withClue("at $path — expected: $exp, actual: $act") {
                         act shouldBe exp

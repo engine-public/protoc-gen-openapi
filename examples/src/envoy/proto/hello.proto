@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package engine.protoc.openapi.example.envoy;
+
+option java_package = "com.engine.protoc.openapi.example.envoy";
+option java_multiple_files = true;
+
+enum Greeting {
+  GREETING_UNSPECIFIED = 0;
+  GREETING_HELLO = 1;
+  GREETING_HI = 2;
+}
+
+message HelloRequest {
+  string your_name = 1;
+  Greeting greeting_type = 2;
+}
+
+message HelloResponse {
+  string reply_message = 1;
+  Greeting greeting_used = 2;
+}
+
+service HelloService {
+  rpc SayHello(HelloRequest) returns (HelloResponse);
+  rpc StreamHellos(HelloRequest) returns (stream HelloResponse);
+}

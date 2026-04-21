@@ -1,9 +1,9 @@
 package com.engine.protoc.openapi.compile
 
 import com.engine.protoc.openapi.ProtocGenOpenAPI
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ArrayNode
-import com.fasterxml.jackson.databind.node.ObjectNode
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.ArrayNode
+import tools.jackson.databind.node.ObjectNode
 
 /**
  * Computes schema keys for `components/schemas` entries and their corresponding `$ref` strings.
@@ -119,7 +119,7 @@ internal class SchemaKeyResolver(
                     val newKey = buildPhaseToFinalMap[oldKey]
                     if (newKey != null) node.put("\$ref", "#/components/schemas/$newKey")
                 }
-                for ((_, child) in node.fields()) rewriteTree(child)
+                for ((_, child) in node.properties()) rewriteTree(child)
             }
 
             is ArrayNode -> for (child in node) rewriteTree(child)

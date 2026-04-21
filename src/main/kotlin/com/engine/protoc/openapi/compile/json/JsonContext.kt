@@ -5,8 +5,8 @@ import com.engine.protoc.openapi.compile.EnumIndex
 import com.engine.protoc.openapi.compile.MessageIndex
 import com.engine.protoc.openapi.compile.RpcIndex
 import com.engine.protoc.openapi.compile.SchemaKeyResolver
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.node.ObjectNode
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.databind.node.ObjectNode
 
 /** Shared state passed through all serialization functions. */
 internal class JsonContext(
@@ -26,12 +26,12 @@ internal class JsonContext(
      * are overwritten by the value in [other].
      */
     fun ObjectNode.deepMerge(other: ObjectNode): ObjectNode {
-        for ((key, value) in other.fields()) {
+        for ((key, value) in other.properties()) {
             val existing = get(key)
             if (existing is ObjectNode && value is ObjectNode) {
                 existing.deepMerge(value)
             } else {
-                set<ObjectNode>(key, value)
+                set(key, value)
             }
         }
         return this

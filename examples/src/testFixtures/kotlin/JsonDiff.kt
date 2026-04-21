@@ -1,4 +1,4 @@
-import com.fasterxml.jackson.databind.JsonNode
+import tools.jackson.databind.JsonNode
 
 /** Represents a single difference between two JSON trees at the given [path]. */
 public data class JsonDiff(val path: String, val expected: JsonNode?, val actual: JsonNode?)
@@ -31,7 +31,7 @@ public fun collectJsonDiffs(
     val diffs = mutableListOf<JsonDiff>()
     when {
         expected.isObject && actual.isObject -> {
-            val allFields = (expected.fieldNames().asSequence() + actual.fieldNames().asSequence()).toSet()
+            val allFields = (expected.propertyNames().asSequence() + actual.propertyNames().asSequence()).toSet()
             for (field in allFields) {
                 val exp = expected.get(field)
                 val act = actual.get(field)

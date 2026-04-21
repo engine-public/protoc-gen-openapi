@@ -15,7 +15,7 @@ val processTestResources = tasks.named("processTestResources", ProcessResources:
 
 protobuf {
     protoc {
-        artifact = tools.protoc.compiler.get().toString()
+        artifact = libs.tools.protoc.compiler.get().toString()
     }
     plugins {
         create("recorder") {

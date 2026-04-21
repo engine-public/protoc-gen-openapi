@@ -6,17 +6,6 @@ pluginManagement {
     }
 }
 
-dependencyResolutionManagement {
-    versionCatalogs {
-        create("testLibs") {
-            from(files("gradle/testLibs.versions.toml"))
-        }
-        create("tools") {
-            from(files("gradle/tools.versions.toml"))
-        }
-    }
-}
-
 rootDir
     .walkTopDown()
     .filter { it != rootDir }

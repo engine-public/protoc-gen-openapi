@@ -6,12 +6,12 @@ import com.engine.protoc.openapi.ProtocGenOpenAPI.Options.SchemaNamespaceSeparat
 import com.engine.protoc.openapi.ProtocGenOpenAPI.Options.SchemaNamespaceSeparator.UNDERSCORE
 import com.engine.protoc.openapi.ProtocGenOpenAPI.Options.SchemaNamespaceStrategy.FULL_PACKAGE
 import com.engine.protoc.openapi.ProtocGenOpenAPI.Options.SchemaNamespaceStrategy.SIMPLIFIED_PACKAGE
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.kotest.assertions.assertSoftly
 import io.kotest.assertions.withClue
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import tools.jackson.databind.ObjectMapper
 
 class NamespacingTest :
     FunSpec({

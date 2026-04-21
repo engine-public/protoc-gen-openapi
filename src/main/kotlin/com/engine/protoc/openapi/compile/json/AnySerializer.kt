@@ -1,8 +1,5 @@
 package com.engine.protoc.openapi.compile.json
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.NullNode
-import com.fasterxml.jackson.databind.node.ObjectNode
 import com.google.protobuf.Any
 import com.google.protobuf.BoolValue
 import com.google.protobuf.BytesValue
@@ -14,6 +11,9 @@ import com.google.protobuf.StringValue
 import com.google.protobuf.UInt32Value
 import com.google.protobuf.UInt64Value
 import com.google.protobuf.Value
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.NullNode
+import tools.jackson.databind.node.ObjectNode
 
 /**
  * Converts a `google.protobuf.Any` value to a [JsonNode].
@@ -55,12 +55,12 @@ internal fun Any.toJson(ctx: JsonContext): JsonNode =
 
         `is`(Value::class.java) -> unpack(Value::class.java).toJson(ctx)
 
-        else -> NullNode.instance
+        else -> NullNode.getInstance()
     }
 
 internal fun Value.toJson(ctx: JsonContext): JsonNode =
     when (kindCase) {
-        Value.KindCase.NULL_VALUE -> NullNode.instance
+        Value.KindCase.NULL_VALUE -> NullNode.getInstance()
 
         Value.KindCase.BOOL_VALUE -> ctx.mapper.nodeFactory.booleanNode(boolValue)
 
@@ -76,7 +76,7 @@ internal fun Value.toJson(ctx: JsonContext): JsonNode =
 
         Value.KindCase.STRUCT_VALUE -> {
             val obj = ctx.obj()
-            for ((k, v) in structValue.fieldsMap) obj.set<JsonNode>(k, v.toJson(ctx))
+            for ((k, v) in structValue.fieldsMap) obj.set(k, v.toJson(ctx))
             obj
         }
 
@@ -86,5 +86,5 @@ internal fun Value.toJson(ctx: JsonContext): JsonNode =
             arr
         }
 
-        else -> NullNode.instance
+        else -> NullNode.getInstance()
     }

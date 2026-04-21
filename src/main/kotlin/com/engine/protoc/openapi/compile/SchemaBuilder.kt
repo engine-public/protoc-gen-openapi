@@ -6,9 +6,9 @@ import com.engine.protoc.openapi.compile.json.toJson
 import com.engine.protoc.openapi.model.Schema
 import com.engine.protoc.util.message.DescriptorProtoWrapper
 import com.engine.protoc.util.message.FieldDescriptorProtoWrapper
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ObjectNode
 import com.google.protobuf.DescriptorProtos
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.ObjectNode
 
 /**
  * Builds the `components/schemas` section from all message types identified by [collector].
@@ -32,12 +32,12 @@ internal class SchemaBuilder(
             val wrapper = ctx.messageIndex.find(typeName) ?: continue
             if (wrapper.proto.options.mapEntry) continue
             val schemaKey = ctx.schemaKeyResolver.keyOf(typeName)
-            schemas.set<JsonNode>(schemaKey, buildMessageSchema(wrapper, typeName))
+            schemas.set(schemaKey, buildMessageSchema(wrapper, typeName))
         }
         for (typeName in collector.collectedEnums) {
             val wrapper = ctx.enumIndex.find(typeName) ?: continue
             val schemaKey = ctx.schemaKeyResolver.keyOf(typeName)
-            schemas.set<JsonNode>(schemaKey, pathsBuilder.buildEnumSchema(typeName, wrapper, includeTitle = true))
+            schemas.set(schemaKey, pathsBuilder.buildEnumSchema(typeName, wrapper, includeTitle = true))
         }
         return schemas
     }
@@ -61,18 +61,18 @@ internal class SchemaBuilder(
             val field = fieldWrapper.proto
             val jsonName = field.jsonName.ifEmpty { field.name }
             val fieldSchema = buildFieldSchema(fieldWrapper)
-            propsNode.set<JsonNode>(jsonName, fieldSchema)
+            propsNode.set(jsonName, fieldSchema)
 
             // proto3 required: fields inside a oneof, or proto2 LABEL_REQUIRED
             if (field.label == DescriptorProtos.FieldDescriptorProto.Label.LABEL_REQUIRED) {
                 required += jsonName
             }
         }
-        if (propsNode.size() > 0) base.set<JsonNode>("properties", propsNode)
+        if (propsNode.size() > 0) base.set("properties", propsNode)
         if (required.isNotEmpty()) {
             val arr = ctx.mapper.createArrayNode()
             for (r in required) arr.add(r)
-            base.set<JsonNode>("required", arr)
+            base.set("required", arr)
         }
 
         // ---- engine.protoc.openapi.message annotation override ----------

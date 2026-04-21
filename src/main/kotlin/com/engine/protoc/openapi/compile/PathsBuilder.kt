@@ -13,15 +13,14 @@ import com.engine.protoc.util.enums.EnumValueDescriptorProtoWrapper
 import com.engine.protoc.util.file.FileDescriptorProtoWrapper
 import com.engine.protoc.util.service.MethodDescriptorProtoWrapper
 import com.engine.protoc.util.service.ServiceDescriptorProtoWrapper
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ArrayNode
-import com.fasterxml.jackson.databind.node.ObjectNode
 import com.google.api.AnnotationsProto
 import com.google.api.HttpRule
 import com.google.protobuf.DescriptorProtos
 import org.commonmark.node.*
 import org.commonmark.parser.Parser
 import org.commonmark.renderer.markdown.MarkdownRenderer
+import tools.jackson.databind.node.ArrayNode
+import tools.jackson.databind.node.ObjectNode
 
 private val markdownParser: Parser = Parser.builder().build()
 private val markdownRenderer: MarkdownRenderer = MarkdownRenderer.builder().build()
@@ -90,7 +89,7 @@ internal class PathsBuilder(
                 val binding = httpRule.primaryBinding() ?: continue
                 val (effectivePath, operationNode) = buildOperation(method, binding, httpRule, autoTagName, serviceTags)
                 val pathItem = byPath.getOrPut(effectivePath) { ctx.obj() }
-                pathItem.set<JsonNode>(binding.httpMethod, operationNode)
+                pathItem.set(binding.httpMethod, operationNode)
                 contributed = true
             }
 
@@ -104,7 +103,7 @@ internal class PathsBuilder(
 
         val pathsNode = ctx.obj()
         for ((path, pathItem) in byPath) {
-            pathsNode.set<JsonNode>(path, pathItem)
+            pathsNode[path] = pathItem
         }
         return pathsNode
     }
@@ -203,7 +202,7 @@ internal class PathsBuilder(
         if (allTags.isNotEmpty()) {
             val arr = ctx.mapper.createArrayNode()
             for (t in allTags) arr.add(t)
-            node.set<JsonNode>("tags", arr)
+            node.set("tags", arr)
         }
 
         // ---- Parameters -------------------------------------------------
@@ -236,7 +235,7 @@ internal class PathsBuilder(
         if (allParams.isNotEmpty()) {
             val arr = ctx.mapper.createArrayNode()
             for (p in allParams) arr.add(p)
-            node.set<JsonNode>("parameters", arr)
+            node.set("parameters", arr)
         }
 
         // ---- Request body -----------------------------------------------
@@ -245,7 +244,7 @@ internal class PathsBuilder(
             annotation?.hasRequestBody() == true -> {
                 val requestBodyNode = annotation.requestBody.toJson(ctx)
                 injectMissingRef(requestBodyNode.get("content") as? ObjectNode, inputTypeName)
-                node.set<JsonNode>("requestBody", requestBodyNode)
+                node.set("requestBody", requestBodyNode)
                 if (annotation.requestBody.hasRequestBody()) {
                     annotation.requestBody.requestBody.contentMap.values.forEach { mt ->
                         if (mt.hasSchema()) collector.collectFromSchema(mt.schema)
@@ -253,9 +252,9 @@ internal class PathsBuilder(
                 }
             }
 
-            body == "*" -> node.set<JsonNode>("requestBody", inferRequestBody(inputTypeName))
+            body == "*" -> node.set("requestBody", inferRequestBody(inputTypeName))
 
-            body.isNotEmpty() -> node.set<JsonNode>(
+            body.isNotEmpty() -> node.set(
                 "requestBody",
                 inferRequestBodyField(inputTypeName, body),
             )
@@ -263,30 +262,30 @@ internal class PathsBuilder(
 
         // ---- Responses --------------------------------------------------
         if (annotation?.hasResponses() == true) {
-            node.set<JsonNode>("responses", annotation.responses.toJson(ctx))
+            node.set("responses", annotation.responses.toJson(ctx))
         } else {
-            node.set<JsonNode>("responses", inferResponses(outputTypeName, responseBodyField))
+            node.set("responses", inferResponses(outputTypeName, responseBodyField))
         }
 
         // ---- Security / deprecated --------------------------------------
         if (annotation?.securityList?.isNotEmpty() == true) {
             val arr = ctx.mapper.createArrayNode()
             for (s in annotation.securityList) arr.add(s.toJson(ctx))
-            node.set<JsonNode>("security", arr)
+            node.set("security", arr)
         }
         if (annotation?.hasDeprecated() == true) node.put("deprecated", annotation.deprecated)
         if (annotation?.hasExternalDocs() == true) {
-            node.set<JsonNode>("externalDocs", annotation.externalDocs.toJson(ctx))
+            node.set("externalDocs", annotation.externalDocs.toJson(ctx))
         }
         if (annotation?.callbacksMap?.isNotEmpty() == true) {
             val cbNode = ctx.obj()
-            for ((k, v) in annotation.callbacksMap) cbNode.set<JsonNode>(k, v.toJson(ctx))
-            node.set<JsonNode>("callbacks", cbNode)
+            for ((k, v) in annotation.callbacksMap) cbNode.set(k, v.toJson(ctx))
+            node.set("callbacks", cbNode)
         }
         if (annotation?.serversList?.isNotEmpty() == true) {
             val arr = ctx.mapper.createArrayNode()
             for (s in annotation.serversList) arr.add(s.toJson(ctx))
-            node.set<JsonNode>("servers", arr)
+            node.set("servers", arr)
         }
         annotation?.extensionsMap?.putExtensionsInto(node, ctx)
 
@@ -331,9 +330,9 @@ internal class PathsBuilder(
 
             // Build merged param: inferred fields as base, annotation fields override
             val merged = ctx.obj()
-            for ((k, v) in inferredNode.fields()) if (k != "schema") merged.set<JsonNode>(k, v)
-            for ((k, v) in annotatedNode.fields()) if (k != "schema") merged.set<JsonNode>(k, v)
-            if (mergedSchema.size() > 0) merged.set<JsonNode>("schema", mergedSchema)
+            for ((k, v) in inferredNode.properties()) if (k != "schema") merged.set(k, v)
+            for ((k, v) in annotatedNode.properties()) if (k != "schema") merged.set(k, v)
+            if (mergedSchema.size() > 0) merged.set("schema", mergedSchema)
             merged
         }
 
@@ -356,7 +355,7 @@ internal class PathsBuilder(
         if (contentNode == null) return
         if (ctx.wellKnownScalarSchema(inputTypeName) != null) return
         val ref = "#/components/schemas/${ctx.schemaKeyResolver.buildPhaseKeyOf(inputTypeName)}"
-        for ((_, mediaTypeNode) in contentNode.fields()) {
+        for ((_, mediaTypeNode) in contentNode.properties()) {
             if (mediaTypeNode !is ObjectNode) continue
             val schemaNode = mediaTypeNode.get("schema") as? ObjectNode ?: continue
             if (schemaNode.size() == 0) schemaNode.put("\$ref", ref)
@@ -383,7 +382,7 @@ internal class PathsBuilder(
         node.put("name", name)
         node.put("in", "path")
         node.put("required", true)
-        node.set<JsonNode>("schema", paramFieldSchema(name, inputTypeName))
+        node.set("schema", paramFieldSchema(name, inputTypeName))
         return node
     }
 
@@ -411,8 +410,8 @@ internal class PathsBuilder(
         val node = ctx.obj()
         node.put("required", true)
         val content = ctx.obj()
-        content.set<JsonNode>("application/json", schemaMediaType(inputTypeName))
-        node.set<JsonNode>("content", content)
+        content.set("application/json", schemaMediaType(inputTypeName))
+        node.set("content", content)
         return node
     }
 
@@ -428,9 +427,9 @@ internal class PathsBuilder(
         node.put("required", true)
         val content = ctx.obj()
         val mediaType = ctx.obj()
-        mediaType.set<JsonNode>("schema", schema)
-        content.set<JsonNode>("application/json", mediaType)
-        node.set<JsonNode>("content", content)
+        mediaType.set("schema", schema)
+        content.set("application/json", mediaType)
+        node.set("content", content)
         return node
     }
 
@@ -440,7 +439,7 @@ internal class PathsBuilder(
                 it.put("\$ref", "#/components/schemas/${ctx.schemaKeyResolver.buildPhaseKeyOf(typeName)}")
             }
         val mediaType = ctx.obj()
-        mediaType.set<JsonNode>("schema", schema)
+        mediaType.set("schema", schema)
         return mediaType
     }
 
@@ -457,15 +456,15 @@ internal class PathsBuilder(
             val content = ctx.obj()
             val mediaType = if (responseBodyField != null) {
                 responseBodyFieldSchema(outputTypeName, responseBodyField)
-                    ?.let { schema -> ctx.obj().also { it.set<JsonNode>("schema", schema) } }
+                    ?.let { schema -> ctx.obj().also { it.set("schema", schema) } }
                     ?: schemaMediaType(outputTypeName)
             } else {
                 schemaMediaType(outputTypeName)
             }
-            content.set<JsonNode>("application/json", mediaType)
-            response.set<JsonNode>("content", content)
+            content.set("application/json", mediaType)
+            response.set("content", content)
         }
-        responses.set<JsonNode>("200", response)
+        responses.set("200", response)
         return responses
     }
 
@@ -516,7 +515,7 @@ internal class PathsBuilder(
         return if (isRepeated && !isMapField(field)) {
             ctx.obj().also {
                 it.put("type", "array")
-                it.set<JsonNode>("items", base)
+                it.set("items", base)
             }
         } else {
             base
@@ -639,7 +638,7 @@ internal class PathsBuilder(
             for (valueWrapper in visibleValues) {
                 valuesArr.add(formatEnumValue(valueWrapper.proto.name, ctx.enumValueFormat))
             }
-            if (valuesArr.size() > 0) node.set<JsonNode>("enum", valuesArr)
+            if (valuesArr.size() > 0) node.set("enum", valuesArr)
 
             val annotation = enumWrapper.options?.findExtension(Annotations.enum_)?.value
             if (annotation != null && annotation.schemaValueCase == Schema.SchemaValueCase.OBJECT) {

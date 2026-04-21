@@ -8,17 +8,18 @@ import com.engine.protoc.util.compiler.CodeGeneratorRequestWrapper
 import com.engine.protoc.util.compiler.CodeGeneratorResponseWrapper
 import com.engine.protoc.util.file.FileDescriptorProtoWrapper
 import com.engine.protoc.util.service.ServiceDescriptorProtoWrapper
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.node.ArrayNode
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
 import com.google.protobuf.compiler.PluginProtos
 import com.networknt.schema.InputFormat
 import com.networknt.schema.SchemaLocation
 import com.networknt.schema.SchemaRegistry
 import com.networknt.schema.SpecificationVersion
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.databind.SerializationFeature
+import tools.jackson.databind.json.JsonMapper
+import tools.jackson.databind.node.ArrayNode
+import tools.jackson.databind.node.ObjectNode
+import tools.jackson.dataformat.yaml.YAMLMapper
 
 /**
  * Main compilation entry point.
@@ -94,7 +95,7 @@ internal class Compiler(
 
         val doc: ObjectNode = ctx.obj()
         doc.put("openapi", "3.1.0")
-        doc.set<JsonNode>("paths", ctx.obj())
+        doc.set("paths", ctx.obj())
 
         // Apply the options version before the annotation loop so that any file-level annotation
         // that explicitly sets info.version will overwrite it (higher-priority layers win).
@@ -176,7 +177,7 @@ internal class Compiler(
                 try {
                     val doc = ctx.obj().also {
                         it.put("openapi", "3.1.0")
-                        it.set<JsonNode>("paths", ctx.obj())
+                        it.set("paths", ctx.obj())
                     }
                     // Apply options version before the annotation so the annotation can override it.
                     applyOptionsVersion(doc, ctx)
@@ -196,7 +197,7 @@ internal class Compiler(
                 try {
                     val doc = ctx.obj().also {
                         it.put("openapi", "3.1.0")
-                        it.set<JsonNode>("paths", ctx.obj())
+                        it.set("paths", ctx.obj())
                     }
 
                     // Layer 1: attributes derived from the service itself (lowest priority)
@@ -268,10 +269,10 @@ internal class Compiler(
     private fun setup(): Setup {
         val mapper = when (options.outputFormat) {
             ProtocGenOpenAPI.Options.OutputFormat.JSON ->
-                ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
+                JsonMapper.builder().enable(SerializationFeature.INDENT_OUTPUT).build()
 
             ProtocGenOpenAPI.Options.OutputFormat.YAML ->
-                YAMLMapper().enable(SerializationFeature.INDENT_OUTPUT)
+                YAMLMapper.builder().enable(SerializationFeature.INDENT_OUTPUT).build()
         }
         val messageIndex = MessageIndex(request.protoFiles)
         val enumIndex = EnumIndex(request.protoFiles)
@@ -307,13 +308,13 @@ internal class Compiler(
         ctx: JsonContext,
     ) {
         val existingPaths = doc.get("paths") as? ObjectNode
-            ?: ctx.obj().also { doc.set<JsonNode>("paths", it) }
-        pathsNode.fields().forEach { (path, rpcPathItem) ->
+            ?: ctx.obj().also { doc.set("paths", it) }
+        pathsNode.properties().forEach { (path, rpcPathItem) ->
             val existing = existingPaths.get(path) as? ObjectNode
             if (existing != null) {
                 with(ctx) { existing.deepMerge(rpcPathItem as ObjectNode) }
             } else {
-                existingPaths.set<JsonNode>(path, rpcPathItem)
+                existingPaths[path] = rpcPathItem
             }
         }
     }
@@ -332,7 +333,7 @@ internal class Compiler(
         val serviceTags = pathsBuilder.buildServiceTags()
         if (serviceTags.size() == 0) return
         val existing = doc.get("tags") as? ArrayNode
-            ?: ctx.mapper.createArrayNode().also { doc.set<JsonNode>("tags", it) }
+            ?: ctx.mapper.createArrayNode().also { doc.set("tags", it) }
         serviceTags.forEach { existing.add(it) }
     }
 
@@ -343,11 +344,11 @@ internal class Compiler(
     ) {
         if (schemas.size() == 0) return
         val components = doc.get("components") as? ObjectNode
-            ?: ctx.obj().also { doc.set<JsonNode>("components", it) }
+            ?: ctx.obj().also { doc.set("components", it) }
         val existingSchemas = components.get("schemas") as? ObjectNode
-            ?: ctx.obj().also { components.set<JsonNode>("schemas", it) }
-        schemas.fields().forEach { (name, schema) ->
-            existingSchemas.set<JsonNode>(name, schema)
+            ?: ctx.obj().also { components.set("schemas", it) }
+        schemas.properties().forEach { (name, schema) ->
+            existingSchemas.set(name, schema)
         }
     }
 
@@ -357,7 +358,7 @@ internal class Compiler(
         ctx: JsonContext,
     ) {
         val infoNode = doc.get("info") as? ObjectNode
-            ?: ctx.obj().also { doc.set<JsonNode>("info", it) }
+            ?: ctx.obj().also { doc.set("info", it) }
         service.name?.value?.let { infoNode.put("title", it) }
         service.location?.proto?.leadingComments?.trim()?.ifEmpty { null }
             ?.let { infoNode.put("description", it) }
@@ -377,7 +378,7 @@ internal class Compiler(
     ) {
         val version = options.version ?: return
         val infoNode = doc.get("info") as? ObjectNode
-            ?: ctx.obj().also { doc.set<JsonNode>("info", it) }
+            ?: ctx.obj().also { doc.set("info", it) }
         infoNode.put("version", version)
     }
 

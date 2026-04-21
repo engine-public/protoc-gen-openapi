@@ -5,9 +5,9 @@ import com.engine.protoc.openapi.model.ExternalDocumentation
 import com.engine.protoc.openapi.model.Schema
 import com.engine.protoc.openapi.model.SchemaObject
 import com.engine.protoc.openapi.model.XML
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ObjectNode
 import com.google.protobuf.Value
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.ObjectNode
 
 // ---------------------------------------------------------------------------
 // Schema (oneof bool | SchemaObject)
@@ -43,8 +43,8 @@ internal fun SchemaObject.toJson(ctx: JsonContext): ObjectNode {
     if (hasDynamicAnchor()) node.put("\$dynamicAnchor", dynamicAnchor)
     if (defsMap.isNotEmpty()) {
         val defsNode = ctx.obj()
-        for ((k, v) in defsMap) defsNode.set<JsonNode>(k, v.toJson(ctx))
-        node.set<JsonNode>("\$defs", defsNode)
+        for ((k, v) in defsMap) defsNode.set(k, v.toJson(ctx))
+        node.set("\$defs", defsNode)
     }
 
     // ---- Metadata --------------------------------------------------------
@@ -53,12 +53,12 @@ internal fun SchemaObject.toJson(ctx: JsonContext): ObjectNode {
     if (hasDeprecated()) node.put("deprecated", deprecated)
     if (hasReadOnly()) node.put("readOnly", readOnly)
     if (hasWriteOnly()) node.put("writeOnly", writeOnly)
-    if (hasDefault()) node.set<JsonNode>("default", default.toJson(ctx))
-    if (hasExample()) node.set<JsonNode>("example", example.toJson(ctx))
+    if (hasDefault()) node.set("default", default.toJson(ctx))
+    if (hasExample()) node.set("example", example.toJson(ctx))
     if (examplesList.isNotEmpty()) {
         val arr = ctx.mapper.createArrayNode()
         for (ex in examplesList) arr.add(ex.toJson(ctx))
-        node.set<JsonNode>("examples", arr)
+        node.set("examples", arr)
     }
 
     // ---- Type ------------------------------------------------------------
@@ -70,7 +70,7 @@ internal fun SchemaObject.toJson(ctx: JsonContext): ObjectNode {
         else -> {
             val arr = ctx.mapper.createArrayNode()
             for (t in typeList) arr.add(t)
-            node.set<JsonNode>("type", arr)
+            node.set("type", arr)
         }
     }
     if (hasFormat()) node.put("format", format)
@@ -79,9 +79,9 @@ internal fun SchemaObject.toJson(ctx: JsonContext): ObjectNode {
     if (enumList.isNotEmpty()) {
         val arr = ctx.mapper.createArrayNode()
         for (v in enumList) arr.add(v.toJson(ctx))
-        node.set<JsonNode>("enum", arr)
+        node.set("enum", arr)
     }
-    if (hasConst()) node.set<JsonNode>("const", const.toJson(ctx))
+    if (hasConst()) node.set("const", const.toJson(ctx))
 
     // ---- Numbers --------------------------------------------------------
     if (hasMultipleOf()) node.put("multipleOf", multipleOf)
@@ -96,80 +96,80 @@ internal fun SchemaObject.toJson(ctx: JsonContext): ObjectNode {
     if (hasPattern()) node.put("pattern", pattern)
     if (hasContentEncoding()) node.put("contentEncoding", contentEncoding)
     if (hasContentMediaType()) node.put("contentMediaType", contentMediaType)
-    if (hasContentSchema()) node.set<JsonNode>("contentSchema", contentSchema.toJson(ctx))
+    if (hasContentSchema()) node.set("contentSchema", contentSchema.toJson(ctx))
 
     // ---- Arrays ---------------------------------------------------------
-    if (hasItems()) node.set<JsonNode>("items", items.toJson(ctx))
+    if (hasItems()) node.set("items", items.toJson(ctx))
     if (prefixItemsList.isNotEmpty()) {
         val arr = ctx.mapper.createArrayNode()
         for (s in prefixItemsList) arr.add(s.toJson(ctx))
-        node.set<JsonNode>("prefixItems", arr)
+        node.set("prefixItems", arr)
     }
-    if (hasContains()) node.set<JsonNode>("contains", contains.toJson(ctx))
+    if (hasContains()) node.set("contains", contains.toJson(ctx))
     if (hasMinContains()) node.put("minContains", minContains)
     if (hasMaxContains()) node.put("maxContains", maxContains)
     if (hasMaxItems()) node.put("maxItems", maxItems)
     if (hasMinItems()) node.put("minItems", minItems)
     if (hasUniqueItems()) node.put("uniqueItems", uniqueItems)
-    if (hasUnevaluatedItems()) node.set<JsonNode>("unevaluatedItems", unevaluatedItems.toJson(ctx))
+    if (hasUnevaluatedItems()) node.set("unevaluatedItems", unevaluatedItems.toJson(ctx))
 
     // ---- Objects --------------------------------------------------------
     if (propertiesMap.isNotEmpty()) {
         val propsNode = ctx.obj()
-        for ((k, v) in propertiesMap) propsNode.set<JsonNode>(k, v.toJson(ctx))
-        node.set<JsonNode>("properties", propsNode)
+        for ((k, v) in propertiesMap) propsNode.set(k, v.toJson(ctx))
+        node.set("properties", propsNode)
     }
     if (patternPropertiesMap.isNotEmpty()) {
         val ppNode = ctx.obj()
-        for ((k, v) in patternPropertiesMap) ppNode.set<JsonNode>(k, v.toJson(ctx))
-        node.set<JsonNode>("patternProperties", ppNode)
+        for ((k, v) in patternPropertiesMap) ppNode.set(k, v.toJson(ctx))
+        node.set("patternProperties", ppNode)
     }
     when (additionalPropertiesTypeCase) {
         SchemaObject.AdditionalPropertiesTypeCase.ADDITIONAL_PROPERTIES_ALLOWED ->
             node.put("additionalProperties", additionalPropertiesAllowed)
 
         SchemaObject.AdditionalPropertiesTypeCase.ADDITIONAL_PROPERTIES_SCHEMA ->
-            node.set<JsonNode>("additionalProperties", additionalPropertiesSchema.toJson(ctx))
+            node.set("additionalProperties", additionalPropertiesSchema.toJson(ctx))
 
         else -> {}
     }
-    if (hasPropertyNames()) node.set<JsonNode>("propertyNames", propertyNames.toJson(ctx))
+    if (hasPropertyNames()) node.set("propertyNames", propertyNames.toJson(ctx))
     if (requiredList.isNotEmpty()) {
         val arr = ctx.mapper.createArrayNode()
         for (r in requiredList) arr.add(r)
-        node.set<JsonNode>("required", arr)
+        node.set("required", arr)
     }
     if (hasMaxProperties()) node.put("maxProperties", maxProperties)
     if (hasMinProperties()) node.put("minProperties", minProperties)
     if (hasUnevaluatedProperties()) {
-        node.set<JsonNode>("unevaluatedProperties", unevaluatedProperties.toJson(ctx))
+        node.set("unevaluatedProperties", unevaluatedProperties.toJson(ctx))
     }
 
     // ---- Composition / Application ---------------------------------------
     if (allOfList.isNotEmpty()) {
         val arr = ctx.mapper.createArrayNode()
         for (s in allOfList) arr.add(s.toJson(ctx))
-        node.set<JsonNode>("allOf", arr)
+        node.set("allOf", arr)
     }
     if (anyOfList.isNotEmpty()) {
         val arr = ctx.mapper.createArrayNode()
         for (s in anyOfList) arr.add(s.toJson(ctx))
-        node.set<JsonNode>("anyOf", arr)
+        node.set("anyOf", arr)
     }
     if (oneOfList.isNotEmpty()) {
         val arr = ctx.mapper.createArrayNode()
         for (s in oneOfList) arr.add(s.toJson(ctx))
-        node.set<JsonNode>("oneOf", arr)
+        node.set("oneOf", arr)
     }
-    if (hasNot()) node.set<JsonNode>("not", not.toJson(ctx))
-    if (hasIfSchema()) node.set<JsonNode>("if", ifSchema.toJson(ctx))
-    if (hasThenSchema()) node.set<JsonNode>("then", thenSchema.toJson(ctx))
-    if (hasElseSchema()) node.set<JsonNode>("else", elseSchema.toJson(ctx))
+    if (hasNot()) node.set("not", not.toJson(ctx))
+    if (hasIfSchema()) node.set("if", ifSchema.toJson(ctx))
+    if (hasThenSchema()) node.set("then", thenSchema.toJson(ctx))
+    if (hasElseSchema()) node.set("else", elseSchema.toJson(ctx))
 
     // ---- OpenAPI extensions to JSON Schema ------------------------------
-    if (hasDiscriminator()) node.set<JsonNode>("discriminator", discriminator.toJson(ctx))
-    if (hasXml()) node.set<JsonNode>("xml", xml.toJson(ctx))
-    if (hasExternalDocs()) node.set<JsonNode>("externalDocs", externalDocs.toJson(ctx))
+    if (hasDiscriminator()) node.set("discriminator", discriminator.toJson(ctx))
+    if (hasXml()) node.set("xml", xml.toJson(ctx))
+    if (hasExternalDocs()) node.set("externalDocs", externalDocs.toJson(ctx))
     extensionsMap.putExtensionsInto(node, ctx)
 
     return node
@@ -185,7 +185,7 @@ internal fun Discriminator.toJson(ctx: JsonContext): ObjectNode {
     if (mappingMap.isNotEmpty()) {
         val mapNode = ctx.obj()
         for ((k, v) in mappingMap) mapNode.put(k, v)
-        node.set<JsonNode>("mapping", mapNode)
+        node.set("mapping", mapNode)
     }
     return node
 }

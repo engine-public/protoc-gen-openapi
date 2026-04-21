@@ -45,9 +45,9 @@ import com.engine.protoc.openapi.model.SecuritySchemeOrReference
 import com.engine.protoc.openapi.model.Server
 import com.engine.protoc.openapi.model.ServerVariable
 import com.engine.protoc.openapi.model.Tag
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ObjectNode
 import com.google.protobuf.Value
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.ObjectNode
 
 // ---------------------------------------------------------------------------
 // Top-level OpenAPI document
@@ -65,7 +65,7 @@ internal fun OpenAPI.mergeInto(
     if (openapi.isNotEmpty()) dest.put("openapi", openapi)
     if (hasInfo()) {
         val infoNode = dest.get("info") as? ObjectNode ?: ctx.obj().also {
-            dest.set<JsonNode>("info", it)
+            dest.set("info", it)
         }
         with(ctx) { infoNode.deepMerge(info.toJson(ctx)) }
     }
@@ -73,41 +73,41 @@ internal fun OpenAPI.mergeInto(
     if (serversList.isNotEmpty()) {
         val arr = ctx.mapper.createArrayNode()
         for (s in serversList) arr.add(s.toJson(ctx))
-        dest.set<JsonNode>("servers", arr)
+        dest.set("servers", arr)
     }
     if (tagsList.isNotEmpty()) {
         val arr = ctx.mapper.createArrayNode()
         for (t in tagsList) arr.add(t.toJson(ctx))
-        dest.set<JsonNode>("tags", arr)
+        dest.set("tags", arr)
     }
     if (securityList.isNotEmpty()) {
         val arr = ctx.mapper.createArrayNode()
         for (s in securityList) arr.add(s.toJson(ctx))
-        dest.set<JsonNode>("security", arr)
+        dest.set("security", arr)
     }
-    if (hasExternalDocs()) dest.set<JsonNode>("externalDocs", externalDocs.toJson(ctx))
+    if (hasExternalDocs()) dest.set("externalDocs", externalDocs.toJson(ctx))
     if (hasComponents()) {
         val existing = dest.get("components") as? ObjectNode ?: ctx.obj().also {
-            dest.set<JsonNode>("components", it)
+            dest.set("components", it)
         }
         with(ctx) { existing.deepMerge(components.toJson(ctx)) }
     }
     if (webhooksMap.isNotEmpty()) {
         val webhooksNode = ctx.obj()
-        for ((k, v) in webhooksMap) webhooksNode.set<JsonNode>(k, v.toJson(ctx))
+        for ((k, v) in webhooksMap) webhooksNode.set(k, v.toJson(ctx))
         val existing = dest.get("webhooks") as? ObjectNode ?: ctx.obj().also {
-            dest.set<JsonNode>("webhooks", it)
+            dest.set("webhooks", it)
         }
         with(ctx) { existing.deepMerge(webhooksNode) }
     }
     // Merge any explicit paths from the extension (rare but supported)
     if (hasPaths()) {
         val pathsNode = dest.get("paths") as? ObjectNode ?: ctx.obj().also {
-            dest.set<JsonNode>("paths", it)
+            dest.set("paths", it)
         }
         for ((k, v) in paths.pathsMap) {
             val pathItem = pathsNode.get(k) as? ObjectNode ?: ctx.obj().also {
-                pathsNode.set<JsonNode>(k, it)
+                pathsNode.set(k, it)
             }
             with(ctx) { pathItem.deepMerge(v.toJson(ctx)) }
         }
@@ -124,7 +124,7 @@ internal fun Map<String, Value>.putExtensionsInto(
     node: ObjectNode,
     ctx: JsonContext,
 ) {
-    for ((key, value) in this) node.set<JsonNode>(key, value.toJson(ctx))
+    for ((key, value) in this) node.set(key, value.toJson(ctx))
 }
 
 // ---------------------------------------------------------------------------
@@ -137,8 +137,8 @@ internal fun Info.toJson(ctx: JsonContext): ObjectNode {
     if (hasSummary()) node.put("summary", summary)
     if (hasDescription()) node.put("description", description)
     if (hasTermsOfService()) node.put("termsOfService", termsOfService)
-    if (hasContact()) node.set<JsonNode>("contact", contact.toJson(ctx))
-    if (hasLicense()) node.set<JsonNode>("license", license.toJson(ctx))
+    if (hasContact()) node.set("contact", contact.toJson(ctx))
+    if (hasLicense()) node.set("license", license.toJson(ctx))
     if (version.isNotEmpty()) node.put("version", version)
     extensionsMap.putExtensionsInto(node, ctx)
     return node
@@ -170,8 +170,8 @@ internal fun Server.toJson(ctx: JsonContext): ObjectNode {
     if (hasDescription()) node.put("description", description)
     if (variablesMap.isNotEmpty()) {
         val varNode = ctx.obj()
-        for ((k, v) in variablesMap) varNode.set<JsonNode>(k, v.toJson(ctx))
-        node.set<JsonNode>("variables", varNode)
+        for ((k, v) in variablesMap) varNode.set(k, v.toJson(ctx))
+        node.set("variables", varNode)
     }
     return node
 }
@@ -181,7 +181,7 @@ internal fun ServerVariable.toJson(ctx: JsonContext): ObjectNode {
     if (enumList.isNotEmpty()) {
         val arr = ctx.mapper.createArrayNode()
         for (e in enumList) arr.add(e)
-        node.set<JsonNode>("enum", arr)
+        node.set("enum", arr)
     }
     node.put("default", default)
     if (hasDescription()) node.put("description", description)
@@ -196,7 +196,7 @@ internal fun Tag.toJson(ctx: JsonContext): ObjectNode {
     val node = ctx.obj()
     node.put("name", name)
     if (hasDescription()) node.put("description", description)
-    if (hasExternalDocs()) node.set<JsonNode>("externalDocs", externalDocs.toJson(ctx))
+    if (hasExternalDocs()) node.set("externalDocs", externalDocs.toJson(ctx))
     extensionsMap.putExtensionsInto(node, ctx)
     return node
 }
@@ -223,23 +223,23 @@ internal fun PathItem.toJson(ctx: JsonContext): ObjectNode {
     }
     if (hasSummary()) node.put("summary", summary)
     if (hasDescription()) node.put("description", description)
-    if (hasGet()) node.set<JsonNode>("get", get.toJson(ctx))
-    if (hasPut()) node.set<JsonNode>("put", put.toJson(ctx))
-    if (hasPost()) node.set<JsonNode>("post", post.toJson(ctx))
-    if (hasDelete()) node.set<JsonNode>("delete", delete.toJson(ctx))
-    if (hasOptions()) node.set<JsonNode>("options", options.toJson(ctx))
-    if (hasHead()) node.set<JsonNode>("head", head.toJson(ctx))
-    if (hasPatch()) node.set<JsonNode>("patch", patch.toJson(ctx))
-    if (hasTrace()) node.set<JsonNode>("trace", trace.toJson(ctx))
+    if (hasGet()) node.set("get", get.toJson(ctx))
+    if (hasPut()) node.set("put", put.toJson(ctx))
+    if (hasPost()) node.set("post", post.toJson(ctx))
+    if (hasDelete()) node.set("delete", delete.toJson(ctx))
+    if (hasOptions()) node.set("options", options.toJson(ctx))
+    if (hasHead()) node.set("head", head.toJson(ctx))
+    if (hasPatch()) node.set("patch", patch.toJson(ctx))
+    if (hasTrace()) node.set("trace", trace.toJson(ctx))
     if (serversList.isNotEmpty()) {
         val arr = ctx.mapper.createArrayNode()
         for (s in serversList) arr.add(s.toJson(ctx))
-        node.set<JsonNode>("servers", arr)
+        node.set("servers", arr)
     }
     if (parametersList.isNotEmpty()) {
         val arr = ctx.mapper.createArrayNode()
         for (p in parametersList) arr.add(p.toJson(ctx))
-        node.set<JsonNode>("parameters", arr)
+        node.set("parameters", arr)
     }
     extensionsMap.putExtensionsInto(node, ctx)
     return node
@@ -254,36 +254,36 @@ internal fun Operation.toJson(ctx: JsonContext): ObjectNode {
     if (tagsList.isNotEmpty()) {
         val arr = ctx.mapper.createArrayNode()
         for (t in tagsList) arr.add(t)
-        node.set<JsonNode>("tags", arr)
+        node.set("tags", arr)
     }
     if (hasSummary()) node.put("summary", summary)
     if (hasDescription()) node.put("description", description)
-    if (hasExternalDocs()) node.set<JsonNode>("externalDocs", externalDocs.toJson(ctx))
+    if (hasExternalDocs()) node.set("externalDocs", externalDocs.toJson(ctx))
     if (hasOperationId()) node.put("operationId", operationId)
     if (parametersList.isNotEmpty()) {
         val arr = ctx.mapper.createArrayNode()
         for (p in parametersList) arr.add(p.toJson(ctx))
-        node.set<JsonNode>("parameters", arr)
+        node.set("parameters", arr)
     }
-    if (hasRequestBody()) node.set<JsonNode>("requestBody", requestBody.toJson(ctx))
-    if (hasResponses()) node.set<JsonNode>("responses", responses.toJson(ctx))
+    if (hasRequestBody()) node.set("requestBody", requestBody.toJson(ctx))
+    if (hasResponses()) node.set("responses", responses.toJson(ctx))
     // callbacks is map<string, Reference> rather than map<string, CallbackOrReference> due to
     // a protobuf circular-dependency constraint (Operation→Callback→PathItem→Operation).
     // References must point to entries in components.callbacks.
     if (callbacksMap.isNotEmpty()) {
         val cbNode = ctx.obj()
-        for ((k, v) in callbacksMap) cbNode.set<JsonNode>(k, v.toJson(ctx))
-        node.set<JsonNode>("callbacks", cbNode)
+        for ((k, v) in callbacksMap) cbNode.set(k, v.toJson(ctx))
+        node.set("callbacks", cbNode)
     }
     if (securityList.isNotEmpty()) {
         val arr = ctx.mapper.createArrayNode()
         for (s in securityList) arr.add(s.toJson(ctx))
-        node.set<JsonNode>("security", arr)
+        node.set("security", arr)
     }
     if (serversList.isNotEmpty()) {
         val arr = ctx.mapper.createArrayNode()
         for (s in serversList) arr.add(s.toJson(ctx))
-        node.set<JsonNode>("servers", arr)
+        node.set("servers", arr)
     }
     if (hasDeprecated()) node.put("deprecated", deprecated)
     extensionsMap.putExtensionsInto(node, ctx)
@@ -315,20 +315,20 @@ internal fun Parameter.toJson(ctx: JsonContext): ObjectNode {
             if (schema.hasStyle()) node.put("style", schema.style)
             if (schema.hasExplode()) node.put("explode", schema.explode)
             if (schema.hasAllowReserved()) node.put("allowReserved", schema.allowReserved)
-            if (schema.hasSchema()) node.set<JsonNode>("schema", schema.schema.toJson(ctx))
+            if (schema.hasSchema()) node.set("schema", schema.schema.toJson(ctx))
             when (schema.exampleTypeCase) {
                 ParameterSchema.ExampleTypeCase.EXAMPLE ->
-                    node.set<JsonNode>("example", schema.example.toJson(ctx))
+                    node.set("example", schema.example.toJson(ctx))
 
                 ParameterSchema.ExampleTypeCase.EXAMPLES ->
-                    node.set<JsonNode>("examples", schema.examples.toJson(ctx))
+                    node.set("examples", schema.examples.toJson(ctx))
 
                 else -> {}
             }
         }
 
         Parameter.ParameterDefinitionTypeCase.CONTENT ->
-            node.set<JsonNode>("content", content.toJson(ctx))
+            node.set("content", content.toJson(ctx))
 
         else -> {}
     }
@@ -339,7 +339,7 @@ internal fun Parameter.toJson(ctx: JsonContext): ObjectNode {
 /** A ParameterContent is a map from media-type string to MediaType; per spec it MUST have exactly one entry. */
 internal fun ParameterContent.toJson(ctx: JsonContext): ObjectNode {
     val node = ctx.obj()
-    for ((k, v) in contentMap) node.set<JsonNode>(k, v.toJson(ctx))
+    for ((k, v) in contentMap) node.set(k, v.toJson(ctx))
     return node
 }
 
@@ -359,8 +359,8 @@ internal fun RequestBody.toJson(ctx: JsonContext): ObjectNode {
     if (hasDescription()) node.put("description", description)
     if (contentMap.isNotEmpty()) {
         val contentNode = ctx.obj()
-        for ((k, v) in contentMap) contentNode.set<JsonNode>(k, v.toJson(ctx))
-        node.set<JsonNode>("content", contentNode)
+        for ((k, v) in contentMap) contentNode.set(k, v.toJson(ctx))
+        node.set("content", contentNode)
     }
     if (hasRequired()) node.put("required", required)
     return node
@@ -368,16 +368,16 @@ internal fun RequestBody.toJson(ctx: JsonContext): ObjectNode {
 
 internal fun MediaType.toJson(ctx: JsonContext): ObjectNode {
     val node = ctx.obj()
-    if (hasSchema()) node.set<JsonNode>("schema", schema.toJson(ctx))
+    if (hasSchema()) node.set("schema", schema.toJson(ctx))
     when (exampleTypeCase) {
-        MediaType.ExampleTypeCase.EXAMPLE -> node.set<JsonNode>("example", example.toJson(ctx))
-        MediaType.ExampleTypeCase.EXAMPLES -> node.set<JsonNode>("examples", examples.toJson(ctx))
+        MediaType.ExampleTypeCase.EXAMPLE -> node.set("example", example.toJson(ctx))
+        MediaType.ExampleTypeCase.EXAMPLES -> node.set("examples", examples.toJson(ctx))
         else -> {}
     }
     if (encodingMap.isNotEmpty()) {
         val encNode = ctx.obj()
-        for ((k, v) in encodingMap) encNode.set<JsonNode>(k, v.toJson(ctx))
-        node.set<JsonNode>("encoding", encNode)
+        for ((k, v) in encodingMap) encNode.set(k, v.toJson(ctx))
+        node.set("encoding", encNode)
     }
     return node
 }
@@ -387,8 +387,8 @@ internal fun Encoding.toJson(ctx: JsonContext): ObjectNode {
     if (hasContentType()) node.put("contentType", contentType)
     if (headersMap.isNotEmpty()) {
         val hdrsNode = ctx.obj()
-        for ((k, v) in headersMap) hdrsNode.set<JsonNode>(k, v.toJson(ctx))
-        node.set<JsonNode>("headers", hdrsNode)
+        for ((k, v) in headersMap) hdrsNode.set(k, v.toJson(ctx))
+        node.set("headers", hdrsNode)
     }
     if (hasStyle()) node.put("style", style)
     if (hasExplode()) node.put("explode", explode)
@@ -402,8 +402,8 @@ internal fun Encoding.toJson(ctx: JsonContext): ObjectNode {
 
 internal fun Responses.toJson(ctx: JsonContext): ObjectNode {
     val node = ctx.obj()
-    if (hasDefault()) node.set<JsonNode>("default", default.toJson(ctx))
-    for ((code, resp) in codesMap) node.set<JsonNode>(code, resp.toJson(ctx))
+    if (hasDefault()) node.set("default", default.toJson(ctx))
+    for ((code, resp) in codesMap) node.set(code, resp.toJson(ctx))
     return node
 }
 
@@ -419,18 +419,18 @@ internal fun ResponseObject.toJson(ctx: JsonContext): ObjectNode {
     node.put("description", description)
     if (headersMap.isNotEmpty()) {
         val headersNode = ctx.obj()
-        for ((k, v) in headersMap) headersNode.set<JsonNode>(k, v.toJson(ctx))
-        node.set<JsonNode>("headers", headersNode)
+        for ((k, v) in headersMap) headersNode.set(k, v.toJson(ctx))
+        node.set("headers", headersNode)
     }
     if (contentMap.isNotEmpty()) {
         val contentNode = ctx.obj()
-        for ((k, v) in contentMap) contentNode.set<JsonNode>(k, v.toJson(ctx))
-        node.set<JsonNode>("content", contentNode)
+        for ((k, v) in contentMap) contentNode.set(k, v.toJson(ctx))
+        node.set("content", contentNode)
     }
     if (linksMap.isNotEmpty()) {
         val linksNode = ctx.obj()
-        for ((k, v) in linksMap) linksNode.set<JsonNode>(k, v.toJson(ctx))
-        node.set<JsonNode>("links", linksNode)
+        for ((k, v) in linksMap) linksNode.set(k, v.toJson(ctx))
+        node.set("links", linksNode)
     }
     extensionsMap.putExtensionsInto(node, ctx)
     return node
@@ -464,12 +464,12 @@ internal fun Link.toJson(ctx: JsonContext): ObjectNode {
     }
     if (parametersMap.isNotEmpty()) {
         val paramsNode = ctx.obj()
-        for ((k, v) in parametersMap) paramsNode.set<JsonNode>(k, v.toJson(ctx))
-        node.set<JsonNode>("parameters", paramsNode)
+        for ((k, v) in parametersMap) paramsNode.set(k, v.toJson(ctx))
+        node.set("parameters", paramsNode)
     }
-    if (hasRequestBody()) node.set<JsonNode>("requestBody", requestBody.toJson(ctx))
+    if (hasRequestBody()) node.set("requestBody", requestBody.toJson(ctx))
     if (hasDescription()) node.put("description", description)
-    if (hasServer()) node.set<JsonNode>("server", server.toJson(ctx))
+    if (hasServer()) node.set("server", server.toJson(ctx))
     return node
 }
 
@@ -487,7 +487,7 @@ internal fun CallbackOrReference.toJson(ctx: JsonContext): ObjectNode =
 /** A Callback is a map from runtime-expression key to PathItem. */
 internal fun Callback.toJson(ctx: JsonContext): ObjectNode {
     val node = ctx.obj()
-    for ((k, v) in callbacksMap) node.set<JsonNode>(k, v.toJson(ctx))
+    for ((k, v) in callbacksMap) node.set(k, v.toJson(ctx))
     return node
 }
 
@@ -513,20 +513,20 @@ internal fun Header.toJson(ctx: JsonContext): ObjectNode {
             // HeaderSchema fields are inlined directly at the Header object level (no nesting).
             if (schema.hasStyle()) node.put("style", schema.style)
             if (schema.hasExplode()) node.put("explode", schema.explode)
-            if (schema.hasSchema()) node.set<JsonNode>("schema", schema.schema.toJson(ctx))
+            if (schema.hasSchema()) node.set("schema", schema.schema.toJson(ctx))
             when (schema.exampleTypeCase) {
                 HeaderSchema.ExampleTypeCase.EXAMPLE ->
-                    node.set<JsonNode>("example", schema.example.toJson(ctx))
+                    node.set("example", schema.example.toJson(ctx))
 
                 HeaderSchema.ExampleTypeCase.EXAMPLES ->
-                    node.set<JsonNode>("examples", schema.examples.toJson(ctx))
+                    node.set("examples", schema.examples.toJson(ctx))
 
                 else -> {}
             }
         }
 
         Header.HeaderDefinitionTypeCase.CONTENT ->
-            node.set<JsonNode>("content", content.toJson(ctx))
+            node.set("content", content.toJson(ctx))
 
         else -> {}
     }
@@ -536,7 +536,7 @@ internal fun Header.toJson(ctx: JsonContext): ObjectNode {
 /** A HeaderContent is a map from media-type string to MediaType; per spec it MUST have exactly one entry. */
 internal fun HeaderContent.toJson(ctx: JsonContext): ObjectNode {
     val node = ctx.obj()
-    for ((k, v) in contentMap) node.set<JsonNode>(k, v.toJson(ctx))
+    for ((k, v) in contentMap) node.set(k, v.toJson(ctx))
     return node
 }
 
@@ -546,7 +546,7 @@ internal fun HeaderContent.toJson(ctx: JsonContext): ObjectNode {
 
 internal fun ExampleOrReferenceMap.toJson(ctx: JsonContext): ObjectNode {
     val node = ctx.obj()
-    for ((k, v) in examplesMap) node.set<JsonNode>(k, v.toJson(ctx))
+    for ((k, v) in examplesMap) node.set(k, v.toJson(ctx))
     return node
 }
 
@@ -562,7 +562,7 @@ internal fun Example.toJson(ctx: JsonContext): ObjectNode {
     if (hasSummary()) node.put("summary", summary)
     if (hasDescription()) node.put("description", description)
     when (typeCase) {
-        Example.TypeCase.VALUE -> node.set<JsonNode>("value", value.toJson(ctx))
+        Example.TypeCase.VALUE -> node.set("value", value.toJson(ctx))
         Example.TypeCase.EXTERNAL_VALUE -> node.put("externalValue", externalValue)
         else -> {}
     }
@@ -579,7 +579,7 @@ internal fun SecurityRequirement.toJson(ctx: JsonContext): ObjectNode {
     for ((schemeName, values) in namesMap) {
         val arr = ctx.mapper.createArrayNode()
         for (v in values.valuesList) arr.add(v)
-        node.set<JsonNode>(schemeName, arr)
+        node.set(schemeName, arr)
     }
     return node
 }
@@ -593,48 +593,48 @@ internal fun Components.toJson(ctx: JsonContext): ObjectNode {
     // schemas are merged in separately by SchemaBuilder — intentionally omitted here
     if (responsesMap.isNotEmpty()) {
         val respNode = ctx.obj()
-        for ((k, v) in responsesMap) respNode.set<JsonNode>(k, v.toJson(ctx))
-        node.set<JsonNode>("responses", respNode)
+        for ((k, v) in responsesMap) respNode.set(k, v.toJson(ctx))
+        node.set("responses", respNode)
     }
     if (parametersMap.isNotEmpty()) {
         val paramNode = ctx.obj()
-        for ((k, v) in parametersMap) paramNode.set<JsonNode>(k, v.toJson(ctx))
-        node.set<JsonNode>("parameters", paramNode)
+        for ((k, v) in parametersMap) paramNode.set(k, v.toJson(ctx))
+        node.set("parameters", paramNode)
     }
     if (examplesMap.isNotEmpty()) {
         val exNode = ctx.obj()
-        for ((k, v) in examplesMap) exNode.set<JsonNode>(k, v.toJson(ctx))
-        node.set<JsonNode>("examples", exNode)
+        for ((k, v) in examplesMap) exNode.set(k, v.toJson(ctx))
+        node.set("examples", exNode)
     }
     if (requestBodiesMap.isNotEmpty()) {
         val rbNode = ctx.obj()
-        for ((k, v) in requestBodiesMap) rbNode.set<JsonNode>(k, v.toJson(ctx))
-        node.set<JsonNode>("requestBodies", rbNode)
+        for ((k, v) in requestBodiesMap) rbNode.set(k, v.toJson(ctx))
+        node.set("requestBodies", rbNode)
     }
     if (headersMap.isNotEmpty()) {
         val hdrsNode = ctx.obj()
-        for ((k, v) in headersMap) hdrsNode.set<JsonNode>(k, v.toJson(ctx))
-        node.set<JsonNode>("headers", hdrsNode)
+        for ((k, v) in headersMap) hdrsNode.set(k, v.toJson(ctx))
+        node.set("headers", hdrsNode)
     }
     if (securitySchemesMap.isNotEmpty()) {
         val ssNode = ctx.obj()
-        for ((k, v) in securitySchemesMap) ssNode.set<JsonNode>(k, v.toJson(ctx))
-        node.set<JsonNode>("securitySchemes", ssNode)
+        for ((k, v) in securitySchemesMap) ssNode.set(k, v.toJson(ctx))
+        node.set("securitySchemes", ssNode)
     }
     if (linksMap.isNotEmpty()) {
         val linksNode = ctx.obj()
-        for ((k, v) in linksMap) linksNode.set<JsonNode>(k, v.toJson(ctx))
-        node.set<JsonNode>("links", linksNode)
+        for ((k, v) in linksMap) linksNode.set(k, v.toJson(ctx))
+        node.set("links", linksNode)
     }
     if (callbacksMap.isNotEmpty()) {
         val cbNode = ctx.obj()
-        for ((k, v) in callbacksMap) cbNode.set<JsonNode>(k, v.toJson(ctx))
-        node.set<JsonNode>("callbacks", cbNode)
+        for ((k, v) in callbacksMap) cbNode.set(k, v.toJson(ctx))
+        node.set("callbacks", cbNode)
     }
     if (pathItemsMap.isNotEmpty()) {
         val piNode = ctx.obj()
-        for ((k, v) in pathItemsMap) piNode.set<JsonNode>(k, v.toJson(ctx))
-        node.set<JsonNode>("pathItems", piNode)
+        for ((k, v) in pathItemsMap) piNode.set(k, v.toJson(ctx))
+        node.set("pathItems", piNode)
     }
     return node
 }
@@ -680,16 +680,16 @@ internal fun MutualTLSSecurityScheme.toJson(ctx: JsonContext): ObjectNode = ctx.
 internal fun OAuthSecurityScheme.toJson(ctx: JsonContext): ObjectNode {
     val node = ctx.obj()
     node.put("type", "oauth2")
-    if (hasFlows()) node.set<JsonNode>("flows", flows.toJson(ctx))
+    if (hasFlows()) node.set("flows", flows.toJson(ctx))
     return node
 }
 
 internal fun OAuthFlows.toJson(ctx: JsonContext): ObjectNode {
     val node = ctx.obj()
-    if (hasImplicit()) node.set<JsonNode>("implicit", implicit.toJson(ctx))
-    if (hasPassword()) node.set<JsonNode>("password", password.toJson(ctx))
-    if (hasClientCredentials()) node.set<JsonNode>("clientCredentials", clientCredentials.toJson(ctx))
-    if (hasAuthorizationCode()) node.set<JsonNode>("authorizationCode", authorizationCode.toJson(ctx))
+    if (hasImplicit()) node.set("implicit", implicit.toJson(ctx))
+    if (hasPassword()) node.set("password", password.toJson(ctx))
+    if (hasClientCredentials()) node.set("clientCredentials", clientCredentials.toJson(ctx))
+    if (hasAuthorizationCode()) node.set("authorizationCode", authorizationCode.toJson(ctx))
     return node
 }
 
@@ -701,7 +701,7 @@ internal fun OAuthFlow.toJson(ctx: JsonContext): ObjectNode {
     if (scopesMap.isNotEmpty()) {
         val scopeNode = ctx.obj()
         for ((k, v) in scopesMap) scopeNode.put(k, v)
-        node.set<JsonNode>("scopes", scopeNode)
+        node.set("scopes", scopeNode)
     }
     return node
 }

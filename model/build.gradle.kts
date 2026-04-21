@@ -17,11 +17,11 @@ kotlin {
 
 protobuf {
     protoc {
-        artifact = tools.protoc.compiler.get().toString()
+        artifact = libs.tools.protoc.compiler.get().toString()
     }
     plugins {
         create("doc") {
-            artifact = tools.protoc.gen.doc.get().toString()
+            artifact = libs.tools.protoc.gen.doc.get().toString()
         }
     }
     generateProtoTasks {

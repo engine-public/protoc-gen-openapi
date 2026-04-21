@@ -115,7 +115,7 @@ allprojects {
                     if (this is JvmTestSuite) {
                         useJUnitJupiter()
                         dependencies {
-                            implementation.bundle(testLibs.bundles.kotest)
+                            implementation.bundle(libs.bundles.test.kotest)
                         }
                     }
                 }

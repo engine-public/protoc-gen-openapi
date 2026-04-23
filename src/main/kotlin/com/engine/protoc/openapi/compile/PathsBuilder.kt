@@ -607,12 +607,17 @@ internal class PathsBuilder(
         ctx.schemaKeyResolver.titleFor(typeName)?.let { node.put("title", it) }
 
         if (enumWrapper != null) {
-            val comment = enumWrapper.location?.proto?.leadingComments?.trim()?.ifEmpty { null }
-            if (comment != null) node.put("description", comment)
+            val visibleValues = enumWrapper.values.filterNot {
+                isValueSuppressed(it, ctx.suppressDefaultEnumValues)
+            }
+
+            buildEnumDescription(
+                enumComment = enumWrapper.location?.proto?.leadingComments?.trim()?.ifEmpty { null },
+                visibleValues = visibleValues,
+            )?.let { node.put("description", it) }
 
             val valuesArr = ctx.mapper.createArrayNode()
-            for (valueWrapper in enumWrapper.values) {
-                if (isValueSuppressed(valueWrapper, ctx.suppressDefaultEnumValues)) continue
+            for (valueWrapper in visibleValues) {
                 valuesArr.add(formatEnumValue(valueWrapper.proto.name, ctx.enumValueFormat))
             }
             if (valuesArr.size() > 0) node.set<JsonNode>("enum", valuesArr)
@@ -624,6 +629,25 @@ internal class PathsBuilder(
         }
 
         return node
+    }
+
+    private fun buildEnumDescription(
+        enumComment: String?,
+        visibleValues: List<com.engine.protoc.util.enums.EnumValueDescriptorProtoWrapper>,
+    ): String? {
+        val bullets = visibleValues.mapNotNull { valueWrapper ->
+            val comment = valueWrapper.location?.proto?.leadingComments?.trim()?.ifEmpty { null }
+                ?: return@mapNotNull null
+            val name = formatEnumValue(valueWrapper.proto.name, ctx.enumValueFormat)
+            "- `$name` — $comment"
+        }
+        return buildString {
+            if (enumComment != null) append(enumComment)
+            if (bullets.isNotEmpty()) {
+                if (enumComment != null) append("\n\n")
+                append(bullets.joinToString("\n"))
+            }
+        }.ifEmpty { null }
     }
 }
 

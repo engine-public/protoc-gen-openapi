@@ -57,13 +57,6 @@ testing {
     }
 }
 
-tasks.register<JavaExec>("generateEnumsReferences") {
-    dependsOn("compileEnumsKotlin", "generateEnumsProto")
-    classpath = sourceSets["enums"].runtimeClasspath
-    mainClass.set("GenerateEnumsReferencesKt")
-    workingDir = rootProject.projectDir
-}
-
 protobuf {
     protoc {
         artifact = tools.protoc.compiler.get().toString()

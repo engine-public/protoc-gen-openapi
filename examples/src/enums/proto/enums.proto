@@ -24,9 +24,13 @@ option (.engine.protoc.openapi.file) = {
 enum OrderStatus {
     // UNSET is the proto3 conventional default value (number = 0).
     UNSET = 0 [(.engine.protoc.openapi.suppress) = false];
+    // Order has been received and is awaiting processing.
     PENDING = 1;
+    // Order has been accepted and payment verified.
     CONFIRMED = 2;
+    // Order has been handed off to the carrier and is in transit.
     SHIPPED = 3;
+    // Order was voided before or during fulfillment.
     CANCELLED = 4;
 }
 

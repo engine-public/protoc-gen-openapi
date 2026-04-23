@@ -52,6 +52,7 @@ testing {
         register<JvmTestSuite>("responseBodyError")
         register<JvmTestSuite>("conventions")
         register<JvmTestSuite>("version")
+        register<JvmTestSuite>("namespacing")
     }
 }
 

@@ -1,0 +1,113 @@
+{
+  "openapi" : "3.1.0",
+  "paths" : {
+    "/catalog/{id}" : {
+      "get" : {
+        "summary" : "Retrieve a catalog item by its identifier.",
+        "description" : "Retrieve a catalog item by its identifier.",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/engine.protoc.openapi.example.namespacing.catalog.Item.v1"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/inventory/{id}" : {
+      "get" : {
+        "summary" : "Retrieve inventory details for an item by its identifier.",
+        "description" : "Retrieve inventory details for an item by its identifier.",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/engine.protoc.openapi.example.namespacing.inventory.Item.v2"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "engine.protoc.openapi.example.namespacing.catalog.Item.v1" : {
+        "type" : "object",
+        "title" : "CatalogItem",
+        "description" : "A catalog item available for purchase.",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "description" : "Unique identifier of this item."
+          },
+          "name" : {
+            "type" : "string",
+            "description" : "Display name of this item."
+          }
+        }
+      },
+      "engine.protoc.openapi.example.namespacing.inventory.Item.v2" : {
+        "type" : "object",
+        "title" : "Item",
+        "description" : "An item tracked in the inventory system.",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "description" : "Unique identifier of this item."
+          },
+          "quantity" : {
+            "type" : "integer",
+            "format" : "int32",
+            "description" : "Current quantity in stock."
+          },
+          "specs" : {
+            "$ref" : "#/components/schemas/engine.protoc.openapi.example.namespacing.inventory.Item.Specs.v2",
+            "description" : "Physical specifications for this item."
+          }
+        }
+      },
+      "engine.protoc.openapi.example.namespacing.inventory.Item.Specs.v2" : {
+        "type" : "object",
+        "title" : "Specs",
+        "description" : "Physical specifications of an inventory item.",
+        "properties" : {
+          "weightGrams" : {
+            "type" : "integer",
+            "format" : "int32",
+            "description" : "Weight in grams."
+          },
+          "volumeMl" : {
+            "type" : "integer",
+            "format" : "int32",
+            "description" : "Volume in millilitres."
+          }
+        }
+      }
+    }
+  }
+}

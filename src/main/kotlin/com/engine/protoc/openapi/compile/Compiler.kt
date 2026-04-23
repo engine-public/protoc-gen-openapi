@@ -122,11 +122,18 @@ internal class Compiler(
 
         applyServiceTags(doc, pathsBuilder, ctx)
 
+        // finalizeKeys must precede SchemaBuilder so keyOf() returns simplified names.
+        // rewriteRefs must follow mergeSchemas so that intra-schema property $refs
+        // (emitted by SchemaBuilder via buildPhaseKeyOf) are also rewritten.
+        ctx.schemaKeyResolver.finalizeKeys(collector.collected)
+
         try {
             mergeSchemas(doc, SchemaBuilder(ctx, pathsBuilder).build(collector), ctx)
         } catch (e: Exception) {
             response.addError("Error building component schemas: ${e.detail()}")
         }
+
+        ctx.schemaKeyResolver.rewriteRefs(doc)
 
         if (!response.hasErrors) {
             try {
@@ -214,8 +221,15 @@ internal class Compiler(
 
                     applyServiceTags(doc, pathsBuilder, ctx)
 
+                    // finalizeKeys must precede SchemaBuilder so keyOf() returns simplified names.
+                    // rewriteRefs must follow mergeSchemas so that intra-schema property $refs
+                    // (emitted by SchemaBuilder via buildPhaseKeyOf) are also rewritten.
+                    ctx.schemaKeyResolver.finalizeKeys(collector.collected)
+
                     // Schemas — only messages responsive to this service
                     mergeSchemas(doc, SchemaBuilder(ctx, pathsBuilder).build(collector), ctx)
+
+                    ctx.schemaKeyResolver.rewriteRefs(doc)
 
                     val pkg = file.`package`?.value.orEmpty()
                     val svcName = service.name?.value.orEmpty()
@@ -261,7 +275,15 @@ internal class Compiler(
         }
         val messageIndex = MessageIndex(request.protoFiles)
         val rpcIndex = RpcIndex(request.protoFiles)
-        val ctx = JsonContext(mapper, messageIndex, rpcIndex)
+        val resolver = SchemaKeyResolver(
+            options.schemaNamespaceStrategy,
+            options.schemaNamespaceSeparator,
+            options.schemaNamespaceCasing,
+            options.schemaNamespaceVersionExtraction,
+            options.setSchemaTitleToMessageName,
+            messageIndex,
+        )
+        val ctx = JsonContext(mapper, messageIndex, rpcIndex, resolver)
         val targetFiles = request.filesToGenerate.mapNotNull { name ->
             request.protoFiles.find { it.name == name }
         }
@@ -373,20 +395,9 @@ internal class Compiler(
             else -> {
                 val packages = services.map { it.first }
                     .ifEmpty { targetFiles.map { it.`package`?.value.orEmpty() } }
-                val prefix = commonPackagePrefix(packages)
+                val prefix = commonDotPrefix(packages)
                 if (prefix.isEmpty()) "openapi.$outputExtension" else "$prefix.openapi.$outputExtension"
             }
         }
-    }
-
-    private fun commonPackagePrefix(packages: List<String>): String {
-        val nonEmpty = packages.filter { it.isNotEmpty() }
-        if (nonEmpty.isEmpty()) return ""
-        val parts = nonEmpty.map { it.split(".") }
-        val common = mutableListOf<String>()
-        for (i in 0 until parts.minOf { it.size }) {
-            if (parts.all { it[i] == parts[0][i] }) common.add(parts[0][i]) else break
-        }
-        return common.joinToString(".")
     }
 }

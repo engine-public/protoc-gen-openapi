@@ -344,7 +344,7 @@ internal class PathsBuilder(
     ) {
         if (contentNode == null) return
         if (ctx.wellKnownScalarSchema(inputTypeName) != null) return
-        val ref = "#/components/schemas/${ctx.messageIndex.simpleNameOf(inputTypeName)}"
+        val ref = "#/components/schemas/${ctx.schemaKeyResolver.buildPhaseKeyOf(inputTypeName)}"
         for ((_, mediaTypeNode) in contentNode.fields()) {
             if (mediaTypeNode !is ObjectNode) continue
             val schemaNode = mediaTypeNode.get("schema") as? ObjectNode ?: continue
@@ -426,7 +426,7 @@ internal class PathsBuilder(
     internal fun schemaMediaType(typeName: String): ObjectNode {
         val schema = ctx.wellKnownScalarSchema(typeName)
             ?: ctx.obj().also {
-                it.put("\$ref", "#/components/schemas/${ctx.messageIndex.simpleNameOf(typeName)}")
+                it.put("\$ref", "#/components/schemas/${ctx.schemaKeyResolver.buildPhaseKeyOf(typeName)}")
             }
         val mediaType = ctx.obj()
         mediaType.set<JsonNode>("schema", schema)
@@ -559,7 +559,10 @@ internal class PathsBuilder(
             DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE -> {
                 val typeName = field.typeName
                 ctx.wellKnownScalarSchema(typeName) ?: node.also {
-                    it.put("\$ref", "#/components/schemas/${ctx.messageIndex.simpleNameOf(typeName)}")
+                    it.put(
+                        "\$ref",
+                        "#/components/schemas/${ctx.schemaKeyResolver.buildPhaseKeyOf(typeName)}",
+                    )
                 }
             }
 

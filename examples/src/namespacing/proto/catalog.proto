@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package engine.protoc.openapi.example.namespacing.catalog.v1;
+
+option java_package = "com.engine.protoc.openapi.example.namespacing.catalog.v1";
+option java_multiple_files = true;
+
+import "google/api/annotations.proto";
+import "engine/protoc/openapi/annotations.proto";
+
+// Catalog service for browsing available items.
+service CatalogService {
+    // Retrieve a catalog item by its identifier.
+    rpc GetItem(GetItemRequest) returns (Item) {
+        option (.google.api.http) = {
+            get: "/catalog/{id}"
+        };
+    }
+}
+
+message GetItemRequest {
+    string id = 1;
+}
+
+// A catalog item available for purchase.
+message Item {
+    option (.engine.protoc.openapi.message) = {
+        object: {
+            title: "CatalogItem"
+        }
+    };
+
+    // Unique identifier of this item.
+    string id = 1;
+
+    // Display name of this item.
+    string name = 2;
+}

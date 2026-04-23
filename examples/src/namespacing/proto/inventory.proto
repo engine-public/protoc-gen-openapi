@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package engine.protoc.openapi.example.namespacing.inventory.v2;
+
+option java_package = "com.engine.protoc.openapi.example.namespacing.inventory.v2";
+option java_multiple_files = true;
+
+import "google/api/annotations.proto";
+
+// Inventory service for checking stock levels.
+service InventoryService {
+    // Retrieve inventory details for an item by its identifier.
+    rpc GetItem(GetItemRequest) returns (Item) {
+        option (.google.api.http) = {
+            get: "/inventory/{id}"
+        };
+    }
+}
+
+message GetItemRequest {
+    string id = 1;
+}
+
+// An item tracked in the inventory system.
+message Item {
+    // Physical specifications of an inventory item.
+    message Specs {
+        // Weight in grams.
+        int32 weight_grams = 1;
+
+        // Volume in millilitres.
+        int32 volume_ml = 2;
+    }
+
+    // Unique identifier of this item.
+    string id = 1;
+
+    // Current quantity in stock.
+    int32 quantity = 2;
+
+    // Physical specifications for this item.
+    Specs specs = 3;
+}

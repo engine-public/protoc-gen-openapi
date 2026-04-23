@@ -70,12 +70,12 @@
             "description" : "Current quantity in stock."
           },
           "specs" : {
-            "$ref" : "#/components/schemas/Specs",
+            "$ref" : "#/components/schemas/Item-Specs",
             "description" : "Physical specifications for this item."
           }
         }
       },
-      "Specs" : {
+      "Item-Specs" : {
         "type" : "object",
         "description" : "Physical specifications of an inventory item.",
         "properties" : {

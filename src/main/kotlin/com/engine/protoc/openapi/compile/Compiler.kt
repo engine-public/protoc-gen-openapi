@@ -109,7 +109,7 @@ internal class Compiler(
             }
         }
 
-        val collector = MessageCollector(ctx.messageIndex)
+        val collector = MessageCollector(ctx.messageIndex, ctx.enumIndex, options.inlineEnums)
         val pathsBuilder = PathsBuilder(ctx, collector, options.autoTagServices)
 
         for (file in targetFiles) {
@@ -125,7 +125,7 @@ internal class Compiler(
         // finalizeKeys must precede SchemaBuilder so keyOf() returns simplified names.
         // rewriteRefs must follow mergeSchemas so that intra-schema property $refs
         // (emitted by SchemaBuilder via buildPhaseKeyOf) are also rewritten.
-        ctx.schemaKeyResolver.finalizeKeys(collector.collected)
+        ctx.schemaKeyResolver.finalizeKeys(collector.allCollected)
 
         try {
             mergeSchemas(doc, SchemaBuilder(ctx, pathsBuilder).build(collector), ctx)
@@ -215,7 +215,7 @@ internal class Compiler(
                         ?.mergeInto(doc, ctx)
 
                     // Paths — only this service's methods
-                    val collector = MessageCollector(ctx.messageIndex)
+                    val collector = MessageCollector(ctx.messageIndex, ctx.enumIndex, options.inlineEnums)
                     val pathsBuilder = PathsBuilder(ctx, collector, options.autoTagServices)
                     mergePaths(doc, pathsBuilder.buildForService(service), ctx)
 
@@ -224,7 +224,7 @@ internal class Compiler(
                     // finalizeKeys must precede SchemaBuilder so keyOf() returns simplified names.
                     // rewriteRefs must follow mergeSchemas so that intra-schema property $refs
                     // (emitted by SchemaBuilder via buildPhaseKeyOf) are also rewritten.
-                    ctx.schemaKeyResolver.finalizeKeys(collector.collected)
+                    ctx.schemaKeyResolver.finalizeKeys(collector.allCollected)
 
                     // Schemas — only messages responsive to this service
                     mergeSchemas(doc, SchemaBuilder(ctx, pathsBuilder).build(collector), ctx)
@@ -274,16 +274,27 @@ internal class Compiler(
                 YAMLMapper().enable(SerializationFeature.INDENT_OUTPUT)
         }
         val messageIndex = MessageIndex(request.protoFiles)
+        val enumIndex = EnumIndex(request.protoFiles)
         val rpcIndex = RpcIndex(request.protoFiles)
         val resolver = SchemaKeyResolver(
             options.schemaNamespaceStrategy,
             options.schemaNamespaceSeparator,
             options.schemaNamespaceCasing,
             options.schemaNamespaceVersionExtraction,
-            options.setSchemaTitleToMessageName,
+            options.setSchemaTitleToProtoSimpleName,
             messageIndex,
+            enumIndex,
         )
-        val ctx = JsonContext(mapper, messageIndex, rpcIndex, resolver)
+        val ctx = JsonContext(
+            mapper,
+            messageIndex,
+            enumIndex,
+            rpcIndex,
+            resolver,
+            options.inlineEnums,
+            options.suppressDefaultEnumValues,
+            options.enumValueFormat,
+        )
         val targetFiles = request.filesToGenerate.mapNotNull { name ->
             request.protoFiles.find { it.name == name }
         }

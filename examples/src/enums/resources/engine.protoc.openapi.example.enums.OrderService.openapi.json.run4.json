@@ -1,0 +1,115 @@
+{
+  "openapi" : "3.1.0",
+  "paths" : {
+    "/orders/{id}" : {
+      "get" : {
+        "summary" : "Retrieve an order by its identifier.",
+        "description" : "Retrieve an order by its identifier.",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Order"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/returns" : {
+      "post" : {
+        "summary" : "Create a new return request.",
+        "description" : "Create a new return request.",
+        "requestBody" : {
+          "required" : true,
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ReturnRequest"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ReturnRequest"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "info" : {
+    "title" : "Enums Example API",
+    "version" : "1.0.0"
+  },
+  "components" : {
+    "schemas" : {
+      "Order" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string",
+            "description" : "The lifecycle status of an order.",
+            "enum" : [ "PENDING", "CONFIRMED", "SHIPPED", "CANCELLED" ]
+          },
+          "priority" : {
+            "type" : "string",
+            "description" : "The priority level of a shipment.\n This enum carries inline = true, so it is always inlined regardless of the\n inlineEnums compiler option.",
+            "enum" : [ "STANDARD", "EXPRESS", "OVERNIGHT" ]
+          },
+          "payment" : {
+            "type" : "string",
+            "description" : "The payment instrument used to complete the transaction.",
+            "enum" : [ "CREDIT_CARD", "DEBIT_CARD", "BANK_TRANSFER" ]
+          }
+        }
+      },
+      "ReturnRequest" : {
+        "type" : "object",
+        "properties" : {
+          "orderId" : {
+            "type" : "string"
+          },
+          "reason" : {
+            "$ref" : "#/components/schemas/ReturnReason"
+          },
+          "affectedStatuses" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "description" : "The lifecycle status of an order.",
+              "enum" : [ "PENDING", "CONFIRMED", "SHIPPED", "CANCELLED" ]
+            },
+            "description" : "Per-value suppress = false keeps REASON_UNSET visible even when\n suppressDefaultEnumValues = true is set globally."
+          }
+        }
+      },
+      "ReturnReason" : {
+        "type" : "string",
+        "description" : "The reason a return was initiated.\n This enum carries inline = false, so it is always a component schema\n regardless of the inlineEnums compiler option.",
+        "enum" : [ "DAMAGED", "WRONG_ITEM", "NO_LONGER_NEEDED" ]
+      }
+    }
+  }
+}

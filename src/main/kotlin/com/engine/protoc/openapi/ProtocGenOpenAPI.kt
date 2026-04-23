@@ -132,15 +132,48 @@ public class ProtocGenOpenAPI(
 
         /**
          * When `true`, adds a `"title"` field to every schema in `components/schemas` set to
-         * the unqualified proto message name.  Useful when schema keys are namespaced (e.g. the
-         * key is `Catalog_Item_v1`) and consumers need a clean, stable label.
+         * the unqualified proto type name (message or enum simple name).  Useful when schema keys
+         * are namespaced (e.g. the key is `Catalog_Item_v1`) and consumers need a clean, stable
+         * label.
          *
-         * If a schema has an `engine.protoc.openapi.message` annotation that explicitly sets
-         * `title`, the annotation value takes precedence over the auto-generated name.
+         * If a schema has an `engine.protoc.openapi.message` or `engine.protoc.openapi.enum`
+         * annotation that explicitly sets `title`, the annotation value takes precedence.
          *
-         * Passed via `--openapi_out=setSchemaTitleToMessageName=true:outdir`.
+         * Passed via `--openapi_out=setSchemaTitleToProtoSimpleName=true:outdir`.
          */
-        val setSchemaTitleToMessageName: Boolean,
+        val setSchemaTitleToProtoSimpleName: Boolean,
+
+        /**
+         * When `true`, every enum field emits its values inline (`"enum": [...]`) instead of
+         * generating a separate `$ref` to a `components/schemas` entry.
+         *
+         * The per-enum `engine.protoc.openapi.inline` annotation overrides this option for a
+         * specific enum, regardless of the global setting.
+         *
+         * Passed via `--openapi_out=inlineEnums=true:outdir`.
+         */
+        val inlineEnums: Boolean,
+
+        /**
+         * When `true`, enum values whose proto number is `0` (the proto3 default value
+         * convention) are omitted from all OAS enum value lists.
+         *
+         * The per-value `engine.protoc.openapi.suppress` annotation overrides this option for a
+         * specific enum value, regardless of the global setting.
+         *
+         * Passed via `--openapi_out=suppressDefaultEnumValues=true:outdir`.
+         */
+        val suppressDefaultEnumValues: Boolean,
+
+        /**
+         * Controls how proto enum value names are written into OAS `enum` arrays.
+         *
+         * Currently only [EnumValueFormat.RAW] is implemented; additional formats will be added
+         * in future releases without breaking this option's presence in the API.
+         *
+         * Passed via `--openapi_out=enumValueFormat=RAW:outdir`.
+         */
+        val enumValueFormat: EnumValueFormat,
     ) {
         /**
          * The serialization format for generated OpenAPI documents.
@@ -160,6 +193,15 @@ public class ProtocGenOpenAPI(
             UNMODIFIED,
             CAMEL_CASE,
             SNAKE_CASE,
+        }
+
+        /**
+         * Controls how proto enum value names are written into OAS `enum` arrays.
+         * All values are matched case-insensitively in `--openapi_out` parameters.
+         */
+        public enum class EnumValueFormat {
+            /** Write each value exactly as its proto name, e.g. `MY_ENUM_VALUE`. */
+            RAW,
         }
 
         /**
@@ -270,10 +312,27 @@ public class ProtocGenOpenAPI(
                 parameters.get<Boolean>("schemaNamespaceVersionExtraction") ?: false
 
             /**
-             * @see [Options.setSchemaTitleToMessageName]
+             * @see [Options.setSchemaTitleToProtoSimpleName]
              */
-            public var setSchemaTitleToMessageName: Boolean =
-                parameters.get<Boolean>("setSchemaTitleToMessageName") ?: false
+            public var setSchemaTitleToProtoSimpleName: Boolean =
+                parameters.get<Boolean>("setSchemaTitleToProtoSimpleName") ?: false
+
+            /**
+             * @see [Options.inlineEnums]
+             */
+            public var inlineEnums: Boolean = parameters.get<Boolean>("inlineEnums") ?: false
+
+            /**
+             * @see [Options.suppressDefaultEnumValues]
+             */
+            public var suppressDefaultEnumValues: Boolean =
+                parameters.get<Boolean>("suppressDefaultEnumValues") ?: false
+
+            /**
+             * @see [Options.enumValueFormat]
+             */
+            public var enumValueFormat: EnumValueFormat =
+                parameters.get<EnumValueFormat>("enumValueFormat") ?: EnumValueFormat.RAW
 
             public companion object {
                 public fun from(parameters: Parameters): Builder = Builder(parameters)
@@ -290,7 +349,10 @@ public class ProtocGenOpenAPI(
                     schemaNamespaceSeparator = schemaNamespaceSeparator,
                     schemaNamespaceCasing = schemaNamespaceCasing,
                     schemaNamespaceVersionExtraction = schemaNamespaceVersionExtraction,
-                    setSchemaTitleToMessageName = setSchemaTitleToMessageName,
+                    setSchemaTitleToProtoSimpleName = setSchemaTitleToProtoSimpleName,
+                    inlineEnums = inlineEnums,
+                    suppressDefaultEnumValues = suppressDefaultEnumValues,
+                    enumValueFormat = enumValueFormat,
                 )
         }
     }

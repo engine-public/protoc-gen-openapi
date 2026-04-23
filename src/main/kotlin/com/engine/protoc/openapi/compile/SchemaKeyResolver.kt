@@ -25,8 +25,9 @@ internal class SchemaKeyResolver(
     private val separator: ProtocGenOpenAPI.Options.SchemaNamespaceSeparator,
     private val casing: ProtocGenOpenAPI.Options.SchemaNamespaceCasing,
     private val versionExtraction: Boolean,
-    private val setSchemaTitleToMessageName: Boolean,
+    private val setSchemaTitleToProtoSimpleName: Boolean,
     private val messageIndex: MessageIndex,
+    private val enumIndex: EnumIndex,
 ) {
     private val versionRegex = Regex("""^v\d+[a-zA-Z0-9]*$""")
 
@@ -45,7 +46,7 @@ internal class SchemaKeyResolver(
     fun buildPhaseKeyOf(typeName: String): String =
         when (strategy) {
             ProtocGenOpenAPI.Options.SchemaNamespaceStrategy.NONE ->
-                messageIndex.simpleNameOf(typeName)
+                localPathSegments(typeName).joinToString(separator.asString())
 
             ProtocGenOpenAPI.Options.SchemaNamespaceStrategy.FULL_PACKAGE,
             ProtocGenOpenAPI.Options.SchemaNamespaceStrategy.SIMPLIFIED_PACKAGE,
@@ -72,20 +73,21 @@ internal class SchemaKeyResolver(
 
     /**
      * Returns the `title` to embed in the schema object for [typeName], or `null` if
-     * [setSchemaTitleToMessageName] is `false`.  When non-null the caller sets this as the
-     * initial `title`; any `engine.protoc.openapi.message` annotation that also sets `title`
-     * will overwrite it via deep-merge.
+     * [setSchemaTitleToProtoSimpleName] is `false`.  When non-null the caller sets this as the
+     * initial `title`; any annotation that also sets `title` will overwrite it via deep-merge.
+     *
+     * Works for both message and enum type names.
      */
     fun titleFor(typeName: String): String? {
-        if (!setSchemaTitleToMessageName) return null
-        return messageIndex.simpleNameOf(typeName)
+        if (!setSchemaTitleToProtoSimpleName) return null
+        return typeName.substringAfterLast('.')
     }
 
     /** Returns the final schema key for use in `components/schemas` (after [finalize]). */
     fun keyOf(typeName: String): String =
         when (strategy) {
             ProtocGenOpenAPI.Options.SchemaNamespaceStrategy.NONE ->
-                messageIndex.simpleNameOf(typeName)
+                localPathSegments(typeName).joinToString(separator.asString())
 
             ProtocGenOpenAPI.Options.SchemaNamespaceStrategy.FULL_PACKAGE ->
                 applyTransform(typeName.removePrefix(".").split("."))
@@ -124,21 +126,37 @@ internal class SchemaKeyResolver(
         }
     }
 
+    /**
+     * Returns the segments of [typeName] that are local to the file (i.e., everything after
+     * stripping the proto package prefix).  For top-level types this is `["Status"]`; for nested
+     * types like `.pkg.Order.Status` it is `["Order", "Status"]`.
+     *
+     * Used by the [ProtocGenOpenAPI.Options.SchemaNamespaceStrategy.NONE] strategy so that nested
+     * types produce unique keys even without package namespacing.
+     */
+    private fun localPathSegments(typeName: String): List<String> {
+        val pkg = packageOf(typeName)
+        val fullName = typeName.removePrefix(".")
+        return if (pkg.isEmpty()) fullName.split(".") else fullName.removePrefix("$pkg.").split(".")
+    }
+
+    /**
+     * Returns the proto package for [typeName], checking messages first then enums.
+     */
+    private fun packageOf(typeName: String): String =
+        messageIndex.packageOf(typeName).takeIf { it.isNotEmpty() }
+            ?: enumIndex.packageOf(typeName)
+
     private fun computeSimplifiedKey(
         typeName: String,
         commonPrefix: String,
     ): String {
-        val protoPackage = messageIndex.packageOf(typeName)
-        // Extract all message-path segments (enclosing type names + simple name) by removing the
+        val protoPackage = packageOf(typeName)
+        // Extract all type-path segments (enclosing type names + simple name) by removing the
         // file-level proto package from the full type name.  For a top-level type like
         // ".pkg.Item" this yields ["Item"]; for a nested type like ".pkg.Outer.Inner" this
-        // yields ["Outer", "Inner"], preserving the enclosing type name that simpleNameOf drops.
-        val fullName = typeName.removePrefix(".")
-        val messagePathSegments = if (protoPackage.isEmpty()) {
-            fullName.split(".")
-        } else {
-            fullName.removePrefix("$protoPackage.").split(".")
-        }
+        // yields ["Outer", "Inner"], preserving the enclosing type name.
+        val typePathSegments = localPathSegments(typeName)
         val remaining = when {
             commonPrefix.isEmpty() -> protoPackage
             protoPackage == commonPrefix -> ""
@@ -146,7 +164,7 @@ internal class SchemaKeyResolver(
             else -> protoPackage
         }
         val segments = (if (remaining.isEmpty()) emptyList() else remaining.split(".")) +
-            messagePathSegments
+            typePathSegments
         return applyTransform(segments)
     }
 
@@ -172,7 +190,7 @@ internal class SchemaKeyResolver(
         return if (versions.isEmpty()) base else "$base$sep${versions.joinToString(sep)}"
     }
 
-    private fun commonPackagePrefix(types: Set<String>): String = commonDotPrefix(types.map { messageIndex.packageOf(it) })
+    private fun commonPackagePrefix(types: Set<String>): String = commonDotPrefix(types.map { packageOf(it) })
 }
 
 /** Returns the longest dot-segment prefix shared by all non-empty strings in [packages]. */

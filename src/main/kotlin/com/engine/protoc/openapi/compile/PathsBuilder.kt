@@ -1,10 +1,13 @@
 package com.engine.protoc.openapi.compile
 
 import com.engine.protoc.openapi.Annotations
+import com.engine.protoc.openapi.ProtocGenOpenAPI
 import com.engine.protoc.openapi.compile.json.JsonContext
 import com.engine.protoc.openapi.compile.json.putExtensionsInto
 import com.engine.protoc.openapi.compile.json.toJson
 import com.engine.protoc.openapi.model.Operation
+import com.engine.protoc.openapi.model.Schema
+import com.engine.protoc.util.enums.EnumDescriptorProtoWrapper
 import com.engine.protoc.util.file.FileDescriptorProtoWrapper
 import com.engine.protoc.util.service.MethodDescriptorProtoWrapper
 import com.engine.protoc.util.service.ServiceDescriptorProtoWrapper
@@ -553,8 +556,23 @@ internal class PathsBuilder(
                     it.put("format", "byte")
                 }
 
-            DescriptorProtos.FieldDescriptorProto.Type.TYPE_ENUM ->
-                node.also { it.put("type", "string") }
+            DescriptorProtos.FieldDescriptorProto.Type.TYPE_ENUM -> {
+                val typeName = field.typeName
+                val enumWrapper = ctx.enumIndex.find(typeName)
+                val annotationInline = enumWrapper?.options?.findExtension(Annotations.inline)?.value
+                val shouldInline = annotationInline ?: ctx.inlineEnums
+                if (shouldInline) {
+                    buildInlineEnumSchema(typeName, enumWrapper)
+                } else {
+                    collector.collectEnum(typeName)
+                    node.also {
+                        it.put(
+                            "\$ref",
+                            "#/components/schemas/${ctx.schemaKeyResolver.buildPhaseKeyOf(typeName)}",
+                        )
+                    }
+                }
+            }
 
             DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE -> {
                 val typeName = field.typeName
@@ -573,6 +591,39 @@ internal class PathsBuilder(
     private fun isMapField(field: DescriptorProtos.FieldDescriptorProto): Boolean {
         if (field.type != DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE) return false
         return ctx.messageIndex.find(field.typeName)?.proto?.options?.mapEntry == true
+    }
+
+    /**
+     * Builds a fully-populated inline enum schema `{ "type": "string", "enum": [...] }` for
+     * [typeName].  Suppresses values per [JsonContext.suppressDefaultEnumValues] and per-value
+     * annotations, then deep-merges any `engine.protoc.openapi.enum` annotation on top.
+     */
+    internal fun buildInlineEnumSchema(
+        typeName: String,
+        enumWrapper: EnumDescriptorProtoWrapper?,
+    ): ObjectNode {
+        val node = ctx.obj()
+        node.put("type", "string")
+        ctx.schemaKeyResolver.titleFor(typeName)?.let { node.put("title", it) }
+
+        if (enumWrapper != null) {
+            val comment = enumWrapper.location?.proto?.leadingComments?.trim()?.ifEmpty { null }
+            if (comment != null) node.put("description", comment)
+
+            val valuesArr = ctx.mapper.createArrayNode()
+            for (valueWrapper in enumWrapper.values) {
+                if (isValueSuppressed(valueWrapper, ctx.suppressDefaultEnumValues)) continue
+                valuesArr.add(formatEnumValue(valueWrapper.proto.name, ctx.enumValueFormat))
+            }
+            if (valuesArr.size() > 0) node.set<JsonNode>("enum", valuesArr)
+
+            val annotation = enumWrapper.options?.findExtension(Annotations.enum_)?.value
+            if (annotation != null && annotation.schemaValueCase == Schema.SchemaValueCase.OBJECT) {
+                with(ctx) { node.deepMerge(annotation.`object`.toJson(ctx)) }
+            }
+        }
+
+        return node
     }
 }
 
@@ -593,6 +644,31 @@ internal fun HttpRule.primaryBinding(): HttpBinding? {
         else -> null
     }
 }
+
+// ---------------------------------------------------------------------------
+// Enum helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Returns `true` when [valueWrapper] should be omitted from all OAS enum value lists.
+ * Per-value annotation takes precedence over the [suppressDefaults] global option.
+ */
+internal fun isValueSuppressed(
+    valueWrapper: com.engine.protoc.util.enums.EnumValueDescriptorProtoWrapper,
+    suppressDefaults: Boolean,
+): Boolean {
+    val annotation = valueWrapper.options?.findExtension(Annotations.suppress)?.value
+    return annotation ?: (suppressDefaults && valueWrapper.proto.number == 0)
+}
+
+/** Formats a proto enum value name according to [format]. */
+internal fun formatEnumValue(
+    protoName: String,
+    format: ProtocGenOpenAPI.Options.EnumValueFormat,
+): String =
+    when (format) {
+        ProtocGenOpenAPI.Options.EnumValueFormat.RAW -> protoName
+    }
 
 // ---------------------------------------------------------------------------
 // String helpers

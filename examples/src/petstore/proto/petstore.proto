@@ -134,6 +134,13 @@ message Tag {
     string name = 2;
 }
 
+enum PetStatus {
+    option (.engine.protoc.openapi.inline) = true;
+    available = 0;
+    pending = 1;
+    sold = 2;
+}
+
 message Pet {
     option (.engine.protoc.openapi.message) = {
         object: {
@@ -160,13 +167,14 @@ message Pet {
         object: { xml: { wrapped: true } }
     }];
     // pet status in the store
-    string status = 6 [(.engine.protoc.openapi.field) = {
-        object: {
-            enum: { [type.googleapis.com/google.protobuf.Value] { string_value: "available" } }
-            enum: { [type.googleapis.com/google.protobuf.Value] { string_value: "pending" } }
-            enum: { [type.googleapis.com/google.protobuf.Value] { string_value: "sold" } }
-        }
-    }];
+    .engine.protoc.openapi.example.petstore.PetStatus status = 6;
+}
+
+enum OrderStatus {
+    option (.engine.protoc.openapi.inline) = true;
+    placed = 0;
+    approved = 1;
+    delivered = 2;
 }
 
 message Order {
@@ -189,11 +197,8 @@ message Order {
         object: { format: "date-time" }
     }];
     // Order Status
-    string status = 5 [(.engine.protoc.openapi.field) = {
+    .engine.protoc.openapi.example.petstore.OrderStatus status = 5 [(.engine.protoc.openapi.field) = {
         object: {
-            enum: { [type.googleapis.com/google.protobuf.Value] { string_value: "placed" } }
-            enum: { [type.googleapis.com/google.protobuf.Value] { string_value: "approved" } }
-            enum: { [type.googleapis.com/google.protobuf.Value] { string_value: "delivered" } }
             example: { [type.googleapis.com/google.protobuf.Value] { string_value: "approved" } }
         }
     }];

@@ -25,7 +25,7 @@ internal class SchemaBuilder(
     private val pathsBuilder: PathsBuilder,
 ) {
 
-    /** Returns an ObjectNode containing all component schemas keyed by schema name. */
+    /** Returns an ObjectNode containing all component schemas (messages and enums) keyed by schema name. */
     fun build(collector: MessageCollector): ObjectNode {
         val schemas = ctx.obj()
         for (typeName in collector.collected) {
@@ -33,6 +33,11 @@ internal class SchemaBuilder(
             if (wrapper.proto.options.mapEntry) continue
             val schemaKey = ctx.schemaKeyResolver.keyOf(typeName)
             schemas.set<JsonNode>(schemaKey, buildMessageSchema(wrapper, typeName))
+        }
+        for (typeName in collector.collectedEnums) {
+            val wrapper = ctx.enumIndex.find(typeName) ?: continue
+            val schemaKey = ctx.schemaKeyResolver.keyOf(typeName)
+            schemas.set<JsonNode>(schemaKey, pathsBuilder.buildInlineEnumSchema(typeName, wrapper))
         }
         return schemas
     }

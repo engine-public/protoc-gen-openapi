@@ -53,7 +53,15 @@ testing {
         register<JvmTestSuite>("conventions")
         register<JvmTestSuite>("version")
         register<JvmTestSuite>("namespacing")
+        register<JvmTestSuite>("enums")
     }
+}
+
+tasks.register<JavaExec>("generateEnumsReferences") {
+    dependsOn("compileEnumsKotlin", "generateEnumsProto")
+    classpath = sourceSets["enums"].runtimeClasspath
+    mainClass.set("GenerateEnumsReferencesKt")
+    workingDir = rootProject.projectDir
 }
 
 protobuf {

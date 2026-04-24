@@ -17,10 +17,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.google.api.AnnotationsProto
 import com.google.api.HttpRule
 import com.google.protobuf.DescriptorProtos
-import org.commonmark.node.BulletList
-import org.commonmark.node.Code
 import org.commonmark.node.Document
-import org.commonmark.node.ListItem
 import org.commonmark.node.Paragraph
 import org.commonmark.node.SoftLineBreak
 import org.commonmark.node.Text
@@ -655,44 +652,52 @@ internal class PathsBuilder(
         }
         if (enumComment == null && commentedValues.isEmpty()) return null
 
-        val doc = if (enumComment != null) commonmarkParser.parse(enumComment) as? Document ?: Document() else Document()
-
-        if (commentedValues.isNotEmpty()) {
-            val list = BulletList().also { it.isTight = true }
-            for ((name, comment) in commentedValues) {
-                val item = ListItem()
-                val para = Paragraph()
-                para.appendChild(Code().also { it.literal = name })
-                para.appendChild(Text(" — "))
-                // splice inline nodes from the parsed comment into the paragraph
-                val commentDoc = commonmarkParser.parse(comment) as? Document ?: Document()
-                var firstBlock = true
-                var block = commentDoc.firstChild
-                while (block != null) {
-                    val nextBlock = block.next
-                    if (block is Paragraph) {
-                        // separate paragraphs with a space when collapsed onto one line
-                        if (!firstBlock) para.appendChild(Text(" "))
-                        firstBlock = false
-                        var node = block.firstChild
-                        while (node != null) {
-                            val next = node.next
-                            node.unlink()
-                            // collapse soft line breaks to spaces so each bullet stays on one line
-                            para.appendChild(if (node is SoftLineBreak) Text(" ") else node)
-                            node = next
-                        }
-                    }
-                    block = nextBlock
-                }
-                if (firstBlock) para.appendChild(Text(comment))
-                item.appendChild(para)
-                list.appendChild(item)
-            }
-            doc.appendChild(list)
+        val sb = StringBuilder()
+        if (enumComment != null) {
+            sb.append(enumComment)
+            if (commentedValues.isNotEmpty()) sb.append("\n\n")
         }
 
-        return commonmarkRenderer.render(doc).trimEnd().ifEmpty { null }
+        for ((index, pair) in commentedValues.withIndex()) {
+            val (name, comment) = pair
+            val paragraphs = commentParagraphs(comment)
+            sb.append("- `").append(name).append("` — ").append(paragraphs[0])
+            for (i in 1 until paragraphs.size) {
+                sb.append("\n\n  ").append(paragraphs[i])
+            }
+            if (index < commentedValues.size - 1) sb.append("\n")
+        }
+
+        return sb.toString().ifEmpty { null }
+    }
+
+    /**
+     * Splits [comment] on blank lines (CommonMark paragraph breaks) and returns each paragraph
+     * as a single line with soft line breaks collapsed to spaces.
+     */
+    private fun commentParagraphs(comment: String): List<String> {
+        val doc = commonmarkParser.parse(comment) as? Document ?: return listOf(comment)
+        val result = mutableListOf<String>()
+        var block = doc.firstChild
+        while (block != null) {
+            if (block is Paragraph) result.add(paragraphInlineText(block))
+            block = block.next
+        }
+        return result.ifEmpty { listOf(comment) }
+    }
+
+    private fun paragraphInlineText(para: Paragraph): String {
+        val sb = StringBuilder()
+        var node = para.firstChild
+        while (node != null) {
+            when (node) {
+                is Text -> sb.append(node.literal)
+                is SoftLineBreak -> sb.append(' ')
+                else -> sb.append(commonmarkRenderer.render(node).trim())
+            }
+            node = node.next
+        }
+        return sb.toString()
     }
 
     private fun isValueSuppressed(

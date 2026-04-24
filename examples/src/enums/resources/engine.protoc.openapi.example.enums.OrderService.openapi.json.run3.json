@@ -73,7 +73,7 @@
           },
           "priority" : {
             "type" : "string",
-            "description" : "The priority level of a shipment.\nThis enum carries inline = true, so it is always inlined regardless of the\ninlineEnums compiler option.",
+            "description" : "The priority level of a shipment.\n This enum carries inline = true, so it is always inlined regardless of the\n inlineEnums compiler option.",
             "enum" : [ "STANDARD", "EXPRESS", "OVERNIGHT" ]
           },
           "payment" : {
@@ -101,7 +101,7 @@
       },
       "OrderStatus" : {
         "type" : "string",
-        "description" : "The lifecycle status of an order.\n\n- `UNSET` — UNSET is the proto3 conventional default value (number = 0).\n- `PENDING` — Order has been received and is awaiting processing. Sometimes an enum comment might be multi-line. What happens then?\n- `CONFIRMED` — Order has been accepted and payment verified.\n- `SHIPPED` — Order has been handed off to the carrier and is in transit.\n- `CANCELLED` — Order was voided before or during fulfillment.",
+        "description" : "The lifecycle status of an order.\n\n- `UNSET` — UNSET is the proto3 conventional default value (number = 0).\n- `PENDING` — Order has been received and is awaiting processing.\n\n  Sometimes an enum comment might be multi-line. What happens then?\n- `CONFIRMED` — Order has been accepted and payment verified.\n- `SHIPPED` — Order has been handed off to the carrier and is in transit.\n- `CANCELLED` — Order was voided before or during fulfillment.",
         "enum" : [ "UNSET", "PENDING", "CONFIRMED", "SHIPPED", "CANCELLED" ]
       },
       "PaymentMethod" : {
@@ -111,7 +111,7 @@
       },
       "ReturnReason" : {
         "type" : "string",
-        "description" : "The reason a return was initiated.\nThis enum carries inline = false, so it is always a component schema\nregardless of the inlineEnums compiler option.",
+        "description" : "The reason a return was initiated.\n This enum carries inline = false, so it is always a component schema\n regardless of the inlineEnums compiler option.",
         "enum" : [ "DAMAGED", "WRONG_ITEM", "NO_LONGER_NEEDED" ]
       }
     }

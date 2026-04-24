@@ -70,7 +70,7 @@
           },
           "status" : {
             "type" : "string",
-            "description" : "The lifecycle status of an order.\n\n- `UNSET` — UNSET is the proto3 conventional default value (number = 0).\n\n- `PENDING` — Order has been received and is awaiting processing.\n  Sometimes an enum comment might be multi-line.\n  What happens then?\n\n- `CONFIRMED` — Order has been accepted and payment verified.\n\n- `SHIPPED` — Order has been handed off to the carrier and is in transit.\n\n- `CANCELLED` — Order was voided before or during fulfillment.",
+            "description" : "The lifecycle status of an order.\n\n- `UNSET` — UNSET is the proto3 conventional default value (number = 0).\n- `PENDING` — Order has been received and is awaiting processing. Sometimes an enum comment might be multi-line. What happens then?\n- `CONFIRMED` — Order has been accepted and payment verified.\n- `SHIPPED` — Order has been handed off to the carrier and is in transit.\n- `CANCELLED` — Order was voided before or during fulfillment.",
             "enum" : [ "UNSET", "PENDING", "CONFIRMED", "SHIPPED", "CANCELLED" ]
           },
           "priority" : {
@@ -98,7 +98,7 @@
             "type" : "array",
             "items" : {
               "type" : "string",
-              "description" : "The lifecycle status of an order.\n\n- `UNSET` — UNSET is the proto3 conventional default value (number = 0).\n\n- `PENDING` — Order has been received and is awaiting processing.\n  Sometimes an enum comment might be multi-line.\n  What happens then?\n\n- `CONFIRMED` — Order has been accepted and payment verified.\n\n- `SHIPPED` — Order has been handed off to the carrier and is in transit.\n\n- `CANCELLED` — Order was voided before or during fulfillment.",
+              "description" : "The lifecycle status of an order.\n\n- `UNSET` — UNSET is the proto3 conventional default value (number = 0).\n- `PENDING` — Order has been received and is awaiting processing. Sometimes an enum comment might be multi-line. What happens then?\n- `CONFIRMED` — Order has been accepted and payment verified.\n- `SHIPPED` — Order has been handed off to the carrier and is in transit.\n- `CANCELLED` — Order was voided before or during fulfillment.",
               "enum" : [ "UNSET", "PENDING", "CONFIRMED", "SHIPPED", "CANCELLED" ]
             },
             "description" : "Per-value suppress = false keeps REASON_UNSET visible even when\n suppressDefaultEnumValues = true is set globally."

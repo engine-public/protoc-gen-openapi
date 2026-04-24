@@ -55,7 +55,5 @@ internal class EnumIndex(protoFiles: List<FileDescriptorProtoWrapper>) {
 
     fun find(typeName: String): EnumDescriptorProtoWrapper? = byTypeName[typeName]
 
-    fun simpleNameOf(typeName: String): String = typeName.substringAfterLast('.')
-
     fun packageOf(typeName: String): String = packageByTypeName[typeName] ?: ""
 }

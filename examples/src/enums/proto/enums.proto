@@ -25,6 +25,7 @@ enum OrderStatus {
     // UNSET is the proto3 conventional default value (number = 0).
     UNSET = 0 [(.engine.protoc.openapi.suppress) = false];
     // Order has been received and is awaiting processing.
+    //
     // Sometimes an enum comment might be multi-line.
     // What happens then?
     PENDING = 1;

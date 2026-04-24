@@ -41,9 +41,9 @@ extend .google.protobuf.FieldOptions {
 }
 
 extend .google.protobuf.EnumOptions {
-    // Adds the ability to add an OpenAPI schema to a field in a proto `enum`
+    // Adds the ability to add an OpenAPI schema to a proto `enum`
     .engine.protoc.openapi.model.Schema enum = 20231016;
-    // when true, this enum will inlined when used instead of created as a separate schema in components.
+    // When true, this enum will be inlined when used instead of created as a separate schema in components.
     optional bool inline = 202310162;
 }
 

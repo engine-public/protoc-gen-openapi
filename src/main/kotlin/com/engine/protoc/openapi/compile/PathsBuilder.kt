@@ -22,6 +22,7 @@ import org.commonmark.node.Code
 import org.commonmark.node.Document
 import org.commonmark.node.ListItem
 import org.commonmark.node.Paragraph
+import org.commonmark.node.SoftLineBreak
 import org.commonmark.node.Text
 import org.commonmark.parser.Parser
 import org.commonmark.renderer.markdown.MarkdownRenderer
@@ -573,7 +574,7 @@ internal class PathsBuilder(
                 val annotationInline = enumWrapper?.options?.findExtension(Annotations.inline)?.value
                 val shouldInline = annotationInline ?: ctx.inlineEnums
                 if (shouldInline) {
-                    buildInlineEnumSchema(typeName, enumWrapper)
+                    buildEnumSchema(typeName, enumWrapper)
                 } else {
                     collector.collectEnum(typeName)
                     node.also {
@@ -605,11 +606,12 @@ internal class PathsBuilder(
     }
 
     /**
-     * Builds a fully-populated inline enum schema `{ "type": "string", "enum": [...] }` for
-     * [typeName].  Suppresses values per [JsonContext.suppressDefaultEnumValues] and per-value
-     * annotations, then deep-merges any `engine.protoc.openapi.enum` annotation on top.
+     * Builds a fully-populated enum schema `{ "type": "string", "enum": [...] }` for [typeName].
+     * Used for both inline field schemas and `components/schemas` entries.  Suppresses values per
+     * [JsonContext.suppressDefaultEnumValues] and per-value annotations, then deep-merges any
+     * `engine.protoc.openapi.enum` annotation on top.
      */
-    internal fun buildInlineEnumSchema(
+    internal fun buildEnumSchema(
         typeName: String,
         enumWrapper: EnumDescriptorProtoWrapper?,
     ): ObjectNode {
@@ -653,29 +655,37 @@ internal class PathsBuilder(
         }
         if (enumComment == null && commentedValues.isEmpty()) return null
 
-        val doc = if (enumComment != null) commonmarkParser.parse(enumComment) as Document else Document()
+        val doc = if (enumComment != null) commonmarkParser.parse(enumComment) as? Document ?: Document() else Document()
 
         if (commentedValues.isNotEmpty()) {
-            val list = BulletList()
+            val list = BulletList().also { it.isTight = true }
             for ((name, comment) in commentedValues) {
                 val item = ListItem()
                 val para = Paragraph()
                 para.appendChild(Code().also { it.literal = name })
                 para.appendChild(Text(" — "))
                 // splice inline nodes from the parsed comment into the paragraph
-                val commentDoc = commonmarkParser.parse(comment) as Document
-                val firstPara = commentDoc.firstChild
-                if (firstPara is Paragraph) {
-                    var node = firstPara.firstChild
-                    while (node != null) {
-                        val next = node.next
-                        node.unlink()
-                        para.appendChild(node)
-                        node = next
+                val commentDoc = commonmarkParser.parse(comment) as? Document ?: Document()
+                var firstBlock = true
+                var block = commentDoc.firstChild
+                while (block != null) {
+                    val nextBlock = block.next
+                    if (block is Paragraph) {
+                        // separate paragraphs with a space when collapsed onto one line
+                        if (!firstBlock) para.appendChild(Text(" "))
+                        firstBlock = false
+                        var node = block.firstChild
+                        while (node != null) {
+                            val next = node.next
+                            node.unlink()
+                            // collapse soft line breaks to spaces so each bullet stays on one line
+                            para.appendChild(if (node is SoftLineBreak) Text(" ") else node)
+                            node = next
+                        }
                     }
-                } else {
-                    para.appendChild(Text(comment))
+                    block = nextBlock
                 }
+                if (firstBlock) para.appendChild(Text(comment))
                 item.appendChild(para)
                 list.appendChild(item)
             }
@@ -684,6 +694,22 @@ internal class PathsBuilder(
 
         return commonmarkRenderer.render(doc).trimEnd().ifEmpty { null }
     }
+
+    private fun isValueSuppressed(
+        valueWrapper: com.engine.protoc.util.enums.EnumValueDescriptorProtoWrapper,
+        suppressDefaults: Boolean,
+    ): Boolean {
+        val annotation = valueWrapper.options?.findExtension(Annotations.suppress)?.value
+        return annotation ?: (suppressDefaults && valueWrapper.proto.number == 0)
+    }
+
+    private fun formatEnumValue(
+        protoName: String,
+        format: ProtocGenOpenAPI.Options.EnumValueFormat,
+    ): String =
+        when (format) {
+            ProtocGenOpenAPI.Options.EnumValueFormat.RAW -> protoName
+        }
 }
 
 // ---------------------------------------------------------------------------
@@ -703,31 +729,6 @@ internal fun HttpRule.primaryBinding(): HttpBinding? {
         else -> null
     }
 }
-
-// ---------------------------------------------------------------------------
-// Enum helpers
-// ---------------------------------------------------------------------------
-
-/**
- * Returns `true` when [valueWrapper] should be omitted from all OAS enum value lists.
- * Per-value annotation takes precedence over the [suppressDefaults] global option.
- */
-internal fun isValueSuppressed(
-    valueWrapper: com.engine.protoc.util.enums.EnumValueDescriptorProtoWrapper,
-    suppressDefaults: Boolean,
-): Boolean {
-    val annotation = valueWrapper.options?.findExtension(Annotations.suppress)?.value
-    return annotation ?: (suppressDefaults && valueWrapper.proto.number == 0)
-}
-
-/** Formats a proto enum value name according to [format]. */
-internal fun formatEnumValue(
-    protoName: String,
-    format: ProtocGenOpenAPI.Options.EnumValueFormat,
-): String =
-    when (format) {
-        ProtocGenOpenAPI.Options.EnumValueFormat.RAW -> protoName
-    }
 
 // ---------------------------------------------------------------------------
 // String helpers

@@ -492,12 +492,14 @@ internal class PathsBuilder(
         when (field.type) {
             DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE ->
                 collector.collect(field.typeName)
+
             DescriptorProtos.FieldDescriptorProto.Type.TYPE_ENUM -> {
                 val enumWrapper = ctx.enumIndex.find(field.typeName)
                 val shouldInline = enumWrapper?.options?.findExtension(Annotations.inline)?.value
                     ?: ctx.inlineEnums
                 if (!shouldInline) collector.collectEnum(field.typeName)
             }
+
             else -> Unit
         }
         return true
@@ -717,7 +719,10 @@ internal class PathsBuilder(
      * Moves all inline children of [src] into [dest], replacing each [SoftLineBreak] with a
      * space so the paragraph renders as a single line.
      */
-    private fun spliceInlineNodes(src: Paragraph, dest: Paragraph) {
+    private fun spliceInlineNodes(
+        src: Paragraph,
+        dest: Paragraph,
+    ) {
         var node = src.firstChild
         while (node != null) {
             val next = node.next

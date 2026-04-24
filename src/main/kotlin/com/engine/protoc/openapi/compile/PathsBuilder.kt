@@ -486,8 +486,16 @@ internal class PathsBuilder(
         val msg = ctx.messageIndex.find(typeName) ?: return false
         val field = msg.proto.fieldList
             .find { it.name == fieldName || it.jsonName == fieldName } ?: return false
-        if (field.type == DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE) {
-            collector.collect(field.typeName)
+        when (field.type) {
+            DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE ->
+                collector.collect(field.typeName)
+            DescriptorProtos.FieldDescriptorProto.Type.TYPE_ENUM -> {
+                val enumWrapper = ctx.enumIndex.find(field.typeName)
+                val shouldInline = enumWrapper?.options?.findExtension(Annotations.inline)?.value
+                    ?: ctx.inlineEnums
+                if (!shouldInline) collector.collectEnum(field.typeName)
+            }
+            else -> Unit
         }
         return true
     }

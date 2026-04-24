@@ -684,7 +684,7 @@ internal class PathsBuilder(
                                     } else {
                                         appendChild(Text(comment))
                                     }
-                                }
+                                },
                             )
                             var block = firstBlock?.next
                             while (block != null) {
@@ -694,7 +694,7 @@ internal class PathsBuilder(
                                 }
                                 block = next
                             }
-                        }
+                        },
                     )
                 }
             }
@@ -713,7 +713,10 @@ internal class PathsBuilder(
      * Moves all inline children of [src] into [dest], replacing each [SoftLineBreak] with a
      * space so the paragraph renders as a single line.
      */
-    private fun spliceInlineNodes(src: Paragraph, dest: Paragraph) {
+    private fun spliceInlineNodes(
+        src: Paragraph,
+        dest: Paragraph,
+    ) {
         var node = src.firstChild
         while (node != null) {
             val next = node.next

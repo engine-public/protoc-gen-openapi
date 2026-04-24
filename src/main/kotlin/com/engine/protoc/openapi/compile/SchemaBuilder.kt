@@ -37,7 +37,7 @@ internal class SchemaBuilder(
         for (typeName in collector.collectedEnums) {
             val wrapper = ctx.enumIndex.find(typeName) ?: continue
             val schemaKey = ctx.schemaKeyResolver.keyOf(typeName)
-            schemas.set<JsonNode>(schemaKey, pathsBuilder.buildEnumSchema(typeName, wrapper))
+            schemas.set<JsonNode>(schemaKey, pathsBuilder.buildEnumSchema(typeName, wrapper, includeTitle = true))
         }
         return schemas
     }

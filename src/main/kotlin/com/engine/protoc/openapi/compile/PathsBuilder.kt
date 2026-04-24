@@ -615,14 +615,18 @@ internal class PathsBuilder(
      * Used for both inline field schemas and `components/schemas` entries.  Suppresses values per
      * [JsonContext.suppressDefaultEnumValues] and per-value annotations, then deep-merges any
      * `engine.protoc.openapi.enum` annotation on top.
+     *
+     * [includeTitle] should be `true` only when building a component schema entry; inline field
+     * schemas must not carry a title.
      */
     internal fun buildEnumSchema(
         typeName: String,
         enumWrapper: EnumDescriptorProtoWrapper?,
+        includeTitle: Boolean = false,
     ): ObjectNode {
         val node = ctx.obj()
         node.put("type", "string")
-        ctx.schemaKeyResolver.titleFor(typeName)?.let { node.put("title", it) }
+        if (includeTitle) ctx.schemaKeyResolver.titleFor(typeName)?.let { node.put("title", it) }
 
         if (enumWrapper != null) {
             val visibleValues = enumWrapper.values.filterNot {

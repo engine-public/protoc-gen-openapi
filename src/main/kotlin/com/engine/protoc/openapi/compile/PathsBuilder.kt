@@ -17,6 +17,17 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.google.api.AnnotationsProto
 import com.google.api.HttpRule
 import com.google.protobuf.DescriptorProtos
+import org.commonmark.node.BulletList
+import org.commonmark.node.Code
+import org.commonmark.node.Document
+import org.commonmark.node.ListItem
+import org.commonmark.node.Paragraph
+import org.commonmark.node.Text
+import org.commonmark.parser.Parser
+import org.commonmark.renderer.markdown.MarkdownRenderer
+
+private val commonmarkParser: Parser = Parser.builder().build()
+private val commonmarkRenderer: MarkdownRenderer = MarkdownRenderer.builder().build()
 
 /**
  * Builds the `paths` section of the OpenAPI document from gRPC service definitions and their
@@ -635,19 +646,43 @@ internal class PathsBuilder(
         enumComment: String?,
         visibleValues: List<com.engine.protoc.util.enums.EnumValueDescriptorProtoWrapper>,
     ): String? {
-        val bullets = visibleValues.mapNotNull { valueWrapper ->
+        val commentedValues = visibleValues.mapNotNull { valueWrapper ->
             val comment = valueWrapper.location?.proto?.leadingComments?.trim()?.ifEmpty { null }
                 ?: return@mapNotNull null
-            val name = formatEnumValue(valueWrapper.proto.name, ctx.enumValueFormat)
-            "- `$name` — $comment"
+            Pair(formatEnumValue(valueWrapper.proto.name, ctx.enumValueFormat), comment)
         }
-        return buildString {
-            if (enumComment != null) append(enumComment)
-            if (bullets.isNotEmpty()) {
-                if (enumComment != null) append("\n\n")
-                append(bullets.joinToString("\n"))
+        if (enumComment == null && commentedValues.isEmpty()) return null
+
+        val doc = if (enumComment != null) commonmarkParser.parse(enumComment) as Document else Document()
+
+        if (commentedValues.isNotEmpty()) {
+            val list = BulletList()
+            for ((name, comment) in commentedValues) {
+                val item = ListItem()
+                val para = Paragraph()
+                para.appendChild(Code().also { it.literal = name })
+                para.appendChild(Text(" — "))
+                // splice inline nodes from the parsed comment into the paragraph
+                val commentDoc = commonmarkParser.parse(comment) as Document
+                val firstPara = commentDoc.firstChild
+                if (firstPara is Paragraph) {
+                    var node = firstPara.firstChild
+                    while (node != null) {
+                        val next = node.next
+                        node.unlink()
+                        para.appendChild(node)
+                        node = next
+                    }
+                } else {
+                    para.appendChild(Text(comment))
+                }
+                item.appendChild(para)
+                list.appendChild(item)
             }
-        }.ifEmpty { null }
+            doc.appendChild(list)
+        }
+
+        return commonmarkRenderer.render(doc).trimEnd().ifEmpty { null }
     }
 }
 

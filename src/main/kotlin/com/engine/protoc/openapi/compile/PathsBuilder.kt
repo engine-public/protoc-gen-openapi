@@ -6,8 +6,10 @@ import com.engine.protoc.openapi.compile.json.JsonContext
 import com.engine.protoc.openapi.compile.json.putExtensionsInto
 import com.engine.protoc.openapi.compile.json.toJson
 import com.engine.protoc.openapi.model.Operation
+import com.engine.protoc.openapi.model.ParameterOrReference
 import com.engine.protoc.openapi.model.Schema
 import com.engine.protoc.util.enums.EnumDescriptorProtoWrapper
+import com.engine.protoc.util.enums.EnumValueDescriptorProtoWrapper
 import com.engine.protoc.util.file.FileDescriptorProtoWrapper
 import com.engine.protoc.util.service.MethodDescriptorProtoWrapper
 import com.engine.protoc.util.service.ServiceDescriptorProtoWrapper
@@ -17,18 +19,12 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.google.api.AnnotationsProto
 import com.google.api.HttpRule
 import com.google.protobuf.DescriptorProtos
-import org.commonmark.node.BulletList
-import org.commonmark.node.Code
-import org.commonmark.node.Document
-import org.commonmark.node.ListItem
-import org.commonmark.node.Paragraph
-import org.commonmark.node.SoftLineBreak
-import org.commonmark.node.Text
+import org.commonmark.node.*
 import org.commonmark.parser.Parser
 import org.commonmark.renderer.markdown.MarkdownRenderer
 
-private val commonmarkParser: Parser = Parser.builder().build()
-private val commonmarkRenderer: MarkdownRenderer = MarkdownRenderer.builder().build()
+private val markdownParser: Parser = Parser.builder().build()
+private val markdownRenderer: MarkdownRenderer = MarkdownRenderer.builder().build()
 
 /**
  * Builds the `paths` section of the OpenAPI document from gRPC service definitions and their
@@ -311,7 +307,7 @@ internal class PathsBuilder(
     private fun buildAnnotatedPathParams(
         originalPath: String,
         inputTypeName: String,
-        annotatedParams: List<com.engine.protoc.openapi.model.ParameterOrReference>,
+        annotatedParams: List<ParameterOrReference>,
     ): Pair<String, List<ObjectNode>> {
         val inferredNodes = inferPathParameters(originalPath, inputTypeName)
         val inferredNames = pathParamRegex.findAll(originalPath).map { it.groupValues[1] }.toList()
@@ -493,12 +489,8 @@ internal class PathsBuilder(
             DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE ->
                 collector.collect(field.typeName)
 
-            DescriptorProtos.FieldDescriptorProto.Type.TYPE_ENUM -> {
-                val enumWrapper = ctx.enumIndex.find(field.typeName)
-                val shouldInline = enumWrapper?.options?.findExtension(Annotations.inline)?.value
-                    ?: ctx.inlineEnums
-                if (!shouldInline) collector.collectEnum(field.typeName)
-            }
+            DescriptorProtos.FieldDescriptorProto.Type.TYPE_ENUM ->
+                collector.collectEnum(field.typeName)
 
             else -> Unit
         }
@@ -660,8 +652,9 @@ internal class PathsBuilder(
 
     private fun buildEnumDescription(
         enumComment: String?,
-        visibleValues: List<com.engine.protoc.util.enums.EnumValueDescriptorProtoWrapper>,
+        visibleValues: List<EnumValueDescriptorProtoWrapper>,
     ): String? {
+        // create pairs
         val commentedValues = visibleValues.mapNotNull { valueWrapper ->
             val comment = valueWrapper.location?.proto?.leadingComments?.trim()?.ifEmpty { null }
                 ?: return@mapNotNull null
@@ -669,48 +662,49 @@ internal class PathsBuilder(
         }
         if (enumComment == null && commentedValues.isEmpty()) return null
 
-        val doc = if (enumComment != null) {
-            commonmarkParser.parse(enumComment) as? Document ?: Document()
+        val documentNode = if (enumComment != null) {
+            markdownParser.parse(enumComment) as? Document ?: Document()
         } else {
             Document()
         }
 
         if (commentedValues.isNotEmpty()) {
-            val list = BulletList()
-            for ((name, comment) in commentedValues) {
-                val item = ListItem()
-                val commentDoc = commonmarkParser.parse(comment) as? Document ?: Document()
-
-                // First paragraph: Code(name) + separator + inline content of first comment paragraph
-                val firstPara = Paragraph()
-                firstPara.appendChild(Code().also { it.literal = name })
-                firstPara.appendChild(Text(" — "))
-                val firstBlock = commentDoc.firstChild
-                if (firstBlock is Paragraph) {
-                    spliceInlineNodes(firstBlock, firstPara)
-                } else {
-                    firstPara.appendChild(Text(comment))
+            val list = BulletList().apply {
+                for ((name, comment) in commentedValues) {
+                    val commentDoc = markdownParser.parse(comment) as? Document ?: Document()
+                    appendChild(
+                        ListItem().apply {
+                            val firstBlock = commentDoc.firstChild
+                            appendChild(
+                                Paragraph().apply {
+                                    appendChild(Code(name))
+                                    appendChild(Text(" — "))
+                                    if (firstBlock is Paragraph) {
+                                        spliceInlineNodes(firstBlock, this)
+                                    } else {
+                                        appendChild(Text(comment))
+                                    }
+                                }
+                            )
+                            var block = firstBlock?.next
+                            while (block != null) {
+                                val next = block.next
+                                if (block is Paragraph) {
+                                    appendChild(Paragraph().also { spliceInlineNodes(block, it) })
+                                }
+                                block = next
+                            }
+                        }
+                    )
                 }
-                item.appendChild(firstPara)
-
-                // Each additional comment paragraph becomes a continuation Paragraph in the ListItem
-                var block = firstBlock?.next
-                while (block != null) {
-                    if (block is Paragraph) {
-                        val contPara = Paragraph()
-                        spliceInlineNodes(block, contPara)
-                        item.appendChild(contPara)
-                    }
-                    block = block.next
-                }
-
-                list.appendChild(item)
             }
-            doc.appendChild(list)
+            documentNode.appendChild(list)
         }
 
-        return commonmarkRenderer.render(doc)
-            .lines().joinToString("\n") { it.trimEnd() }
+        return markdownRenderer
+            .render(documentNode)
+            .lines()
+            .joinToString("\n") { it.trimEnd() }
             .trimEnd()
             .ifEmpty { null }
     }
@@ -719,10 +713,7 @@ internal class PathsBuilder(
      * Moves all inline children of [src] into [dest], replacing each [SoftLineBreak] with a
      * space so the paragraph renders as a single line.
      */
-    private fun spliceInlineNodes(
-        src: Paragraph,
-        dest: Paragraph,
-    ) {
+    private fun spliceInlineNodes(src: Paragraph, dest: Paragraph) {
         var node = src.firstChild
         while (node != null) {
             val next = node.next
@@ -733,7 +724,7 @@ internal class PathsBuilder(
     }
 
     private fun isValueSuppressed(
-        valueWrapper: com.engine.protoc.util.enums.EnumValueDescriptorProtoWrapper,
+        valueWrapper: EnumValueDescriptorProtoWrapper,
         suppressDefaults: Boolean,
     ): Boolean {
         val annotation = valueWrapper.options?.findExtension(Annotations.suppress)?.value

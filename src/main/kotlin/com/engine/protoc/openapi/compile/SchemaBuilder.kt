@@ -59,7 +59,14 @@ internal class SchemaBuilder(
         val propsNode = ctx.obj()
         for (fieldWrapper in wrapper.fields) {
             val field = fieldWrapper.proto
-            val jsonName = field.jsonName.ifEmpty { field.name }
+            val jsonName = if (ctx.preserveProtoFieldNames) {
+                // preserve_proto_field_names: always use the raw proto field name.
+                // This overrides both auto-camelCase conversion and explicit json_name annotations,
+                // matching Envoy's preserve_proto_field_names PrintOption behaviour.
+                field.name
+            } else {
+                field.jsonName.ifEmpty { field.name }
+            }
             val fieldSchema = buildFieldSchema(fieldWrapper)
             propsNode.set(jsonName, fieldSchema)
 
@@ -111,3 +118,4 @@ internal class SchemaBuilder(
         }
     }
 }
+

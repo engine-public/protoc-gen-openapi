@@ -175,6 +175,25 @@ public class ProtocGenOpenAPI(
          * Passed via `--openapi_out=enumValueFormat=CANONICAL:outdir`.
          */
         val enumValueFormat: EnumValueFormat,
+
+        /**
+         * When `true`, all schema property keys use the raw proto field name (e.g. `my_field`)
+         * instead of the `json_name` option value or its lowerCamelCase default (e.g. `myField`).
+         * This applies to every property key across all `components/schemas` entries.
+         *
+         * Use this option together with Envoy's `preserve_proto_field_names = true` PrintOption
+         * so the OAS schema matches the JSON field names that Envoy actually emits in responses.
+         *
+         * Note: proto3 JSON parsers accept **both** the camelCase name and the original proto
+         * name in request bodies regardless of this setting.  Setting this option makes the
+         * documented (OAS) name match the server-side wire name when `preserve_proto_field_names`
+         * is enabled.
+         *
+         * See: [PrintOptions.preserve_proto_field_names](https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/filters/http/grpc_json_transcoder/v3/transcoder.proto#extensions-filters-http-grpc-json-transcoder-v3-grpcjsontranscoder-printoptions)
+         *
+         * Passed via `--openapi_out=preserveProtoFieldNames=true:outdir`.
+         */
+        val preserveProtoFieldNames: Boolean,
     ) {
         /**
          * The serialization format for generated OpenAPI documents.
@@ -369,6 +388,12 @@ public class ProtocGenOpenAPI(
             public var enumValueFormat: EnumValueFormat =
                 parameters.get<EnumValueFormat>("enumValueFormat") ?: EnumValueFormat.CANONICAL
 
+            /**
+             * @see [Options.preserveProtoFieldNames]
+             */
+            public var preserveProtoFieldNames: Boolean =
+                parameters.get<Boolean>("preserveProtoFieldNames") ?: false
+
             public companion object {
                 public fun from(parameters: Parameters): Builder = Builder(parameters)
             }
@@ -388,6 +413,7 @@ public class ProtocGenOpenAPI(
                     inlineEnums = inlineEnums,
                     suppressDefaultEnumValues = suppressDefaultEnumValues,
                     enumValueFormat = enumValueFormat,
+                    preserveProtoFieldNames = preserveProtoFieldNames,
                 )
         }
     }

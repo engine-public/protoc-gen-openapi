@@ -18,6 +18,13 @@ internal class JsonContext(
     val inlineEnums: Boolean,
     val suppressDefaultEnumValues: Boolean,
     val enumValueFormat: ProtocGenOpenAPI.Options.EnumValueFormat,
+    /**
+     * When true, schema property keys use the raw proto field name (e.g. `my_field`) instead of
+     * the `json_name` option value or lowerCamelCase default (e.g. `myField`).
+     *
+     * Mirrors Envoy's `preserve_proto_field_names` PrintOption.
+     */
+    val preserveProtoFieldNames: Boolean = false,
 ) {
     fun obj(): ObjectNode = mapper.createObjectNode()
 

@@ -406,7 +406,7 @@ When `stream_sse_style_delimited = true` (see §8), it overrides this setting.
 
 ### 8. `print_options.stream_sse_style_delimited`
 
-**Status: not yet implemented**
+**Status: implemented** — compiler option `streamSseStyleDelimited = true`
 
 **What it does.** When `stream_sse_style_delimited = true`, each streamed message is emitted using
 Server-Sent Events framing:
@@ -477,7 +477,7 @@ the shape of request or response JSON schemas. They need not influence compiler 
 | 3 | `auto_mapping` | `autoMapping` | Medium — PathsBuilder must detect unannotated methods and synthesise paths | [x] |
 | 4 | `convert_grpc_status` | `convertGrpcStatus` | Small — inject `google.rpc.Status` schema + error response on every operation | [x] |
 | 5 | `stream_newline_delimited` | `streamNewlineDelimited` | Small — change content-type + schema shape for streaming responses | [x] |
-| 6 | `stream_sse_style_delimited` | `streamSseStyleDelimited` | Small — same as above, takes precedence over `streamNewlineDelimited` | [ ] |
+| 6 | `stream_sse_style_delimited` | `streamSseStyleDelimited` | Small — same as above, takes precedence over `streamNewlineDelimited` | [x] |
 
 Items 1–2 affect request/response schemas broadly and are the highest client-visible risk.  
 Items 3–4 add new content rather than changing existing shapes.  

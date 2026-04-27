@@ -265,6 +265,21 @@ public class ProtocGenOpenAPI(
          * Passed via `--openapi_out=streamNewlineDelimited=true:outdir`.
          */
         val streamNewlineDelimited: Boolean,
+
+        /**
+         * When `true`, server-streaming RPC responses are documented with content-type
+         * `text/event-stream` and a single-message schema, reflecting Envoy's
+         * `stream_sse_style_delimited` PrintOption which frames each streamed message as an
+         * SSE `data:` line.
+         *
+         * This option takes precedence over [streamNewlineDelimited] when both are `true`.
+         * Unary (non-streaming) method responses are not affected.
+         *
+         * See: [PrintOptions.stream_sse_style_delimited](https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/filters/http/grpc_json_transcoder/v3/transcoder.proto#extensions-filters-http-grpc-json-transcoder-v3-grpcjsontranscoder-printoptions)
+         *
+         * Passed via `--openapi_out=streamSseStyleDelimited=true:outdir`.
+         */
+        val streamSseStyleDelimited: Boolean,
     ) {
         /**
          * The serialization format for generated OpenAPI documents.
@@ -489,6 +504,12 @@ public class ProtocGenOpenAPI(
             public var streamNewlineDelimited: Boolean =
                 parameters.get<Boolean>("streamNewlineDelimited") ?: false
 
+            /**
+             * @see [Options.streamSseStyleDelimited]
+             */
+            public var streamSseStyleDelimited: Boolean =
+                parameters.get<Boolean>("streamSseStyleDelimited") ?: false
+
             public companion object {
                 public fun from(parameters: Parameters): Builder = Builder(parameters)
             }
@@ -513,6 +534,7 @@ public class ProtocGenOpenAPI(
                     preserveProtoFieldNames = preserveProtoFieldNames,
                     convertGrpcStatus = convertGrpcStatus,
                     streamNewlineDelimited = streamNewlineDelimited,
+                    streamSseStyleDelimited = streamSseStyleDelimited,
                 )
         }
     }

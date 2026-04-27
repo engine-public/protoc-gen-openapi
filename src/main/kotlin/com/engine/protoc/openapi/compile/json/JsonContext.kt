@@ -47,6 +47,13 @@ internal class JsonContext(
      * Mirrors Envoy's `stream_newline_delimited` PrintOption.
      */
     val streamNewlineDelimited: Boolean = false,
+    /**
+     * When true, server-streaming responses use content-type `text/event-stream` with a
+     * single-message schema.  Takes precedence over [streamNewlineDelimited].
+     *
+     * Mirrors Envoy's `stream_sse_style_delimited` PrintOption.
+     */
+    val streamSseStyleDelimited: Boolean = false,
 ) {
     fun obj(): ObjectNode = mapper.createObjectNode()
 

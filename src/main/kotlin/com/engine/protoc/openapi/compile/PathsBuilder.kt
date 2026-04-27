@@ -478,8 +478,10 @@ internal class PathsBuilder(
             val content = ctx.obj()
             // When a streaming option is active for a server-streaming method, use the
             // appropriate content type and a single-message schema (no array wrapper).
-            val useNdjson = isServerStreaming && ctx.streamNewlineDelimited
-            val mediaType = if (useNdjson) {
+            // SSE takes precedence over ndjson when both are enabled.
+            val useSse = isServerStreaming && ctx.streamSseStyleDelimited
+            val useNdjson = isServerStreaming && ctx.streamNewlineDelimited && !useSse
+            val mediaType = if (useSse || useNdjson) {
                 schemaMediaType(outputTypeName)
             } else if (responseBodyField != null) {
                 responseBodyFieldSchema(outputTypeName, responseBodyField)
@@ -488,7 +490,11 @@ internal class PathsBuilder(
             } else {
                 schemaMediaType(outputTypeName)
             }
-            val contentType = if (useNdjson) "application/x-ndjson" else "application/json"
+            val contentType = when {
+                useSse -> "text/event-stream"
+                useNdjson -> "application/x-ndjson"
+                else -> "application/json"
+            }
             content.set(contentType, mediaType)
             response.set("content", content)
         }

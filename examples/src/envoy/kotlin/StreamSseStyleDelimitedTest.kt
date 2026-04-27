@@ -1,22 +1,40 @@
 import com.engine.protoc.openapi.ProtocGenOpenAPI
 import com.google.protobuf.compiler.PluginProtos
 import io.kotest.assertions.withClue
-import io.kotest.core.spec.style.FunSpec
 import io.kotest.datatest.withData
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import tools.jackson.databind.ObjectMapper
+import io.kotest.matchers.string.shouldStartWith
+import tools.jackson.module.kotlin.readValue
 
-/**
- * Tests for the `streamSseStyleDelimited` compiler option.
- *
- * Envoy's `stream_sse_style_delimited` PrintOption was introduced after Envoy v1.33, so this
- * test validates OAS compilation output only (no live Envoy container).
- */
-class StreamSseStyleDelimitedTest : FunSpec() {
-    private val jsonMapper = ObjectMapper()
-
+class StreamSseStyleDelimitedTest :
+    EnvoyTestBase(GrpcJsonTranscoder(printOptions = GrpcJsonTranscoder.PrintOptions(streamSseStyleDelimited = true))) {
     init {
+        context("confirm envoy behaviors") {
+            test("unary /hello returns plain JSON") {
+                val response = postJson("/hello", mapOf("yourName" to "World"))
+                response.statusCode() shouldBe 200
+                val body = jsonMapper.readValue<Map<String, Any>>(response.body())
+                body["replyMessage"].shouldNotBeNull()
+            }
+
+            test("streaming /hellos returns SSE-framed messages") {
+                val response = postJson("/hellos", mapOf("yourName" to "World"))
+                response.statusCode() shouldBe 200
+                val body = response.body().trim()
+                // With stream_sse_style_delimited, each message is prefixed with "data: "
+                val dataLines = body.lines().filter { it.startsWith("data: ") }
+                dataLines.size shouldBe 3
+                dataLines.forEachIndexed { i, line ->
+                    line shouldStartWith "data: "
+                    val json = line.removePrefix("data: ")
+                    val msg = jsonMapper.readValue<Map<String, Any>>(json)
+                    (msg["replyMessage"] as? String).shouldNotBeNull()
+                    msg["replyMessage"] shouldBe "Hello, World #$i!"
+                }
+            }
+        }
+
         context("validate streamSseStyleDelimited openapi output") {
             fun request() =
                 StreamSseStyleDelimitedTest::class.java

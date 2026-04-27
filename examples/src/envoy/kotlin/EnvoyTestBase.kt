@@ -18,7 +18,7 @@ import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.util.concurrent.TimeUnit
 
-private const val ENVOY_IMAGE = "envoyproxy/envoy:v1.33.14"
+private const val ENVOY_IMAGE = "envoyproxy/envoy:v1.35.0"
 
 private class EnvoyContainer(image: String) : GenericContainer<EnvoyContainer>(image)
 

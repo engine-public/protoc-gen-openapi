@@ -70,8 +70,13 @@ internal class SchemaBuilder(
             val fieldSchema = buildFieldSchema(fieldWrapper)
             propsNode.set(jsonName, fieldSchema)
 
-            // proto3 required: fields inside a oneof, or proto2 LABEL_REQUIRED
-            if (field.label == DescriptorProtos.FieldDescriptorProto.Label.LABEL_REQUIRED) {
+            // proto3 required: proto2 LABEL_REQUIRED, or alwaysPrintPrimitiveFields for
+            // non-repeated scalar/enum fields (they will always appear in the response).
+            val isPrimitive = field.label != DescriptorProtos.FieldDescriptorProto.Label.LABEL_REPEATED &&
+                field.type != DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE
+            if (field.label == DescriptorProtos.FieldDescriptorProto.Label.LABEL_REQUIRED ||
+                (ctx.alwaysPrintPrimitiveFields && isPrimitive)
+            ) {
                 required += jsonName
             }
         }

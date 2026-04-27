@@ -296,6 +296,7 @@ internal class Compiler(
             options.suppressDefaultEnumValues,
             options.enumValueFormat,
             preserveProtoFieldNames = options.preserveProtoFieldNames,
+            alwaysPrintPrimitiveFields = options.alwaysPrintPrimitiveFields,
         )
         val targetFiles = request.filesToGenerate.mapNotNull { name ->
             request.protoFiles.find { it.name == name }

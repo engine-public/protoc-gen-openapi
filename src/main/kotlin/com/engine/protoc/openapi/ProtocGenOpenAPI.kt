@@ -177,6 +177,21 @@ public class ProtocGenOpenAPI(
         val enumValueFormat: EnumValueFormat,
 
         /**
+         * When `true`, every non-repeated, non-message field is added to the `required` array of
+         * its containing schema.  Proto3 JSON omits scalar and enum fields whose value equals
+         * the type default (0, `""`, `false`, first enum value); enabling this option tells the
+         * compiler that Envoy will always include those fields, so they can be modelled as
+         * `required` in the OAS schema.
+         *
+         * Use this option together with Envoy's `always_print_primitive_fields = true` PrintOption.
+         *
+         * See: [PrintOptions.always_print_primitive_fields](https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/filters/http/grpc_json_transcoder/v3/transcoder.proto#extensions-filters-http-grpc-json-transcoder-v3-grpcjsontranscoder-printoptions)
+         *
+         * Passed via `--openapi_out=alwaysPrintPrimitiveFields=true:outdir`.
+         */
+        val alwaysPrintPrimitiveFields: Boolean,
+
+        /**
          * When `true`, all schema property keys use the raw proto field name (e.g. `my_field`)
          * instead of the `json_name` option value or its lowerCamelCase default (e.g. `myField`).
          * This applies to every property key across all `components/schemas` entries.
@@ -389,6 +404,12 @@ public class ProtocGenOpenAPI(
                 parameters.get<EnumValueFormat>("enumValueFormat") ?: EnumValueFormat.CANONICAL
 
             /**
+             * @see [Options.alwaysPrintPrimitiveFields]
+             */
+            public var alwaysPrintPrimitiveFields: Boolean =
+                parameters.get<Boolean>("alwaysPrintPrimitiveFields") ?: false
+
+            /**
              * @see [Options.preserveProtoFieldNames]
              */
             public var preserveProtoFieldNames: Boolean =
@@ -413,6 +434,7 @@ public class ProtocGenOpenAPI(
                     inlineEnums = inlineEnums,
                     suppressDefaultEnumValues = suppressDefaultEnumValues,
                     enumValueFormat = enumValueFormat,
+                    alwaysPrintPrimitiveFields = alwaysPrintPrimitiveFields,
                     preserveProtoFieldNames = preserveProtoFieldNames,
                 )
         }

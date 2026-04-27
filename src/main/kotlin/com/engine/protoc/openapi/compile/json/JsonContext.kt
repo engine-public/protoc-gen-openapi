@@ -25,6 +25,14 @@ internal class JsonContext(
      * Mirrors Envoy's `preserve_proto_field_names` PrintOption.
      */
     val preserveProtoFieldNames: Boolean = false,
+    /**
+     * When true, every non-repeated, non-message field is added to the schema `required` array.
+     * Proto3 JSON omits scalar and enum fields whose value equals the type default; enabling this
+     * option signals that Envoy will always include them, making them `required` in the OAS sense.
+     *
+     * Mirrors Envoy's `always_print_primitive_fields` PrintOption.
+     */
+    val alwaysPrintPrimitiveFields: Boolean = false,
 ) {
     fun obj(): ObjectNode = mapper.createObjectNode()
 

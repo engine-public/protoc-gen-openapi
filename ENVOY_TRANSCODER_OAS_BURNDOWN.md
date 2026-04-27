@@ -473,7 +473,7 @@ the shape of request or response JSON schemas. They need not influence compiler 
 | Priority | Option | Compiler option name (proposed) | Effort | Completed |
 |---|---|---|---|:---:|
 | 1 | `preserve_proto_field_names` | `preserveProtoFieldNames` | Medium — field name lookup change throughout SchemaBuilder + PathsBuilder | [x] |
-| 2 | `always_print_primitive_fields` | `alwaysPrintPrimitiveFields` | Small — add `required` array logic in SchemaBuilder for primitive fields | [ ] |
+| 2 | `always_print_primitive_fields` | `alwaysPrintPrimitiveFields` | Small — add `required` array logic in SchemaBuilder for primitive fields | [x] |
 | 3 | `auto_mapping` | `autoMapping` | Medium — PathsBuilder must detect unannotated methods and synthesise paths | [ ] |
 | 4 | `convert_grpc_status` | `convertGrpcStatus` | Small — inject `google.rpc.Status` schema + error response on every operation | [ ] |
 | 5 | `stream_newline_delimited` | `streamNewlineDelimited` | Small — change content-type + schema shape for streaming responses | [ ] |

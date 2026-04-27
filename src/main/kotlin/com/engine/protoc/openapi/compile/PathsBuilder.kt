@@ -285,7 +285,7 @@ internal class PathsBuilder(
         if (annotation?.hasResponses() == true) {
             node.set("responses", annotation.responses.toJson(ctx))
         } else {
-            node.set("responses", inferResponses(outputTypeName, responseBodyField))
+            node.set("responses", inferResponses(outputTypeName, responseBodyField, method.proto.serverStreaming))
         }
 
         // ---- Security / deprecated --------------------------------------
@@ -469,20 +469,27 @@ internal class PathsBuilder(
     private fun inferResponses(
         outputTypeName: String,
         responseBodyField: String? = null,
+        isServerStreaming: Boolean = false,
     ): ObjectNode {
         val responses = ctx.obj()
         val response = ctx.obj()
         response.put("description", "OK")
         if (outputTypeName.isNotEmpty() && outputTypeName != ".google.protobuf.Empty") {
             val content = ctx.obj()
-            val mediaType = if (responseBodyField != null) {
+            // When a streaming option is active for a server-streaming method, use the
+            // appropriate content type and a single-message schema (no array wrapper).
+            val useNdjson = isServerStreaming && ctx.streamNewlineDelimited
+            val mediaType = if (useNdjson) {
+                schemaMediaType(outputTypeName)
+            } else if (responseBodyField != null) {
                 responseBodyFieldSchema(outputTypeName, responseBodyField)
                     ?.let { schema -> ctx.obj().also { it.set("schema", schema) } }
                     ?: schemaMediaType(outputTypeName)
             } else {
                 schemaMediaType(outputTypeName)
             }
-            content.set("application/json", mediaType)
+            val contentType = if (useNdjson) "application/x-ndjson" else "application/json"
+            content.set(contentType, mediaType)
             response.set("content", content)
         }
         responses.set("200", response)

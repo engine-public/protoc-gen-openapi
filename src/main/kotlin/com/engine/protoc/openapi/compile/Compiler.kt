@@ -298,6 +298,7 @@ internal class Compiler(
             preserveProtoFieldNames = options.preserveProtoFieldNames,
             alwaysPrintPrimitiveFields = options.alwaysPrintPrimitiveFields,
             convertGrpcStatus = options.convertGrpcStatus,
+            streamNewlineDelimited = options.streamNewlineDelimited,
         )
         val targetFiles = request.filesToGenerate.mapNotNull { name ->
             request.protoFiles.find { it.name == name }

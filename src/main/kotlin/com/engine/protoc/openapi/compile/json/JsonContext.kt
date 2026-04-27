@@ -40,6 +40,13 @@ internal class JsonContext(
      * Mirrors Envoy's `convert_grpc_status` option.
      */
     val convertGrpcStatus: Boolean = false,
+    /**
+     * When true, server-streaming responses use content-type `application/x-ndjson` with a
+     * single-message schema instead of `application/json`.
+     *
+     * Mirrors Envoy's `stream_newline_delimited` PrintOption.
+     */
+    val streamNewlineDelimited: Boolean = false,
 ) {
     fun obj(): ObjectNode = mapper.createObjectNode()
 

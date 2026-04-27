@@ -248,6 +248,23 @@ public class ProtocGenOpenAPI(
          * Passed via `--openapi_out=convertGrpcStatus=true:outdir`.
          */
         val convertGrpcStatus: Boolean,
+
+        /**
+         * When `true`, server-streaming RPC responses are documented with content-type
+         * `application/x-ndjson` and a single-message schema (rather than the default
+         * `application/json`).  This reflects Envoy's `stream_newline_delimited` PrintOption,
+         * which causes each streamed message to be emitted as a separate newline-delimited JSON
+         * object rather than as a comma-separated array.
+         *
+         * Unary (non-streaming) method responses are not affected.
+         *
+         * [streamSseStyleDelimited] takes precedence over this option when both are `true`.
+         *
+         * See: [PrintOptions.stream_newline_delimited](https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/filters/http/grpc_json_transcoder/v3/transcoder.proto#extensions-filters-http-grpc-json-transcoder-v3-grpcjsontranscoder-printoptions)
+         *
+         * Passed via `--openapi_out=streamNewlineDelimited=true:outdir`.
+         */
+        val streamNewlineDelimited: Boolean,
     ) {
         /**
          * The serialization format for generated OpenAPI documents.
@@ -466,6 +483,12 @@ public class ProtocGenOpenAPI(
             public var convertGrpcStatus: Boolean =
                 parameters.get<Boolean>("convertGrpcStatus") ?: false
 
+            /**
+             * @see [Options.streamNewlineDelimited]
+             */
+            public var streamNewlineDelimited: Boolean =
+                parameters.get<Boolean>("streamNewlineDelimited") ?: false
+
             public companion object {
                 public fun from(parameters: Parameters): Builder = Builder(parameters)
             }
@@ -489,6 +512,7 @@ public class ProtocGenOpenAPI(
                     alwaysPrintPrimitiveFields = alwaysPrintPrimitiveFields,
                     preserveProtoFieldNames = preserveProtoFieldNames,
                     convertGrpcStatus = convertGrpcStatus,
+                    streamNewlineDelimited = streamNewlineDelimited,
                 )
         }
     }

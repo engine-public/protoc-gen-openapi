@@ -353,7 +353,7 @@ Alternatively (for richer OAS tooling), emit per-gRPC-status-code HTTP equivalen
 
 ### 7. `print_options.stream_newline_delimited`
 
-**Status: not yet implemented**
+**Status: implemented** — compiler option `streamNewlineDelimited = true`
 
 **What it does.** For server-streaming gRPC methods, responses are normally returned as a
 comma-separated JSON array (`[{msg1},{msg2}]`). With `stream_newline_delimited = true`, each
@@ -476,7 +476,7 @@ the shape of request or response JSON schemas. They need not influence compiler 
 | 2 | `always_print_primitive_fields` | `alwaysPrintPrimitiveFields` | Small — add `required` array logic in SchemaBuilder for primitive fields | [x] |
 | 3 | `auto_mapping` | `autoMapping` | Medium — PathsBuilder must detect unannotated methods and synthesise paths | [x] |
 | 4 | `convert_grpc_status` | `convertGrpcStatus` | Small — inject `google.rpc.Status` schema + error response on every operation | [x] |
-| 5 | `stream_newline_delimited` | `streamNewlineDelimited` | Small — change content-type + schema shape for streaming responses | [ ] |
+| 5 | `stream_newline_delimited` | `streamNewlineDelimited` | Small — change content-type + schema shape for streaming responses | [x] |
 | 6 | `stream_sse_style_delimited` | `streamSseStyleDelimited` | Small — same as above, takes precedence over `streamNewlineDelimited` | [ ] |
 
 Items 1–2 affect request/response schemas broadly and are the highest client-visible risk.  

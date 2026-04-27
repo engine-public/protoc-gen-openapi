@@ -16,9 +16,12 @@ class CaseInsensitiveEnumParsingTest : EnvoyTestBase(GrpcJsonTranscoder(caseInse
                 TestData("integer (hello)", Greeting.GREETING_HELLO.number),
                 TestData("canonical enum name (hello)", Greeting.GREETING_HELLO.name),
                 TestData("lowercase enum name (hello)", "greeting_hello"),
+                // T2: mixed-case inputs are accepted; response still uses canonical uppercase
+                TestData("mixed-case enum name (hello)", "Greeting_Hello"),
                 TestData("integer (hi)", Greeting.GREETING_HI.number, Greeting.GREETING_HI),
                 TestData("canonical enum name (hi)", Greeting.GREETING_HI.name, Greeting.GREETING_HI),
                 TestData("lowercase enum name (hi)", "greeting_hi", Greeting.GREETING_HI),
+                TestData("mixed-case enum name (hi)", "Greeting_Hi", Greeting.GREETING_HI),
                 TestData("invalid enum", "foo", shouldFail = true),
             ) {
                 val request = mapOf("yourName" to "World", "greetingType" to it.input)
@@ -30,6 +33,7 @@ class CaseInsensitiveEnumParsingTest : EnvoyTestBase(GrpcJsonTranscoder(caseInse
                     response.statusCode() shouldNotBe 200
                 } else {
                     val responseBody = jsonMapper.readValue<Map<String, Any>>(response.body())
+                    // Response always uses the canonical uppercase string regardless of input casing
                     responseBody["greeting"] shouldBe it.expectedGreetingUsed.name
                 }
             }
@@ -63,6 +67,15 @@ class CaseInsensitiveEnumParsingTest : EnvoyTestBase(GrpcJsonTranscoder(caseInse
                         .readText(),
                 )
                 jsonMapper.readTree(file.content) shouldBe expected
+            }
+
+            // T1: explicitly assert that enum values in the schema are lowercase strings
+            test("Greeting enum values are all lowercase") {
+                val tree = jsonMapper.readTree(result.fileList.first().content)
+                val enumValues = mutableListOf<String>()
+                tree.path("components").path("schemas").path("Greeting").path("enum")
+                    .forEach { enumValues.add(it.asText()) }
+                enumValues shouldBe listOf("greeting_unspecified", "greeting_hello", "greeting_hi")
             }
         }
     }

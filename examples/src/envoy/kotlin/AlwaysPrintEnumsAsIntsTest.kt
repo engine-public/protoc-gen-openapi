@@ -33,6 +33,14 @@ class AlwaysPrintEnumsAsIntsTest : EnvoyTestBase(GrpcJsonTranscoder(printOptions
                     responseBody["greeting"] shouldBe it.expectedGreetingUsed.number
                 }
             }
+
+            // T1: without alwaysPrintPrimitiveFields, integer 0 (proto3 default) is omitted
+            test("integer 0 (UNSPECIFIED) is omitted from response without alwaysPrintPrimitiveFields") {
+                val response = postJson("/hello", mapOf("yourName" to "World", "greetingType" to Greeting.GREETING_UNSPECIFIED.number))
+                response.statusCode() shouldBe 200
+                val body = jsonMapper.readValue<Map<String, Any>>(response.body())
+                body.containsKey("greeting") shouldBe false
+            }
         }
 
         context("validate NUMERIC_VALUE openapi output") {
@@ -67,6 +75,16 @@ class AlwaysPrintEnumsAsIntsTest : EnvoyTestBase(GrpcJsonTranscoder(printOptions
                         act shouldBe exp
                     }
                 }
+            }
+
+            // T3: enum $ref in message properties resolves to integer type throughout schema hierarchy
+            test("Greeting component schema has integer type") {
+                val tree = jsonMapper.readTree(result.fileList.first().content)
+                val greeting = tree.path("components").path("schemas").path("Greeting")
+                greeting.path("type").asText() shouldBe "integer"
+                val enumValues = mutableListOf<Int>()
+                greeting.path("enum").forEach { enumValues.add(it.intValue()) }
+                enumValues shouldBe listOf(0, 1, 2)
             }
         }
     }

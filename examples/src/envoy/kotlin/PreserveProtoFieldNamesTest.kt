@@ -7,8 +7,7 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import tools.jackson.module.kotlin.readValue
 
-class PreserveProtoFieldNamesTest :
-    EnvoyTestBase(GrpcJsonTranscoder(printOptions = GrpcJsonTranscoder.PrintOptions(preserveProtoFieldNames = true))) {
+class PreserveProtoFieldNamesTest : EnvoyTestBase(GrpcJsonTranscoder(printOptions = GrpcJsonTranscoder.PrintOptions(preserveProtoFieldNames = true))) {
     init {
         context("confirm envoy behaviors") {
             data class TestData(

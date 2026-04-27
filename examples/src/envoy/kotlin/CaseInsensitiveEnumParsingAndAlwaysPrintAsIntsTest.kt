@@ -14,12 +14,13 @@ import tools.jackson.module.kotlin.readValue
  * From the OAS compiler perspective, NUMERIC_VALUE format already covers this combination;
  * no separate compiler option is needed.
  */
-class CaseInsensitiveEnumParsingAndAlwaysPrintAsIntsTest : EnvoyTestBase(
-    GrpcJsonTranscoder(
-        caseInsensitiveEnumParsing = true,
-        printOptions = GrpcJsonTranscoder.PrintOptions(alwaysPrintEnumsAsInts = true),
-    ),
-) {
+class CaseInsensitiveEnumParsingAndAlwaysPrintAsIntsTest :
+    EnvoyTestBase(
+        GrpcJsonTranscoder(
+            caseInsensitiveEnumParsing = true,
+            printOptions = GrpcJsonTranscoder.PrintOptions(alwaysPrintEnumsAsInts = true),
+        ),
+    ) {
     init {
         context("confirm envoy behaviors") {
             test("integer input works; response is integer") {

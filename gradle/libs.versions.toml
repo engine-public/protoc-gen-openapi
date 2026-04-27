@@ -28,7 +28,7 @@ ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "jlleitschuh-ktli
 [libraries]
 commonmark = { group = "org.commonmark", name = "commonmark", version.ref = "commonmark" }
 google-api-grpc-googleCommonProtos = { group = "com.google.api.grpc", name = "proto-google-common-protos", version.ref = "google-common-protos" }
-jackson-databind = { group = "tools.jackson.core", name = "jackson-databind", version.ref = "jackson-module" }
+jackson-databind = { group = "tools.jackson.core", name = "jackson-databind", version.ref = "jackson-core" }
 jackson-dataformat-yaml = { group = "tools.jackson.dataformat", name = "jackson-dataformat-yaml", version.ref = "jackson-core" }
 jackson-module-kotlin = { group = "tools.jackson.module", name = "jackson-module-kotlin", version.ref = "jackson-module"}
 kotlin-reflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect", version.ref = "kotlin" }

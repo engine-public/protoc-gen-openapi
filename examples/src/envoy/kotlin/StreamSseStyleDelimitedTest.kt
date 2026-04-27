@@ -7,8 +7,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldStartWith
 import tools.jackson.module.kotlin.readValue
 
-class StreamSseStyleDelimitedTest :
-    EnvoyTestBase(GrpcJsonTranscoder(printOptions = GrpcJsonTranscoder.PrintOptions(streamSseStyleDelimited = true))) {
+class StreamSseStyleDelimitedTest : EnvoyTestBase(GrpcJsonTranscoder(printOptions = GrpcJsonTranscoder.PrintOptions(streamSseStyleDelimited = true))) {
     init {
         context("confirm envoy behaviors") {
             test("unary /hello returns plain JSON") {

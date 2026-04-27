@@ -48,9 +48,11 @@ internal class PathsBuilder(
 
     /** Collects all paths from [files] into a merged `paths` ObjectNode. */
     fun build(files: List<FileDescriptorProtoWrapper>): ObjectNode =
-        buildForServicePairs(files.flatMap { file ->
-            file.services.map { file.`package`?.value to it }
-        })
+        buildForServicePairs(
+            files.flatMap { file ->
+                file.services.map { file.`package`?.value to it }
+            },
+        )
 
     /** Collects paths for a single [service] into a `paths` ObjectNode. */
     fun buildForService(

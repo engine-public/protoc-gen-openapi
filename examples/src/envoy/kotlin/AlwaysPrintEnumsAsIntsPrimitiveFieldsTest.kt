@@ -13,14 +13,15 @@ import tools.jackson.module.kotlin.readValue
  * default enum value) to appear in the response, and that the OAS schema reflects
  * both integer enum type and required arrays.
  */
-class AlwaysPrintEnumsAsIntsPrimitiveFieldsTest : EnvoyTestBase(
-    GrpcJsonTranscoder(
-        printOptions = GrpcJsonTranscoder.PrintOptions(
-            alwaysPrintEnumsAsInts = true,
-            alwaysPrintPrimitiveFields = true,
+class AlwaysPrintEnumsAsIntsPrimitiveFieldsTest :
+    EnvoyTestBase(
+        GrpcJsonTranscoder(
+            printOptions = GrpcJsonTranscoder.PrintOptions(
+                alwaysPrintEnumsAsInts = true,
+                alwaysPrintPrimitiveFields = true,
+            ),
         ),
-    ),
-) {
+    ) {
     init {
         context("confirm envoy behaviors") {
             // T2: with alwaysPrintPrimitiveFields, integer 0 is present in response

@@ -6,8 +6,7 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import tools.jackson.module.kotlin.readValue
 
-class StreamNewlineDelimitedTest :
-    EnvoyTestBase(GrpcJsonTranscoder(printOptions = GrpcJsonTranscoder.PrintOptions(streamNewlineDelimited = true))) {
+class StreamNewlineDelimitedTest : EnvoyTestBase(GrpcJsonTranscoder(printOptions = GrpcJsonTranscoder.PrintOptions(streamNewlineDelimited = true))) {
     init {
         context("confirm envoy behaviors") {
             test("unary /hello returns single JSON object") {

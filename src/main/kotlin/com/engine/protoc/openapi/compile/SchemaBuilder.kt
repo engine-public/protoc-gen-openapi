@@ -49,7 +49,13 @@ internal class SchemaBuilder(
         val schema = ctx.obj()
         schema.put("type", "object")
         val props = ctx.obj()
-        props.set("code", ctx.obj().also { it.put("type", "integer"); it.put("format", "int32") })
+        props.set(
+            "code",
+            ctx.obj().also {
+                it.put("type", "integer")
+                it.put("format", "int32")
+            },
+        )
         props.set("message", ctx.obj().also { it.put("type", "string") })
         val details = ctx.obj()
         details.put("type", "array")
@@ -140,4 +146,3 @@ internal class SchemaBuilder(
         }
     }
 }
-

@@ -116,12 +116,11 @@ protobuf {
              * isTest doesn't work.
              */
             if (name == "generate${suiteName.capitalized()}Proto") {
-                if (suiteName != "envoy") {
-                    dependsOn(":protoc-utils-recorder:nativeCompile")
-                    plugins {
-                        create("recorder")
-                    }
-                } else {
+                dependsOn(":protoc-utils-recorder:nativeCompile")
+                plugins {
+                    create("recorder")
+                }
+                if (suiteName == "envoy") {
                     generateDescriptorSet = true
                     descriptorSetOptions.includeImports = true
                     descriptorSetOptions.path =

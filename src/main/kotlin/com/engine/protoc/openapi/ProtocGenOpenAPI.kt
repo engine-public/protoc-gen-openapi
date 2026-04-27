@@ -168,10 +168,11 @@ public class ProtocGenOpenAPI(
         /**
          * Controls how proto enum value names are written into OAS `enum` arrays.
          *
-         * Currently only [EnumValueFormat.RAW] is implemented; additional formats will be added
-         * in future releases without breaking this option's presence in the API.
+         * The default is [EnumValueFormat.CANONICAL], which writes each value exactly as its
+         * proto name.  [EnumValueFormat.NUMERIC_VALUE] emits the integer number instead, which
+         * satisfies Envoy's `always_print_enums_as_ints = true` configuration.
          *
-         * Passed via `--openapi_out=enumValueFormat=RAW:outdir`.
+         * Passed via `--openapi_out=enumValueFormat=CANONICAL:outdir`.
          */
         val enumValueFormat: EnumValueFormat,
     ) {
@@ -201,7 +202,24 @@ public class ProtocGenOpenAPI(
          */
         public enum class EnumValueFormat {
             /** Write each value exactly as its proto name, e.g. `MY_ENUM_VALUE`. */
-            RAW,
+            CANONICAL,
+
+            /**
+             * Write each value as its integer number (the `EnumValue.number` field, not
+             * its ordinal position in the file).  The schema `type` changes to `"integer"`
+             * and the `enum` array contains JSON integers.
+             *
+             * Description bullets include the integer, the proto name, and the leading
+             * comment when present — e.g. `` `1 (GREETING_HELLO)` — A formal hello greeting. ``
+             *
+             * In request payloads Envoy's gRPC-JSON transcoder accepts **either** the
+             * canonical name (e.g. `"GREETING_HELLO"`) or the integer (e.g. `1`); in
+             * response payloads only the integer form is emitted.  Use this format when
+             * configuring the transcoder with `always_print_enums_as_ints = true`.
+             *
+             * See: [PrintOptions.always_print_enums_as_ints](https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/filters/http/grpc_json_transcoder/v3/transcoder.proto#extensions-filters-http-grpc-json-transcoder-v3-grpcjsontranscoder-printoptions)
+             */
+            NUMERIC_VALUE,
         }
 
         /**
@@ -332,7 +350,7 @@ public class ProtocGenOpenAPI(
              * @see [Options.enumValueFormat]
              */
             public var enumValueFormat: EnumValueFormat =
-                parameters.get<EnumValueFormat>("enumValueFormat") ?: EnumValueFormat.RAW
+                parameters.get<EnumValueFormat>("enumValueFormat") ?: EnumValueFormat.CANONICAL
 
             public companion object {
                 public fun from(parameters: Parameters): Builder = Builder(parameters)

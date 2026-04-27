@@ -621,7 +621,8 @@ internal class PathsBuilder(
         includeTitle: Boolean = false,
     ): ObjectNode {
         val node = ctx.obj()
-        node.put("type", "string")
+        val isNumeric = ctx.enumValueFormat == ProtocGenOpenAPI.Options.EnumValueFormat.NUMERIC_VALUE
+        node.put("type", if (isNumeric) "integer" else "string")
         if (includeTitle) ctx.schemaKeyResolver.titleFor(typeName)?.let { node.put("title", it) }
 
         if (enumWrapper != null) {
@@ -636,7 +637,11 @@ internal class PathsBuilder(
 
             val valuesArr = ctx.mapper.createArrayNode()
             for (valueWrapper in visibleValues) {
-                valuesArr.add(formatEnumValue(valueWrapper.proto.name, ctx.enumValueFormat))
+                if (isNumeric) {
+                    valuesArr.add(valueWrapper.proto.number)
+                } else {
+                    valuesArr.add(valueWrapper.proto.name)
+                }
             }
             if (valuesArr.size() > 0) node.set("enum", valuesArr)
 
@@ -653,13 +658,29 @@ internal class PathsBuilder(
         enumComment: String?,
         visibleValues: List<EnumValueDescriptorProtoWrapper>,
     ): String? {
-        // create pairs
-        val commentedValues = visibleValues.mapNotNull { valueWrapper ->
-            val comment = valueWrapper.location?.proto?.leadingComments?.trim()?.ifEmpty { null }
-                ?: return@mapNotNull null
-            Pair(formatEnumValue(valueWrapper.proto.name, ctx.enumValueFormat), comment)
+        val isNumeric = ctx.enumValueFormat == ProtocGenOpenAPI.Options.EnumValueFormat.NUMERIC_VALUE
+
+        // For NUMERIC_VALUE every visible value gets a bullet regardless of whether it carries a
+        // comment (the bullet serves as an integer-to-name reference even without prose).
+        // For other formats only values that carry a leading comment produce a bullet.
+        val labeledValues: List<Pair<String, String?>> = if (isNumeric) {
+            visibleValues.map { valueWrapper ->
+                Pair(
+                    formatEnumLabel(valueWrapper.proto.name, valueWrapper.proto.number, ctx.enumValueFormat),
+                    valueWrapper.location?.proto?.leadingComments?.trim()?.ifEmpty { null },
+                )
+            }
+        } else {
+            visibleValues.mapNotNull { valueWrapper ->
+                val comment = valueWrapper.location?.proto?.leadingComments?.trim()?.ifEmpty { null }
+                    ?: return@mapNotNull null
+                Pair(
+                    formatEnumLabel(valueWrapper.proto.name, valueWrapper.proto.number, ctx.enumValueFormat),
+                    comment,
+                )
+            }
         }
-        if (enumComment == null && commentedValues.isEmpty()) return null
+        if (enumComment == null && labeledValues.isEmpty()) return null
 
         val documentNode = if (enumComment != null) {
             markdownParser.parse(enumComment) as? Document ?: Document()
@@ -667,21 +688,23 @@ internal class PathsBuilder(
             Document()
         }
 
-        if (commentedValues.isNotEmpty()) {
+        if (labeledValues.isNotEmpty()) {
             val list = BulletList().apply {
-                for ((name, comment) in commentedValues) {
-                    val commentDoc = markdownParser.parse(comment) as? Document ?: Document()
+                for ((name, comment) in labeledValues) {
+                    val commentDoc = comment?.let { markdownParser.parse(it) as? Document }
                     appendChild(
                         ListItem().apply {
-                            val firstBlock = commentDoc.firstChild
+                            val firstBlock = commentDoc?.firstChild
                             appendChild(
                                 Paragraph().apply {
                                     appendChild(Code(name))
-                                    appendChild(Text(" — "))
-                                    if (firstBlock is Paragraph) {
-                                        spliceInlineNodes(firstBlock, this)
-                                    } else {
-                                        appendChild(Text(comment))
+                                    if (comment != null) {
+                                        appendChild(Text(" — "))
+                                        if (firstBlock is Paragraph) {
+                                            spliceInlineNodes(firstBlock, this)
+                                        } else {
+                                            appendChild(Text(comment))
+                                        }
                                     }
                                 },
                             )
@@ -733,12 +756,14 @@ internal class PathsBuilder(
         return annotation ?: (suppressDefaults && valueWrapper.proto.number == 0)
     }
 
-    private fun formatEnumValue(
+    private fun formatEnumLabel(
         protoName: String,
+        protoNumber: Int,
         format: ProtocGenOpenAPI.Options.EnumValueFormat,
     ): String =
         when (format) {
-            ProtocGenOpenAPI.Options.EnumValueFormat.RAW -> protoName
+            ProtocGenOpenAPI.Options.EnumValueFormat.CANONICAL -> protoName
+            ProtocGenOpenAPI.Options.EnumValueFormat.NUMERIC_VALUE -> "$protoNumber ($protoName)"
         }
 }
 

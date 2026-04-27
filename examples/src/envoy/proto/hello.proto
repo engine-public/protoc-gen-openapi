@@ -5,9 +5,14 @@ package engine.protoc.openapi.example.envoy;
 option java_package = "com.engine.protoc.openapi.example.envoy";
 option java_multiple_files = true;
 
+import "google/api/annotations.proto";
+
+// The type of greeting to use.
 enum Greeting {
   GREETING_UNSPECIFIED = 0;
+  // A formal hello greeting.
   GREETING_HELLO = 1;
+  // A casual hi greeting.
   GREETING_HI = 2;
 }
 
@@ -22,6 +27,16 @@ message HelloResponse {
 }
 
 service HelloService {
-  rpc SayHello(HelloRequest) returns (HelloResponse);
-  rpc StreamHellos(HelloRequest) returns (stream HelloResponse);
+  rpc SayHello(HelloRequest) returns (HelloResponse) {
+    option (google.api.http) = {
+      post: "/hello"
+      body: "*"
+    };
+  }
+  rpc StreamHellos(HelloRequest) returns (stream HelloResponse) {
+    option (google.api.http) = {
+      post: "/hellos"
+      body: "*"
+    };
+  }
 }

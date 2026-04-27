@@ -1,6 +1,7 @@
 import com.engine.protoc.openapi.ProtocGenOpenAPI
 import com.engine.protoc.openapi.example.envoy.Greeting
 import com.google.protobuf.compiler.PluginProtos
+import io.kotest.assertions.withClue
 import io.kotest.datatest.withData
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -29,7 +30,7 @@ class AlwaysPrintEnumsAsIntsTest : EnvoyTestBase(GrpcJsonTranscoder(printOptions
                     response.statusCode() shouldNotBe 200
                 } else {
                     val responseBody = jsonMapper.readValue<Map<String, Any>>(response.body())
-                    responseBody["greetingUsed"] shouldBe it.expectedGreetingUsed.number
+                    responseBody["greeting"] shouldBe it.expectedGreetingUsed.number
                 }
             }
         }
@@ -61,7 +62,11 @@ class AlwaysPrintEnumsAsIntsTest : EnvoyTestBase(GrpcJsonTranscoder(printOptions
                         .reader()
                         .readText(),
                 )
-                jsonMapper.readTree(file.content) shouldBe expected
+                collectJsonDiffs(expected, jsonMapper.readTree(file.content)).forEach { (path, exp, act) ->
+                    withClue("at $path -- expected: $exp, actual: $act") {
+                        act shouldBe exp
+                    }
+                }
             }
         }
     }

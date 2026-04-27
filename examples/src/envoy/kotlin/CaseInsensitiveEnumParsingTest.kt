@@ -30,7 +30,7 @@ class CaseInsensitiveEnumParsingTest : EnvoyTestBase(GrpcJsonTranscoder(caseInse
                     response.statusCode() shouldNotBe 200
                 } else {
                     val responseBody = jsonMapper.readValue<Map<String, Any>>(response.body())
-                    responseBody["greetingUsed"] shouldBe it.expectedGreetingUsed.name
+                    responseBody["greeting"] shouldBe it.expectedGreetingUsed.name
                 }
             }
         }

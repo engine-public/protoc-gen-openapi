@@ -23,7 +23,7 @@ message HelloRequest {
 
 message HelloResponse {
   string reply_message = 1;
-  Greeting greeting_used = 2;
+  Greeting greeting_used = 2 [ json_name = "greeting" ];
 }
 
 service HelloService {

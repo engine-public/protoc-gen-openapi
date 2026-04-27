@@ -2,6 +2,8 @@ import com.engine.protoc.openapi.example.envoy.Greeting
 import com.engine.protoc.openapi.example.envoy.HelloRequest
 import com.engine.protoc.openapi.example.envoy.HelloResponse
 import com.engine.protoc.openapi.example.envoy.HelloServiceGrpcKt
+import io.grpc.Status
+import io.grpc.StatusException
 import io.kotest.assertions.fail
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -10,8 +12,11 @@ internal class HelloServiceImpl : HelloServiceGrpcKt.HelloServiceCoroutineImplBa
     private fun createGreeting(
         request: HelloRequest,
         index: Int? = null,
-    ): HelloResponse =
-        HelloResponse
+    ): HelloResponse {
+        if (request.yourName.isEmpty()) {
+            throw StatusException(Status.NOT_FOUND.withDescription("yourName is required"))
+        }
+        return HelloResponse
             .newBuilder()
             .setReplyMessage(
                 when (request.greetingType) {
@@ -22,6 +27,7 @@ internal class HelloServiceImpl : HelloServiceGrpcKt.HelloServiceCoroutineImplBa
             )
             .setGreetingUsed(request.greetingType)
             .build()
+    }
 
     override suspend fun sayHello(request: HelloRequest): HelloResponse = createGreeting(request)
 

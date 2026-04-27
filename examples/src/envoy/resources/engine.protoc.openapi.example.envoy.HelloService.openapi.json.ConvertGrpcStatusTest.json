@@ -1,0 +1,130 @@
+{
+  "openapi" : "3.1.0",
+  "paths" : {
+    "/hello" : {
+      "post" : {
+        "requestBody" : {
+          "required" : true,
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/HelloRequest"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/HelloResponse"
+                }
+              }
+            }
+          },
+          "default" : {
+            "description" : "Error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/google.rpc.Status"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/hellos" : {
+      "post" : {
+        "requestBody" : {
+          "required" : true,
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/HelloRequest"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/HelloResponse"
+                }
+              }
+            }
+          },
+          "default" : {
+            "description" : "Error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/google.rpc.Status"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "info" : {
+    "title" : "HelloService",
+    "version" : "1.0.0"
+  },
+  "components" : {
+    "schemas" : {
+      "HelloResponse" : {
+        "type" : "object",
+        "properties" : {
+          "replyMessage" : {
+            "type" : "string"
+          },
+          "greeting" : {
+            "$ref" : "#/components/schemas/Greeting"
+          }
+        }
+      },
+      "HelloRequest" : {
+        "type" : "object",
+        "properties" : {
+          "yourName" : {
+            "type" : "string"
+          },
+          "greetingType" : {
+            "$ref" : "#/components/schemas/Greeting"
+          }
+        }
+      },
+      "Greeting" : {
+        "type" : "string",
+        "description" : "The type of greeting to use.\n\n- `GREETING_HELLO` — A formal hello greeting.\n\n- `GREETING_HI` — A casual hi greeting.",
+        "enum" : [ "GREETING_UNSPECIFIED", "GREETING_HELLO", "GREETING_HI" ]
+      },
+      "google.rpc.Status" : {
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "message" : {
+            "type" : "string"
+          },
+          "details" : {
+            "type" : "array",
+            "items" : {
+              "type" : "object"
+            }
+          }
+        }
+      }
+    }
+  }
+}

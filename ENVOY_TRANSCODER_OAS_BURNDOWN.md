@@ -285,7 +285,7 @@ explicitly-annotated paths.
 
 ### 6. `convert_grpc_status`
 
-**Status: not yet implemented**
+**Status: implemented** — compiler option `convertGrpcStatus = true`
 
 **What it does.** When `convert_grpc_status = true`, Envoy translates gRPC error trailers into a
 JSON response body shaped as `google.rpc.Status`:
@@ -475,7 +475,7 @@ the shape of request or response JSON schemas. They need not influence compiler 
 | 1 | `preserve_proto_field_names` | `preserveProtoFieldNames` | Medium — field name lookup change throughout SchemaBuilder + PathsBuilder | [x] |
 | 2 | `always_print_primitive_fields` | `alwaysPrintPrimitiveFields` | Small — add `required` array logic in SchemaBuilder for primitive fields | [x] |
 | 3 | `auto_mapping` | `autoMapping` | Medium — PathsBuilder must detect unannotated methods and synthesise paths | [x] |
-| 4 | `convert_grpc_status` | `convertGrpcStatus` | Small — inject `google.rpc.Status` schema + error response on every operation | [ ] |
+| 4 | `convert_grpc_status` | `convertGrpcStatus` | Small — inject `google.rpc.Status` schema + error response on every operation | [x] |
 | 5 | `stream_newline_delimited` | `streamNewlineDelimited` | Small — change content-type + schema shape for streaming responses | [ ] |
 | 6 | `stream_sse_style_delimited` | `streamSseStyleDelimited` | Small — same as above, takes precedence over `streamNewlineDelimited` | [ ] |
 

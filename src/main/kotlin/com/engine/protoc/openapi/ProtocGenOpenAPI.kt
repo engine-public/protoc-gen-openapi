@@ -228,6 +228,26 @@ public class ProtocGenOpenAPI(
          * Passed via `--openapi_out=preserveProtoFieldNames=true:outdir`.
          */
         val preserveProtoFieldNames: Boolean,
+
+        /**
+         * When `true`, a reusable `google.rpc.Status` schema is added to `components/schemas`
+         * and every operation's `responses` map gains a `"default"` entry referencing it.
+         *
+         * This matches Envoy's `convert_grpc_status` option, which translates gRPC error trailers
+         * into an HTTP error response whose JSON body is shaped as `google.rpc.Status`:
+         *
+         * ```json
+         * { "code": 5, "message": "not found", "details": [...] }
+         * ```
+         *
+         * Enable this when the Envoy filter is configured with `convert_grpc_status: true` so
+         * that API consumers can see the error contract in the generated OpenAPI spec.
+         *
+         * See: [GrpcJsonTranscoder.convert_grpc_status](https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/filters/http/grpc_json_transcoder/v3/transcoder.proto#extensions-filters-http-grpc-json-transcoder-v3-grpcjsontranscoder)
+         *
+         * Passed via `--openapi_out=convertGrpcStatus=true:outdir`.
+         */
+        val convertGrpcStatus: Boolean,
     ) {
         /**
          * The serialization format for generated OpenAPI documents.
@@ -440,6 +460,12 @@ public class ProtocGenOpenAPI(
             public var preserveProtoFieldNames: Boolean =
                 parameters.get<Boolean>("preserveProtoFieldNames") ?: false
 
+            /**
+             * @see [Options.convertGrpcStatus]
+             */
+            public var convertGrpcStatus: Boolean =
+                parameters.get<Boolean>("convertGrpcStatus") ?: false
+
             public companion object {
                 public fun from(parameters: Parameters): Builder = Builder(parameters)
             }
@@ -462,6 +488,7 @@ public class ProtocGenOpenAPI(
                     autoMapping = autoMapping,
                     alwaysPrintPrimitiveFields = alwaysPrintPrimitiveFields,
                     preserveProtoFieldNames = preserveProtoFieldNames,
+                    convertGrpcStatus = convertGrpcStatus,
                 )
         }
     }

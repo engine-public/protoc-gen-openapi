@@ -486,6 +486,16 @@ internal class PathsBuilder(
             response.set("content", content)
         }
         responses.set("200", response)
+        if (ctx.convertGrpcStatus) {
+            val errorResponse = ctx.obj()
+            errorResponse.put("description", "Error")
+            val content = ctx.obj()
+            val mediaType = ctx.obj()
+            mediaType.set("schema", ctx.obj().also { it.put("\$ref", "#/components/schemas/google.rpc.Status") })
+            content.set("application/json", mediaType)
+            errorResponse.set("content", content)
+            responses.set("default", errorResponse)
+        }
         return responses
     }
 

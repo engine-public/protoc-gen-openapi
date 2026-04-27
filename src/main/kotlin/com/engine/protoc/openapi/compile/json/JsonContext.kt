@@ -33,6 +33,13 @@ internal class JsonContext(
      * Mirrors Envoy's `always_print_primitive_fields` PrintOption.
      */
     val alwaysPrintPrimitiveFields: Boolean = false,
+    /**
+     * When true, a `google.rpc.Status` schema is injected into `components/schemas` and a
+     * `"default"` error response referencing it is added to every operation's `responses` map.
+     *
+     * Mirrors Envoy's `convert_grpc_status` option.
+     */
+    val convertGrpcStatus: Boolean = false,
 ) {
     fun obj(): ObjectNode = mapper.createObjectNode()
 

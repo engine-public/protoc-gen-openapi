@@ -47,6 +47,10 @@ A minimal example based on the [helloworld Greeter service](https://grpc.io/docs
 
 Exercises the `options.version` fallback: a nullable string written to `info.version` of every document that does not already have a version from an engine annotation. Covers all four combinations of options version present/absent × annotation version present/absent, and documents the priority layering that lets annotation-pinned versions always win over the global option.
 
+### [envoy](src/envoy/README.md)
+
+An integration test suite for Envoy's [`GrpcJsonTranscoder`](https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/filters/http/grpc_json_transcoder/v3/transcoder.proto) filter options. Each test class maps one Envoy option to the corresponding compiler option and exercises both layers: a live Envoy container confirms runtime behavior, and an OAS snapshot confirms the generated schema matches that behavior. Covers `preserve_proto_field_names`, `always_print_primitive_fields`, `always_print_enums_as_ints`, `case_insensitive_enum_parsing`, `auto_mapping`, `convert_grpc_status`, `stream_newline_delimited`, and `stream_sse_style_delimited`, including selected two-option combinations.
+
 ### [namespacing](src/namespacing/README.md)
 
 Exercises the four `schemaNamespace*` options that control how proto package information is incorporated into `components/schemas` keys. Uses two proto packages (`catalog.v1` and `inventory.v2`) that both define an `Item` message — a collision that `NONE` (the default) cannot resolve. Three reference compilations cover `FULL_PACKAGE`, `SIMPLIFIED_PACKAGE + CAPITALIZED`, and `SIMPLIFIED_PACKAGE + CAPITALIZED + versionExtraction`.

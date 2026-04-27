@@ -111,7 +111,7 @@ internal class Compiler(
         }
 
         val collector = MessageCollector(ctx.messageIndex, ctx.enumIndex, options.inlineEnums)
-        val pathsBuilder = PathsBuilder(ctx, collector, options.autoTagServices)
+        val pathsBuilder = PathsBuilder(ctx, collector, options.autoTagServices, options.autoMapping)
 
         for (file in targetFiles) {
             try {
@@ -217,8 +217,8 @@ internal class Compiler(
 
                     // Paths — only this service's methods
                     val collector = MessageCollector(ctx.messageIndex, ctx.enumIndex, options.inlineEnums)
-                    val pathsBuilder = PathsBuilder(ctx, collector, options.autoTagServices)
-                    mergePaths(doc, pathsBuilder.buildForService(service), ctx)
+                    val pathsBuilder = PathsBuilder(ctx, collector, options.autoTagServices, options.autoMapping)
+                    mergePaths(doc, pathsBuilder.buildForService(service, file.`package`?.value), ctx)
 
                     applyServiceTags(doc, pathsBuilder, ctx)
 

@@ -40,16 +40,23 @@ internal class PathsBuilder(
     private val ctx: JsonContext,
     private val collector: MessageCollector,
     private val autoTagServices: Boolean = false,
+    private val autoMapping: Boolean = false,
 ) {
     // Services (name → leading comment) that contributed ≥1 operation, in encounter order.
     // Only populated when autoTagServices is true.
     private val contributingServices = LinkedHashMap<String, String?>()
 
     /** Collects all paths from [files] into a merged `paths` ObjectNode. */
-    fun build(files: List<FileDescriptorProtoWrapper>): ObjectNode = buildForServices(files.flatMap { it.services })
+    fun build(files: List<FileDescriptorProtoWrapper>): ObjectNode =
+        buildForServicePairs(files.flatMap { file ->
+            file.services.map { file.`package`?.value to it }
+        })
 
     /** Collects paths for a single [service] into a `paths` ObjectNode. */
-    fun buildForService(service: ServiceDescriptorProtoWrapper): ObjectNode = buildForServices(listOf(service))
+    fun buildForService(
+        service: ServiceDescriptorProtoWrapper,
+        filePackage: String? = null,
+    ): ObjectNode = buildForServicePairs(listOf(filePackage to service))
 
     /**
      * Returns a JSON array of tag objects for every service that contributed at least one
@@ -70,10 +77,12 @@ internal class PathsBuilder(
         return arr
     }
 
-    private fun buildForServices(services: List<ServiceDescriptorProtoWrapper>): ObjectNode {
+    private fun buildForServicePairs(
+        services: List<Pair<String?, ServiceDescriptorProtoWrapper>>,
+    ): ObjectNode {
         val byPath = LinkedHashMap<String, ObjectNode>()
 
-        for (service in services) {
+        for ((filePackage, service) in services) {
             // Resolve the auto-tag name once per service; null when feature is disabled.
             val autoTagName = if (autoTagServices) service.name?.value else null
             // Service-level tags applied to every operation in this service.
@@ -84,9 +93,19 @@ internal class PathsBuilder(
             for (method in service.methods) {
                 val httpRule = method.options
                     ?.findExtension(AnnotationsProto.http)?.value
-                    ?: continue
 
-                val binding = httpRule.primaryBinding() ?: continue
+                val binding: HttpBinding = if (httpRule != null) {
+                    httpRule.primaryBinding() ?: continue
+                } else if (autoMapping) {
+                    // Synthesise POST /<pkg.Service>/<Method> body:* for unannotated methods.
+                    val pkg = filePackage?.let { "$it." } ?: ""
+                    val svcName = service.name?.value ?: continue
+                    val methodName = method.proto.name ?: continue
+                    HttpBinding("post", "/$pkg$svcName/$methodName", "*")
+                } else {
+                    continue
+                }
+
                 val (effectivePath, operationNode) = buildOperation(method, binding, httpRule, autoTagName, serviceTags)
                 val pathItem = byPath.getOrPut(effectivePath) { ctx.obj() }
                 pathItem.set(binding.httpMethod, operationNode)
@@ -112,7 +131,8 @@ internal class PathsBuilder(
     private fun buildOperation(
         method: MethodDescriptorProtoWrapper,
         binding: HttpBinding,
-        httpRule: HttpRule,
+        // Null for auto-mapped methods that have no google.api.http annotation.
+        httpRule: HttpRule?,
         // Non-null when autoTagServices is true; the service name becomes the first tag.
         autoTagName: String? = null,
         // Tags from the service-level `engine.protoc.openapi.tags` option, applied to all methods.
@@ -129,7 +149,7 @@ internal class PathsBuilder(
         // When response_body names a field, the HTTP response carries that field's value directly
         // rather than the full output message.  The wrapper message is not referenced in the
         // output schema, so we collect the field's type instead.
-        val responseBodyField = httpRule.responseBody.takeIf { it.isNotEmpty() }
+        val responseBodyField = httpRule?.responseBody?.takeIf { it.isNotEmpty() }
 
         // Always collect the output type — it is an API entity that clients receive.
         // When response_body names a field, we collect that field's type instead of the wrapper.
@@ -239,7 +259,8 @@ internal class PathsBuilder(
         }
 
         // ---- Request body -----------------------------------------------
-        val body = httpRule.body
+        // For auto-mapped methods (httpRule == null) the body defaults to "*" per Envoy convention.
+        val body = httpRule?.body ?: binding.body
         when {
             annotation?.hasRequestBody() == true -> {
                 val requestBodyNode = annotation.requestBody.toJson(ctx)

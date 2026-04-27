@@ -177,6 +177,25 @@ public class ProtocGenOpenAPI(
         val enumValueFormat: EnumValueFormat,
 
         /**
+         * When `true`, gRPC methods that lack a `google.api.http` annotation are automatically
+         * mapped to a REST endpoint using the convention:
+         *
+         * ```
+         * POST /<package>.<ServiceName>/<MethodName>
+         * body: "*"
+         * ```
+         *
+         * Explicit `google.api.http` annotations on other methods in the same service always take
+         * precedence.  This mirrors Envoy's `auto_mapping` option, which applies the same
+         * convention at runtime so that unannotated methods remain reachable via HTTP/JSON.
+         *
+         * See: [GrpcJsonTranscoder.auto_mapping](https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/filters/http/grpc_json_transcoder/v3/transcoder.proto#extensions-filters-http-grpc-json-transcoder-v3-grpcjsontranscoder)
+         *
+         * Passed via `--openapi_out=autoMapping=true:outdir`.
+         */
+        val autoMapping: Boolean,
+
+        /**
          * When `true`, every non-repeated, non-message field is added to the `required` array of
          * its containing schema.  Proto3 JSON omits scalar and enum fields whose value equals
          * the type default (0, `""`, `false`, first enum value); enabling this option tells the
@@ -404,6 +423,12 @@ public class ProtocGenOpenAPI(
                 parameters.get<EnumValueFormat>("enumValueFormat") ?: EnumValueFormat.CANONICAL
 
             /**
+             * @see [Options.autoMapping]
+             */
+            public var autoMapping: Boolean =
+                parameters.get<Boolean>("autoMapping") ?: false
+
+            /**
              * @see [Options.alwaysPrintPrimitiveFields]
              */
             public var alwaysPrintPrimitiveFields: Boolean =
@@ -434,6 +459,7 @@ public class ProtocGenOpenAPI(
                     inlineEnums = inlineEnums,
                     suppressDefaultEnumValues = suppressDefaultEnumValues,
                     enumValueFormat = enumValueFormat,
+                    autoMapping = autoMapping,
                     alwaysPrintPrimitiveFields = alwaysPrintPrimitiveFields,
                     preserveProtoFieldNames = preserveProtoFieldNames,
                 )

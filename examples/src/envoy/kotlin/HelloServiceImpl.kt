@@ -25,6 +25,8 @@ internal class HelloServiceImpl : HelloServiceGrpcKt.HelloServiceCoroutineImplBa
 
     override suspend fun sayHello(request: HelloRequest): HelloResponse = createGreeting(request)
 
+    override suspend fun pingHello(request: HelloRequest): HelloResponse = createGreeting(request)
+
     override fun streamHellos(request: HelloRequest): Flow<HelloResponse> =
         flow {
             repeat(3) { i ->

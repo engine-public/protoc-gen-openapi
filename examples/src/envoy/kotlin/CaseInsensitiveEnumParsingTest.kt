@@ -7,7 +7,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import tools.jackson.module.kotlin.readValue
 
-class AlwaysPrintEnumsAsIntsTest : EnvoyTestBase(GrpcJsonTranscoder(printOptions = GrpcJsonTranscoder.PrintOptions(alwaysPrintEnumsAsInts = true))) {
+class CaseInsensitiveEnumParsingTest : EnvoyTestBase(GrpcJsonTranscoder(caseInsensitiveEnumParsing = true)) {
     init {
         context("confirm envoy behaviors") {
             data class TestData(val description: String, val input: Any, val expectedGreetingUsed: Greeting = Greeting.GREETING_HELLO, val shouldFail: Boolean = false)
@@ -15,10 +15,11 @@ class AlwaysPrintEnumsAsIntsTest : EnvoyTestBase(GrpcJsonTranscoder(printOptions
                 { it.description },
                 TestData("integer (hello)", Greeting.GREETING_HELLO.number),
                 TestData("canonical enum name (hello)", Greeting.GREETING_HELLO.name),
+                TestData("lowercase enum name (hello)", "greeting_hello"),
                 TestData("integer (hi)", Greeting.GREETING_HI.number, Greeting.GREETING_HI),
                 TestData("canonical enum name (hi)", Greeting.GREETING_HI.name, Greeting.GREETING_HI),
+                TestData("lowercase enum name (hi)", "greeting_hi", Greeting.GREETING_HI),
                 TestData("invalid enum", "foo", shouldFail = true),
-                TestData("wrong case", "greeting_hello", shouldFail = true),
             ) {
                 val request = mapOf("yourName" to "World", "greetingType" to it.input)
                 val response = postJson(
@@ -29,19 +30,19 @@ class AlwaysPrintEnumsAsIntsTest : EnvoyTestBase(GrpcJsonTranscoder(printOptions
                     response.statusCode() shouldNotBe 200
                 } else {
                     val responseBody = jsonMapper.readValue<Map<String, Any>>(response.body())
-                    responseBody["greetingUsed"] shouldBe it.expectedGreetingUsed.number
+                    responseBody["greetingUsed"] shouldBe it.expectedGreetingUsed.name
                 }
             }
         }
 
-        context("validate NUMERIC_VALUE openapi output") {
+        context("validate LOWER_CASE openapi output") {
             fun request() =
-                AlwaysPrintEnumsAsIntsTest::class.java
+                CaseInsensitiveEnumParsingTest::class.java
                     .getResourceAsStream("/code-generator-request.binpb")
                     .shouldNotBeNull()
 
             val result = ProtocGenOpenAPI.from(request()) {
-                enumValueFormat = ProtocGenOpenAPI.Options.EnumValueFormat.NUMERIC_VALUE
+                enumValueFormat = ProtocGenOpenAPI.Options.EnumValueFormat.LOWER_CASE
                 version = "1.0.0"
             }.compile()
 
@@ -55,8 +56,8 @@ class AlwaysPrintEnumsAsIntsTest : EnvoyTestBase(GrpcJsonTranscoder(printOptions
                 result.fileList,
             ) { file ->
                 val expected = jsonMapper.readTree(
-                    AlwaysPrintEnumsAsIntsTest::class.java
-                        .getResourceAsStream("/${file.name}.AlwaysPrintEnumsAsIntsTest.json")
+                    CaseInsensitiveEnumParsingTest::class.java
+                        .getResourceAsStream("/${file.name}.CaseInsensitiveEnumParsingTest.json")
                         .shouldNotBeNull()
                         .reader()
                         .readText(),

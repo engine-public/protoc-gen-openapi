@@ -622,6 +622,7 @@ internal class PathsBuilder(
     ): ObjectNode {
         val node = ctx.obj()
         val isNumeric = ctx.enumValueFormat == ProtocGenOpenAPI.Options.EnumValueFormat.NUMERIC_VALUE
+        val isLowerCase = ctx.enumValueFormat == ProtocGenOpenAPI.Options.EnumValueFormat.LOWER_CASE
         node.put("type", if (isNumeric) "integer" else "string")
         if (includeTitle) ctx.schemaKeyResolver.titleFor(typeName)?.let { node.put("title", it) }
 
@@ -639,6 +640,8 @@ internal class PathsBuilder(
             for (valueWrapper in visibleValues) {
                 if (isNumeric) {
                     valuesArr.add(valueWrapper.proto.number)
+                } else if (isLowerCase) {
+                    valuesArr.add(valueWrapper.proto.name.lowercase())
                 } else {
                     valuesArr.add(valueWrapper.proto.name)
                 }
@@ -659,11 +662,12 @@ internal class PathsBuilder(
         visibleValues: List<EnumValueDescriptorProtoWrapper>,
     ): String? {
         val isNumeric = ctx.enumValueFormat == ProtocGenOpenAPI.Options.EnumValueFormat.NUMERIC_VALUE
+        val isLowerCase = ctx.enumValueFormat == ProtocGenOpenAPI.Options.EnumValueFormat.LOWER_CASE
 
-        // For NUMERIC_VALUE every visible value gets a bullet regardless of whether it carries a
-        // comment (the bullet serves as an integer-to-name reference even without prose).
+        // For NUMERIC_VALUE and LOWER_CASE every visible value gets a bullet regardless of whether
+        // it carries a comment (the bullet documents the exact accepted value even without prose).
         // For other formats only values that carry a leading comment produce a bullet.
-        val labeledValues: List<Pair<String, String?>> = if (isNumeric) {
+        val labeledValues: List<Pair<String, String?>> = if (isNumeric || isLowerCase) {
             visibleValues.map { valueWrapper ->
                 Pair(
                     formatEnumLabel(valueWrapper.proto.name, valueWrapper.proto.number, ctx.enumValueFormat),
@@ -764,6 +768,7 @@ internal class PathsBuilder(
         when (format) {
             ProtocGenOpenAPI.Options.EnumValueFormat.CANONICAL -> protoName
             ProtocGenOpenAPI.Options.EnumValueFormat.NUMERIC_VALUE -> "$protoNumber ($protoName)"
+            ProtocGenOpenAPI.Options.EnumValueFormat.LOWER_CASE -> protoName.lowercase()
         }
 }
 

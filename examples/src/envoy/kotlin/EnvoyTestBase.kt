@@ -62,13 +62,19 @@ abstract class EnvoyTestBase(
             val connectionManager = listener0["filter_chains"].flatMap { it["filters"] }.first { it["name"].textValue() == "envoy.filters.network.http_connection_manager" }
             val httpFilters = connectionManager["typed_config"]["http_filters"] as ArrayNode
 
-            val routerIndex = httpFilters.indexOfFirst { it["name"].textValue() == "envoy.filters.http.router" }
-
             val grpcTranscoderConfigNode = yamlMapper.nodeFactory.objectNode().apply {
                 put("name", "envoy.filters.http.grpc_json_transcoder")
                 set("typed_config", yamlMapper.convertValue(options, ObjectNode::class.java))
             }
-            httpFilters.insert(routerIndex, grpcTranscoderConfigNode)
+            val transcoderIndex = httpFilters.indexOfFirst {
+                it["name"].textValue() == "envoy.filters.http.grpc_json_transcoder"
+            }
+            if (transcoderIndex >= 0) {
+                httpFilters.set(transcoderIndex, grpcTranscoderConfigNode)
+            } else {
+                val routerIndex = httpFilters.indexOfFirst { it["name"].textValue() == "envoy.filters.http.router" }
+                httpFilters.insert(routerIndex, grpcTranscoderConfigNode)
+            }
 
             val configFile = tempfile("envoy-", ".yaml").apply {
                 setReadable(true, false)

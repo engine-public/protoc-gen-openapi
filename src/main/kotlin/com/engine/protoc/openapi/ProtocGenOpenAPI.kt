@@ -220,6 +220,23 @@ public class ProtocGenOpenAPI(
              * See: [PrintOptions.always_print_enums_as_ints](https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/filters/http/grpc_json_transcoder/v3/transcoder.proto#extensions-filters-http-grpc-json-transcoder-v3-grpcjsontranscoder-printoptions)
              */
             NUMERIC_VALUE,
+
+            /**
+             * Write each value as its proto name lowercased, e.g. `my_enum_value`.
+             *
+             * Description bullets include the lowercased name and the leading comment
+             * when present — e.g. `` `greeting_hello` — A formal hello greeting. ``
+             *
+             * Envoy's gRPC-JSON transcoder by default only accepts the exact canonical
+             * proto name (e.g. `"GREETING_HELLO"`).  Setting
+             * `case_insensitive_enum_parsing = true` makes Envoy accept values in any
+             * case, including the lowercase form emitted by this format.  Use this
+             * format together with that transcoder option so that API clients can send
+             * `"greeting_hello"` and Envoy will map it correctly.
+             *
+             * See: [GrpcJsonTranscoder.case_insensitive_enum_parsing](https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/filters/http/grpc_json_transcoder/v3/transcoder.proto#extensions-filters-http-grpc-json-transcoder-v3-grpcjsontranscoder)
+             */
+            LOWER_CASE,
         }
 
         /**

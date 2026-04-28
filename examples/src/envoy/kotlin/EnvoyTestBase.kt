@@ -17,6 +17,8 @@ import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.util.concurrent.TimeUnit
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.toJavaDuration
 
 private const val ENVOY_IMAGE = "envoyproxy/envoy:v1.35.0"
 
@@ -93,7 +95,13 @@ abstract class EnvoyTestBase(
                 )
                 .withExposedPorts(8080, 9901)
                 .waitingFor(Wait.forHttp("/ready").forPort(9901))
-            container.start()
+                .withStartupTimeout(2.minutes.toJavaDuration())
+            try {
+                container.start()
+            } catch (e: Exception) {
+                val logs = runCatching { container.logs }.getOrElse { "<logs unavailable: ${it.message}>" }
+                throw IllegalStateException("Envoy container failed to start.\n\n--- container logs ---\n$logs", e)
+            }
             envoyContainer = container
 
             envoyPort = container.getMappedPort(8080)

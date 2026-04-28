@@ -258,7 +258,9 @@ public class ProtocGenOpenAPI(
          *
          * Unary (non-streaming) method responses are not affected.
          *
-         * [streamSseStyleDelimited] takes precedence over this option when both are `true`.
+         * **Precedence:** if [streamSseStyleDelimited] is also `true`, this option has no effect —
+         * the compiler emits `text/event-stream` instead.  Setting both is a misconfiguration;
+         * enable at most one.
          *
          * See: [PrintOptions.stream_newline_delimited](https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/filters/http/grpc_json_transcoder/v3/transcoder.proto#extensions-filters-http-grpc-json-transcoder-v3-grpcjsontranscoder-printoptions)
          *

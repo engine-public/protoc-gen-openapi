@@ -310,6 +310,6 @@ data class GrpcJsonTranscoder(
         ALL_CHARACTERS,
     }
 
-    @get:JsonProperty("@type")
+    @get:JsonProperty("@type", index = -1)
     val type = "type.googleapis.com/envoy.extensions.filters.http.grpc_json_transcoder.v3.GrpcJsonTranscoder"
 }

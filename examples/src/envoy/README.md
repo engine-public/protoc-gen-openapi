@@ -115,14 +115,19 @@ compiler changes the response content type for streaming methods from `applicati
 array schema) to `application/x-ndjson` (with a single-message schema). Unary methods are
 unchanged.
 
+> **Note:** `streamSseStyleDelimited` takes precedence. If both options are `true`, this option has
+> no effect — the compiler emits `text/event-stream`, not `application/x-ndjson`. Setting both is
+> a misconfiguration; enable at most one.
+
 ### `stream_sse_style_delimited` → `streamSseStyleDelimited`
 
 **`StreamSseStyleDelimitedTest`** — With `stream_sse_style_delimited = true`, each streamed message
-is framed as a Server-Sent Events chunk (`data: <json>\n\n`). This takes precedence over
-`stream_newline_delimited`. The test confirms that `/hellos` returns `data: ` prefixed lines and
-that enabling both SSE and ndjson options still produces `text/event-stream` content. The compiler
-emits `text/event-stream` (instead of `application/x-ndjson`) as the content type for streaming
-method responses and uses a single-message schema rather than an array.
+is framed as a Server-Sent Events chunk (`data: <json>\n\n`). This option takes precedence over
+`stream_newline_delimited` when both are set; the compiler emits `text/event-stream` (not
+`application/x-ndjson`) as the content type for streaming method responses and uses a
+single-message schema rather than an array. The test confirms that `/hellos` returns `data: `
+prefixed lines and that enabling both SSE and ndjson options still produces `text/event-stream`
+content.
 
 ## Peculiarities
 

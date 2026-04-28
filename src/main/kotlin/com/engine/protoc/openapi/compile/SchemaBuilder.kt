@@ -95,8 +95,11 @@ internal class SchemaBuilder(
 
             // proto3 required: proto2 LABEL_REQUIRED, or alwaysPrintPrimitiveFields for
             // non-repeated scalar/enum fields (they will always appear in the response).
+            // oneof members (including proto3 optional, which uses a synthetic oneof) are never
+            // unconditionally present — only the set field in a oneof is serialized.
             val isPrimitive = field.label != DescriptorProtos.FieldDescriptorProto.Label.LABEL_REPEATED &&
-                field.type != DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE
+                field.type != DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE &&
+                !field.hasOneofIndex()
             if (field.label == DescriptorProtos.FieldDescriptorProto.Label.LABEL_REQUIRED ||
                 (ctx.alwaysPrintPrimitiveFields && isPrimitive)
             ) {

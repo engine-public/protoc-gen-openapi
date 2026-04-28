@@ -83,6 +83,8 @@ internal class PathsBuilder(
         services: List<Pair<String?, ServiceDescriptorProtoWrapper>>,
     ): ObjectNode {
         val byPath = LinkedHashMap<String, ObjectNode>()
+        // Tracks (path, httpMethod) → "Service/Method" for conflict reporting.
+        val occupiedSlots = mutableMapOf<Pair<String, String>, String>()
 
         for ((filePackage, service) in services) {
             // Resolve the auto-tag name once per service; null when feature is disabled.
@@ -109,6 +111,20 @@ internal class PathsBuilder(
                 }
 
                 val (effectivePath, operationNode) = buildOperation(method, binding, httpRule, autoTagName, serviceTags)
+
+                val slotKey = effectivePath to binding.httpMethod
+                val existingOwner = occupiedSlots[slotKey]
+                if (existingOwner != null) {
+                    val currentOwner = "${service.name?.value ?: "<unknown>"}/${method.proto.name ?: "<unknown>"}"
+                    val currentType = if (httpRule == null) "auto-mapped" else "annotated"
+                    throw IllegalArgumentException(
+                        "Route ${binding.httpMethod.uppercase()} $effectivePath is claimed by both " +
+                            "$existingOwner and $currentOwner ($currentType). " +
+                            "Resolve the conflict by adjusting http annotations or disabling autoMapping.",
+                    )
+                }
+                occupiedSlots[slotKey] = "${service.name?.value ?: "<unknown>"}/${method.proto.name ?: "<unknown>"}"
+
                 val pathItem = byPath.getOrPut(effectivePath) { ctx.obj() }
                 pathItem.set(binding.httpMethod, operationNode)
                 contributed = true

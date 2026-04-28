@@ -84,7 +84,7 @@ class AlwaysPrintPrimitiveFieldsOneofTest :
                 .path("components").path("schemas").path("TestMsg")
                 .path("required") as? ArrayNode
 
-            val requiredFields = required?.elements()?.asSequence()?.map { it.asText() }?.toList().orEmpty()
+            val requiredFields = required?.elements()?.asSequence()?.map { it.asString() }?.toList().orEmpty()
             requiredFields shouldBe listOf("regularString")
         }
 

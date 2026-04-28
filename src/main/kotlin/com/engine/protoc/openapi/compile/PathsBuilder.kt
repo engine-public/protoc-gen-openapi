@@ -355,7 +355,7 @@ internal class PathsBuilder(
             val inferredNode = inferredNodes.getOrNull(i) ?: ctx.obj()
             val annotatedNode = annotatedParam.toJson(ctx)
 
-            val annotatedName = annotatedNode.path("name").asText("")
+            val annotatedName = annotatedNode.path("name").stringValue("")
             val inferredName = inferredNames.getOrNull(i) ?: ""
             if (annotatedName.isNotEmpty() && inferredName.isNotEmpty() && annotatedName != inferredName) {
                 rewrittenPath = rewrittenPath.replace("{$inferredName}", "{$annotatedName}")

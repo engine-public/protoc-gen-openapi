@@ -15,6 +15,10 @@ kotlin {
     explicitApi = ExplicitApiMode.Disabled
 }
 
+tasks.withType<Javadoc> {
+    (options as StandardJavadocDocletOptions).addStringOption("Xdoclint:none", "-quiet")
+}
+
 protobuf {
     protoc {
         artifact = libs.tools.protoc.compiler.get().toString()

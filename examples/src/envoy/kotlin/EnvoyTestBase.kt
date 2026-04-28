@@ -59,9 +59,9 @@ abstract class EnvoyTestBase(
                 )
             val listener0 =
                 (configTree["static_resources"]["listeners"] as ArrayNode).first { listeners ->
-                    listeners["name"].textValue() == "listener_0"
+                    listeners["name"].stringValue() == "listener_0"
                 }
-            val connectionManager = listener0["filter_chains"].flatMap { it["filters"] }.first { it["name"].textValue() == "envoy.filters.network.http_connection_manager" }
+            val connectionManager = listener0["filter_chains"].flatMap { it["filters"] }.first { it["name"].stringValue() == "envoy.filters.network.http_connection_manager" }
             val httpFilters = connectionManager["typed_config"]["http_filters"] as ArrayNode
 
             val grpcTranscoderConfigNode = yamlMapper.nodeFactory.objectNode().apply {
@@ -69,12 +69,12 @@ abstract class EnvoyTestBase(
                 set("typed_config", yamlMapper.convertValue(options, ObjectNode::class.java))
             }
             val transcoderIndex = httpFilters.indexOfFirst {
-                it["name"].textValue() == "envoy.filters.http.grpc_json_transcoder"
+                it["name"].stringValue() == "envoy.filters.http.grpc_json_transcoder"
             }
             if (transcoderIndex >= 0) {
                 httpFilters.set(transcoderIndex, grpcTranscoderConfigNode)
             } else {
-                val routerIndex = httpFilters.indexOfFirst { it["name"].textValue() == "envoy.filters.http.router" }
+                val routerIndex = httpFilters.indexOfFirst { it["name"].stringValue() == "envoy.filters.http.router" }
                 httpFilters.insert(routerIndex, grpcTranscoderConfigNode)
             }
 

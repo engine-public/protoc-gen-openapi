@@ -113,7 +113,7 @@ internal class SchemaKeyResolver(
     private fun rewriteTree(node: JsonNode) {
         when (node) {
             is ObjectNode -> {
-                val ref = node.get("\$ref")?.asText()
+                val ref = node.get("\$ref")?.asString()
                 if (ref != null && ref.startsWith("#/components/schemas/")) {
                     val oldKey = ref.removePrefix("#/components/schemas/")
                     val newKey = buildPhaseToFinalMap[oldKey]

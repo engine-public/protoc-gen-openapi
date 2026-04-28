@@ -59,6 +59,7 @@ public class FileOptionsWrapper(
     }
 
     @Deprecated("This option does nothing.")
+    @Suppress("DEPRECATION") // proto.hasJavaGenerateEqualsAndHash / .javaGenerateEqualsAndHash deprecated upstream (proto editions migration)
     public val javaGenerateEqualsAndHash: SyntaxElement<Boolean>? = (if (proto.hasJavaGenerateEqualsAndHash()) proto.javaGenerateEqualsAndHash else null)?.let {
         SyntaxElement(
             it,

@@ -196,9 +196,9 @@ class NamespacingTest :
         test("run6: annotation title takes precedence over auto-generated title") {
             val schemas = mapper.readTree(run6.fileList.first().content)["components"]["schemas"]
             // catalog.proto annotates Item with title: "CatalogItem" — annotation wins over auto "Item"
-            schemas["Catalog_Item_v1"]["title"].asText() shouldBe "CatalogItem"
+            schemas["Catalog_Item_v1"]["title"].asString() shouldBe "CatalogItem"
             // inventory.proto has no annotation — auto title "Item" is used
-            schemas["Inventory_Item_v2"]["title"].asText() shouldBe "Item"
+            schemas["Inventory_Item_v2"]["title"].asString() shouldBe "Item"
         }
 
         test("run6: intra-schema property \$refs use simplified keys") {
@@ -206,7 +206,7 @@ class NamespacingTest :
             // Item.specs references the nested type Item.Specs.  The simplified key must include
             // the enclosing type name ("Item") so it is Inventory_Item_Specs_v2, not the
             // FULL_PACKAGE build-phase key used during path building.
-            schemas["Inventory_Item_v2"]["properties"]["specs"]["\$ref"].asText() shouldBe
+            schemas["Inventory_Item_v2"]["properties"]["specs"]["\$ref"].asString() shouldBe
                 "#/components/schemas/Inventory_Item_Specs_v2"
         }
     })

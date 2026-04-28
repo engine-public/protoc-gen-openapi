@@ -74,7 +74,7 @@ class CaseInsensitiveEnumParsingTest : EnvoyTestBase(GrpcJsonTranscoder(caseInse
                 val tree = jsonMapper.readTree(result.fileList.first().content)
                 val enumValues = mutableListOf<String>()
                 tree.path("components").path("schemas").path("Greeting").path("enum")
-                    .forEach { enumValues.add(it.asText()) }
+                    .forEach { enumValues.add(it.asString()) }
                 enumValues shouldBe listOf("greeting_unspecified", "greeting_hello", "greeting_hi")
             }
         }

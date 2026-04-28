@@ -57,7 +57,7 @@ class CaseInsensitiveEnumParsingAndAlwaysPrintAsIntsTest :
                 result.hasError() shouldBe false
                 val tree = jsonMapper.readTree(result.fileList.first().content)
                 val greeting = tree.path("components").path("schemas").path("Greeting")
-                greeting.path("type").asText() shouldBe "integer"
+                greeting.path("type").asString() shouldBe "integer"
                 val enumValues = mutableListOf<Int>()
                 greeting.path("enum").forEach { enumValues.add(it.intValue()) }
                 enumValues shouldBe listOf(0, 1, 2)

@@ -111,6 +111,7 @@ public class MessageOptionsWrapper(
      * teams have had time to migrate.
      */
     @Deprecated("Legacy behavior planned for removal. Migrate off JSON field name conflict handling.")
+    @Suppress("DEPRECATION") // proto.hasDeprecatedLegacyJsonFieldConflicts / .deprecatedLegacyJsonFieldConflicts deprecated upstream (proto editions migration)
     public val deprecatedLegacyJsonFieldConflicts: SyntaxElement<Boolean>? =
         (if (proto.hasDeprecatedLegacyJsonFieldConflicts()) proto.deprecatedLegacyJsonFieldConflicts else null)?.let {
             SyntaxElement(

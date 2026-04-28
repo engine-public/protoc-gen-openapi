@@ -27,7 +27,7 @@ import tools.jackson.databind.node.ObjectNode
 internal fun Any.toJson(ctx: JsonContext): JsonNode =
     when {
         `is`(StringValue::class.java) ->
-            ctx.mapper.nodeFactory.textNode(unpack(StringValue::class.java).value)
+            ctx.mapper.nodeFactory.stringNode(unpack(StringValue::class.java).value)
 
         `is`(Int32Value::class.java) ->
             ctx.mapper.nodeFactory.numberNode(unpack(Int32Value::class.java).value)
@@ -51,7 +51,7 @@ internal fun Any.toJson(ctx: JsonContext): JsonNode =
             ctx.mapper.nodeFactory.booleanNode(unpack(BoolValue::class.java).value)
 
         `is`(BytesValue::class.java) ->
-            ctx.mapper.nodeFactory.textNode(unpack(BytesValue::class.java).value.toStringUtf8())
+            ctx.mapper.nodeFactory.stringNode(unpack(BytesValue::class.java).value.toStringUtf8())
 
         `is`(Value::class.java) -> unpack(Value::class.java).toJson(ctx)
 
@@ -72,7 +72,7 @@ internal fun Value.toJson(ctx: JsonContext): JsonNode =
             }
         }
 
-        Value.KindCase.STRING_VALUE -> ctx.mapper.nodeFactory.textNode(stringValue)
+        Value.KindCase.STRING_VALUE -> ctx.mapper.nodeFactory.stringNode(stringValue)
 
         Value.KindCase.STRUCT_VALUE -> {
             val obj = ctx.obj()

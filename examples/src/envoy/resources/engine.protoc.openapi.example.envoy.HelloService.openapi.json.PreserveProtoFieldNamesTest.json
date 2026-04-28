@@ -1,91 +1,95 @@
 {
-  "openapi" : "3.1.0",
-  "paths" : {
-    "/hello" : {
-      "post" : {
-        "requestBody" : {
-          "required" : true,
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/HelloRequest"
-              }
-            }
+  "components": {
+    "schemas": {
+      "Greeting": {
+        "description": "The type of greeting to use.\n\n- `GREETING_HELLO` — A formal hello greeting.\n\n- `GREETING_HI` — A casual hi greeting.",
+        "enum": [
+          "GREETING_UNSPECIFIED",
+          "GREETING_HELLO",
+          "GREETING_HI"
+        ],
+        "type": "string"
+      },
+      "HelloRequest": {
+        "properties": {
+          "greeting_type": {
+            "$ref": "#/components/schemas/Greeting"
+          },
+          "your_name": {
+            "type": "string"
           }
         },
-        "responses" : {
-          "200" : {
-            "description" : "OK",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/HelloResponse"
-                }
+        "type": "object"
+      },
+      "HelloResponse": {
+        "properties": {
+          "greeting_used": {
+            "$ref": "#/components/schemas/Greeting"
+          },
+          "reply_message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "HelloService",
+    "version": "1.0.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/hello": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HelloRequest"
               }
             }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HelloResponse"
+                }
+              }
+            },
+            "description": "OK"
           }
         }
       }
     },
-    "/hellos" : {
-      "post" : {
-        "requestBody" : {
-          "required" : true,
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/HelloRequest"
+    "/hellos": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HelloRequest"
               }
             }
-          }
+          },
+          "required": true
         },
-        "responses" : {
-          "200" : {
-            "description" : "OK",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/HelloResponse"
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HelloResponse"
                 }
               }
-            }
+            },
+            "description": "OK"
           }
         }
-      }
-    }
-  },
-  "info" : {
-    "title" : "HelloService",
-    "version" : "1.0.0"
-  },
-  "components" : {
-    "schemas" : {
-      "HelloResponse" : {
-        "type" : "object",
-        "properties" : {
-          "reply_message" : {
-            "type" : "string"
-          },
-          "greeting_used" : {
-            "$ref" : "#/components/schemas/Greeting"
-          }
-        }
-      },
-      "HelloRequest" : {
-        "type" : "object",
-        "properties" : {
-          "your_name" : {
-            "type" : "string"
-          },
-          "greeting_type" : {
-            "$ref" : "#/components/schemas/Greeting"
-          }
-        }
-      },
-      "Greeting" : {
-        "type" : "string",
-        "description" : "The type of greeting to use.\n\n- `GREETING_HELLO` — A formal hello greeting.\n\n- `GREETING_HI` — A casual hi greeting.",
-        "enum" : [ "GREETING_UNSPECIFIED", "GREETING_HELLO", "GREETING_HI" ]
       }
     }
   }

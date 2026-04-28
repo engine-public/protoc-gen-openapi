@@ -1,97 +1,101 @@
 {
-  "openapi" : "3.1.0",
-  "paths" : {
-    "/catalog/{id}" : {
-      "get" : {
-        "summary" : "Retrieve a catalog item by its identifier.",
-        "description" : "Retrieve a catalog item by its identifier.",
-        "parameters" : [ {
-          "name" : "id",
-          "in" : "path",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
+  "components": {
+    "schemas": {
+      "Item": {
+        "description": "An item tracked in the inventory system.",
+        "properties": {
+          "id": {
+            "description": "Unique identifier of this item.",
+            "type": "string"
+          },
+          "quantity": {
+            "description": "Current quantity in stock.",
+            "format": "int32",
+            "type": "integer"
+          },
+          "specs": {
+            "$ref": "#/components/schemas/ItemSpecs",
+            "description": "Physical specifications for this item."
           }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "OK",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Item"
-                }
-              }
-            }
+        },
+        "title": "Item",
+        "type": "object"
+      },
+      "ItemSpecs": {
+        "description": "Physical specifications of an inventory item.",
+        "properties": {
+          "volumeMl": {
+            "description": "Volume in millilitres.",
+            "format": "int32",
+            "type": "integer"
+          },
+          "weightGrams": {
+            "description": "Weight in grams.",
+            "format": "int32",
+            "type": "integer"
           }
-        }
-      }
-    },
-    "/inventory/{id}" : {
-      "get" : {
-        "summary" : "Retrieve inventory details for an item by its identifier.",
-        "description" : "Retrieve inventory details for an item by its identifier.",
-        "parameters" : [ {
-          "name" : "id",
-          "in" : "path",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "OK",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Item"
-                }
-              }
-            }
-          }
-        }
+        },
+        "title": "Specs",
+        "type": "object"
       }
     }
   },
-  "components" : {
-    "schemas" : {
-      "Item" : {
-        "type" : "object",
-        "title" : "Item",
-        "description" : "An item tracked in the inventory system.",
-        "properties" : {
-          "id" : {
-            "type" : "string",
-            "description" : "Unique identifier of this item."
-          },
-          "quantity" : {
-            "type" : "integer",
-            "format" : "int32",
-            "description" : "Current quantity in stock."
-          },
-          "specs" : {
-            "$ref" : "#/components/schemas/ItemSpecs",
-            "description" : "Physical specifications for this item."
+  "openapi": "3.1.0",
+  "paths": {
+    "/catalog/{id}": {
+      "get": {
+        "description": "Retrieve a catalog item by its identifier.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
           }
-        }
-      },
-      "ItemSpecs" : {
-        "type" : "object",
-        "title" : "Specs",
-        "description" : "Physical specifications of an inventory item.",
-        "properties" : {
-          "weightGrams" : {
-            "type" : "integer",
-            "format" : "int32",
-            "description" : "Weight in grams."
-          },
-          "volumeMl" : {
-            "type" : "integer",
-            "format" : "int32",
-            "description" : "Volume in millilitres."
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Item"
+                }
+              }
+            },
+            "description": "OK"
           }
-        }
+        },
+        "summary": "Retrieve a catalog item by its identifier."
+      }
+    },
+    "/inventory/{id}": {
+      "get": {
+        "description": "Retrieve inventory details for an item by its identifier.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Item"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Retrieve inventory details for an item by its identifier."
       }
     }
   }

@@ -1,0 +1,122 @@
+syntax = "proto3";
+
+package engine.protoc.openapi.example.enums;
+
+option java_package = "com.engine.protoc.openapi.example.enums";
+option java_multiple_files = true;
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "engine/protoc/openapi/annotations.proto";
+
+option (.engine.protoc.openapi.file) = {
+    info: {
+        title: "Enums Example API"
+        version: "1.0.0"
+    }
+};
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+// The lifecycle status of an order.
+enum OrderStatus {
+    // UNSET is the proto3 conventional default value (number = 0).
+    UNSET = 0 [(.engine.protoc.openapi.suppress) = false];
+    // Order has been received and is awaiting processing.
+    //
+    // Sometimes an enum comment might be multi-line.
+    // What happens then?
+    PENDING = 1;
+    // Order has been accepted and payment verified.
+    CONFIRMED = 2;
+    // Order has been handed off to the carrier and is in transit.
+    SHIPPED = 3;
+    // Order was voided before or during fulfillment.
+    CANCELLED = 4;
+}
+
+// The priority level of a shipment.
+// This enum carries inline = true, so it is always inlined regardless of the
+// inlineEnums compiler option.
+enum ShipmentPriority {
+    option (.engine.protoc.openapi.inline) = true;
+    PRIORITY_UNSET = 0;
+    STANDARD = 1;
+    EXPRESS = 2;
+    OVERNIGHT = 3;
+}
+
+// The reason a return was initiated.
+// This enum carries inline = false, so it is always a component schema
+// regardless of the inlineEnums compiler option.
+enum ReturnReason {
+    option (.engine.protoc.openapi.inline) = false;
+    REASON_UNSET = 0;
+    DAMAGED = 1;
+    WRONG_ITEM = 2;
+    NO_LONGER_NEEDED = 3;
+}
+
+// The kind of payment method used.
+// This enum uses the engine.protoc.openapi.enum schema annotation to add a
+// description and a title, demonstrating annotation-level override.
+enum PaymentMethod {
+    option (.engine.protoc.openapi.enum) = {
+        object: {
+            description: "The payment instrument used to complete the transaction."
+        }
+    };
+    PAYMENT_UNSET = 0;
+    CREDIT_CARD = 1;
+    DEBIT_CARD = 2;
+    BANK_TRANSFER = 3;
+    // Suppress this value with a per-value annotation regardless of suppressDefaultEnumValues.
+    CRYPTO = 4 [(.engine.protoc.openapi.suppress) = true];
+}
+
+// ---------------------------------------------------------------------------
+// Messages
+// ---------------------------------------------------------------------------
+
+message Order {
+    string id = 1;
+    OrderStatus status = 2;
+    ShipmentPriority priority = 3;
+    PaymentMethod payment = 4;
+}
+
+message ReturnRequest {
+    string order_id = 1;
+    ReturnReason reason = 2;
+    // Per-value suppress = false keeps REASON_UNSET visible even when
+    // suppressDefaultEnumValues = true is set globally.
+    repeated OrderStatus affected_statuses = 3;
+}
+
+// ---------------------------------------------------------------------------
+// Service
+// ---------------------------------------------------------------------------
+
+service OrderService {
+
+    // Retrieve an order by its identifier.
+    rpc GetOrder(GetOrderRequest) returns (Order) {
+        option (google.api.http) = {
+            get: "/orders/{id}"
+        };
+    }
+
+    // Create a new return request.
+    rpc CreateReturn(ReturnRequest) returns (ReturnRequest) {
+        option (google.api.http) = {
+            post: "/returns"
+            body: "*"
+        };
+    }
+}
+
+message GetOrderRequest {
+    string id = 1;
+}

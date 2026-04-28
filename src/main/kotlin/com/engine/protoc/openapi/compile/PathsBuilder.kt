@@ -1,10 +1,15 @@
 package com.engine.protoc.openapi.compile
 
 import com.engine.protoc.openapi.Annotations
+import com.engine.protoc.openapi.ProtocGenOpenAPI
 import com.engine.protoc.openapi.compile.json.JsonContext
 import com.engine.protoc.openapi.compile.json.putExtensionsInto
 import com.engine.protoc.openapi.compile.json.toJson
 import com.engine.protoc.openapi.model.Operation
+import com.engine.protoc.openapi.model.ParameterOrReference
+import com.engine.protoc.openapi.model.Schema
+import com.engine.protoc.util.enums.EnumDescriptorProtoWrapper
+import com.engine.protoc.util.enums.EnumValueDescriptorProtoWrapper
 import com.engine.protoc.util.file.FileDescriptorProtoWrapper
 import com.engine.protoc.util.service.MethodDescriptorProtoWrapper
 import com.engine.protoc.util.service.ServiceDescriptorProtoWrapper
@@ -14,6 +19,12 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.google.api.AnnotationsProto
 import com.google.api.HttpRule
 import com.google.protobuf.DescriptorProtos
+import org.commonmark.node.*
+import org.commonmark.parser.Parser
+import org.commonmark.renderer.markdown.MarkdownRenderer
+
+private val markdownParser: Parser = Parser.builder().build()
+private val markdownRenderer: MarkdownRenderer = MarkdownRenderer.builder().build()
 
 /**
  * Builds the `paths` section of the OpenAPI document from gRPC service definitions and their
@@ -296,7 +307,7 @@ internal class PathsBuilder(
     private fun buildAnnotatedPathParams(
         originalPath: String,
         inputTypeName: String,
-        annotatedParams: List<com.engine.protoc.openapi.model.ParameterOrReference>,
+        annotatedParams: List<ParameterOrReference>,
     ): Pair<String, List<ObjectNode>> {
         val inferredNodes = inferPathParameters(originalPath, inputTypeName)
         val inferredNames = pathParamRegex.findAll(originalPath).map { it.groupValues[1] }.toList()
@@ -474,8 +485,14 @@ internal class PathsBuilder(
         val msg = ctx.messageIndex.find(typeName) ?: return false
         val field = msg.proto.fieldList
             .find { it.name == fieldName || it.jsonName == fieldName } ?: return false
-        if (field.type == DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE) {
-            collector.collect(field.typeName)
+        when (field.type) {
+            DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE ->
+                collector.collect(field.typeName)
+
+            DescriptorProtos.FieldDescriptorProto.Type.TYPE_ENUM ->
+                collector.collectEnum(field.typeName)
+
+            else -> Unit
         }
         return true
     }
@@ -553,8 +570,23 @@ internal class PathsBuilder(
                     it.put("format", "byte")
                 }
 
-            DescriptorProtos.FieldDescriptorProto.Type.TYPE_ENUM ->
-                node.also { it.put("type", "string") }
+            DescriptorProtos.FieldDescriptorProto.Type.TYPE_ENUM -> {
+                val typeName = field.typeName
+                val enumWrapper = ctx.enumIndex.find(typeName)
+                val annotationInline = enumWrapper?.options?.findExtension(Annotations.inline)?.value
+                val shouldInline = annotationInline ?: ctx.inlineEnums
+                if (shouldInline) {
+                    buildEnumSchema(typeName, enumWrapper)
+                } else {
+                    collector.collectEnum(typeName)
+                    node.also {
+                        it.put(
+                            "\$ref",
+                            "#/components/schemas/${ctx.schemaKeyResolver.buildPhaseKeyOf(typeName)}",
+                        )
+                    }
+                }
+            }
 
             DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE -> {
                 val typeName = field.typeName
@@ -574,6 +606,141 @@ internal class PathsBuilder(
         if (field.type != DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE) return false
         return ctx.messageIndex.find(field.typeName)?.proto?.options?.mapEntry == true
     }
+
+    /**
+     * Builds a fully-populated enum schema `{ "type": "string", "enum": [...] }` for [typeName].
+     * Used for both inline field schemas and `components/schemas` entries.  Suppresses values per
+     * [JsonContext.suppressDefaultEnumValues] and per-value annotations, then deep-merges any
+     * `engine.protoc.openapi.enum` annotation on top.
+     *
+     * [includeTitle] should be `true` only when building a component schema entry; inline field
+     * schemas must not carry a title.
+     */
+    internal fun buildEnumSchema(
+        typeName: String,
+        enumWrapper: EnumDescriptorProtoWrapper?,
+        includeTitle: Boolean = false,
+    ): ObjectNode {
+        val node = ctx.obj()
+        node.put("type", "string")
+        if (includeTitle) ctx.schemaKeyResolver.titleFor(typeName)?.let { node.put("title", it) }
+
+        if (enumWrapper != null) {
+            val visibleValues = enumWrapper.values.filterNot {
+                isValueSuppressed(it, ctx.suppressDefaultEnumValues)
+            }
+
+            buildEnumDescription(
+                enumComment = enumWrapper.location?.proto?.leadingComments?.trim()?.ifEmpty { null },
+                visibleValues = visibleValues,
+            )?.let { node.put("description", it) }
+
+            val valuesArr = ctx.mapper.createArrayNode()
+            for (valueWrapper in visibleValues) {
+                valuesArr.add(formatEnumValue(valueWrapper.proto.name, ctx.enumValueFormat))
+            }
+            if (valuesArr.size() > 0) node.set<JsonNode>("enum", valuesArr)
+
+            val annotation = enumWrapper.options?.findExtension(Annotations.enum_)?.value
+            if (annotation != null && annotation.schemaValueCase == Schema.SchemaValueCase.OBJECT) {
+                with(ctx) { node.deepMerge(annotation.`object`.toJson(ctx)) }
+            }
+        }
+
+        return node
+    }
+
+    private fun buildEnumDescription(
+        enumComment: String?,
+        visibleValues: List<EnumValueDescriptorProtoWrapper>,
+    ): String? {
+        // create pairs
+        val commentedValues = visibleValues.mapNotNull { valueWrapper ->
+            val comment = valueWrapper.location?.proto?.leadingComments?.trim()?.ifEmpty { null }
+                ?: return@mapNotNull null
+            Pair(formatEnumValue(valueWrapper.proto.name, ctx.enumValueFormat), comment)
+        }
+        if (enumComment == null && commentedValues.isEmpty()) return null
+
+        val documentNode = if (enumComment != null) {
+            markdownParser.parse(enumComment) as? Document ?: Document()
+        } else {
+            Document()
+        }
+
+        if (commentedValues.isNotEmpty()) {
+            val list = BulletList().apply {
+                for ((name, comment) in commentedValues) {
+                    val commentDoc = markdownParser.parse(comment) as? Document ?: Document()
+                    appendChild(
+                        ListItem().apply {
+                            val firstBlock = commentDoc.firstChild
+                            appendChild(
+                                Paragraph().apply {
+                                    appendChild(Code(name))
+                                    appendChild(Text(" — "))
+                                    if (firstBlock is Paragraph) {
+                                        spliceInlineNodes(firstBlock, this)
+                                    } else {
+                                        appendChild(Text(comment))
+                                    }
+                                },
+                            )
+                            var block = firstBlock?.next
+                            while (block != null) {
+                                val next = block.next
+                                if (block is Paragraph) {
+                                    appendChild(Paragraph().also { spliceInlineNodes(block, it) })
+                                }
+                                block = next
+                            }
+                        },
+                    )
+                }
+            }
+            documentNode.appendChild(list)
+        }
+
+        return markdownRenderer
+            .render(documentNode)
+            .lines()
+            .joinToString("\n") { it.trimEnd() }
+            .trimEnd()
+            .ifEmpty { null }
+    }
+
+    /**
+     * Moves all inline children of [src] into [dest], replacing each [SoftLineBreak] with a
+     * space so the paragraph renders as a single line.
+     */
+    private fun spliceInlineNodes(
+        src: Paragraph,
+        dest: Paragraph,
+    ) {
+        var node = src.firstChild
+        while (node != null) {
+            val next = node.next
+            node.unlink()
+            dest.appendChild(if (node is SoftLineBreak) Text(" ") else node)
+            node = next
+        }
+    }
+
+    private fun isValueSuppressed(
+        valueWrapper: EnumValueDescriptorProtoWrapper,
+        suppressDefaults: Boolean,
+    ): Boolean {
+        val annotation = valueWrapper.options?.findExtension(Annotations.suppress)?.value
+        return annotation ?: (suppressDefaults && valueWrapper.proto.number == 0)
+    }
+
+    private fun formatEnumValue(
+        protoName: String,
+        format: ProtocGenOpenAPI.Options.EnumValueFormat,
+    ): String =
+        when (format) {
+            ProtocGenOpenAPI.Options.EnumValueFormat.RAW -> protoName
+        }
 }
 
 // ---------------------------------------------------------------------------

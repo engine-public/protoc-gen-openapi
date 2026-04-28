@@ -53,13 +53,13 @@ class NamespacingTest :
         //
         // With strategy=NONE schema keys are unqualified message names. Both
         // packages define Item, so keys collide and only one definition survives.
-        // setSchemaTitleToMessageName still applies the title to the surviving schema.
+        // setSchemaTitleToProtoSimpleName still applies the title to the surviving schema.
         // -----------------------------------------------------------------------
         val run1 =
             ProtocGenOpenAPI.from(request()) {
                 merge = true
                 schemaNamespaceVersionExtraction = true
-                setSchemaTitleToMessageName = true
+                setSchemaTitleToProtoSimpleName = true
             }.compile()
 
         test("run1: no errors") {
@@ -105,7 +105,7 @@ class NamespacingTest :
                 schemaNamespaceStrategy = FULL_PACKAGE
                 schemaNamespaceCasing = CAPITALIZED
                 schemaNamespaceVersionExtraction = true
-                setSchemaTitleToMessageName = true
+                setSchemaTitleToProtoSimpleName = true
             }.compile()
 
         test("run3: no errors") {
@@ -129,7 +129,7 @@ class NamespacingTest :
                 schemaNamespaceStrategy = FULL_PACKAGE
                 schemaNamespaceSeparator = DOT
                 schemaNamespaceVersionExtraction = true
-                setSchemaTitleToMessageName = true
+                setSchemaTitleToProtoSimpleName = true
             }.compile()
 
         test("run4: no errors") {
@@ -154,7 +154,7 @@ class NamespacingTest :
                 schemaNamespaceStrategy = FULL_PACKAGE
                 schemaNamespaceSeparator = UNDERSCORE
                 schemaNamespaceCasing = UPPER_CASE
-                setSchemaTitleToMessageName = true
+                setSchemaTitleToProtoSimpleName = true
             }.compile()
 
         test("run5: no errors") {
@@ -181,7 +181,7 @@ class NamespacingTest :
                 schemaNamespaceSeparator = UNDERSCORE
                 schemaNamespaceCasing = CAPITALIZED
                 schemaNamespaceVersionExtraction = true
-                setSchemaTitleToMessageName = true
+                setSchemaTitleToProtoSimpleName = true
             }.compile()
 
         test("run6: no errors") {

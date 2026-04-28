@@ -30,6 +30,7 @@ testing {
                 implementation(libs.jackson.databind)
                 implementation(libs.jackson.dataformat.yaml)
                 implementation(libs.networknt.jsonSchemaValidator)
+                implementation(libs.commonmark)
             }
             val testSuiteName = this.name
             tasks.named("process${testSuiteName.capitalized()}Resources", ProcessResources::class) {
@@ -53,6 +54,7 @@ testing {
         register<JvmTestSuite>("conventions")
         register<JvmTestSuite>("version")
         register<JvmTestSuite>("namespacing")
+        register<JvmTestSuite>("enums")
     }
 }
 

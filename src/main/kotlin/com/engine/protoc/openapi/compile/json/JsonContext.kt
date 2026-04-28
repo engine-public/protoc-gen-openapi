@@ -1,5 +1,7 @@
 package com.engine.protoc.openapi.compile.json
 
+import com.engine.protoc.openapi.ProtocGenOpenAPI
+import com.engine.protoc.openapi.compile.EnumIndex
 import com.engine.protoc.openapi.compile.MessageIndex
 import com.engine.protoc.openapi.compile.RpcIndex
 import com.engine.protoc.openapi.compile.SchemaKeyResolver
@@ -10,8 +12,12 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 internal class JsonContext(
     val mapper: ObjectMapper,
     val messageIndex: MessageIndex,
+    val enumIndex: EnumIndex,
     val rpcIndex: RpcIndex,
     val schemaKeyResolver: SchemaKeyResolver,
+    val inlineEnums: Boolean,
+    val suppressDefaultEnumValues: Boolean,
+    val enumValueFormat: ProtocGenOpenAPI.Options.EnumValueFormat,
 ) {
     fun obj(): ObjectNode = mapper.createObjectNode()
 

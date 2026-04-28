@@ -39,3 +39,16 @@ extend .google.protobuf.FieldOptions {
     // Adds the ability to add an OpenAPI schema to a field in a proto `message`
     .engine.protoc.openapi.model.Schema field = 20231016;
 }
+
+extend .google.protobuf.EnumOptions {
+    // Adds the ability to add an OpenAPI schema to a proto `enum`
+    .engine.protoc.openapi.model.Schema enum = 20231016;
+    // When true, this enum will be inlined when used instead of created as a separate schema in components.
+    optional bool inline = 202310162;
+}
+
+extend .google.protobuf.EnumValueOptions {
+    // When true, suppress this enum value from OAS schema output.
+    // This is helpful for the conventional "default" value of proto enums with the assigned 0 number.
+    optional bool suppress = 202310162;
+}

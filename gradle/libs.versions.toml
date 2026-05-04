@@ -6,8 +6,8 @@ kotlin = "2.3.20"
 networknt = "3.0.1"
 protobuf = "4.34.1"
 google-common-protos = "2.66.0"
-grpc = "1.65.0"
-grpcKotlin = "1.4.1"
+grpc = "1.81.0"
+grpcKotlin = "1.5.0"
 kotlinx-coroutines = "1.8.1"
 testcontainers = "2.0.5"
 kotest = "6.1.4"
@@ -48,11 +48,9 @@ slf4j-simple = { group = "org.slf4j", name = "slf4j-simple", version = "1.7.36" 
 test-kotest-assertions-core = { group = "io.kotest", name = "kotest-assertions-core", version.ref = "kotest" }
 test-kotest-runner-junit5 = { group = "io.kotest", name = "kotest-runner-junit5", version.ref = "kotest" }
 
-
 # build tool dependencies
 tools-protoc-compiler = { group = "com.google.protobuf", name = "protoc", version.ref = "protobuf" }
 tools-protoc-gen-doc = { group = "io.github.pseudomuto", name = "protoc-gen-doc", version = "1.5.1" }
 
 [bundles]
 test-kotest = ["test-kotest-assertions-core", "test-kotest-runner-junit5"]
-

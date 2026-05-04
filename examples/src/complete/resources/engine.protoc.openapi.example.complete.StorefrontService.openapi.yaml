@@ -1,864 +1,862 @@
----
-openapi: "3.1.0"
-paths:
-  /health:
-    get:
-      summary: "Health status endpoint"
-      operationId: "healthStatus"
-      responses:
-        "200":
-          description: "Service is healthy"
-  /products:
-    get:
-      summary: "List products"
-      description: "Returns a paginated list of products. Supports filtering by category,\
-        \ price range, and stock status."
-      operationId: "listProducts"
-      tags:
-      - "products"
-      - "inventory"
-      parameters:
-      - $ref: "#/components/parameters/PageSize"
-      - name: "category"
-        in: "query"
-        description: "Filter by product category"
-        schema:
-          type: "string"
-      - name: "X-Filter-Context"
-        in: "header"
-        description: "Structured filter context header"
-        content:
-          application/json:
-            schema:
-              type: "object"
-      responses:
-        "200":
-          description: "Successful response"
-          headers:
-            X-Total-Count:
-              description: "Total number of products matching the filter"
-              schema:
-                type: "integer"
-            X-Rate-Limit-Remaining:
-              $ref: "#/components/headers/RateLimitRemaining"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ProductList"
-              examples:
-                typical:
-                  $ref: "#/components/examples/ProductExample"
-                external:
-                  $ref: "#/components/examples/ExternalProductExample"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-      security:
-      - bearerAuth: []
-      x-rate-limit: 100
-    post:
-      summary: "Create product"
-      description: "Adds a new product to the catalog. Requires admin privileges."
-      operationId: "createProduct"
-      tags:
-      - "products"
-      requestBody:
-        $ref: "#/components/requestBodies/CreateProductBody"
-      responses:
-        "201":
-          description: "Product created successfully"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Product"
-          links:
-            GetProduct:
-              $ref: "#/components/links/GetProductByIdLink"
-        "400":
-          $ref: "#/components/responses/ValidationError"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-      security:
-      - bearerAuth: []
-      - apiKeyAuth: []
-  /products/{id}:
-    get:
-      summary: "Get product"
-      description: "Returns a single product by its unique identifier."
-      operationId: "getProduct"
-      tags:
-      - "products"
-      parameters:
-      - name: "id"
-        in: "path"
-        required: true
-        schema:
-          type: "string"
-      - $ref: "#/components/parameters/ProductId"
-      responses:
-        "200":
-          description: "Product found"
-          headers:
-            X-Rate-Limit-Remaining:
-              $ref: "#/components/headers/RateLimitRemaining"
-            X-Rate-Limit-Reset:
-              $ref: "#/components/headers/RateLimitReset"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Product"
-              example:
-                id: "abc-123"
-                name: "UltraRun Pro"
-                price: 129.99
-          links:
-            PlaceOrder:
-              operationId: "placeOrder"
-              parameters:
-                items[0].productId: "$response.body#/id"
-              description: "Place an order for this product"
-            GetProduct:
-              $ref: "#/components/links/GetProductByIdLink"
-        "404":
-          $ref: "#/components/responses/NotFound"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-      security:
-      - oauth2Auth:
-        - "read:products"
-    put:
-      summary: "Update product"
-      description: "Fully replaces a product by its identifier."
-      operationId: "updateProduct"
-      tags:
-      - "products"
-      parameters:
-      - name: "id"
-        in: "path"
-        required: true
-        deprecated: true
-        x-param-position: 0
-        schema:
-          type: "string"
-          format: "uuid"
-      requestBody:
-        description: "Updated product data"
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UpdateProductRequest"
-        required: true
-      responses:
-        "200":
-          description: "Product updated"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Product"
-          x-rate-limit-cost: 2
-        "404":
-          $ref: "#/components/responses/NotFound"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-    patch:
-      summary: "Patch product"
-      description: "Partially updates a product by its identifier."
-      operationId: "patchProduct"
-      tags:
-      - "products"
-      parameters:
-      - name: "id"
-        in: "path"
-        required: true
-        schema:
-          type: "string"
-      - $ref: "#/components/parameters/ProductId"
-        summary: "Product reference"
-        description: "Resolved from component ref"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UpdateProductRequest"
-      responses:
-        "200":
-          description: "Product patched"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Product"
-        "404":
-          $ref: "#/components/responses/NotFound"
-    delete:
-      summary: "Delete product"
-      description: "Removes a product from the catalog. This action is irreversible."
-      operationId: "deleteProduct"
-      tags:
-      - "products"
-      parameters:
-      - name: "id"
-        in: "path"
-        required: true
-        schema:
-          type: "string"
-      - $ref: "#/components/parameters/ProductId"
-      responses:
-        "204":
-          description: "Product deleted"
-        "404":
-          $ref: "#/components/responses/NotFound"
-      deprecated: true
-      externalDocs:
-        description: "Deprecation notice"
-        url: "https://example.com/docs/deprecations"
-  /products/{product_id}/image:
-    post:
-      summary: "Upload product image"
-      description: "Uploads a binary image for the given product (PNG or JPEG)."
-      operationId: "uploadProductImage"
-      tags:
-      - "products"
-      parameters:
-      - name: "product_id"
-        in: "path"
-        required: true
-        schema:
-          type: "string"
-          format: "uuid"
-      requestBody:
-        description: "Image upload (multipart)"
-        content:
-          multipart/form-data:
-            schema:
-              type: "object"
-              properties:
-                image:
-                  type: "string"
-                  format: "binary"
-            encoding:
-              image:
-                contentType: "image/png, image/jpeg"
-                headers:
-                  X-Upload-Token:
-                    $ref: "#/components/headers/UploadToken"
-                style: "form"
-                explode: false
-                allowReserved: false
-        required: true
-      responses:
-        "204":
-          description: "Image uploaded"
-          headers:
-            X-Image-Meta:
-              description: "Metadata about the uploaded image"
-              content:
-                application/json:
-                  schema:
-                    type: "object"
-        "400":
-          $ref: "#/components/responses/ValidationError"
-  /orders:
-    post:
-      summary: "Place order"
-      description: "Creates a new order. Triggers an async callback when order status\
-        \ changes."
-      operationId: "placeOrder"
-      tags:
-      - "orders"
-      requestBody:
-        description: "Order creation payload"
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CreateOrderRequest"
-        required: true
-      responses:
-        "201":
-          description: "Order placed"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Order"
-          links:
-            GetOrderStatus:
-              $ref: "#/components/links/GetOrderStatusLink"
-        "400":
-          $ref: "#/components/responses/ValidationError"
-      externalDocs:
-        description: "Order flow docs"
-        url: "https://example.com/docs/orders"
-      callbacks:
-        onStatusChange:
-          $ref: "#/components/callbacks/OrderStatusCallback"
-      servers:
-      - url: "https://orders.example.com/v1"
-        description: "Dedicated order service"
-  /orders/{order_id}:
-    get:
-      summary: "Get order status"
-      description: "Get the current status of an order."
-      operationId: "getOrderStatus"
-      tags:
-      - "orders"
-      parameters:
-      - name: "order_id"
-        in: "path"
-        required: true
-        schema:
-          type: "string"
-          format: "uuid"
-      responses:
-        "200":
-          description: "Order details"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Order"
-        "404":
-          $ref: "#/components/responses/NotFound"
-info:
-  title: "Sporting Goods Storefront API"
-  description: "A complete demonstration API for a fictional sporting goods store,\
-    \ exercising every OpenAPI v3.1 annotation option."
-  summary: "Fictitious sporting goods catalog and ordering API"
-  termsOfService: "https://example.com/terms"
-  contact:
-    name: "Sporting Goods Support"
-    url: "https://example.com/support"
-    email: "support@example.com"
-  license:
-    name: "Apache 2.0"
-    identifier: "Apache-2.0"
-  version: "1.0.0"
-  x-info-contact-policy: "verified"
-jsonSchemaDialect: "https://spec.openapis.org/oas/3.1/dialect/base"
-servers:
-- url: "https://api.example.com/v1"
-  description: "Production (multi-region)"
-  variables:
-    region:
-      enum:
-      - "us-east-1"
-      - "us-west-2"
-      - "eu-west-1"
-      default: "us-east-1"
-      description: "AWS region for the API endpoint"
-- url: "https://sandbox.example.com/v1"
-  description: "Sandbox"
-tags:
-- name: "products"
-  description: "Operations on the product catalog"
-  externalDocs:
-    description: "Product catalog docs"
-    url: "https://example.com/docs/products"
-  x-tag-version: "v1"
-- name: "orders"
-  description: "Order management operations"
-- name: "inventory"
-  description: "Inventory and stock queries"
-security:
-- bearerAuth: []
-externalDocs:
-  description: "Full API reference"
-  url: "https://example.com/docs/api"
 components:
-  responses:
-    NotFound:
-      description: "The requested resource was not found"
-      headers:
-        X-Request-Id:
-          description: "Unique request identifier"
-          required: true
-          schema:
-            type: "string"
-      x-error-code: "RESOURCE_NOT_FOUND"
-    Unauthorized:
-      description: "Authentication required"
-    ValidationError:
-      description: "Request validation failed"
-      content:
-        application/json:
-          schema:
-            type: "object"
-            properties:
-              errors:
-                type: "array"
-                items:
-                  type: "string"
-          examples:
-            missingField:
-              summary: "Missing required field"
-              externalValue: "https://example.com/samples/validation-error.json"
-  parameters:
-    ProductId:
-      name: "productId"
-      in: "path"
-      description: "Unique product identifier"
-      required: true
-      deprecated: true
-      schema:
-        type: "string"
-        format: "uuid"
-      example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
-      x-param-group: "product-identifiers"
-    PageSize:
-      name: "pageSize"
-      in: "query"
-      description: "Number of results per page"
-      allowEmptyValue: false
-      style: "form"
-      explode: false
-      allowReserved: false
-      schema:
-        type: "integer"
-        format: "int32"
-      examples:
-        small:
-          summary: "Small page"
-          value: "10"
-        large:
-          summary: "Large page"
-          value: "100"
-    FilterContext:
-      name: "X-Filter-Context"
-      in: "header"
-      description: "Structured filter context, serialized as JSON"
-      content:
-        application/json:
-          schema:
-            type: "object"
-  examples:
-    ProductExample:
-      summary: "A typical running shoe"
-      description: "Canonical example of a product resource"
-      value:
-        id: "abc-123"
-        name: "UltraRun Pro"
-        price: 129.99
-        category: "footwear"
-    ExternalProductExample:
-      summary: "Complex product (external)"
-      externalValue: "https://example.com/samples/product.json"
-  requestBodies:
-    CreateProductBody:
-      description: "Product creation payload (multipart)"
-      content:
-        multipart/form-data:
-          schema:
-            type: "object"
-            properties:
-              name:
-                type: "string"
-              image:
-                type: "string"
-                format: "binary"
-              metadata:
-                type: "object"
-          example:
-            name: "Trail Blazer Boots"
-          encoding:
-            image:
-              contentType: "image/png, image/jpeg"
-              headers:
-                X-Upload-Token:
-                  $ref: "#/components/headers/UploadToken"
-              style: "form"
-              explode: false
-              allowReserved: false
-            metadata:
-              contentType: "application/json"
-              style: "form"
-              explode: true
-      required: true
-  headers:
-    RateLimitRemaining:
-      description: "Number of requests remaining in the current rate-limit window"
-      required: true
-      style: "simple"
-      explode: false
-      schema:
-        type: "integer"
-      example: "42"
-    RateLimitReset:
-      description: "Unix timestamp at which the rate-limit window resets"
-      deprecated: true
-      schema:
-        type: "integer"
-        format: "int64"
-      examples:
-        future:
-          summary: "One minute from now"
-          value: "1711666800"
-    UploadToken:
-      description: "Short-lived token authorizing a binary upload"
-      required: true
-      schema:
-        type: "string"
-    X-Structured-Meta:
-      description: "Structured metadata serialized as JSON"
-      content:
-        application/json:
-          schema:
-            type: "object"
-  securitySchemes:
-    bearerAuth:
-      type: "http"
-      scheme: "bearer"
-      bearerFormat: "JWT"
-      x-bearer-docs: "https://example.com/auth"
-    apiKeyAuth:
-      type: "apiKey"
-      name: "X-API-Key"
-      in: "header"
-    oauth2Auth:
-      type: "oauth2"
-      flows:
-        implicit:
-          authorizationUrl: "https://auth.example.com/authorize"
-          refreshUrl: "https://auth.example.com/token/refresh"
-          scopes:
-            read:products: "Read product catalog"
-        password:
-          tokenUrl: "https://auth.example.com/token"
-          refreshUrl: "https://auth.example.com/token/refresh"
-          scopes:
-            read:products: "Read product catalog"
-            write:products: "Modify products"
-        clientCredentials:
-          tokenUrl: "https://auth.example.com/token"
-          scopes:
-            admin: "Admin access"
-        authorizationCode:
-          authorizationUrl: "https://auth.example.com/authorize"
-          tokenUrl: "https://auth.example.com/token"
-          refreshUrl: "https://auth.example.com/token/refresh"
-          scopes:
-            read:products: "Read product catalog"
-            write:orders: "Place orders"
-    oidcAuth:
-      type: "openIdConnect"
-      openIdConnectUrl: "https://auth.example.com/.well-known/openid-configuration"
-    mtlsAuth:
-      type: "mutualTLS"
-    bearerRef:
-      $ref: "#/components/securitySchemes/bearerAuth"
-  links:
-    GetProductByIdLink:
-      operationId: "getProduct"
-      parameters:
-        productId: "$response.body#/id"
-      description: "Retrieve the product that was just created"
-    GetOrderStatusLink:
-      operationRef: "#/paths/~1orders~1%7Border_id%7D/get"
-      parameters:
-        order_id: "$response.body#/orderId"
-      description: "Check the status of the placed order"
-      server:
-        url: "https://orders.example.com/v1"
-        description: "Dedicated order service"
-    OperationRefLink:
-      operationRef: "#/paths/~1orders/post"
-      requestBody: "$request.body"
-      description: "Place an order using operationRef"
   callbacks:
     OrderStatusCallback:
       '{$request.body#/callbackUrl}':
         post:
-          summary: "Order status update notification"
           requestBody:
-            description: "Order status payload"
             content:
               application/json:
                 schema:
-                  type: "object"
                   properties:
                     orderId:
-                      type: "string"
+                      type: string
                     status:
-                      type: "string"
+                      type: string
+                  type: object
+            description: Order status payload
           responses:
             default:
-              description: "Callback received"
+              description: Callback received
+          summary: Order status update notification
     OrderStatusRef:
-      $ref: "#/components/callbacks/OrderStatusCallback"
+      $ref: '#/components/callbacks/OrderStatusCallback'
+  examples:
+    ExternalProductExample:
+      externalValue: https://example.com/samples/product.json
+      summary: Complex product (external)
+    ProductExample:
+      description: Canonical example of a product resource
+      summary: A typical running shoe
+      value:
+        category: footwear
+        id: abc-123
+        name: UltraRun Pro
+        price: 129.99
+  headers:
+    RateLimitRemaining:
+      description: Number of requests remaining in the current rate-limit window
+      example: '42'
+      explode: false
+      required: true
+      schema:
+        type: integer
+      style: simple
+    RateLimitReset:
+      deprecated: true
+      description: Unix timestamp at which the rate-limit window resets
+      examples:
+        future:
+          summary: One minute from now
+          value: '1711666800'
+      schema:
+        format: int64
+        type: integer
+    UploadToken:
+      description: Short-lived token authorizing a binary upload
+      required: true
+      schema:
+        type: string
+    X-Structured-Meta:
+      content:
+        application/json:
+          schema:
+            type: object
+      description: Structured metadata serialized as JSON
+  links:
+    GetOrderStatusLink:
+      description: Check the status of the placed order
+      operationRef: '#/paths/~1orders~1%7Border_id%7D/get'
+      parameters:
+        order_id: $response.body#/orderId
+      server:
+        description: Dedicated order service
+        url: https://orders.example.com/v1
+    GetProductByIdLink:
+      description: Retrieve the product that was just created
+      operationId: getProduct
+      parameters:
+        productId: $response.body#/id
+    OperationRefLink:
+      description: Place an order using operationRef
+      operationRef: '#/paths/~1orders/post'
+      requestBody: $request.body
+  parameters:
+    FilterContext:
+      content:
+        application/json:
+          schema:
+            type: object
+      description: Structured filter context, serialized as JSON
+      in: header
+      name: X-Filter-Context
+    PageSize:
+      allowEmptyValue: false
+      allowReserved: false
+      description: Number of results per page
+      examples:
+        large:
+          summary: Large page
+          value: '100'
+        small:
+          summary: Small page
+          value: '10'
+      explode: false
+      in: query
+      name: pageSize
+      schema:
+        format: int32
+        type: integer
+      style: form
+    ProductId:
+      deprecated: true
+      description: Unique product identifier
+      example: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+      in: path
+      name: productId
+      required: true
+      schema:
+        format: uuid
+        type: string
+      x-param-group: product-identifiers
   pathItems:
     HealthCheck:
-      summary: "API health check"
-      description: "Verifies that the API is operational."
+      description: Verifies that the API is operational.
       get:
-        summary: "Check API health"
-        operationId: "healthCheck"
+        operationId: healthCheck
         responses:
-          "200":
-            description: "API is healthy"
-      options:
-        summary: "CORS preflight for health endpoint"
-        operationId: "healthCheckOptions"
-        responses:
-          "200":
-            description: "OK"
+          '200':
+            description: API is healthy
+        summary: Check API health
       head:
-        summary: "HEAD request for health endpoint"
-        operationId: "healthCheckHead"
+        operationId: healthCheckHead
         responses:
-          "200":
-            description: "OK"
-      trace:
-        summary: "TRACE request for health endpoint"
-        operationId: "healthCheckTrace"
+          '200':
+            description: OK
+        summary: HEAD request for health endpoint
+      options:
+        operationId: healthCheckOptions
         responses:
-          "200":
-            description: "OK"
-      servers:
-      - url: "https://health.example.com/v1"
-        description: "Health service"
+          '200':
+            description: OK
+        summary: CORS preflight for health endpoint
       parameters:
-      - name: "X-Request-Id"
-        in: "header"
-        description: "Optional correlation ID"
+      - description: Optional correlation ID
+        in: header
+        name: X-Request-Id
         schema:
-          type: "string"
+          type: string
+      servers:
+      - description: Health service
+        url: https://health.example.com/v1
+      summary: API health check
+      trace:
+        operationId: healthCheckTrace
+        responses:
+          '200':
+            description: OK
+        summary: TRACE request for health endpoint
       x-health-priority: 1
     RpcRefPathItem:
-      $ref: "#/paths/~1products~1%7Bid%7D"
-  schemas:
-    ProductList:
-      type: "object"
-      description: "ProductList covers: all_of (Schema.boolean=true), any_of, one_of,\n\
-        \ not (Schema.boolean=false), if_schema, then_schema, else_schema,\n unevaluated_properties\
-        \ (Schema.boolean=false), additional_properties_schema (Schema.boolean=true)."
-      properties:
-        products:
-          type: "array"
-          items:
-            $ref: "#/components/schemas/Product"
-        total:
-          type: "integer"
-          format: "int32"
-        page:
-          type: "integer"
-          format: "int32"
-        pageSize:
-          type: "integer"
-          format: "int32"
-      additionalProperties: true
-      unevaluatedProperties: false
-      allOf:
-      - true
-      - type: "object"
-      anyOf:
-      - description: "Non-empty product list"
-      - description: "Empty product list"
-      oneOf:
-      - description: "Paginated result"
-      - description: "Non-paginated result"
-      not: false
-      if:
-        required:
-        - "products"
-      then:
-        required:
-        - "total"
-      else:
-        description: "No products available"
-    Product:
-      type: "object"
-      description: "A product available in the sporting goods catalog."
-      properties:
-        id:
-          type: "string"
-          description: "covers SchemaObject.read_only, SchemaObject.format"
-          readOnly: true
-          format: "uuid"
-        name:
-          type:
-          - "string"
-          - "null"
-          description: "covers SchemaObject.write_only, min_length, max_length, pattern,\
-            \ multi-type (type repeated)"
-          writeOnly: true
-          maxLength: 200
-          minLength: 1
-          pattern: "^[A-Za-z0-9 .,'-]+$"
-        description:
-          type: "string"
-        price:
-          type: "number"
-          format: "double"
-          description: "covers SchemaObject.minimum, exclusive_minimum, maximum, exclusive_maximum,\n\
-            \ multiple_of, default, example (SchemaObject.example deprecated field)"
-          default: 9.99
-          example: 29.99
-          multipleOf: 0.01
-          maximum: 99999.99
-          exclusiveMaximum: 100000.0
-          minimum: 0.01
-          exclusiveMinimum: 0.0
-        category:
-          type: "string"
-          description: "covers SchemaObject.enum (repeated Any), SchemaObject.const\
-            \ (Any)"
-          enum:
-          - "footwear"
-          - "apparel"
-          - "equipment"
-          const: "footwear"
-        tags:
-          type: "array"
-          items:
-            type: "string"
-            minLength: 1
-          description: "covers SchemaObject.items, prefix_items, contains, min_contains,\
-            \ max_contains,\n min_items, max_items, unique_items, unevaluated_items\
-            \ (Schema.boolean=false)"
-          prefixItems:
-          - type: "string"
-            pattern: "^[a-z]+$"
-          - type: "string"
-          contains:
-            type: "string"
-            minLength: 2
-          minContains: 0
-          maxContains: 10
-          maxItems: 20
-          minItems: 0
-          uniqueItems: true
-          unevaluatedItems: false
-        stockQuantity:
-          type: "integer"
-          format: "int32"
-          description: "covers SchemaObject.deprecated (on field), SchemaObject.examples\
-            \ (repeated Any),\n SchemaObject.title (on field)"
-          title: "Stock Quantity"
-          deprecated: true
+      $ref: '#/paths/~1products~1%7Bid%7D'
+  requestBodies:
+    CreateProductBody:
+      content:
+        multipart/form-data:
+          encoding:
+            image:
+              allowReserved: false
+              contentType: image/png, image/jpeg
+              explode: false
+              headers:
+                X-Upload-Token:
+                  $ref: '#/components/headers/UploadToken'
+              style: form
+            metadata:
+              contentType: application/json
+              explode: true
+              style: form
+          example:
+            name: Trail Blazer Boots
+          schema:
+            properties:
+              image:
+                format: binary
+                type: string
+              metadata:
+                type: object
+              name:
+                type: string
+            type: object
+      description: Product creation payload (multipart)
+      required: true
+  responses:
+    NotFound:
+      description: The requested resource was not found
+      headers:
+        X-Request-Id:
+          description: Unique request identifier
+          required: true
+          schema:
+            type: string
+      x-error-code: RESOURCE_NOT_FOUND
+    Unauthorized:
+      description: Authentication required
+    ValidationError:
+      content:
+        application/json:
           examples:
-          - 0
-          - 100
-      title: "Sporting Goods Product"
-      deprecated: true
-      patternProperties:
-        ^x-:
-          type: "string"
-      additionalProperties: false
-      propertyNames:
-        type: "string"
-        maxLength: 100
-      required:
-      - "id"
-      - "name"
-      - "price"
-      maxProperties: 20
-      minProperties: 1
-      discriminator:
-        propertyName: "category"
-        mapping:
-          footwear: "#/components/schemas/Footwear"
-          apparel: "#/components/schemas/Apparel"
-      xml:
-        name: "product"
-        namespace: "https://example.com/schemas"
-        prefix: "sg"
-        attribute: false
-        wrapped: false
-      externalDocs:
-        description: "Product documentation"
-        url: "https://example.com/docs/products"
-      x-product-type: "physical"
-    UpdateProductRequest:
-      type: "object"
+            missingField:
+              externalValue: https://example.com/samples/validation-error.json
+              summary: Missing required field
+          schema:
+            properties:
+              errors:
+                items:
+                  type: string
+                type: array
+            type: object
+      description: Request validation failed
+  schemas:
+    CreateOrderRequest:
       properties:
-        id:
-          type: "string"
-        name:
-          type: "string"
-        price:
-          type: "number"
-          format: "double"
-        category:
-          type: "string"
+        callbackUrl:
+          type: string
+        items:
+          items:
+            $ref: '#/components/schemas/OrderItem'
+          type: array
+        shippingAddress:
+          type: string
+      type: object
     Order:
-      type: "object"
+      $anchor: OrderSchema
+      $defs:
+        OrderStatus:
+          enum:
+          - pending
+          - shipped
+          - delivered
+          type: string
+      $dynamicAnchor: DynOrder
+      $dynamicRef: '#DynOrder'
+      $id: https://example.com/schemas/Order
+      $ref: '#/components/schemas/Order'
+      $schema: https://spec.openapis.org/oas/3.1/dialect/base
       description: "Order covers SchemaObject: id ($id), schema ($schema), anchor\
         \ ($anchor),\n dynamic_anchor ($dynamicAnchor), dynamic_ref ($dynamicRef),\
         \ defs ($defs),\n uri_ref ($ref at SchemaObject level).\n Order.status field\
         \ covers: content_encoding, content_media_type, content_schema."
       properties:
-        orderId:
-          type: "string"
         items:
-          type: "array"
           items:
-            $ref: "#/components/schemas/OrderItem"
-        status:
-          type: "string"
-          description: "covers SchemaObject.content_encoding, content_media_type,\
-            \ content_schema"
-          contentEncoding: "utf-8"
-          contentMediaType: "text/plain"
-          contentSchema:
-            type: "string"
-        total:
-          type: "number"
-          format: "double"
+            $ref: '#/components/schemas/OrderItem'
+          type: array
+        orderId:
+          type: string
         shippingAddress:
-          type: "string"
-      $ref: "#/components/schemas/Order"
-      $id: "https://example.com/schemas/Order"
-      $schema: "https://spec.openapis.org/oas/3.1/dialect/base"
-      $anchor: "OrderSchema"
-      $dynamicRef: "#DynOrder"
-      $dynamicAnchor: "DynOrder"
-      $defs:
-        OrderStatus:
-          type: "string"
-          enum:
-          - "pending"
-          - "shipped"
-          - "delivered"
+          type: string
+        status:
+          contentEncoding: utf-8
+          contentMediaType: text/plain
+          contentSchema:
+            type: string
+          description: covers SchemaObject.content_encoding, content_media_type, content_schema
+          type: string
+        total:
+          format: double
+          type: number
+      type: object
     OrderItem:
-      type: "object"
       properties:
         productId:
-          type: "string"
+          type: string
         quantity:
-          type: "integer"
-          format: "int32"
-    CreateOrderRequest:
-      type: "object"
+          format: int32
+          type: integer
+      type: object
+    Product:
+      additionalProperties: false
+      deprecated: true
+      description: A product available in the sporting goods catalog.
+      discriminator:
+        mapping:
+          apparel: '#/components/schemas/Apparel'
+          footwear: '#/components/schemas/Footwear'
+        propertyName: category
+      externalDocs:
+        description: Product documentation
+        url: https://example.com/docs/products
+      maxProperties: 20
+      minProperties: 1
+      patternProperties:
+        ^x-:
+          type: string
       properties:
-        items:
-          type: "array"
+        category:
+          const: footwear
+          description: covers SchemaObject.enum (repeated Any), SchemaObject.const
+            (Any)
+          enum:
+          - footwear
+          - apparel
+          - equipment
+          type: string
+        description:
+          type: string
+        id:
+          description: covers SchemaObject.read_only, SchemaObject.format
+          format: uuid
+          readOnly: true
+          type: string
+        name:
+          description: covers SchemaObject.write_only, min_length, max_length, pattern,
+            multi-type (type repeated)
+          maxLength: 200
+          minLength: 1
+          pattern: ^[A-Za-z0-9 .,'-]+$
+          type:
+          - string
+          - 'null'
+          writeOnly: true
+        price:
+          default: 9.99
+          description: "covers SchemaObject.minimum, exclusive_minimum, maximum, exclusive_maximum,\n\
+            \ multiple_of, default, example (SchemaObject.example deprecated field)"
+          example: 29.99
+          exclusiveMaximum: 100000.0
+          exclusiveMinimum: 0.0
+          format: double
+          maximum: 99999.99
+          minimum: 0.01
+          multipleOf: 0.01
+          type: number
+        stockQuantity:
+          deprecated: true
+          description: "covers SchemaObject.deprecated (on field), SchemaObject.examples\
+            \ (repeated Any),\n SchemaObject.title (on field)"
+          examples:
+          - 0
+          - 100
+          format: int32
+          title: Stock Quantity
+          type: integer
+        tags:
+          contains:
+            minLength: 2
+            type: string
+          description: "covers SchemaObject.items, prefix_items, contains, min_contains,\
+            \ max_contains,\n min_items, max_items, unique_items, unevaluated_items\
+            \ (Schema.boolean=false)"
           items:
-            $ref: "#/components/schemas/OrderItem"
-        shippingAddress:
-          type: "string"
-        callbackUrl:
-          type: "string"
-webhooks:
-  stockAlert:
-    summary: "Stock level alert"
-    description: "Fired when a product's stock drops below the threshold."
+            minLength: 1
+            type: string
+          maxContains: 10
+          maxItems: 20
+          minContains: 0
+          minItems: 0
+          prefixItems:
+          - pattern: ^[a-z]+$
+            type: string
+          - type: string
+          type: array
+          unevaluatedItems: false
+          uniqueItems: true
+      propertyNames:
+        maxLength: 100
+        type: string
+      required:
+      - id
+      - name
+      - price
+      title: Sporting Goods Product
+      type: object
+      x-product-type: physical
+      xml:
+        attribute: false
+        name: product
+        namespace: https://example.com/schemas
+        prefix: sg
+        wrapped: false
+    ProductList:
+      additionalProperties: true
+      allOf:
+      - true
+      - type: object
+      anyOf:
+      - description: Non-empty product list
+      - description: Empty product list
+      description: "ProductList covers: all_of (Schema.boolean=true), any_of, one_of,\n\
+        \ not (Schema.boolean=false), if_schema, then_schema, else_schema,\n unevaluated_properties\
+        \ (Schema.boolean=false), additional_properties_schema (Schema.boolean=true)."
+      else:
+        description: No products available
+      if:
+        required:
+        - products
+      not: false
+      oneOf:
+      - description: Paginated result
+      - description: Non-paginated result
+      properties:
+        page:
+          format: int32
+          type: integer
+        pageSize:
+          format: int32
+          type: integer
+        products:
+          items:
+            $ref: '#/components/schemas/Product'
+          type: array
+        total:
+          format: int32
+          type: integer
+      then:
+        required:
+        - total
+      type: object
+      unevaluatedProperties: false
+    UpdateProductRequest:
+      properties:
+        category:
+          type: string
+        id:
+          type: string
+        name:
+          type: string
+        price:
+          format: double
+          type: number
+      type: object
+  securitySchemes:
+    apiKeyAuth:
+      in: header
+      name: X-API-Key
+      type: apiKey
+    bearerAuth:
+      bearerFormat: JWT
+      scheme: bearer
+      type: http
+      x-bearer-docs: https://example.com/auth
+    bearerRef:
+      $ref: '#/components/securitySchemes/bearerAuth'
+    mtlsAuth:
+      type: mutualTLS
+    oauth2Auth:
+      flows:
+        authorizationCode:
+          authorizationUrl: https://auth.example.com/authorize
+          refreshUrl: https://auth.example.com/token/refresh
+          scopes:
+            read:products: Read product catalog
+            write:orders: Place orders
+          tokenUrl: https://auth.example.com/token
+        clientCredentials:
+          scopes:
+            admin: Admin access
+          tokenUrl: https://auth.example.com/token
+        implicit:
+          authorizationUrl: https://auth.example.com/authorize
+          refreshUrl: https://auth.example.com/token/refresh
+          scopes:
+            read:products: Read product catalog
+        password:
+          refreshUrl: https://auth.example.com/token/refresh
+          scopes:
+            read:products: Read product catalog
+            write:products: Modify products
+          tokenUrl: https://auth.example.com/token
+      type: oauth2
+    oidcAuth:
+      openIdConnectUrl: https://auth.example.com/.well-known/openid-configuration
+      type: openIdConnect
+externalDocs:
+  description: Full API reference
+  url: https://example.com/docs/api
+info:
+  contact:
+    email: support@example.com
+    name: Sporting Goods Support
+    url: https://example.com/support
+  description: A complete demonstration API for a fictional sporting goods store,
+    exercising every OpenAPI v3.1 annotation option.
+  license:
+    identifier: Apache-2.0
+    name: Apache 2.0
+  summary: Fictitious sporting goods catalog and ordering API
+  termsOfService: https://example.com/terms
+  title: Sporting Goods Storefront API
+  version: 1.0.0
+  x-info-contact-policy: verified
+jsonSchemaDialect: https://spec.openapis.org/oas/3.1/dialect/base
+openapi: 3.1.0
+paths:
+  /health:
+    get:
+      operationId: healthStatus
+      responses:
+        '200':
+          description: Service is healthy
+      summary: Health status endpoint
+  /orders:
     post:
-      summary: "Receive a stock alert"
-      operationId: "stockAlertWebhook"
+      callbacks:
+        onStatusChange:
+          $ref: '#/components/callbacks/OrderStatusCallback'
+      description: Creates a new order. Triggers an async callback when order status
+        changes.
+      externalDocs:
+        description: Order flow docs
+        url: https://example.com/docs/orders
+      operationId: placeOrder
       requestBody:
-        description: "Alert payload"
         content:
           application/json:
             schema:
-              type: "object"
+              $ref: '#/components/schemas/CreateOrderRequest'
+        description: Order creation payload
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+          description: Order placed
+          links:
+            GetOrderStatus:
+              $ref: '#/components/links/GetOrderStatusLink'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+      servers:
+      - description: Dedicated order service
+        url: https://orders.example.com/v1
+      summary: Place order
+      tags:
+      - orders
+  /orders/{order_id}:
+    get:
+      description: Get the current status of an order.
+      operationId: getOrderStatus
+      parameters:
+      - in: path
+        name: order_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+          description: Order details
+        '404':
+          $ref: '#/components/responses/NotFound'
+      summary: Get order status
+      tags:
+      - orders
+  /products:
+    get:
+      description: Returns a paginated list of products. Supports filtering by category,
+        price range, and stock status.
+      operationId: listProducts
+      parameters:
+      - $ref: '#/components/parameters/PageSize'
+      - description: Filter by product category
+        in: query
+        name: category
+        schema:
+          type: string
+      - content:
+          application/json:
+            schema:
+              type: object
+        description: Structured filter context header
+        in: header
+        name: X-Filter-Context
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                external:
+                  $ref: '#/components/examples/ExternalProductExample'
+                typical:
+                  $ref: '#/components/examples/ProductExample'
+              schema:
+                $ref: '#/components/schemas/ProductList'
+          description: Successful response
+          headers:
+            X-Rate-Limit-Remaining:
+              $ref: '#/components/headers/RateLimitRemaining'
+            X-Total-Count:
+              description: Total number of products matching the filter
+              schema:
+                type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      security:
+      - bearerAuth: []
+      summary: List products
+      tags:
+      - products
+      - inventory
+      x-rate-limit: 100
+    post:
+      description: Adds a new product to the catalog. Requires admin privileges.
+      operationId: createProduct
+      requestBody:
+        $ref: '#/components/requestBodies/CreateProductBody'
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+          description: Product created successfully
+          links:
+            GetProduct:
+              $ref: '#/components/links/GetProductByIdLink'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      security:
+      - bearerAuth: []
+      - apiKeyAuth: []
+      summary: Create product
+      tags:
+      - products
+  /products/{id}:
+    delete:
+      deprecated: true
+      description: Removes a product from the catalog. This action is irreversible.
+      externalDocs:
+        description: Deprecation notice
+        url: https://example.com/docs/deprecations
+      operationId: deleteProduct
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/ProductId'
+      responses:
+        '204':
+          description: Product deleted
+        '404':
+          $ref: '#/components/responses/NotFound'
+      summary: Delete product
+      tags:
+      - products
+    get:
+      description: Returns a single product by its unique identifier.
+      operationId: getProduct
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/ProductId'
+      responses:
+        '200':
+          content:
+            application/json:
+              example:
+                id: abc-123
+                name: UltraRun Pro
+                price: 129.99
+              schema:
+                $ref: '#/components/schemas/Product'
+          description: Product found
+          headers:
+            X-Rate-Limit-Remaining:
+              $ref: '#/components/headers/RateLimitRemaining'
+            X-Rate-Limit-Reset:
+              $ref: '#/components/headers/RateLimitReset'
+          links:
+            GetProduct:
+              $ref: '#/components/links/GetProductByIdLink'
+            PlaceOrder:
+              description: Place an order for this product
+              operationId: placeOrder
+              parameters:
+                items[0].productId: $response.body#/id
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      security:
+      - oauth2Auth:
+        - read:products
+      summary: Get product
+      tags:
+      - products
+    patch:
+      description: Partially updates a product by its identifier.
+      operationId: patchProduct
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/ProductId'
+        description: Resolved from component ref
+        summary: Product reference
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProductRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+          description: Product patched
+        '404':
+          $ref: '#/components/responses/NotFound'
+      summary: Patch product
+      tags:
+      - products
+    put:
+      description: Fully replaces a product by its identifier.
+      operationId: updateProduct
+      parameters:
+      - deprecated: true
+        in: path
+        name: id
+        required: true
+        schema:
+          format: uuid
+          type: string
+        x-param-position: 0
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProductRequest'
+        description: Updated product data
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+          description: Product updated
+          x-rate-limit-cost: 2
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      summary: Update product
+      tags:
+      - products
+  /products/{product_id}/image:
+    post:
+      description: Uploads a binary image for the given product (PNG or JPEG).
+      operationId: uploadProductImage
+      parameters:
+      - in: path
+        name: product_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            encoding:
+              image:
+                allowReserved: false
+                contentType: image/png, image/jpeg
+                explode: false
+                headers:
+                  X-Upload-Token:
+                    $ref: '#/components/headers/UploadToken'
+                style: form
+            schema:
               properties:
-                productId:
-                  type: "string"
+                image:
+                  format: binary
+                  type: string
+              type: object
+        description: Image upload (multipart)
+        required: true
+      responses:
+        '204':
+          description: Image uploaded
+          headers:
+            X-Image-Meta:
+              content:
+                application/json:
+                  schema:
+                    type: object
+              description: Metadata about the uploaded image
+        '400':
+          $ref: '#/components/responses/ValidationError'
+      summary: Upload product image
+      tags:
+      - products
+security:
+- bearerAuth: []
+servers:
+- description: Production (multi-region)
+  url: https://api.example.com/v1
+  variables:
+    region:
+      default: us-east-1
+      description: AWS region for the API endpoint
+      enum:
+      - us-east-1
+      - us-west-2
+      - eu-west-1
+- description: Sandbox
+  url: https://sandbox.example.com/v1
+tags:
+- description: Operations on the product catalog
+  externalDocs:
+    description: Product catalog docs
+    url: https://example.com/docs/products
+  name: products
+  x-tag-version: v1
+- description: Order management operations
+  name: orders
+- description: Inventory and stock queries
+  name: inventory
+webhooks:
+  externalPathItem:
+    $ref: '#/components/pathItems/HealthCheck'
+  healthCheckWebhook:
+    $ref: '#/paths/~1products~1%7Bid%7D'
+  stockAlert:
+    description: Fired when a product's stock drops below the threshold.
+    post:
+      operationId: stockAlertWebhook
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
                 currentStock:
-                  type: "integer"
+                  type: integer
+                productId:
+                  type: string
+              type: object
+        description: Alert payload
       responses:
         default:
-          description: "Webhook received"
-  healthCheckWebhook:
-    $ref: "#/paths/~1products~1%7Bid%7D"
-  externalPathItem:
-    $ref: "#/components/pathItems/HealthCheck"
+          description: Webhook received
+      summary: Receive a stock alert
+    summary: Stock level alert
 x-logo:
-  url: "https://example.com/logo.png"
-  altText: "Sporting Goods Logo"
+  altText: Sporting Goods Logo
+  url: https://example.com/logo.png

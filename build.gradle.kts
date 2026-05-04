@@ -115,7 +115,7 @@ allprojects {
                     if (this is JvmTestSuite) {
                         useJUnitJupiter()
                         dependencies {
-                            implementation.bundle(testLibs.bundles.kotest)
+                            implementation.bundle(libs.bundles.test.kotest)
                         }
                     }
                 }
@@ -166,6 +166,7 @@ graalvmNative {
                 languageVersion.set(JavaLanguageVersion.of(21))
                 vendor.set(JvmVendorSpec.GRAAL_VM)
             })
+            buildArgs.add("-H:+UnlockExperimentalVMOptions")
             buildArgs.add("-H:ThrowMissingRegistrationErrors=")
         }
     }

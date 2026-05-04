@@ -114,6 +114,7 @@ public class FieldOptionsWrapper(
 
     /** For Google-internal migration only. Do not use. */
     @Deprecated("For Google-internal migration only. Do not use.")
+    @Suppress("DEPRECATION") // proto.hasWeak / .weak deprecated upstream (proto editions migration)
     public val weak: SyntaxElement<Boolean>? =
         (if (proto.hasWeak()) proto.weak else null)?.let {
             SyntaxElement(it, path + DescriptorProtos.FieldOptions.WEAK_FIELD_NUMBER, file)

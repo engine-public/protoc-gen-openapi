@@ -168,12 +168,120 @@ public class ProtocGenOpenAPI(
         /**
          * Controls how proto enum value names are written into OAS `enum` arrays.
          *
-         * Currently only [EnumValueFormat.RAW] is implemented; additional formats will be added
-         * in future releases without breaking this option's presence in the API.
+         * The default is [EnumValueFormat.CANONICAL], which writes each value exactly as its
+         * proto name.  [EnumValueFormat.NUMERIC_VALUE] emits the integer number instead, which
+         * satisfies Envoy's `always_print_enums_as_ints = true` configuration.
          *
-         * Passed via `--openapi_out=enumValueFormat=RAW:outdir`.
+         * Passed via `--openapi_out=enumValueFormat=CANONICAL:outdir`.
          */
         val enumValueFormat: EnumValueFormat,
+
+        /**
+         * When `true`, gRPC methods that lack a `google.api.http` annotation are automatically
+         * mapped to a REST endpoint using the convention:
+         *
+         * ```
+         * POST /<package>.<ServiceName>/<MethodName>
+         * body: "*"
+         * ```
+         *
+         * Explicit `google.api.http` annotations on other methods in the same service always take
+         * precedence.  This mirrors Envoy's `auto_mapping` option, which applies the same
+         * convention at runtime so that unannotated methods remain reachable via HTTP/JSON.
+         *
+         * See: [GrpcJsonTranscoder.auto_mapping](https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/filters/http/grpc_json_transcoder/v3/transcoder.proto#extensions-filters-http-grpc-json-transcoder-v3-grpcjsontranscoder)
+         *
+         * Passed via `--openapi_out=autoMapping=true:outdir`.
+         */
+        val autoMapping: Boolean,
+
+        /**
+         * When `true`, every non-repeated, non-message field is added to the `required` array of
+         * its containing schema.  Proto3 JSON omits scalar and enum fields whose value equals
+         * the type default (0, `""`, `false`, first enum value); enabling this option tells the
+         * compiler that Envoy will always include those fields, so they can be modelled as
+         * `required` in the OAS schema.
+         *
+         * Use this option together with Envoy's `always_print_primitive_fields = true` PrintOption.
+         *
+         * See: [PrintOptions.always_print_primitive_fields](https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/filters/http/grpc_json_transcoder/v3/transcoder.proto#extensions-filters-http-grpc-json-transcoder-v3-grpcjsontranscoder-printoptions)
+         *
+         * Passed via `--openapi_out=alwaysPrintPrimitiveFields=true:outdir`.
+         */
+        val alwaysPrintPrimitiveFields: Boolean,
+
+        /**
+         * When `true`, all schema property keys use the raw proto field name (e.g. `my_field`)
+         * instead of the `json_name` option value or its lowerCamelCase default (e.g. `myField`).
+         * This applies to every property key across all `components/schemas` entries.
+         *
+         * Use this option together with Envoy's `preserve_proto_field_names = true` PrintOption
+         * so the OAS schema matches the JSON field names that Envoy actually emits in responses.
+         *
+         * Note: proto3 JSON parsers accept **both** the camelCase name and the original proto
+         * name in request bodies regardless of this setting.  Setting this option makes the
+         * documented (OAS) name match the server-side wire name when `preserve_proto_field_names`
+         * is enabled.
+         *
+         * See: [PrintOptions.preserve_proto_field_names](https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/filters/http/grpc_json_transcoder/v3/transcoder.proto#extensions-filters-http-grpc-json-transcoder-v3-grpcjsontranscoder-printoptions)
+         *
+         * Passed via `--openapi_out=preserveProtoFieldNames=true:outdir`.
+         */
+        val preserveProtoFieldNames: Boolean,
+
+        /**
+         * When `true`, a reusable `google.rpc.Status` schema is added to `components/schemas`
+         * and every operation's `responses` map gains a `"default"` entry referencing it.
+         *
+         * This matches Envoy's `convert_grpc_status` option, which translates gRPC error trailers
+         * into an HTTP error response whose JSON body is shaped as `google.rpc.Status`:
+         *
+         * ```json
+         * { "code": 5, "message": "not found", "details": [...] }
+         * ```
+         *
+         * Enable this when the Envoy filter is configured with `convert_grpc_status: true` so
+         * that API consumers can see the error contract in the generated OpenAPI spec.
+         *
+         * See: [GrpcJsonTranscoder.convert_grpc_status](https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/filters/http/grpc_json_transcoder/v3/transcoder.proto#extensions-filters-http-grpc-json-transcoder-v3-grpcjsontranscoder)
+         *
+         * Passed via `--openapi_out=convertGrpcStatus=true:outdir`.
+         */
+        val convertGrpcStatus: Boolean,
+
+        /**
+         * When `true`, server-streaming RPC responses are documented with content-type
+         * `application/x-ndjson` and a single-message schema (rather than the default
+         * `application/json`).  This reflects Envoy's `stream_newline_delimited` PrintOption,
+         * which causes each streamed message to be emitted as a separate newline-delimited JSON
+         * object rather than as a comma-separated array.
+         *
+         * Unary (non-streaming) method responses are not affected.
+         *
+         * **Precedence:** if [streamSseStyleDelimited] is also `true`, this option has no effect —
+         * the compiler emits `text/event-stream` instead.  Setting both is a misconfiguration;
+         * enable at most one.
+         *
+         * See: [PrintOptions.stream_newline_delimited](https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/filters/http/grpc_json_transcoder/v3/transcoder.proto#extensions-filters-http-grpc-json-transcoder-v3-grpcjsontranscoder-printoptions)
+         *
+         * Passed via `--openapi_out=streamNewlineDelimited=true:outdir`.
+         */
+        val streamNewlineDelimited: Boolean,
+
+        /**
+         * When `true`, server-streaming RPC responses are documented with content-type
+         * `text/event-stream` and a single-message schema, reflecting Envoy's
+         * `stream_sse_style_delimited` PrintOption which frames each streamed message as an
+         * SSE `data:` line.
+         *
+         * This option takes precedence over [streamNewlineDelimited] when both are `true`.
+         * Unary (non-streaming) method responses are not affected.
+         *
+         * See: [PrintOptions.stream_sse_style_delimited](https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/filters/http/grpc_json_transcoder/v3/transcoder.proto#extensions-filters-http-grpc-json-transcoder-v3-grpcjsontranscoder-printoptions)
+         *
+         * Passed via `--openapi_out=streamSseStyleDelimited=true:outdir`.
+         */
+        val streamSseStyleDelimited: Boolean,
     ) {
         /**
          * The serialization format for generated OpenAPI documents.
@@ -201,7 +309,41 @@ public class ProtocGenOpenAPI(
          */
         public enum class EnumValueFormat {
             /** Write each value exactly as its proto name, e.g. `MY_ENUM_VALUE`. */
-            RAW,
+            CANONICAL,
+
+            /**
+             * Write each value as its integer number (the `EnumValue.number` field, not
+             * its ordinal position in the file).  The schema `type` changes to `"integer"`
+             * and the `enum` array contains JSON integers.
+             *
+             * Description bullets include the integer, the proto name, and the leading
+             * comment when present — e.g. `` `1 (GREETING_HELLO)` — A formal hello greeting. ``
+             *
+             * In request payloads Envoy's gRPC-JSON transcoder accepts **either** the
+             * canonical name (e.g. `"GREETING_HELLO"`) or the integer (e.g. `1`); in
+             * response payloads only the integer form is emitted.  Use this format when
+             * configuring the transcoder with `always_print_enums_as_ints = true`.
+             *
+             * See: [PrintOptions.always_print_enums_as_ints](https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/filters/http/grpc_json_transcoder/v3/transcoder.proto#extensions-filters-http-grpc-json-transcoder-v3-grpcjsontranscoder-printoptions)
+             */
+            NUMERIC_VALUE,
+
+            /**
+             * Write each value as its proto name lowercased, e.g. `my_enum_value`.
+             *
+             * Description bullets include the lowercased name and the leading comment
+             * when present — e.g. `` `greeting_hello` — A formal hello greeting. ``
+             *
+             * Envoy's gRPC-JSON transcoder by default only accepts the exact canonical
+             * proto name (e.g. `"GREETING_HELLO"`).  Setting
+             * `case_insensitive_enum_parsing = true` makes Envoy accept values in any
+             * case, including the lowercase form emitted by this format.  Use this
+             * format together with that transcoder option so that API clients can send
+             * `"greeting_hello"` and Envoy will map it correctly.
+             *
+             * See: [GrpcJsonTranscoder.case_insensitive_enum_parsing](https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/filters/http/grpc_json_transcoder/v3/transcoder.proto#extensions-filters-http-grpc-json-transcoder-v3-grpcjsontranscoder)
+             */
+            LOWER_CASE,
         }
 
         /**
@@ -332,7 +474,43 @@ public class ProtocGenOpenAPI(
              * @see [Options.enumValueFormat]
              */
             public var enumValueFormat: EnumValueFormat =
-                parameters.get<EnumValueFormat>("enumValueFormat") ?: EnumValueFormat.RAW
+                parameters.get<EnumValueFormat>("enumValueFormat") ?: EnumValueFormat.CANONICAL
+
+            /**
+             * @see [Options.autoMapping]
+             */
+            public var autoMapping: Boolean =
+                parameters.get<Boolean>("autoMapping") ?: false
+
+            /**
+             * @see [Options.alwaysPrintPrimitiveFields]
+             */
+            public var alwaysPrintPrimitiveFields: Boolean =
+                parameters.get<Boolean>("alwaysPrintPrimitiveFields") ?: false
+
+            /**
+             * @see [Options.preserveProtoFieldNames]
+             */
+            public var preserveProtoFieldNames: Boolean =
+                parameters.get<Boolean>("preserveProtoFieldNames") ?: false
+
+            /**
+             * @see [Options.convertGrpcStatus]
+             */
+            public var convertGrpcStatus: Boolean =
+                parameters.get<Boolean>("convertGrpcStatus") ?: false
+
+            /**
+             * @see [Options.streamNewlineDelimited]
+             */
+            public var streamNewlineDelimited: Boolean =
+                parameters.get<Boolean>("streamNewlineDelimited") ?: false
+
+            /**
+             * @see [Options.streamSseStyleDelimited]
+             */
+            public var streamSseStyleDelimited: Boolean =
+                parameters.get<Boolean>("streamSseStyleDelimited") ?: false
 
             public companion object {
                 public fun from(parameters: Parameters): Builder = Builder(parameters)
@@ -353,6 +531,12 @@ public class ProtocGenOpenAPI(
                     inlineEnums = inlineEnums,
                     suppressDefaultEnumValues = suppressDefaultEnumValues,
                     enumValueFormat = enumValueFormat,
+                    autoMapping = autoMapping,
+                    alwaysPrintPrimitiveFields = alwaysPrintPrimitiveFields,
+                    preserveProtoFieldNames = preserveProtoFieldNames,
+                    convertGrpcStatus = convertGrpcStatus,
+                    streamNewlineDelimited = streamNewlineDelimited,
+                    streamSseStyleDelimited = streamSseStyleDelimited,
                 )
         }
     }

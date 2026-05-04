@@ -1,5 +1,4 @@
 import com.engine.protoc.openapi.ProtocGenOpenAPI
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.protobuf.compiler.PluginProtos
 import io.kotest.assertions.assertSoftly
 import io.kotest.assertions.withClue
@@ -7,6 +6,7 @@ import io.kotest.core.spec.style.FunSpec
 import io.kotest.datatest.withData
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import tools.jackson.databind.ObjectMapper
 
 class EnumsTest :
     FunSpec({

@@ -5,8 +5,8 @@ import com.engine.protoc.openapi.compile.EnumIndex
 import com.engine.protoc.openapi.compile.MessageIndex
 import com.engine.protoc.openapi.compile.RpcIndex
 import com.engine.protoc.openapi.compile.SchemaKeyResolver
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.node.ObjectNode
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.databind.node.ObjectNode
 
 /** Shared state passed through all serialization functions. */
 internal class JsonContext(
@@ -18,6 +18,42 @@ internal class JsonContext(
     val inlineEnums: Boolean,
     val suppressDefaultEnumValues: Boolean,
     val enumValueFormat: ProtocGenOpenAPI.Options.EnumValueFormat,
+    /**
+     * When true, schema property keys use the raw proto field name (e.g. `my_field`) instead of
+     * the `json_name` option value or lowerCamelCase default (e.g. `myField`).
+     *
+     * Mirrors Envoy's `preserve_proto_field_names` PrintOption.
+     */
+    val preserveProtoFieldNames: Boolean = false,
+    /**
+     * When true, every non-repeated, non-message field is added to the schema `required` array.
+     * Proto3 JSON omits scalar and enum fields whose value equals the type default; enabling this
+     * option signals that Envoy will always include them, making them `required` in the OAS sense.
+     *
+     * Mirrors Envoy's `always_print_primitive_fields` PrintOption.
+     */
+    val alwaysPrintPrimitiveFields: Boolean = false,
+    /**
+     * When true, a `google.rpc.Status` schema is injected into `components/schemas` and a
+     * `"default"` error response referencing it is added to every operation's `responses` map.
+     *
+     * Mirrors Envoy's `convert_grpc_status` option.
+     */
+    val convertGrpcStatus: Boolean = false,
+    /**
+     * When true, server-streaming responses use content-type `application/x-ndjson` with a
+     * single-message schema instead of `application/json`.
+     *
+     * Mirrors Envoy's `stream_newline_delimited` PrintOption.
+     */
+    val streamNewlineDelimited: Boolean = false,
+    /**
+     * When true, server-streaming responses use content-type `text/event-stream` with a
+     * single-message schema.  Takes precedence over [streamNewlineDelimited].
+     *
+     * Mirrors Envoy's `stream_sse_style_delimited` PrintOption.
+     */
+    val streamSseStyleDelimited: Boolean = false,
 ) {
     fun obj(): ObjectNode = mapper.createObjectNode()
 
@@ -26,12 +62,12 @@ internal class JsonContext(
      * are overwritten by the value in [other].
      */
     fun ObjectNode.deepMerge(other: ObjectNode): ObjectNode {
-        for ((key, value) in other.fields()) {
+        for ((key, value) in other.properties()) {
             val existing = get(key)
             if (existing is ObjectNode && value is ObjectNode) {
                 existing.deepMerge(value)
             } else {
-                set<ObjectNode>(key, value)
+                set(key, value)
             }
         }
         return this

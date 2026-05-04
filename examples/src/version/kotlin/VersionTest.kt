@@ -1,5 +1,4 @@
 import com.engine.protoc.openapi.ProtocGenOpenAPI
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.protobuf.compiler.PluginProtos
 import io.kotest.assertions.assertSoftly
 import io.kotest.assertions.withClue
@@ -7,6 +6,7 @@ import io.kotest.core.spec.style.FunSpec
 import io.kotest.datatest.withData
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import tools.jackson.databind.ObjectMapper
 
 class VersionTest :
     FunSpec({
@@ -55,7 +55,7 @@ class VersionTest :
                         .shouldNotBeNull()
                         .content,
                 )
-            doc["info"]["version"].asText() shouldBe "pinned-1.0.0"
+            doc["info"]["version"].asString() shouldBe "pinned-1.0.0"
         }
 
         test("with options version: option fills in missing version") {
@@ -68,7 +68,7 @@ class VersionTest :
                         .shouldNotBeNull()
                         .content,
                 )
-            doc["info"]["version"].asText() shouldBe "global-2.0.0"
+            doc["info"]["version"].asString() shouldBe "global-2.0.0"
         }
 
         // Full reference-file comparison for regression protection.
@@ -128,7 +128,7 @@ class VersionTest :
                         .shouldNotBeNull()
                         .content,
                 )
-            doc["info"]["version"].asText() shouldBe "pinned-1.0.0"
+            doc["info"]["version"].asString() shouldBe "pinned-1.0.0"
         }
 
         test("without options version: no version when neither source provides one") {

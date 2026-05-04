@@ -1,42 +1,42 @@
 {
-  "openapi" : "3.1.0",
-  "paths" : {
-    "/doodad" : {
-      "post" : {
-        "responses" : {
-          "200" : {
-            "description" : "OK",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/DooDad"
-                }
-              }
-            }
+  "components": {
+    "schemas": {
+      "DooDad": {
+        "description": "A canonical representation of an Umbrella Corporation Doo-Dad",
+        "properties": {
+          "id": {
+            "description": "The unique identifier of this DooDad",
+            "format": "int64",
+            "type": "integer"
+          },
+          "isDoodad": {
+            "description": "If true, this DooDad is, in fact, also a DooDad",
+            "type": "boolean"
           }
-        }
+        },
+        "type": "object"
       }
     }
   },
-  "info" : {
-    "title" : "SecondaryService",
-    "description" : "This guy does some really heavy stuff.",
-    "version" : "7.2.1"
+  "info": {
+    "description": "This guy does some really heavy stuff.",
+    "title": "SecondaryService",
+    "version": "7.2.1"
   },
-  "components" : {
-    "schemas" : {
-      "DooDad" : {
-        "type" : "object",
-        "description" : "A canonical representation of an Umbrella Corporation Doo-Dad",
-        "properties" : {
-          "id" : {
-            "type" : "integer",
-            "format" : "int64",
-            "description" : "The unique identifier of this DooDad"
-          },
-          "isDoodad" : {
-            "type" : "boolean",
-            "description" : "If true, this DooDad is, in fact, also a DooDad"
+  "openapi": "3.1.0",
+  "paths": {
+    "/doodad": {
+      "post": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DooDad"
+                }
+              }
+            },
+            "description": "OK"
           }
         }
       }

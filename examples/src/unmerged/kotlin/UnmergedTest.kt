@@ -1,5 +1,4 @@
 import com.engine.protoc.openapi.ProtocGenOpenAPI
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.protobuf.compiler.PluginProtos
 import com.networknt.schema.InputFormat
 import com.networknt.schema.SchemaLocation
@@ -13,6 +12,7 @@ import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import tools.jackson.databind.ObjectMapper
 import java.io.File
 
 class UnmergedTest :

@@ -1,7 +1,4 @@
 import com.engine.protoc.openapi.ProtocGenOpenAPI
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
 import com.networknt.schema.InputFormat
 import com.networknt.schema.SchemaLocation
 import com.networknt.schema.SchemaRegistry
@@ -12,6 +9,9 @@ import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.dataformat.yaml.YAMLMapper
 
 class CompleteTest :
     FunSpec({
@@ -56,29 +56,29 @@ class CompleteTest :
         }
 
         test("openapi version") {
-            doc["openapi"].asText() shouldBe "3.1.0"
+            doc["openapi"].asString() shouldBe "3.1.0"
         }
 
         // covers OpenAPI.json_schema_dialect
         test("json_schema_dialect") {
-            doc["jsonSchemaDialect"].asText() shouldBe "https://spec.openapis.org/oas/3.1/dialect/base"
+            doc["jsonSchemaDialect"].asString() shouldBe "https://spec.openapis.org/oas/3.1/dialect/base"
         }
 
         test("info — all fields") {
             assertSoftly {
                 val info = doc["info"].shouldNotBeNull()
-                info["title"].asText() shouldBe "Sporting Goods Storefront API"
-                info["summary"].asText() shouldBe "Fictitious sporting goods catalog and ordering API"
+                info["title"].asString() shouldBe "Sporting Goods Storefront API"
+                info["summary"].asString() shouldBe "Fictitious sporting goods catalog and ordering API"
                 info["description"].shouldNotBeNull()
-                info["termsOfService"].asText() shouldBe "https://example.com/terms"
-                info["contact"]["email"].asText() shouldBe "support@example.com"
-                info["contact"]["name"].asText() shouldBe "Sporting Goods Support"
-                info["license"]["name"].asText() shouldBe "Apache 2.0"
+                info["termsOfService"].asString() shouldBe "https://example.com/terms"
+                info["contact"]["email"].asString() shouldBe "support@example.com"
+                info["contact"]["name"].asString() shouldBe "Sporting Goods Support"
+                info["license"]["name"].asString() shouldBe "Apache 2.0"
                 // covers License.identifier (SPDX)
-                info["license"]["identifier"].asText() shouldBe "Apache-2.0"
-                info["version"].asText() shouldBe "1.0.0"
+                info["license"]["identifier"].asString() shouldBe "Apache-2.0"
+                info["version"].asString() shouldBe "1.0.0"
                 // covers Info.extensions
-                info["x-info-contact-policy"].asText() shouldBe "verified"
+                info["x-info-contact-policy"].asString() shouldBe "verified"
             }
         }
 
@@ -87,9 +87,9 @@ class CompleteTest :
                 val servers = doc["servers"].shouldNotBeNull()
                 servers.isArray shouldBe true
                 val first = servers[0]
-                first["url"].asText() shouldBe "https://api.example.com/v1"
+                first["url"].asString() shouldBe "https://api.example.com/v1"
                 val regionVar = first["variables"]["region"]
-                regionVar["default"].asText() shouldBe "us-east-1"
+                regionVar["default"].asString() shouldBe "us-east-1"
                 regionVar["enum"].isArray shouldBe true
             }
         }
@@ -97,22 +97,22 @@ class CompleteTest :
         // covers OpenAPI.paths and Paths.paths (explicit annotation)
         test("explicit paths from annotation") {
             val healthPath = doc["paths"]["/health"].shouldNotBeNull()
-            healthPath["get"]["operationId"].asText() shouldBe "healthStatus"
+            healthPath["get"]["operationId"].asString() shouldBe "healthStatus"
         }
 
         test("tags with externalDocs") {
             assertSoftly {
                 val tags = doc["tags"].shouldNotBeNull()
                 tags.isArray shouldBe true
-                val productTag = tags.find { it["name"].asText() == "products" }.shouldNotBeNull()
-                productTag["externalDocs"]["url"].asText() shouldBe "https://example.com/docs/products"
+                val productTag = tags.find { it["name"].asString() == "products" }.shouldNotBeNull()
+                productTag["externalDocs"]["url"].asString() shouldBe "https://example.com/docs/products"
                 // covers Tag.extensions
-                productTag["x-tag-version"].asText() shouldBe "v1"
+                productTag["x-tag-version"].asString() shouldBe "v1"
             }
         }
 
         test("externalDocs") {
-            doc["externalDocs"]["url"].asText() shouldBe "https://example.com/docs/api"
+            doc["externalDocs"]["url"].asString() shouldBe "https://example.com/docs/api"
         }
 
         test("root security") {
@@ -128,7 +128,7 @@ class CompleteTest :
             val oauth2Req = security.find { it["oauth2Auth"] != null }.shouldNotBeNull()
             val scopes = oauth2Req["oauth2Auth"].shouldNotBeNull()
             scopes.isArray shouldBe true
-            scopes[0].asText() shouldBe "read:products"
+            scopes[0].asString() shouldBe "read:products"
         }
 
         test("extensions") {
@@ -138,53 +138,53 @@ class CompleteTest :
         test("webhooks") {
             val webhooks = doc["webhooks"].shouldNotBeNull()
             val stockAlert = webhooks["stockAlert"].shouldNotBeNull()
-            stockAlert["post"]["operationId"].asText() shouldBe "stockAlertWebhook"
+            stockAlert["post"]["operationId"].asString() shouldBe "stockAlertWebhook"
         }
 
         // covers PathItemOrReference.reference oneof, Reference.proto_rpc_ref
         test("webhooks — PathItemOrReference.reference") {
             val ref = doc["webhooks"]["healthCheckWebhook"].shouldNotBeNull()
-            ref["\$ref"].asText() shouldBe "#/paths/~1products~1%7Bid%7D"
+            ref["\$ref"].asString() shouldBe "#/paths/~1products~1%7Bid%7D"
         }
 
         // covers PathItem.uri_ref ($ref on PathItem itself)
         test("webhooks — PathItem.uri_ref") {
             val item = doc["webhooks"]["externalPathItem"].shouldNotBeNull()
-            item["\$ref"].asText() shouldBe "#/components/pathItems/HealthCheck"
+            item["\$ref"].asString() shouldBe "#/components/pathItems/HealthCheck"
         }
 
         // §1 — Components with all map fields
         test("§1 — components.responses") {
             assertSoftly {
                 val responses = doc["components"]["responses"].shouldNotBeNull()
-                responses["NotFound"]["description"].asText() shouldBe "The requested resource was not found"
-                responses["Unauthorized"]["description"].asText() shouldBe "Authentication required"
+                responses["NotFound"]["description"].asString() shouldBe "The requested resource was not found"
+                responses["Unauthorized"]["description"].asString() shouldBe "Authentication required"
                 responses["ValidationError"]["description"].shouldNotBeNull()
                 // covers ResponseObject.extensions
-                responses["NotFound"]["x-error-code"].asText() shouldBe "RESOURCE_NOT_FOUND"
+                responses["NotFound"]["x-error-code"].asString() shouldBe "RESOURCE_NOT_FOUND"
             }
         }
 
         test("§1 — components.parameters") {
             assertSoftly {
                 val params = doc["components"]["parameters"].shouldNotBeNull()
-                params["ProductId"]["name"].asText() shouldBe "productId"
-                params["PageSize"]["name"].asText() shouldBe "pageSize"
-                params["FilterContext"]["name"].asText() shouldBe "X-Filter-Context"
+                params["ProductId"]["name"].asString() shouldBe "productId"
+                params["PageSize"]["name"].asString() shouldBe "pageSize"
+                params["FilterContext"]["name"].asString() shouldBe "X-Filter-Context"
                 // covers Parameter.deprecated
                 params["ProductId"]["deprecated"].asBoolean() shouldBe true
                 // covers Parameter.allow_empty_value (only valid on query params per OAS 3.1)
                 params["PageSize"]["allowEmptyValue"].asBoolean() shouldBe false
                 // covers Parameter.extensions
-                params["ProductId"]["x-param-group"].asText() shouldBe "product-identifiers"
+                params["ProductId"]["x-param-group"].asString() shouldBe "product-identifiers"
             }
         }
 
         test("§1 — components.examples") {
             assertSoftly {
                 val examples = doc["components"]["examples"].shouldNotBeNull()
-                examples["ProductExample"]["summary"].asText() shouldBe "A typical running shoe"
-                examples["ExternalProductExample"]["externalValue"].asText() shouldBe "https://example.com/samples/product.json"
+                examples["ProductExample"]["summary"].asString() shouldBe "A typical running shoe"
+                examples["ExternalProductExample"]["externalValue"].asString() shouldBe "https://example.com/samples/product.json"
             }
         }
 
@@ -210,10 +210,10 @@ class CompleteTest :
         test("§1 — components.links") {
             assertSoftly {
                 val links = doc["components"]["links"].shouldNotBeNull()
-                links["GetProductByIdLink"]["operationId"].asText() shouldBe "getProduct"
+                links["GetProductByIdLink"]["operationId"].asString() shouldBe "getProduct"
                 links["GetOrderStatusLink"].shouldNotBeNull()
                 // covers Link.operation_ref
-                links["OperationRefLink"]["operationRef"].asText() shouldBe "#/paths/~1orders/post"
+                links["OperationRefLink"]["operationRef"].asString() shouldBe "#/paths/~1orders/post"
                 // covers Link.request_body
                 links["OperationRefLink"]["requestBody"].shouldNotBeNull()
             }
@@ -224,34 +224,34 @@ class CompleteTest :
                 val callbacks = doc["components"]["callbacks"].shouldNotBeNull()
                 callbacks["OrderStatusCallback"].shouldNotBeNull()
                 // covers CallbackOrReference.reference
-                callbacks["OrderStatusRef"]["\$ref"].asText() shouldBe "#/components/callbacks/OrderStatusCallback"
+                callbacks["OrderStatusRef"]["\$ref"].asString() shouldBe "#/components/callbacks/OrderStatusCallback"
             }
         }
 
         test("§1 — components.pathItems") {
             assertSoftly {
                 val pathItems = doc["components"]["pathItems"].shouldNotBeNull()
-                pathItems["HealthCheck"]["summary"].asText() shouldBe "API health check"
+                pathItems["HealthCheck"]["summary"].asString() shouldBe "API health check"
                 // covers PathItem.proto_rpc_ref ($ref resolved from RPC binding)
-                pathItems["RpcRefPathItem"]["\$ref"].asText() shouldBe "#/paths/~1products~1%7Bid%7D"
+                pathItems["RpcRefPathItem"]["\$ref"].asString() shouldBe "#/paths/~1products~1%7Bid%7D"
             }
         }
 
         test("§1 — components.securitySchemes") {
             assertSoftly {
                 val schemes = doc["components"]["securitySchemes"].shouldNotBeNull()
-                schemes["bearerAuth"]["scheme"].asText() shouldBe "bearer"
-                schemes["apiKeyAuth"]["name"].asText() shouldBe "X-API-Key"
+                schemes["bearerAuth"]["scheme"].asString() shouldBe "bearer"
+                schemes["apiKeyAuth"]["name"].asString() shouldBe "X-API-Key"
                 // covers SecurityScheme.extensions
                 schemes["bearerAuth"]["x-bearer-docs"].shouldNotBeNull()
                 // covers SecurityScheme.oauth2
-                schemes["oauth2Auth"]["type"].asText() shouldBe "oauth2"
+                schemes["oauth2Auth"]["type"].asString() shouldBe "oauth2"
                 // covers SecurityScheme.open_id_connect
-                schemes["oidcAuth"]["type"].asText() shouldBe "openIdConnect"
+                schemes["oidcAuth"]["type"].asString() shouldBe "openIdConnect"
                 // covers MutualTLSSecurityScheme
-                schemes["mtlsAuth"]["type"].asText() shouldBe "mutualTLS"
+                schemes["mtlsAuth"]["type"].asString() shouldBe "mutualTLS"
                 // covers SecuritySchemeOrReference.reference
-                schemes["bearerRef"]["\$ref"].asText() shouldBe "#/components/securitySchemes/bearerAuth"
+                schemes["bearerRef"]["\$ref"].asString() shouldBe "#/components/securitySchemes/bearerAuth"
             }
         }
 
@@ -261,37 +261,37 @@ class CompleteTest :
                 val flows = doc["components"]["securitySchemes"]["oauth2Auth"]["flows"].shouldNotBeNull()
                 // covers OAuthFlows.implicit, OAuthFlow.authorization_url, refresh_url, scopes
                 val implicit = flows["implicit"].shouldNotBeNull()
-                implicit["authorizationUrl"].asText() shouldBe "https://auth.example.com/authorize"
-                implicit["refreshUrl"].asText() shouldBe "https://auth.example.com/token/refresh"
-                implicit["scopes"]["read:products"].asText() shouldBe "Read product catalog"
+                implicit["authorizationUrl"].asString() shouldBe "https://auth.example.com/authorize"
+                implicit["refreshUrl"].asString() shouldBe "https://auth.example.com/token/refresh"
+                implicit["scopes"]["read:products"].asString() shouldBe "Read product catalog"
                 // covers OAuthFlows.password, OAuthFlow.token_url
                 val password = flows["password"].shouldNotBeNull()
-                password["tokenUrl"].asText() shouldBe "https://auth.example.com/token"
-                password["scopes"]["write:products"].asText() shouldBe "Modify products"
+                password["tokenUrl"].asString() shouldBe "https://auth.example.com/token"
+                password["scopes"]["write:products"].asString() shouldBe "Modify products"
                 // covers OAuthFlows.client_credentials
                 val cc = flows["clientCredentials"].shouldNotBeNull()
-                cc["tokenUrl"].asText() shouldBe "https://auth.example.com/token"
-                cc["scopes"]["admin"].asText() shouldBe "Admin access"
+                cc["tokenUrl"].asString() shouldBe "https://auth.example.com/token"
+                cc["scopes"]["admin"].asString() shouldBe "Admin access"
                 // covers OAuthFlows.authorization_code
                 val ac = flows["authorizationCode"].shouldNotBeNull()
-                ac["authorizationUrl"].asText() shouldBe "https://auth.example.com/authorize"
-                ac["tokenUrl"].asText() shouldBe "https://auth.example.com/token"
-                ac["refreshUrl"].asText() shouldBe "https://auth.example.com/token/refresh"
-                ac["scopes"]["write:orders"].asText() shouldBe "Place orders"
+                ac["authorizationUrl"].asString() shouldBe "https://auth.example.com/authorize"
+                ac["tokenUrl"].asString() shouldBe "https://auth.example.com/token"
+                ac["refreshUrl"].asString() shouldBe "https://auth.example.com/token/refresh"
+                ac["scopes"]["write:orders"].asString() shouldBe "Place orders"
             }
         }
 
         // covers OpenIDConnectSecurityScheme.openid_connect_url
         test("oidc security scheme") {
             doc["components"]["securitySchemes"]["oidcAuth"]["openIdConnectUrl"]
-                .asText() shouldBe "https://auth.example.com/.well-known/openid-configuration"
+                .asString() shouldBe "https://auth.example.com/.well-known/openid-configuration"
         }
 
         // §2 — Operation.callbacks
         test("§2 — Operation.callbacks (placeOrder)") {
             val placeOrder = doc["paths"]["/orders"]["post"].shouldNotBeNull()
             val callbacks = placeOrder["callbacks"].shouldNotBeNull()
-            callbacks["onStatusChange"]["\$ref"].asText() shouldBe "#/components/callbacks/OrderStatusCallback"
+            callbacks["onStatusChange"]["\$ref"].asString() shouldBe "#/components/callbacks/OrderStatusCallback"
         }
 
         // §3 — PathItem.parameters and PathItem operations
@@ -299,7 +299,7 @@ class CompleteTest :
             val healthCheck = doc["components"]["pathItems"]["HealthCheck"].shouldNotBeNull()
             val params = healthCheck["parameters"].shouldNotBeNull()
             params.isArray shouldBe true
-            params[0]["name"].asText() shouldBe "X-Request-Id"
+            params[0]["name"].asString() shouldBe "X-Request-Id"
         }
 
         // covers PathItem.options, PathItem.head, PathItem.trace, PathItem.servers, PathItem.extensions
@@ -307,15 +307,15 @@ class CompleteTest :
             assertSoftly {
                 val hc = doc["components"]["pathItems"]["HealthCheck"].shouldNotBeNull()
                 // covers PathItem.options
-                hc["options"]["operationId"].asText() shouldBe "healthCheckOptions"
+                hc["options"]["operationId"].asString() shouldBe "healthCheckOptions"
                 // covers PathItem.head
-                hc["head"]["operationId"].asText() shouldBe "healthCheckHead"
+                hc["head"]["operationId"].asString() shouldBe "healthCheckHead"
                 // covers PathItem.trace
-                hc["trace"]["operationId"].asText() shouldBe "healthCheckTrace"
+                hc["trace"]["operationId"].asString() shouldBe "healthCheckTrace"
                 // covers PathItem.servers
                 val servers = hc["servers"].shouldNotBeNull()
                 servers.isArray shouldBe true
-                servers[0]["url"].asText() shouldBe "https://health.example.com/v1"
+                servers[0]["url"].asString() shouldBe "https://health.example.com/v1"
                 // covers PathItem.extensions
                 hc["x-health-priority"].shouldNotBeNull()
             }
@@ -324,13 +324,13 @@ class CompleteTest :
         // covers PathItem.put (UpdateProduct)
         test("PathItem.put — updateProduct") {
             val putOp = doc["paths"]["/products/{id}"]["put"].shouldNotBeNull()
-            putOp["operationId"].asText() shouldBe "updateProduct"
+            putOp["operationId"].asString() shouldBe "updateProduct"
         }
 
         // covers PathItem.patch (PatchProduct)
         test("PathItem.patch — patchProduct") {
             val patchOp = doc["paths"]["/products/{id}"]["patch"].shouldNotBeNull()
-            patchOp["operationId"].asText() shouldBe "patchProduct"
+            patchOp["operationId"].asString() shouldBe "patchProduct"
         }
 
         // covers Parameter.deprecated, extensions (inline parameter)
@@ -356,30 +356,30 @@ class CompleteTest :
                 params.isArray shouldBe true
                 // The inferred {id} path param is at index 0; the annotation reference is at index 1
                 val ref = params[1].shouldNotBeNull()
-                ref["\$ref"].asText() shouldBe "#/components/parameters/ProductId"
+                ref["\$ref"].asString() shouldBe "#/components/parameters/ProductId"
                 // covers Reference.summary
-                ref["summary"].asText() shouldBe "Product reference"
+                ref["summary"].asString() shouldBe "Product reference"
                 // covers Reference.description
-                ref["description"].asText() shouldBe "Resolved from component ref"
+                ref["description"].asString() shouldBe "Resolved from component ref"
             }
         }
 
         // §4 — Example with value and externalValue
         test("§4 — Example.value (inline literal)") {
             val example = doc["components"]["examples"]["ProductExample"].shouldNotBeNull()
-            example["summary"].asText() shouldBe "A typical running shoe"
+            example["summary"].asString() shouldBe "A typical running shoe"
             example["value"].shouldNotBeNull()
         }
 
         test("§4 — Example.externalValue") {
             val example = doc["components"]["examples"]["ExternalProductExample"].shouldNotBeNull()
-            example["externalValue"].asText() shouldBe "https://example.com/samples/product.json"
+            example["externalValue"].asString() shouldBe "https://example.com/samples/product.json"
         }
 
         // §5 — Link and LinkOrReference
         test("§5 — Link.operationId in components.links") {
             val link = doc["components"]["links"]["GetProductByIdLink"].shouldNotBeNull()
-            link["operationId"].asText() shouldBe "getProduct"
+            link["operationId"].asString() shouldBe "getProduct"
             link["parameters"]["productId"].shouldNotBeNull()
         }
 
@@ -387,18 +387,18 @@ class CompleteTest :
         test("§5 — Link.proto_rpc_ref in components.links (GetOrderStatusLink)") {
             assertSoftly {
                 val link = doc["components"]["links"]["GetOrderStatusLink"].shouldNotBeNull()
-                link["operationRef"].asText() shouldBe "#/paths/~1orders~1%7Border_id%7D/get"
+                link["operationRef"].asString() shouldBe "#/paths/~1orders~1%7Border_id%7D/get"
                 // covers Link.server
-                link["server"]["url"].asText() shouldBe "https://orders.example.com/v1"
-                link["server"]["description"].asText() shouldBe "Dedicated order service"
+                link["server"]["url"].asString() shouldBe "https://orders.example.com/v1"
+                link["server"]["description"].asString() shouldBe "Dedicated order service"
             }
         }
 
         test("§5 — ResponseObject.links (getProduct)") {
             val response200 = doc["paths"]["/products/{id}"]["get"]["responses"]["200"].shouldNotBeNull()
             val links = response200["links"].shouldNotBeNull()
-            links["PlaceOrder"]["operationId"].asText() shouldBe "placeOrder"
-            links["GetProduct"]["\$ref"].asText() shouldBe "#/components/links/GetProductByIdLink"
+            links["PlaceOrder"]["operationId"].asString() shouldBe "placeOrder"
+            links["GetProduct"]["\$ref"].asString() shouldBe "#/components/links/GetProductByIdLink"
         }
 
         // §6 — Callback
@@ -417,24 +417,24 @@ class CompleteTest :
         test("§7 — MediaType.examples (plural, listProducts)") {
             val content = doc["paths"]["/products"]["get"]["responses"]["200"]["content"]["application/json"].shouldNotBeNull()
             val examples = content["examples"].shouldNotBeNull()
-            examples["typical"]["\$ref"].asText() shouldBe "#/components/examples/ProductExample"
-            examples["external"]["\$ref"].asText() shouldBe "#/components/examples/ExternalProductExample"
+            examples["typical"]["\$ref"].asString() shouldBe "#/components/examples/ProductExample"
+            examples["external"]["\$ref"].asString() shouldBe "#/components/examples/ExternalProductExample"
         }
 
         test("§7 — MediaType.encoding (uploadProductImage)") {
             val requestBody = doc["paths"]["/products/{product_id}/image"]["post"]["requestBody"].shouldNotBeNull()
             val encoding = requestBody["content"]["multipart/form-data"]["encoding"].shouldNotBeNull()
-            encoding["image"]["contentType"].asText() shouldBe "image/png, image/jpeg"
+            encoding["image"]["contentType"].asString() shouldBe "image/png, image/jpeg"
         }
 
         // §8 — Encoding all fields
         test("§8 — Encoding fields (style, explode, allowReserved, headers)") {
             val encoding = doc["paths"]["/products/{product_id}/image"]["post"]["requestBody"]["content"]["multipart/form-data"]["encoding"]["image"].shouldNotBeNull()
             assertSoftly {
-                encoding["style"].asText() shouldBe "form"
+                encoding["style"].asString() shouldBe "form"
                 encoding["explode"].asBoolean() shouldBe false
                 encoding["allowReserved"].asBoolean() shouldBe false
-                encoding["headers"]["X-Upload-Token"]["\$ref"].asText() shouldBe "#/components/headers/UploadToken"
+                encoding["headers"]["X-Upload-Token"]["\$ref"].asString() shouldBe "#/components/headers/UploadToken"
             }
         }
 
@@ -447,8 +447,8 @@ class CompleteTest :
         test("§9 — ParameterSchema.examples (components.parameters.PageSize)") {
             val param = doc["components"]["parameters"]["PageSize"].shouldNotBeNull()
             val examples = param["examples"].shouldNotBeNull()
-            examples["small"]["summary"].asText() shouldBe "Small page"
-            examples["large"]["summary"].asText() shouldBe "Large page"
+            examples["small"]["summary"].asString() shouldBe "Small page"
+            examples["large"]["summary"].asString() shouldBe "Large page"
         }
 
         // §10 — HeaderSchema.example / examples
@@ -460,7 +460,7 @@ class CompleteTest :
         test("§10 — HeaderSchema.examples (components.headers.RateLimitReset)") {
             val header = doc["components"]["headers"]["RateLimitReset"].shouldNotBeNull()
             val examples = header["examples"].shouldNotBeNull()
-            examples["future"]["summary"].asText() shouldBe "One minute from now"
+            examples["future"]["summary"].asString() shouldBe "One minute from now"
         }
 
         // §11 — Parameter.content variant
@@ -472,7 +472,7 @@ class CompleteTest :
 
         test("§11 — Parameter.content variant (inline on listProducts)") {
             val params = doc["paths"]["/products"]["get"]["parameters"].shouldNotBeNull()
-            val contentParam = params.find { it["name"]?.asText() == "X-Filter-Context" }.shouldNotBeNull()
+            val contentParam = params.find { it["name"]?.asString() == "X-Filter-Context" }.shouldNotBeNull()
             contentParam["content"]["application/json"].shouldNotBeNull()
         }
 
@@ -501,24 +501,24 @@ class CompleteTest :
             assertSoftly {
                 val product = doc["components"]["schemas"]["Product"].shouldNotBeNull()
                 // covers SchemaObject.title
-                product["title"].asText() shouldBe "Sporting Goods Product"
+                product["title"].asString() shouldBe "Sporting Goods Product"
                 // covers SchemaObject.description
                 product["description"].shouldNotBeNull()
                 // covers SchemaObject.deprecated
                 product["deprecated"].asBoolean() shouldBe true
                 // covers SchemaObject.external_docs
-                product["externalDocs"]["url"].asText() shouldBe "https://example.com/docs/products"
+                product["externalDocs"]["url"].asString() shouldBe "https://example.com/docs/products"
                 // covers SchemaObject.xml (all 5 fields)
                 val xml = product["xml"].shouldNotBeNull()
-                xml["name"].asText() shouldBe "product"
-                xml["namespace"].asText() shouldBe "https://example.com/schemas"
-                xml["prefix"].asText() shouldBe "sg"
+                xml["name"].asString() shouldBe "product"
+                xml["namespace"].asString() shouldBe "https://example.com/schemas"
+                xml["prefix"].asString() shouldBe "sg"
                 xml["attribute"].shouldNotBeNull()
                 xml["wrapped"].shouldNotBeNull()
                 // covers SchemaObject.discriminator (property_name + mapping)
                 val disc = product["discriminator"].shouldNotBeNull()
-                disc["propertyName"].asText() shouldBe "category"
-                disc["mapping"]["footwear"].asText() shouldBe "#/components/schemas/Footwear"
+                disc["propertyName"].asString() shouldBe "category"
+                disc["mapping"]["footwear"].asString() shouldBe "#/components/schemas/Footwear"
                 // covers SchemaObject.required
                 val required = product["required"].shouldNotBeNull()
                 required.isArray shouldBe true
@@ -532,7 +532,7 @@ class CompleteTest :
                 // covers SchemaObject.property_names
                 product["propertyNames"].shouldNotBeNull()
                 // covers SchemaObject.extensions
-                product["x-product-type"].asText() shouldBe "physical"
+                product["x-product-type"].asString() shouldBe "physical"
             }
         }
 
@@ -543,7 +543,7 @@ class CompleteTest :
                 // covers SchemaObject.read_only
                 idSchema["readOnly"].asBoolean() shouldBe true
                 // covers SchemaObject.format
-                idSchema["format"].asText() shouldBe "uuid"
+                idSchema["format"].asString() shouldBe "uuid"
             }
         }
 
@@ -557,7 +557,7 @@ class CompleteTest :
                 nameSchema["minLength"].asInt() shouldBe 1
                 nameSchema["maxLength"].asInt() shouldBe 200
                 // covers SchemaObject.pattern
-                nameSchema["pattern"].asText() shouldBe "^[A-Za-z0-9 .,'-]+$"
+                nameSchema["pattern"].asString() shouldBe "^[A-Za-z0-9 .,'-]+$"
                 // covers SchemaObject.type (repeated / multi-type)
                 nameSchema["type"].isArray shouldBe true
             }
@@ -631,7 +631,7 @@ class CompleteTest :
                 // covers SchemaObject.deprecated (on field)
                 sqSchema["deprecated"].asBoolean() shouldBe true
                 // covers SchemaObject.title (on field)
-                sqSchema["title"].asText() shouldBe "Stock Quantity"
+                sqSchema["title"].asString() shouldBe "Stock Quantity"
                 // covers SchemaObject.examples (repeated Any)
                 val exs = sqSchema["examples"].shouldNotBeNull()
                 exs.isArray shouldBe true
@@ -671,19 +671,19 @@ class CompleteTest :
             assertSoftly {
                 val order = doc["components"]["schemas"]["Order"].shouldNotBeNull()
                 // covers SchemaObject.id
-                order["\$id"].asText() shouldBe "https://example.com/schemas/Order"
+                order["\$id"].asString() shouldBe "https://example.com/schemas/Order"
                 // covers SchemaObject.schema
-                order["\$schema"].asText() shouldBe "https://spec.openapis.org/oas/3.1/dialect/base"
+                order["\$schema"].asString() shouldBe "https://spec.openapis.org/oas/3.1/dialect/base"
                 // covers SchemaObject.anchor
-                order["\$anchor"].asText() shouldBe "OrderSchema"
+                order["\$anchor"].asString() shouldBe "OrderSchema"
                 // covers SchemaObject.dynamic_anchor
-                order["\$dynamicAnchor"].asText() shouldBe "DynOrder"
+                order["\$dynamicAnchor"].asString() shouldBe "DynOrder"
                 // covers SchemaObject.dynamic_ref
-                order["\$dynamicRef"].asText() shouldBe "#DynOrder"
+                order["\$dynamicRef"].asString() shouldBe "#DynOrder"
                 // covers SchemaObject.defs
                 order["\$defs"]["OrderStatus"].shouldNotBeNull()
                 // covers SchemaObject.uri_ref ($ref at SchemaObject level)
-                order["\$ref"].asText() shouldBe "#/components/schemas/Order"
+                order["\$ref"].asString() shouldBe "#/components/schemas/Order"
             }
         }
 
@@ -692,9 +692,9 @@ class CompleteTest :
             assertSoftly {
                 val statusSchema = doc["components"]["schemas"]["Order"]["properties"]["status"].shouldNotBeNull()
                 // covers SchemaObject.content_encoding
-                statusSchema["contentEncoding"].asText() shouldBe "utf-8"
+                statusSchema["contentEncoding"].asString() shouldBe "utf-8"
                 // covers SchemaObject.content_media_type
-                statusSchema["contentMediaType"].asText() shouldBe "text/plain"
+                statusSchema["contentMediaType"].asString() shouldBe "text/plain"
                 // covers SchemaObject.content_schema
                 statusSchema["contentSchema"].shouldNotBeNull()
             }

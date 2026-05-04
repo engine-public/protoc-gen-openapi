@@ -13,12 +13,16 @@
   - [x] separation
   - [x] write simple title
 - [ ] include/exclude regex
-- [ ] [envoy GrpcJsonTranscoder options](https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/filters/http/grpc_json_transcoder/v3/transcoder.proto)
-  - [ ] auto_mapping
-  - [ ] case_insensitive_enum_parsing
-- [ ] [envoy PrintOptions support options](https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/filters/http/grpc_json_transcoder/v3/transcoder.proto#envoy-v3-api-msg-extensions-filters-http-grpc-json-transcoder-v3-grpcjsontranscoder-printoptions)
-  - [ ] preserve_proto_field_names
-  - [ ] always_print_enums_as_ints
-  - [ ] stream_newline_delimited
-  - [ ] stream_sse_style_delimited
+- [x] [envoy GrpcJsonTranscoder options](https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/filters/http/grpc_json_transcoder/v3/transcoder.proto)
+  - [x] auto_mapping
+  - [x] case_insensitive_enum_parsing
+- [x] [envoy PrintOptions support options](https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/filters/http/grpc_json_transcoder/v3/transcoder.proto#envoy-v3-api-msg-extensions-filters-http-grpc-json-transcoder-v3-grpcjsontranscoder-printoptions)
+  - [x] preserve_proto_field_names
+  - [x] always_print_enums_as_ints
+  - [x] stream_newline_delimited
+  - [x] stream_sse_style_delimited
 - [ ] generate new readme
+- [ ] field-level required annotation
+- [ ] move recorder and protoc-utils to their own repo
+- [ ] get native build working for compiler
+- [ ] publish both repos

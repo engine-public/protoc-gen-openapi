@@ -22,6 +22,7 @@ public fun <MessageT, ExtendableMessageT : GeneratedMessage.ExtendableMessage<Ex
  * @throws com.google.protobuf.InvalidProtocolBufferException If an unknown field with the same extension number is found, but it cannot be deserialized as [MessageT].
  * @throws ClassCastException if the extension value cannot be coerced to [MessageT].
  */
+@Suppress("UNCHECKED_CAST") // MessageT is erased at runtime; cast is verified structurally by the caller
 public fun <MessageT, ExtendableMessageT : GeneratedMessage.ExtendableMessage<ExtendableMessageT>, GeneratedExtensionT : GeneratedMessage.GeneratedExtension<ExtendableMessageT, MessageT>> ExtendableMessageT.findUnregisteredExtension(
     extension: GeneratedExtensionT,
 ): MessageT? =

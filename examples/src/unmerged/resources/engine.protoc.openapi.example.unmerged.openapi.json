@@ -1,12 +1,14 @@
 {
-  "openapi" : "3.1.0",
-  "paths" : { },
-  "info" : {
-    "title" : "Example: Un-merged Proto Services",
-    "summary" : "Shows multiple Protobuf services each receiving their own OpenAPI spec",
-    "version" : "1.2.3"
+  "info": {
+    "summary": "Shows multiple Protobuf services each receiving their own OpenAPI spec",
+    "title": "Example: Un-merged Proto Services",
+    "version": "1.2.3"
   },
-  "servers" : [ {
-    "url" : "https://unmerged.example.com"
-  } ]
+  "openapi": "3.1.0",
+  "paths": {},
+  "servers": [
+    {
+      "url": "https://unmerged.example.com"
+    }
+  ]
 }

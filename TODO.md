@@ -12,7 +12,7 @@
   - [x] casing
   - [x] separation
   - [x] write simple title
-- [ ] include/exclude regex
+- [x] include/exclude regex
 - [x] [envoy GrpcJsonTranscoder options](https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/filters/http/grpc_json_transcoder/v3/transcoder.proto)
   - [x] auto_mapping
   - [x] case_insensitive_enum_parsing
@@ -22,7 +22,6 @@
   - [x] stream_newline_delimited
   - [x] stream_sse_style_delimited
 - [ ] generate new readme
-- [ ] field-level required annotation
 - [ ] move recorder and protoc-utils to their own repo
 - [ ] get native build working for compiler
 - [ ] publish both repos

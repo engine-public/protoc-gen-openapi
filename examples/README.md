@@ -55,6 +55,10 @@ An integration test suite for Envoy's [`GrpcJsonTranscoder`](https://www.envoypr
 
 Exercises the four `schemaNamespace*` options that control how proto package information is incorporated into `components/schemas` keys. Uses two proto packages (`catalog.v1` and `inventory.v2`) that both define an `Item` message — a collision that `NONE` (the default) cannot resolve. Three reference compilations cover `FULL_PACKAGE`, `SIMPLIFIED_PACKAGE + CAPITALIZED`, and `SIMPLIFIED_PACKAGE + CAPITALIZED + versionExtraction`.
 
+### [filtering](src/filtering/README.md)
+
+Exercises the `serviceInclude` and `serviceExclude` regex options that control which services appear in the generated output. Uses a single proto file with three services (`AlphaService`, `BetaService`, `GammaService`), each owning distinct request/response message types, so that schema suppression is verifiable alongside path suppression. Covers: default pass-all behavior, include by name substring, exclude by name substring, include via regex alternation, include via anchored full-FQN match, exclude multiple via alternation, and filtering in `merge = false` (per-service) mode.
+
 ## Adding a new example
 
 1. Create `src/<name>/proto/` with your `.proto` files.

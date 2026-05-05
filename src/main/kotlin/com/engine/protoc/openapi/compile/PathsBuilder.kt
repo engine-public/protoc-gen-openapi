@@ -46,11 +46,23 @@ internal class PathsBuilder(
     // Only populated when autoTagServices is true.
     private val contributingServices = LinkedHashMap<String, String?>()
 
-    /** Collects all paths from [files] into a merged `paths` ObjectNode. */
-    fun build(files: List<FileDescriptorProtoWrapper>): ObjectNode =
+    /**
+     * Collects all paths from [files] into a merged `paths` ObjectNode.
+     *
+     * When [serviceFilter] is non-null, only services for which it returns `true` contribute
+     * paths.  The first argument to [serviceFilter] is the file's proto package (may be null
+     * when the file declares no package), and the second is the service descriptor.
+     */
+    fun build(
+        files: List<FileDescriptorProtoWrapper>,
+        serviceFilter: ((pkg: String?, svc: ServiceDescriptorProtoWrapper) -> Boolean)? = null,
+    ): ObjectNode =
         buildForServicePairs(
             files.flatMap { file ->
-                file.services.map { file.`package`?.value to it }
+                val pkg = file.`package`?.value
+                file.services
+                    .filter { svc -> serviceFilter == null || serviceFilter(pkg, svc) }
+                    .map { pkg to it }
             },
         )
 

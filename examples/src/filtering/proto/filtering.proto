@@ -1,0 +1,70 @@
+syntax = "proto3";
+
+package engine.protoc.openapi.example.filtering;
+
+option java_package = "com.engine.protoc.openapi.example.filtering";
+option java_multiple_files = true;
+
+import "google/api/annotations.proto";
+import "engine/protoc/openapi/annotations.proto";
+
+option (.engine.protoc.openapi.file) = {
+    info: {
+        title: "Service Filtering Example"
+        version: "1.0.0"
+    }
+};
+
+// Manages alpha resources.
+service AlphaService {
+    rpc CreateAlpha(AlphaRequest) returns (AlphaResponse) {
+        option (.google.api.http) = {
+            post: "/alpha"
+            body: "*"
+        };
+    }
+}
+
+// Manages beta resources.
+service BetaService {
+    rpc CreateBeta(BetaRequest) returns (BetaResponse) {
+        option (.google.api.http) = {
+            post: "/beta"
+            body: "*"
+        };
+    }
+}
+
+// Manages gamma resources.
+service GammaService {
+    rpc CreateGamma(GammaRequest) returns (GammaResponse) {
+        option (.google.api.http) = {
+            post: "/gamma"
+            body: "*"
+        };
+    }
+}
+
+message AlphaRequest {
+    string name = 1;
+}
+
+message AlphaResponse {
+    string id = 1;
+}
+
+message BetaRequest {
+    string name = 1;
+}
+
+message BetaResponse {
+    string id = 1;
+}
+
+message GammaRequest {
+    string name = 1;
+}
+
+message GammaResponse {
+    string id = 1;
+}

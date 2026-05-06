@@ -282,6 +282,44 @@ public class ProtocGenOpenAPI(
          * Passed via `--openapi_out=streamSseStyleDelimited=true:outdir`.
          */
         val streamSseStyleDelimited: Boolean,
+
+        /**
+         * A Java-compatible regular expression tested via [Regex.containsMatchIn] against the
+         * fully-qualified service name (`<package>.<ServiceName>`, e.g.
+         * `com.example.v1.WidgetService`).  A service is **included** in the generated output
+         * only when its fully-qualified name contains at least one match for this expression.
+         * Services that do not match are silently omitted; schema types in
+         * `components/schemas` that are referenced exclusively by omitted services are also
+         * omitted.
+         *
+         * The fully-qualified service name follows the proto3 `fullIdent` grammar:
+         * one or more `.`-separated identifiers, each starting with a letter and continuing
+         * with letters, decimal digits, or underscores.
+         *
+         * **Evaluation order:** [serviceInclude] is tested first.  A service that does not
+         * match is dropped immediately, regardless of [serviceExclude].  A service that
+         * matches [serviceInclude] but also matches [serviceExclude] is then dropped.
+         *
+         * **Default:** `^[a-zA-Z][a-zA-Z0-9_]*(\.[a-zA-Z][a-zA-Z0-9_]*)*$` — matches
+         * every syntactically valid fully-qualified proto service name, so all services
+         * pass by default.
+         *
+         * Passed via `--openapi_out=serviceInclude=<pattern>:outdir`.
+         */
+        val serviceInclude: String,
+
+        /**
+         * A Java-compatible regular expression tested via [Regex.containsMatchIn] against the
+         * fully-qualified service name (`<package>.<ServiceName>`).  A service is
+         * **excluded** from the generated output when its fully-qualified name contains at
+         * least one match for this expression, even if it also matched [serviceInclude].
+         * Schema types referenced exclusively by excluded services are also omitted.
+         *
+         * **Default:** `null` — no services are excluded.
+         *
+         * Passed via `--openapi_out=serviceExclude=<pattern>:outdir`.
+         */
+        val serviceExclude: String?,
     ) {
         /**
          * The serialization format for generated OpenAPI documents.
@@ -512,7 +550,22 @@ public class ProtocGenOpenAPI(
             public var streamSseStyleDelimited: Boolean =
                 parameters.get<Boolean>("streamSseStyleDelimited") ?: false
 
+            /**
+             * @see [Options.serviceInclude]
+             */
+            public var serviceInclude: String =
+                parameters.get<String>("serviceInclude") ?: SERVICE_INCLUDE_DEFAULT
+
+            /**
+             * @see [Options.serviceExclude]
+             */
+            public var serviceExclude: String? =
+                parameters.get<String>("serviceExclude")
+
             public companion object {
+                private const val SERVICE_INCLUDE_DEFAULT =
+                    """^[a-zA-Z][a-zA-Z0-9_]*(\.[a-zA-Z][a-zA-Z0-9_]*)*$"""
+
                 public fun from(parameters: Parameters): Builder = Builder(parameters)
             }
 
@@ -537,6 +590,8 @@ public class ProtocGenOpenAPI(
                     convertGrpcStatus = convertGrpcStatus,
                     streamNewlineDelimited = streamNewlineDelimited,
                     streamSseStyleDelimited = streamSseStyleDelimited,
+                    serviceInclude = serviceInclude,
+                    serviceExclude = serviceExclude,
                 )
         }
     }

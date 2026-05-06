@@ -83,6 +83,27 @@ internal class Compiler(
         ProtocGenOpenAPI.Options.OutputFormat.YAML -> InputFormat.YAML
     }
 
+    private val serviceIncludeRegex: Regex by lazy { Regex(options.serviceInclude) }
+    private val serviceExcludeRegex: Regex? by lazy { options.serviceExclude?.let { Regex(it) } }
+
+    private fun isServiceIncluded(
+        pkg: String?,
+        service: ServiceDescriptorProtoWrapper,
+    ): Boolean {
+        val svcName = service.name?.value ?: return false
+        val fqn = buildString {
+            val p = pkg.orEmpty()
+            if (p.isNotEmpty()) {
+                append(p)
+                append('.')
+            }
+            append(svcName)
+        }
+        if (!serviceIncludeRegex.containsMatchIn(fqn)) return false
+        if (serviceExcludeRegex?.containsMatchIn(fqn) == true) return false
+        return true
+    }
+
     fun compile(): PluginProtos.CodeGeneratorResponse = if (options.merge) compileMerged() else compileUnmerged()
 
     // -------------------------------------------------------------------------
@@ -115,7 +136,7 @@ internal class Compiler(
 
         for (file in targetFiles) {
             try {
-                mergePaths(doc, pathsBuilder.build(listOf(file)), ctx)
+                mergePaths(doc, pathsBuilder.build(listOf(file), ::isServiceIncluded), ctx)
             } catch (e: Exception) {
                 response.addError("[${file.name}] Error building paths: ${e.detail()}")
             }
@@ -195,6 +216,7 @@ internal class Compiler(
             for (service in file.services) {
                 val svcLabel = "${file.name}/${service.name?.value}"
                 try {
+                    if (!isServiceIncluded(file.`package`?.value, service)) continue
                     val doc = ctx.obj().also {
                         it.put("openapi", "3.1.0")
                         it.set("paths", ctx.obj())

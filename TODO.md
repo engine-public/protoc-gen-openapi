@@ -22,6 +22,6 @@
   - [x] stream_newline_delimited
   - [x] stream_sse_style_delimited
 - [ ] generate new readme
-- [ ] move recorder and protoc-utils to their own repo
+- [x] move recorder and protoc-utils to their own repo
 - [ ] get native build working for compiler
 - [ ] publish both repos

@@ -92,14 +92,7 @@ protobuf {
     }
     plugins {
         create("recorder") {
-            path = project
-                .project(projects.protocUtilsRecorder.path)
-                .layout
-                .buildDirectory
-                .map { it.dir("native/nativeCompile").file("${projects.protocUtilsRecorder.name}-${osdetector.arch}") }
-                .get()
-                .asFile
-                .absolutePath
+            artifact = libs.tools.protoc.recorder.get().toString()
         }
         create("grpc") {
             artifact = libs.grpc.protoc.java.get().toString()
@@ -117,7 +110,6 @@ protobuf {
              * isTest doesn't work.
              */
             if (name == "generate${suiteName.capitalized()}Proto") {
-                dependsOn(":protoc-utils-recorder:nativeCompile")
                 plugins {
                     create("recorder")
                 }

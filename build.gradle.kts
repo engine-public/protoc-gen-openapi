@@ -1,5 +1,3 @@
-import org.gradle.internal.extensions.stdlib.capitalized
-import org.gradle.kotlin.dsl.configure
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 import org.jlleitschuh.gradle.ktlint.KtlintExtension
 import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
@@ -29,9 +27,9 @@ description = "protoc compiler to turn gRPC services into openapi v3.1 specs"
 
 dependencies {
     implementation(projects.protocGenOpenapiModel)
-    implementation(projects.protocUtils)
 
     implementation(libs.commonmark)
+    implementation(libs.engine.protoc.utils)
     implementation(libs.jackson.databind)
     implementation(libs.jackson.dataformat.yaml)
     implementation(libs.kotlin.reflect)

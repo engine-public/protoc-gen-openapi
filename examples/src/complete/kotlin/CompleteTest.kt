@@ -1,3 +1,5 @@
+package com.engine.protoc.openapi.example
+
 import com.engine.protoc.openapi.ProtocGenOpenAPI
 import com.networknt.schema.InputFormat
 import com.networknt.schema.SchemaLocation
@@ -30,7 +32,7 @@ class CompleteTest :
             .find { it.name == "engine.protoc.openapi.example.complete.StorefrontService.openapi.yaml" }
             .shouldNotBeNull()
         val doc: JsonNode = mapper.readTree(generatedFile.content)
-        val expected = CompleteTest::class.java.getResourceAsStream("engine.protoc.openapi.example.complete.StorefrontService.openapi.yaml").shouldNotBeNull().reader().readText()
+        val expected = CompleteTest::class.java.getResourceAsStream("/engine.protoc.openapi.example.complete.StorefrontService.openapi.yaml").shouldNotBeNull().reader().readText()
 
         test("validate reference file") {
             val oasSchema by lazy {

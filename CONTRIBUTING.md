@@ -36,11 +36,30 @@ Reflection metadata lives in [`src/main/resources/META-INF/native-image/com.engi
 
 The build sets `-H:ThrowMissingRegistrationErrors=` so missing reflection registrations fail loudly rather than silently at runtime.
 
-When you add new proto types or new Kotlin reflection usage, regenerate the metadata:
+The canonical recording surface is the example test suite.
+Each non-`envoy` suite compiles a real `CodeGeneratorRequest` through `ProtocGenOpenAPI.compile()` with a specific permutation of plugin options, so running those suites with the GraalVM agent attached records the reflection the production binary needs.
 
-1. Run the plugin on the JVM with the GraalVM agent attached: `./gradlew :protoc-gen-openapi:run` (feed it a real `CodeGeneratorRequest`)
-2. Copy/merge the captured metadata into the resources directory: `./gradlew :protoc-gen-openapi:metadataCopy`
-3. Verify by re-running the example suite: `./gradlew :protoc-gen-openapi-examples:generateProto`
+Caller/access filter files at [`gradle/native-image-agent/`](gradle/native-image-agent/) exclude test-only callers (kotest, JUnit, testcontainers, grpc-netty) so they don't contaminate the recorded metadata.
+
+To regenerate metadata after adding new proto types, plugin options, or reflective Kotlin usage:
+
+1. Record reflection across the example suite:
+   `./gradlew -Pagent :protoc-gen-openapi-examples:check`
+2. Merge the captured metadata into the resources directory:
+   `./gradlew :protoc-gen-openapi-examples:metadataCopy`
+3. Verify by re-running the example suite without the agent:
+   `./gradlew :protoc-gen-openapi-examples:check`
+4. Smoke-test the native binary:
+   `./gradlew :protoc-gen-openapi:nativeCompile`
+
+Review the resulting diff under `src/main/resources/META-INF/native-image/...` by hand before committing — additions are expected, but unexpected entries (e.g. third-party classes only reachable from test code) signal a filter gap.
+
+### One-off agent runs
+
+For debugging a single `CodeGeneratorRequest`, the `:protoc-gen-openapi:run` task still has an agent-aware `metadataCopy` wired up:
+
+1. `./gradlew -Pagent :protoc-gen-openapi:run < your.binpb`
+2. `./gradlew :protoc-gen-openapi:metadataCopy`
 
 ## Code Style
 
@@ -71,10 +90,12 @@ Tests use [kotest](https://kotest.io) `FunSpec` style with `assertSoftly` enable
 
 1. Create `src/<name>/proto/` with your `.proto` files.
 2. Add a test suite block in [`examples/build.gradle.kts`](examples/build.gradle.kts) following the pattern of the existing suites.
+   For pure compile-and-assert suites, also add `"<name>"` to the `agentMetadataSuites` list near the bottom of the same file so the suite contributes to native-image reflection metadata.
 3. Run `./gradlew :protoc-gen-openapi-examples:generate<Name>Proto` to produce the `code-generator-request.binpb`, then run the test once to generate initial output.
-4. Copy the generated JSON/YAML into `src/<name>/resources/` as the reference file.
-5. Write a `src/<name>/README.md` describing what the example demonstrates.
-6. Add a section for it in [`examples/README.md`](examples/README.md).
+4. Write the test class at `src/<name>/kotlin/<Name>Test.kt` and declare `package com.engine.protoc.openapi.example` at the top — the [agent filter](gradle/native-image-agent/access-filter.json) excludes this package so test-only reflection doesn't pollute the recorded metadata.
+5. Copy the generated JSON/YAML into `src/<name>/resources/` as the reference file.
+6. Write a `src/<name>/README.md` describing what the example demonstrates.
+7. Add a section for it in [`examples/README.md`](examples/README.md).
 
 ## PR Process
 

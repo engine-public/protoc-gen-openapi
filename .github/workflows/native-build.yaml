@@ -114,7 +114,7 @@ jobs:
         env:
           ENGINE_BUILD_VERSION: ${{ steps.getversion.outputs.version }}
         run: |
-          ./gradlew nativeCompile
+          ./gradlew :nativeCompile
 
       - name: Stage Binary
         shell: bash

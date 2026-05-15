@@ -6,6 +6,12 @@ Every example pairs a self-contained `.proto` source with a checked-in reference
 Browse the examples below by the feature you are trying to use.
 The proto sources also serve as executable, copy-paste-ready illustrations of how to write the annotations.
 
+## Test class convention
+
+Every test class under `examples/src/<suite>/kotlin/` must declare `package com.engine.protoc.openapi.example`.
+The GraalVM native-image agent filter at [`gradle/native-image-agent/access-filter.json`](../gradle/native-image-agent/access-filter.json) excludes this package wholesale so test-only callers don't contaminate the recorded reflection metadata.
+A test that omits the package decl will leak entries into `reflect-config.json` when the suite is run under `-Pagent`.
+
 ## By Example
 
 ### [conventions](src/conventions/README.md)

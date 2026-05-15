@@ -1,3 +1,5 @@
+package com.engine.protoc.openapi.example
+
 import com.engine.protoc.openapi.ProtocGenOpenAPI
 import com.google.protobuf.compiler.PluginProtos
 import com.networknt.schema.InputFormat
@@ -50,7 +52,7 @@ class UnmergedTest :
         }
 
         withData<PluginProtos.CodeGeneratorResponse.File>({ "validate reference: " + it.name }, response.fileList) { file ->
-            val expected = UnmergedTest::class.java.getResourceAsStream(file.name).shouldNotBeNull().reader().readText()
+            val expected = UnmergedTest::class.java.getResourceAsStream("/${file.name}").shouldNotBeNull().reader().readText()
             oasSchema.validate(expected, InputFormat.YAML) { ctx ->
                 ctx.executionConfig { cfg -> cfg.formatAssertionsEnabled(true) }
             }.shouldBeEmpty()
@@ -63,7 +65,7 @@ class UnmergedTest :
 
         withData<PluginProtos.CodeGeneratorResponse.File>({ "validate output: " + it.name }, response.fileList) { file ->
             val json = mapper.readTree(file.content)
-            val expected = mapper.readTree(UnmergedTest::class.java.getResourceAsStream(file.name).shouldNotBeNull().reader().readText())
+            val expected = mapper.readTree(UnmergedTest::class.java.getResourceAsStream("/${file.name}").shouldNotBeNull().reader().readText())
             assertSoftly {
                 collectJsonDiffs(
                     expected,

@@ -89,6 +89,48 @@ testing {
     }
 }
 
+/*
+ * Netty arrives transitively via grpc-netty (consumed only by the `envoy`
+ * test suite above). grpc-netty 1.81.0 — the latest available release — still
+ * pulls Netty 4.1.132.Final, affected by a batch of CVEs disclosed in
+ * November 2026. Until grpc-netty publishes against a patched Netty,
+ * constrain the affected modules to 4.1.133.Final. Constraints (not
+ * `useVersion` forces) so a future grpc upgrade that brings a newer Netty
+ * still wins cleanly.
+ *
+ * Alerts: https://github.com/HotelEngine/protoc-gen-openapi/security/dependabot
+ */
+dependencies {
+    constraints {
+        "envoyImplementation"("io.netty:netty-codec-http2:4.1.133.Final") {
+            because(
+                "CVE-2026-42587 (alert #37): HttpContentDecompressor maxAllocation bypass " +
+                    "for br/zstd/snappy content encodings leads to decompression-bomb DoS.",
+            )
+        }
+        "envoyImplementation"("io.netty:netty-codec-http:4.1.133.Final") {
+            because(
+                "CVE-2026-42587 (#36, decompression DoS), CVE-2026-42585 (#35, malformed " +
+                    "Transfer-Encoding smuggling), CVE-2026-42584 (#34, HttpClientCodec " +
+                    "response desync), CVE-2026-42581 (#32, HTTP/1.0 TE+CL coexistence " +
+                    "smuggling), CVE-2026-42580 (#31, chunk-size parsing smuggling), " +
+                    "CVE-2026-41417 (#29, DefaultHttpRequest.setUri start-line injection).",
+            )
+        }
+        "envoyImplementation"("io.netty:netty-codec:4.1.133.Final") {
+            because(
+                "CVE-2026-42583 (alert #33): Lz4FrameDecoder is vulnerable to resource exhaustion.",
+            )
+        }
+        "envoyImplementation"("io.netty:netty-handler-proxy:4.1.133.Final") {
+            because(
+                "CVE-2026-42578 (alert #30): HTTP header injection via HttpProxyHandler " +
+                    "with validation disabled (incomplete fix for CVE-2025-67735).",
+            )
+        }
+    }
+}
+
 protobuf {
     protoc {
         artifact = libs.tools.protoc.compiler.get().toString()

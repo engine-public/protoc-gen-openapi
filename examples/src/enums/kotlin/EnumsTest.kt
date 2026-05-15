@@ -1,3 +1,5 @@
+package com.engine.protoc.openapi.example
+
 import com.engine.protoc.openapi.ProtocGenOpenAPI
 import com.google.protobuf.compiler.PluginProtos
 import io.kotest.assertions.assertSoftly

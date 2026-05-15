@@ -1,3 +1,5 @@
+package com.engine.protoc.openapi.example
+
 import com.engine.protoc.openapi.ProtocGenOpenAPI
 import com.networknt.schema.InputFormat
 import com.networknt.schema.SchemaLocation

@@ -7,16 +7,9 @@ on:
         description: "The version to build.  It must be semver-compliant, and must not be for a tag that already exists."
         required: false
         type: string
-    secrets:
-      JRELEASER_GPG_SECRET_KEY:
-        required: false
-        description: "The GPG Secret Key used to sign produced artifacts."
-      JRELEASER_GPG_PASSPHRASE:
-        required: false
-        description: "The passphrase to the GPG Secret Key used to sign produced artifacts."
-      JRELEASER_MAVENCENTRAL_TOKEN:
-        required: false
-        description: "The maven central token provisioned to upload artifacts."
+
+permissions:
+  contents: read
 
 jobs:
   build:
@@ -36,7 +29,7 @@ jobs:
           native-image-job-reports: 'true'
 
       - name: Setup gradle
-        uses: gradle/actions/setup-gradle@06832c7b30a0129d7fb559bcc6e43d26f6374244
+        uses: gradle/actions/setup-gradle@50e97c2cd7a37755bbfafc9c5b7cafaece252f6e # https://github.com/gradle/actions/releases/tag/v6.1.0
 
       - name: Determine Build Version
         env:
@@ -48,10 +41,40 @@ jobs:
         id: getversion
         run: |
           test -f build/version.txt
-          echo "version=$(cat build/version.txt)" >> $GITHUB_OUTPUT
+          echo "version=$(cat build/version.txt)" >> "$GITHUB_OUTPUT"
 
       - name: Build
         env:
           ENGINE_BUILD_VERSION: ${{ steps.getversion.outputs.version }}
         run: |
           ./gradlew build
+
+      - name: Stage JVM Distribution
+        if: inputs.build_version != ''
+        env:
+          VERSION: ${{ steps.getversion.outputs.version }}
+        run: |
+          set -euo pipefail
+          mkdir -p staging
+          # Only the model subproject ships jars; the root plugin ships
+          # only as native binaries (see native-build.yaml + release.yaml).
+          cp model/build/libs/*.jar staging/
+          # CycloneDX SBOMs (one per module) ride along so they get attached
+          # to the GitHub release and to Maven Central via the
+          # `cyclonedx`-classified artifacts on each publication.
+          cp build/reports/cyclonedx-direct/bom.json \
+            "staging/protoc-gen-openapi-${VERSION}-cyclonedx.json"
+          cp model/build/reports/cyclonedx-direct/bom.json \
+            "staging/protoc-gen-openapi-model-${VERSION}-cyclonedx.json"
+          # Bundle of model .proto sources for non-Gradle consumers.
+          cp model/build/distributions/protoc-gen-openapi-model-protos-${VERSION}.zip \
+            staging/
+          ls -al staging
+
+      - name: Upload JVM Artifacts
+        if: inputs.build_version != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-jvm-jars
+          path: staging/*
+          if-no-files-found: error

@@ -1,3 +1,5 @@
+package com.engine.protoc.openapi.example
+
 import com.engine.protoc.openapi.ProtocGenOpenAPI
 import com.engine.protoc.openapi.example.envoy.Greeting
 import io.kotest.matchers.shouldBe

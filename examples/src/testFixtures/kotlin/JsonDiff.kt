@@ -1,3 +1,5 @@
+package com.engine.protoc.openapi.example
+
 import tools.jackson.databind.JsonNode
 
 /** Represents a single difference between two JSON trees at the given [path]. */

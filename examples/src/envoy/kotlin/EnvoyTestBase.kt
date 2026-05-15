@@ -1,3 +1,5 @@
+package com.engine.protoc.openapi.example
+
 import io.grpc.Server
 import io.grpc.ServerBuilder
 import io.kotest.core.spec.style.FunSpec
@@ -52,7 +54,7 @@ abstract class EnvoyTestBase(
             val configTree = yamlMapper
                 .readTree(
                     EnvoyTestBase::class.java
-                        .getResourceAsStream("envoy/envoy.template.yaml")
+                        .getResourceAsStream("/envoy/envoy.template.yaml")
                         .shouldNotBeNull()
                         .use { inputStream -> inputStream.reader().readText() }
                         .replace($$"${GRPC_PORT}", grpcPort.toString()),

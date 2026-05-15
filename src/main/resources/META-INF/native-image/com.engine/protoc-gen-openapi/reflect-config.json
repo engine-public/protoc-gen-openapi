@@ -1,184 +1,4241 @@
 [
-{
-  "name":"com.google.protobuf.DescriptorMessageInfoFactory",
-  "methods":[{"name":"getInstance","parameterTypes":[] }]
-},
-{
-  "name":"com.google.protobuf.DescriptorProtos$FeatureSet",
-  "methods":[{"name":"newBuilder","parameterTypes":[] }]
-},
-{
-  "name":"com.google.protobuf.DescriptorProtos$FileOptions",
-  "methods":[{"name":"getCcEnableArenas","parameterTypes":[] }, {"name":"getCcGenericServices","parameterTypes":[] }, {"name":"getCsharpNamespace","parameterTypes":[] }, {"name":"getCsharpNamespaceBytes","parameterTypes":[] }, {"name":"getDeprecated","parameterTypes":[] }, {"name":"getFeatures","parameterTypes":[] }, {"name":"getGoPackage","parameterTypes":[] }, {"name":"getGoPackageBytes","parameterTypes":[] }, {"name":"getJavaGenerateEqualsAndHash","parameterTypes":[] }, {"name":"getJavaGenericServices","parameterTypes":[] }, {"name":"getJavaMultipleFiles","parameterTypes":[] }, {"name":"getJavaOuterClassname","parameterTypes":[] }, {"name":"getJavaOuterClassnameBytes","parameterTypes":[] }, {"name":"getJavaPackage","parameterTypes":[] }, {"name":"getJavaPackageBytes","parameterTypes":[] }, {"name":"getJavaStringCheckUtf8","parameterTypes":[] }, {"name":"getObjcClassPrefix","parameterTypes":[] }, {"name":"getObjcClassPrefixBytes","parameterTypes":[] }, {"name":"getOptimizeFor","parameterTypes":[] }, {"name":"getPhpClassPrefix","parameterTypes":[] }, {"name":"getPhpClassPrefixBytes","parameterTypes":[] }, {"name":"getPhpMetadataNamespace","parameterTypes":[] }, {"name":"getPhpMetadataNamespaceBytes","parameterTypes":[] }, {"name":"getPhpNamespace","parameterTypes":[] }, {"name":"getPhpNamespaceBytes","parameterTypes":[] }, {"name":"getPyGenericServices","parameterTypes":[] }, {"name":"getRubyPackage","parameterTypes":[] }, {"name":"getRubyPackageBytes","parameterTypes":[] }, {"name":"getSwiftPrefix","parameterTypes":[] }, {"name":"getSwiftPrefixBytes","parameterTypes":[] }, {"name":"getUninterpretedOption","parameterTypes":["int"] }, {"name":"getUninterpretedOptionCount","parameterTypes":[] }, {"name":"getUninterpretedOptionList","parameterTypes":[] }, {"name":"hasCcEnableArenas","parameterTypes":[] }, {"name":"hasCcGenericServices","parameterTypes":[] }, {"name":"hasCsharpNamespace","parameterTypes":[] }, {"name":"hasDeprecated","parameterTypes":[] }, {"name":"hasFeatures","parameterTypes":[] }, {"name":"hasGoPackage","parameterTypes":[] }, {"name":"hasJavaGenerateEqualsAndHash","parameterTypes":[] }, {"name":"hasJavaGenericServices","parameterTypes":[] }, {"name":"hasJavaMultipleFiles","parameterTypes":[] }, {"name":"hasJavaOuterClassname","parameterTypes":[] }, {"name":"hasJavaPackage","parameterTypes":[] }, {"name":"hasJavaStringCheckUtf8","parameterTypes":[] }, {"name":"hasObjcClassPrefix","parameterTypes":[] }, {"name":"hasOptimizeFor","parameterTypes":[] }, {"name":"hasPhpClassPrefix","parameterTypes":[] }, {"name":"hasPhpMetadataNamespace","parameterTypes":[] }, {"name":"hasPhpNamespace","parameterTypes":[] }, {"name":"hasPyGenericServices","parameterTypes":[] }, {"name":"hasRubyPackage","parameterTypes":[] }, {"name":"hasSwiftPrefix","parameterTypes":[] }]
-},
-{
-  "name":"com.google.protobuf.DescriptorProtos$FileOptions$Builder",
-  "methods":[{"name":"addUninterpretedOption","parameterTypes":["com.google.protobuf.DescriptorProtos$UninterpretedOption"] }, {"name":"clearCcEnableArenas","parameterTypes":[] }, {"name":"clearCcGenericServices","parameterTypes":[] }, {"name":"clearCsharpNamespace","parameterTypes":[] }, {"name":"clearDeprecated","parameterTypes":[] }, {"name":"clearFeatures","parameterTypes":[] }, {"name":"clearGoPackage","parameterTypes":[] }, {"name":"clearJavaGenerateEqualsAndHash","parameterTypes":[] }, {"name":"clearJavaGenericServices","parameterTypes":[] }, {"name":"clearJavaMultipleFiles","parameterTypes":[] }, {"name":"clearJavaOuterClassname","parameterTypes":[] }, {"name":"clearJavaPackage","parameterTypes":[] }, {"name":"clearJavaStringCheckUtf8","parameterTypes":[] }, {"name":"clearObjcClassPrefix","parameterTypes":[] }, {"name":"clearOptimizeFor","parameterTypes":[] }, {"name":"clearPhpClassPrefix","parameterTypes":[] }, {"name":"clearPhpMetadataNamespace","parameterTypes":[] }, {"name":"clearPhpNamespace","parameterTypes":[] }, {"name":"clearPyGenericServices","parameterTypes":[] }, {"name":"clearRubyPackage","parameterTypes":[] }, {"name":"clearSwiftPrefix","parameterTypes":[] }, {"name":"clearUninterpretedOption","parameterTypes":[] }, {"name":"getCcEnableArenas","parameterTypes":[] }, {"name":"getCcGenericServices","parameterTypes":[] }, {"name":"getCsharpNamespace","parameterTypes":[] }, {"name":"getDeprecated","parameterTypes":[] }, {"name":"getFeatures","parameterTypes":[] }, {"name":"getFeaturesBuilder","parameterTypes":[] }, {"name":"getGoPackage","parameterTypes":[] }, {"name":"getJavaGenerateEqualsAndHash","parameterTypes":[] }, {"name":"getJavaGenericServices","parameterTypes":[] }, {"name":"getJavaMultipleFiles","parameterTypes":[] }, {"name":"getJavaOuterClassname","parameterTypes":[] }, {"name":"getJavaPackage","parameterTypes":[] }, {"name":"getJavaStringCheckUtf8","parameterTypes":[] }, {"name":"getObjcClassPrefix","parameterTypes":[] }, {"name":"getOptimizeFor","parameterTypes":[] }, {"name":"getPhpClassPrefix","parameterTypes":[] }, {"name":"getPhpMetadataNamespace","parameterTypes":[] }, {"name":"getPhpNamespace","parameterTypes":[] }, {"name":"getPyGenericServices","parameterTypes":[] }, {"name":"getRubyPackage","parameterTypes":[] }, {"name":"getSwiftPrefix","parameterTypes":[] }, {"name":"getUninterpretedOption","parameterTypes":["int"] }, {"name":"getUninterpretedOptionBuilder","parameterTypes":["int"] }, {"name":"getUninterpretedOptionCount","parameterTypes":[] }, {"name":"getUninterpretedOptionList","parameterTypes":[] }, {"name":"hasCcEnableArenas","parameterTypes":[] }, {"name":"hasCcGenericServices","parameterTypes":[] }, {"name":"hasCsharpNamespace","parameterTypes":[] }, {"name":"hasDeprecated","parameterTypes":[] }, {"name":"hasFeatures","parameterTypes":[] }, {"name":"hasGoPackage","parameterTypes":[] }, {"name":"hasJavaGenerateEqualsAndHash","parameterTypes":[] }, {"name":"hasJavaGenericServices","parameterTypes":[] }, {"name":"hasJavaMultipleFiles","parameterTypes":[] }, {"name":"hasJavaOuterClassname","parameterTypes":[] }, {"name":"hasJavaPackage","parameterTypes":[] }, {"name":"hasJavaStringCheckUtf8","parameterTypes":[] }, {"name":"hasObjcClassPrefix","parameterTypes":[] }, {"name":"hasOptimizeFor","parameterTypes":[] }, {"name":"hasPhpClassPrefix","parameterTypes":[] }, {"name":"hasPhpMetadataNamespace","parameterTypes":[] }, {"name":"hasPhpNamespace","parameterTypes":[] }, {"name":"hasPyGenericServices","parameterTypes":[] }, {"name":"hasRubyPackage","parameterTypes":[] }, {"name":"hasSwiftPrefix","parameterTypes":[] }, {"name":"setCcEnableArenas","parameterTypes":["boolean"] }, {"name":"setCcGenericServices","parameterTypes":["boolean"] }, {"name":"setCsharpNamespace","parameterTypes":["java.lang.String"] }, {"name":"setCsharpNamespaceBytes","parameterTypes":["com.google.protobuf.ByteString"] }, {"name":"setDeprecated","parameterTypes":["boolean"] }, {"name":"setFeatures","parameterTypes":["com.google.protobuf.DescriptorProtos$FeatureSet"] }, {"name":"setGoPackage","parameterTypes":["java.lang.String"] }, {"name":"setGoPackageBytes","parameterTypes":["com.google.protobuf.ByteString"] }, {"name":"setJavaGenerateEqualsAndHash","parameterTypes":["boolean"] }, {"name":"setJavaGenericServices","parameterTypes":["boolean"] }, {"name":"setJavaMultipleFiles","parameterTypes":["boolean"] }, {"name":"setJavaOuterClassname","parameterTypes":["java.lang.String"] }, {"name":"setJavaOuterClassnameBytes","parameterTypes":["com.google.protobuf.ByteString"] }, {"name":"setJavaPackage","parameterTypes":["java.lang.String"] }, {"name":"setJavaPackageBytes","parameterTypes":["com.google.protobuf.ByteString"] }, {"name":"setJavaStringCheckUtf8","parameterTypes":["boolean"] }, {"name":"setObjcClassPrefix","parameterTypes":["java.lang.String"] }, {"name":"setObjcClassPrefixBytes","parameterTypes":["com.google.protobuf.ByteString"] }, {"name":"setOptimizeFor","parameterTypes":["com.google.protobuf.DescriptorProtos$FileOptions$OptimizeMode"] }, {"name":"setPhpClassPrefix","parameterTypes":["java.lang.String"] }, {"name":"setPhpClassPrefixBytes","parameterTypes":["com.google.protobuf.ByteString"] }, {"name":"setPhpMetadataNamespace","parameterTypes":["java.lang.String"] }, {"name":"setPhpMetadataNamespaceBytes","parameterTypes":["com.google.protobuf.ByteString"] }, {"name":"setPhpNamespace","parameterTypes":["java.lang.String"] }, {"name":"setPhpNamespaceBytes","parameterTypes":["com.google.protobuf.ByteString"] }, {"name":"setPyGenericServices","parameterTypes":["boolean"] }, {"name":"setRubyPackage","parameterTypes":["java.lang.String"] }, {"name":"setRubyPackageBytes","parameterTypes":["com.google.protobuf.ByteString"] }, {"name":"setSwiftPrefix","parameterTypes":["java.lang.String"] }, {"name":"setSwiftPrefixBytes","parameterTypes":["com.google.protobuf.ByteString"] }, {"name":"setUninterpretedOption","parameterTypes":["int","com.google.protobuf.DescriptorProtos$UninterpretedOption"] }]
-},
-{
-  "name":"com.google.protobuf.DescriptorProtos$FileOptions$OptimizeMode",
-  "methods":[{"name":"getValueDescriptor","parameterTypes":[] }, {"name":"valueOf","parameterTypes":["com.google.protobuf.Descriptors$EnumValueDescriptor"] }]
-},
-{
-  "name":"com.google.protobuf.DescriptorProtos$MethodDescriptorProto",
-  "methods":[{"name":"getClientStreaming","parameterTypes":[] }, {"name":"getInputType","parameterTypes":[] }, {"name":"getInputTypeBytes","parameterTypes":[] }, {"name":"getName","parameterTypes":[] }, {"name":"getNameBytes","parameterTypes":[] }, {"name":"getOptions","parameterTypes":[] }, {"name":"getOutputType","parameterTypes":[] }, {"name":"getOutputTypeBytes","parameterTypes":[] }, {"name":"getServerStreaming","parameterTypes":[] }, {"name":"hasClientStreaming","parameterTypes":[] }, {"name":"hasInputType","parameterTypes":[] }, {"name":"hasName","parameterTypes":[] }, {"name":"hasOptions","parameterTypes":[] }, {"name":"hasOutputType","parameterTypes":[] }, {"name":"hasServerStreaming","parameterTypes":[] }, {"name":"newBuilder","parameterTypes":[] }]
-},
-{
-  "name":"com.google.protobuf.DescriptorProtos$MethodDescriptorProto$Builder",
-  "methods":[{"name":"clearClientStreaming","parameterTypes":[] }, {"name":"clearInputType","parameterTypes":[] }, {"name":"clearName","parameterTypes":[] }, {"name":"clearOptions","parameterTypes":[] }, {"name":"clearOutputType","parameterTypes":[] }, {"name":"clearServerStreaming","parameterTypes":[] }, {"name":"getClientStreaming","parameterTypes":[] }, {"name":"getInputType","parameterTypes":[] }, {"name":"getName","parameterTypes":[] }, {"name":"getOptions","parameterTypes":[] }, {"name":"getOptionsBuilder","parameterTypes":[] }, {"name":"getOutputType","parameterTypes":[] }, {"name":"getServerStreaming","parameterTypes":[] }, {"name":"hasClientStreaming","parameterTypes":[] }, {"name":"hasInputType","parameterTypes":[] }, {"name":"hasName","parameterTypes":[] }, {"name":"hasOptions","parameterTypes":[] }, {"name":"hasOutputType","parameterTypes":[] }, {"name":"hasServerStreaming","parameterTypes":[] }, {"name":"setClientStreaming","parameterTypes":["boolean"] }, {"name":"setInputType","parameterTypes":["java.lang.String"] }, {"name":"setInputTypeBytes","parameterTypes":["com.google.protobuf.ByteString"] }, {"name":"setName","parameterTypes":["java.lang.String"] }, {"name":"setNameBytes","parameterTypes":["com.google.protobuf.ByteString"] }, {"name":"setOptions","parameterTypes":["com.google.protobuf.DescriptorProtos$MethodOptions"] }, {"name":"setOutputType","parameterTypes":["java.lang.String"] }, {"name":"setOutputTypeBytes","parameterTypes":["com.google.protobuf.ByteString"] }, {"name":"setServerStreaming","parameterTypes":["boolean"] }]
-},
-{
-  "name":"com.google.protobuf.DescriptorProtos$MethodOptions",
-  "methods":[{"name":"newBuilder","parameterTypes":[] }]
-},
-{
-  "name":"com.google.protobuf.DescriptorProtos$ServiceDescriptorProto",
-  "methods":[{"name":"getMethod","parameterTypes":["int"] }, {"name":"getMethodCount","parameterTypes":[] }, {"name":"getMethodList","parameterTypes":[] }, {"name":"getName","parameterTypes":[] }, {"name":"getNameBytes","parameterTypes":[] }, {"name":"getOptions","parameterTypes":[] }, {"name":"hasName","parameterTypes":[] }, {"name":"hasOptions","parameterTypes":[] }]
-},
-{
-  "name":"com.google.protobuf.DescriptorProtos$ServiceDescriptorProto$Builder",
-  "methods":[{"name":"addMethod","parameterTypes":["com.google.protobuf.DescriptorProtos$MethodDescriptorProto"] }, {"name":"clearMethod","parameterTypes":[] }, {"name":"clearName","parameterTypes":[] }, {"name":"clearOptions","parameterTypes":[] }, {"name":"getMethod","parameterTypes":["int"] }, {"name":"getMethodBuilder","parameterTypes":["int"] }, {"name":"getMethodCount","parameterTypes":[] }, {"name":"getMethodList","parameterTypes":[] }, {"name":"getName","parameterTypes":[] }, {"name":"getOptions","parameterTypes":[] }, {"name":"getOptionsBuilder","parameterTypes":[] }, {"name":"hasName","parameterTypes":[] }, {"name":"hasOptions","parameterTypes":[] }, {"name":"setMethod","parameterTypes":["int","com.google.protobuf.DescriptorProtos$MethodDescriptorProto"] }, {"name":"setName","parameterTypes":["java.lang.String"] }, {"name":"setNameBytes","parameterTypes":["com.google.protobuf.ByteString"] }, {"name":"setOptions","parameterTypes":["com.google.protobuf.DescriptorProtos$ServiceOptions"] }]
-},
-{
-  "name":"com.google.protobuf.DescriptorProtos$ServiceOptions",
-  "methods":[{"name":"newBuilder","parameterTypes":[] }]
-},
-{
-  "name":"com.google.protobuf.DescriptorProtos$UninterpretedOption",
-  "methods":[{"name":"newBuilder","parameterTypes":[] }]
-},
-{
-  "name":"com.google.protobuf.Extension"
-},
-{
-  "name":"com.google.protobuf.ExtensionRegistry",
-  "methods":[{"name":"add","parameterTypes":["com.google.protobuf.Extension"] }, {"name":"getEmptyRegistry","parameterTypes":[] }]
-},
-{
-  "name":"engine.protoc.openapi.Openapi$OpenAPI",
-  "methods":[{"name":"getComponents","parameterTypes":[] }, {"name":"getDefaultInstance","parameterTypes":[] }, {"name":"getExternalDocs","parameterTypes":[] }, {"name":"getInfo","parameterTypes":[] }, {"name":"getJsonSchemaDialect","parameterTypes":[] }, {"name":"getJsonSchemaDialectBytes","parameterTypes":[] }, {"name":"getOpenapi","parameterTypes":[] }, {"name":"getOpenapiBytes","parameterTypes":[] }, {"name":"getPaths","parameterTypes":[] }, {"name":"getSecurity","parameterTypes":["int"] }, {"name":"getSecurityCount","parameterTypes":[] }, {"name":"getSecurityList","parameterTypes":[] }, {"name":"getServers","parameterTypes":["int"] }, {"name":"getServersCount","parameterTypes":[] }, {"name":"getServersList","parameterTypes":[] }, {"name":"getTags","parameterTypes":["int"] }, {"name":"getTagsCount","parameterTypes":[] }, {"name":"getTagsList","parameterTypes":[] }, {"name":"hasComponents","parameterTypes":[] }, {"name":"hasExternalDocs","parameterTypes":[] }, {"name":"hasInfo","parameterTypes":[] }, {"name":"hasJsonSchemaDialect","parameterTypes":[] }, {"name":"hasOpenapi","parameterTypes":[] }, {"name":"hasPaths","parameterTypes":[] }]
-},
-{
-  "name":"engine.protoc.openapi.Openapi$OpenAPI$Builder",
-  "methods":[{"name":"addSecurity","parameterTypes":["engine.protoc.openapi.model.SecurityRequirementOuterClass$SecurityRequirement"] }, {"name":"addServers","parameterTypes":["engine.protoc.openapi.model.ServerOuterClass$Server"] }, {"name":"addTags","parameterTypes":["engine.protoc.openapi.model.TagOuterClass$Tag"] }, {"name":"clearComponents","parameterTypes":[] }, {"name":"clearExternalDocs","parameterTypes":[] }, {"name":"clearInfo","parameterTypes":[] }, {"name":"clearJsonSchemaDialect","parameterTypes":[] }, {"name":"clearOpenapi","parameterTypes":[] }, {"name":"clearPaths","parameterTypes":[] }, {"name":"clearSecurity","parameterTypes":[] }, {"name":"clearServers","parameterTypes":[] }, {"name":"clearTags","parameterTypes":[] }, {"name":"getComponents","parameterTypes":[] }, {"name":"getComponentsBuilder","parameterTypes":[] }, {"name":"getExternalDocs","parameterTypes":[] }, {"name":"getExternalDocsBuilder","parameterTypes":[] }, {"name":"getInfo","parameterTypes":[] }, {"name":"getInfoBuilder","parameterTypes":[] }, {"name":"getJsonSchemaDialect","parameterTypes":[] }, {"name":"getOpenapi","parameterTypes":[] }, {"name":"getPaths","parameterTypes":[] }, {"name":"getPathsBuilder","parameterTypes":[] }, {"name":"getSecurity","parameterTypes":["int"] }, {"name":"getSecurityBuilder","parameterTypes":["int"] }, {"name":"getSecurityCount","parameterTypes":[] }, {"name":"getSecurityList","parameterTypes":[] }, {"name":"getServers","parameterTypes":["int"] }, {"name":"getServersBuilder","parameterTypes":["int"] }, {"name":"getServersCount","parameterTypes":[] }, {"name":"getServersList","parameterTypes":[] }, {"name":"getTags","parameterTypes":["int"] }, {"name":"getTagsBuilder","parameterTypes":["int"] }, {"name":"getTagsCount","parameterTypes":[] }, {"name":"getTagsList","parameterTypes":[] }, {"name":"hasComponents","parameterTypes":[] }, {"name":"hasExternalDocs","parameterTypes":[] }, {"name":"hasInfo","parameterTypes":[] }, {"name":"hasJsonSchemaDialect","parameterTypes":[] }, {"name":"hasOpenapi","parameterTypes":[] }, {"name":"hasPaths","parameterTypes":[] }, {"name":"setComponents","parameterTypes":["engine.protoc.openapi.model.ComponentsOuterClass$Components"] }, {"name":"setExternalDocs","parameterTypes":["engine.protoc.openapi.model.ExternalDocumentationOuterClass$ExternalDocumentation"] }, {"name":"setInfo","parameterTypes":["engine.protoc.openapi.model.InfoOuterClass$Info"] }, {"name":"setJsonSchemaDialect","parameterTypes":["java.lang.String"] }, {"name":"setJsonSchemaDialectBytes","parameterTypes":["com.google.protobuf.ByteString"] }, {"name":"setOpenapi","parameterTypes":["java.lang.String"] }, {"name":"setOpenapiBytes","parameterTypes":["com.google.protobuf.ByteString"] }, {"name":"setPaths","parameterTypes":["engine.protoc.openapi.model.PathsOuterClass$Paths"] }, {"name":"setSecurity","parameterTypes":["int","engine.protoc.openapi.model.SecurityRequirementOuterClass$SecurityRequirement"] }, {"name":"setServers","parameterTypes":["int","engine.protoc.openapi.model.ServerOuterClass$Server"] }, {"name":"setTags","parameterTypes":["int","engine.protoc.openapi.model.TagOuterClass$Tag"] }]
-},
-{
-  "name":"engine.protoc.openapi.model.ApiKeySecurityScheme$APIKeySecurityScheme",
-  "methods":[{"name":"newBuilder","parameterTypes":[] }]
-},
-{
-  "name":"engine.protoc.openapi.model.ComponentsOuterClass$Components",
-  "methods":[{"name":"getDefaultInstance","parameterTypes":[] }, {"name":"newBuilder","parameterTypes":[] }]
-},
-{
-  "name":"engine.protoc.openapi.model.ContactOuterClass$Contact",
-  "methods":[{"name":"getEmail","parameterTypes":[] }, {"name":"getEmailBytes","parameterTypes":[] }, {"name":"getName","parameterTypes":[] }, {"name":"getNameBytes","parameterTypes":[] }, {"name":"getUrl","parameterTypes":[] }, {"name":"getUrlBytes","parameterTypes":[] }, {"name":"hasEmail","parameterTypes":[] }, {"name":"hasName","parameterTypes":[] }, {"name":"hasUrl","parameterTypes":[] }, {"name":"newBuilder","parameterTypes":[] }]
-},
-{
-  "name":"engine.protoc.openapi.model.ContactOuterClass$Contact$Builder",
-  "methods":[{"name":"clearEmail","parameterTypes":[] }, {"name":"clearName","parameterTypes":[] }, {"name":"clearUrl","parameterTypes":[] }, {"name":"getEmail","parameterTypes":[] }, {"name":"getName","parameterTypes":[] }, {"name":"getUrl","parameterTypes":[] }, {"name":"hasEmail","parameterTypes":[] }, {"name":"hasName","parameterTypes":[] }, {"name":"hasUrl","parameterTypes":[] }, {"name":"setEmail","parameterTypes":["java.lang.String"] }, {"name":"setEmailBytes","parameterTypes":["com.google.protobuf.ByteString"] }, {"name":"setName","parameterTypes":["java.lang.String"] }, {"name":"setNameBytes","parameterTypes":["com.google.protobuf.ByteString"] }, {"name":"setUrl","parameterTypes":["java.lang.String"] }, {"name":"setUrlBytes","parameterTypes":["com.google.protobuf.ByteString"] }]
-},
-{
-  "name":"engine.protoc.openapi.model.ExternalDocumentationOuterClass$ExternalDocumentation",
-  "methods":[{"name":"getDescription","parameterTypes":[] }, {"name":"getDescriptionBytes","parameterTypes":[] }, {"name":"getUrl","parameterTypes":[] }, {"name":"getUrlBytes","parameterTypes":[] }, {"name":"hasDescription","parameterTypes":[] }, {"name":"hasUrl","parameterTypes":[] }, {"name":"newBuilder","parameterTypes":[] }]
-},
-{
-  "name":"engine.protoc.openapi.model.ExternalDocumentationOuterClass$ExternalDocumentation$Builder",
-  "methods":[{"name":"clearDescription","parameterTypes":[] }, {"name":"clearUrl","parameterTypes":[] }, {"name":"getDescription","parameterTypes":[] }, {"name":"getUrl","parameterTypes":[] }, {"name":"hasDescription","parameterTypes":[] }, {"name":"hasUrl","parameterTypes":[] }, {"name":"setDescription","parameterTypes":["java.lang.String"] }, {"name":"setDescriptionBytes","parameterTypes":["com.google.protobuf.ByteString"] }, {"name":"setUrl","parameterTypes":["java.lang.String"] }, {"name":"setUrlBytes","parameterTypes":["com.google.protobuf.ByteString"] }]
-},
-{
-  "name":"engine.protoc.openapi.model.HttpSecurityScheme$HTTPSecurityScheme",
-  "methods":[{"name":"newBuilder","parameterTypes":[] }]
-},
-{
-  "name":"engine.protoc.openapi.model.InfoOuterClass$Info",
-  "methods":[{"name":"getContact","parameterTypes":[] }, {"name":"getDescription","parameterTypes":[] }, {"name":"getDescriptionBytes","parameterTypes":[] }, {"name":"getLicense","parameterTypes":[] }, {"name":"getSummary","parameterTypes":[] }, {"name":"getSummaryBytes","parameterTypes":[] }, {"name":"getTermsOfService","parameterTypes":[] }, {"name":"getTermsOfServiceBytes","parameterTypes":[] }, {"name":"getTitle","parameterTypes":[] }, {"name":"getTitleBytes","parameterTypes":[] }, {"name":"getVersion","parameterTypes":[] }, {"name":"getVersionBytes","parameterTypes":[] }, {"name":"hasContact","parameterTypes":[] }, {"name":"hasDescription","parameterTypes":[] }, {"name":"hasLicense","parameterTypes":[] }, {"name":"hasSummary","parameterTypes":[] }, {"name":"hasTermsOfService","parameterTypes":[] }, {"name":"hasTitle","parameterTypes":[] }, {"name":"hasVersion","parameterTypes":[] }, {"name":"newBuilder","parameterTypes":[] }]
-},
-{
-  "name":"engine.protoc.openapi.model.InfoOuterClass$Info$Builder",
-  "methods":[{"name":"clearContact","parameterTypes":[] }, {"name":"clearDescription","parameterTypes":[] }, {"name":"clearLicense","parameterTypes":[] }, {"name":"clearSummary","parameterTypes":[] }, {"name":"clearTermsOfService","parameterTypes":[] }, {"name":"clearTitle","parameterTypes":[] }, {"name":"clearVersion","parameterTypes":[] }, {"name":"getContact","parameterTypes":[] }, {"name":"getContactBuilder","parameterTypes":[] }, {"name":"getDescription","parameterTypes":[] }, {"name":"getLicense","parameterTypes":[] }, {"name":"getLicenseBuilder","parameterTypes":[] }, {"name":"getSummary","parameterTypes":[] }, {"name":"getTermsOfService","parameterTypes":[] }, {"name":"getTitle","parameterTypes":[] }, {"name":"getVersion","parameterTypes":[] }, {"name":"hasContact","parameterTypes":[] }, {"name":"hasDescription","parameterTypes":[] }, {"name":"hasLicense","parameterTypes":[] }, {"name":"hasSummary","parameterTypes":[] }, {"name":"hasTermsOfService","parameterTypes":[] }, {"name":"hasTitle","parameterTypes":[] }, {"name":"hasVersion","parameterTypes":[] }, {"name":"setContact","parameterTypes":["engine.protoc.openapi.model.ContactOuterClass$Contact"] }, {"name":"setDescription","parameterTypes":["java.lang.String"] }, {"name":"setDescriptionBytes","parameterTypes":["com.google.protobuf.ByteString"] }, {"name":"setLicense","parameterTypes":["engine.protoc.openapi.model.LicenseOuterClass$License"] }, {"name":"setSummary","parameterTypes":["java.lang.String"] }, {"name":"setSummaryBytes","parameterTypes":["com.google.protobuf.ByteString"] }, {"name":"setTermsOfService","parameterTypes":["java.lang.String"] }, {"name":"setTermsOfServiceBytes","parameterTypes":["com.google.protobuf.ByteString"] }, {"name":"setTitle","parameterTypes":["java.lang.String"] }, {"name":"setTitleBytes","parameterTypes":["com.google.protobuf.ByteString"] }, {"name":"setVersion","parameterTypes":["java.lang.String"] }, {"name":"setVersionBytes","parameterTypes":["com.google.protobuf.ByteString"] }]
-},
-{
-  "name":"engine.protoc.openapi.model.LicenseOuterClass$License",
-  "methods":[{"name":"getIdentifier","parameterTypes":[] }, {"name":"getIdentifierBytes","parameterTypes":[] }, {"name":"getName","parameterTypes":[] }, {"name":"getNameBytes","parameterTypes":[] }, {"name":"getTypeCase","parameterTypes":[] }, {"name":"getUrl","parameterTypes":[] }, {"name":"getUrlBytes","parameterTypes":[] }, {"name":"hasIdentifier","parameterTypes":[] }, {"name":"hasName","parameterTypes":[] }, {"name":"hasUrl","parameterTypes":[] }, {"name":"newBuilder","parameterTypes":[] }]
-},
-{
-  "name":"engine.protoc.openapi.model.LicenseOuterClass$License$Builder",
-  "methods":[{"name":"clearIdentifier","parameterTypes":[] }, {"name":"clearName","parameterTypes":[] }, {"name":"clearType","parameterTypes":[] }, {"name":"clearUrl","parameterTypes":[] }, {"name":"getIdentifier","parameterTypes":[] }, {"name":"getName","parameterTypes":[] }, {"name":"getTypeCase","parameterTypes":[] }, {"name":"getUrl","parameterTypes":[] }, {"name":"hasIdentifier","parameterTypes":[] }, {"name":"hasName","parameterTypes":[] }, {"name":"hasUrl","parameterTypes":[] }, {"name":"setIdentifier","parameterTypes":["java.lang.String"] }, {"name":"setIdentifierBytes","parameterTypes":["com.google.protobuf.ByteString"] }, {"name":"setName","parameterTypes":["java.lang.String"] }, {"name":"setNameBytes","parameterTypes":["com.google.protobuf.ByteString"] }, {"name":"setUrl","parameterTypes":["java.lang.String"] }, {"name":"setUrlBytes","parameterTypes":["com.google.protobuf.ByteString"] }]
-},
-{
-  "name":"engine.protoc.openapi.model.MtlsSecurityScheme$MutualTLSSecurityScheme",
-  "methods":[{"name":"newBuilder","parameterTypes":[] }]
-},
-{
-  "name":"engine.protoc.openapi.model.OauthSecurityScheme$OAuthSecurityScheme",
-  "methods":[{"name":"newBuilder","parameterTypes":[] }]
-},
-{
-  "name":"engine.protoc.openapi.model.OpenidConnectSecurityScheme$OpenIDConnectSecurityScheme",
-  "methods":[{"name":"newBuilder","parameterTypes":[] }]
-},
-{
-  "name":"engine.protoc.openapi.model.PathsOuterClass$Paths",
-  "methods":[{"name":"newBuilder","parameterTypes":[] }]
-},
-{
-  "name":"engine.protoc.openapi.model.ReferenceOuterClass$Reference",
-  "methods":[{"name":"newBuilder","parameterTypes":[] }]
-},
-{
-  "name":"engine.protoc.openapi.model.SecurityRequirementOuterClass$SecurityRequirement",
-  "methods":[{"name":"getDefaultInstance","parameterTypes":[] }, {"name":"newBuilder","parameterTypes":[] }]
-},
-{
-  "name":"engine.protoc.openapi.model.SecurityRequirementValuesOuterClass$SecurityRequirementValues",
-  "methods":[{"name":"getValues","parameterTypes":["int"] }, {"name":"getValuesCount","parameterTypes":[] }, {"name":"getValuesList","parameterTypes":[] }]
-},
-{
-  "name":"engine.protoc.openapi.model.SecurityRequirementValuesOuterClass$SecurityRequirementValues$Builder",
-  "methods":[{"name":"addValues","parameterTypes":["java.lang.String"] }, {"name":"clearValues","parameterTypes":[] }, {"name":"getValues","parameterTypes":["int"] }, {"name":"getValuesCount","parameterTypes":[] }, {"name":"getValuesList","parameterTypes":[] }, {"name":"setValues","parameterTypes":["int","java.lang.String"] }]
-},
-{
-  "name":"engine.protoc.openapi.model.SecuritySchemeOrReferenceOuterClass$SecuritySchemeOrReference",
-  "methods":[{"name":"getReference","parameterTypes":[] }, {"name":"getSecurityScheme","parameterTypes":[] }, {"name":"getTypeCase","parameterTypes":[] }, {"name":"hasReference","parameterTypes":[] }, {"name":"hasSecurityScheme","parameterTypes":[] }]
-},
-{
-  "name":"engine.protoc.openapi.model.SecuritySchemeOrReferenceOuterClass$SecuritySchemeOrReference$Builder",
-  "methods":[{"name":"clearReference","parameterTypes":[] }, {"name":"clearSecurityScheme","parameterTypes":[] }, {"name":"clearType","parameterTypes":[] }, {"name":"getReference","parameterTypes":[] }, {"name":"getReferenceBuilder","parameterTypes":[] }, {"name":"getSecurityScheme","parameterTypes":[] }, {"name":"getSecuritySchemeBuilder","parameterTypes":[] }, {"name":"getTypeCase","parameterTypes":[] }, {"name":"hasReference","parameterTypes":[] }, {"name":"hasSecurityScheme","parameterTypes":[] }, {"name":"setReference","parameterTypes":["engine.protoc.openapi.model.ReferenceOuterClass$Reference"] }, {"name":"setSecurityScheme","parameterTypes":["engine.protoc.openapi.model.SecuritySchemeOuterClass$SecurityScheme"] }]
-},
-{
-  "name":"engine.protoc.openapi.model.SecuritySchemeOuterClass$SecurityScheme",
-  "methods":[{"name":"getApiKey","parameterTypes":[] }, {"name":"getDescription","parameterTypes":[] }, {"name":"getDescriptionBytes","parameterTypes":[] }, {"name":"getHttp","parameterTypes":[] }, {"name":"getMutualTls","parameterTypes":[] }, {"name":"getOauth2","parameterTypes":[] }, {"name":"getOpenIdConnect","parameterTypes":[] }, {"name":"getTypeCase","parameterTypes":[] }, {"name":"hasApiKey","parameterTypes":[] }, {"name":"hasDescription","parameterTypes":[] }, {"name":"hasHttp","parameterTypes":[] }, {"name":"hasMutualTls","parameterTypes":[] }, {"name":"hasOauth2","parameterTypes":[] }, {"name":"hasOpenIdConnect","parameterTypes":[] }, {"name":"newBuilder","parameterTypes":[] }]
-},
-{
-  "name":"engine.protoc.openapi.model.SecuritySchemeOuterClass$SecurityScheme$Builder",
-  "methods":[{"name":"clearApiKey","parameterTypes":[] }, {"name":"clearDescription","parameterTypes":[] }, {"name":"clearHttp","parameterTypes":[] }, {"name":"clearMutualTls","parameterTypes":[] }, {"name":"clearOauth2","parameterTypes":[] }, {"name":"clearOpenIdConnect","parameterTypes":[] }, {"name":"clearType","parameterTypes":[] }, {"name":"getApiKey","parameterTypes":[] }, {"name":"getApiKeyBuilder","parameterTypes":[] }, {"name":"getDescription","parameterTypes":[] }, {"name":"getHttp","parameterTypes":[] }, {"name":"getHttpBuilder","parameterTypes":[] }, {"name":"getMutualTls","parameterTypes":[] }, {"name":"getMutualTlsBuilder","parameterTypes":[] }, {"name":"getOauth2","parameterTypes":[] }, {"name":"getOauth2Builder","parameterTypes":[] }, {"name":"getOpenIdConnect","parameterTypes":[] }, {"name":"getOpenIdConnectBuilder","parameterTypes":[] }, {"name":"getTypeCase","parameterTypes":[] }, {"name":"hasApiKey","parameterTypes":[] }, {"name":"hasDescription","parameterTypes":[] }, {"name":"hasHttp","parameterTypes":[] }, {"name":"hasMutualTls","parameterTypes":[] }, {"name":"hasOauth2","parameterTypes":[] }, {"name":"hasOpenIdConnect","parameterTypes":[] }, {"name":"setApiKey","parameterTypes":["engine.protoc.openapi.model.ApiKeySecurityScheme$APIKeySecurityScheme"] }, {"name":"setDescription","parameterTypes":["java.lang.String"] }, {"name":"setDescriptionBytes","parameterTypes":["com.google.protobuf.ByteString"] }, {"name":"setHttp","parameterTypes":["engine.protoc.openapi.model.HttpSecurityScheme$HTTPSecurityScheme"] }, {"name":"setMutualTls","parameterTypes":["engine.protoc.openapi.model.MtlsSecurityScheme$MutualTLSSecurityScheme"] }, {"name":"setOauth2","parameterTypes":["engine.protoc.openapi.model.OauthSecurityScheme$OAuthSecurityScheme"] }, {"name":"setOpenIdConnect","parameterTypes":["engine.protoc.openapi.model.OpenidConnectSecurityScheme$OpenIDConnectSecurityScheme"] }]
-},
-{
-  "name":"engine.protoc.openapi.model.ServerOuterClass$Server",
-  "methods":[{"name":"getDefaultInstance","parameterTypes":[] }, {"name":"getDescription","parameterTypes":[] }, {"name":"getDescriptionBytes","parameterTypes":[] }, {"name":"getUrl","parameterTypes":[] }, {"name":"getUrlBytes","parameterTypes":[] }, {"name":"newBuilder","parameterTypes":[] }]
-},
-{
-  "name":"engine.protoc.openapi.model.ServerOuterClass$Server$Builder",
-  "methods":[{"name":"clearDescription","parameterTypes":[] }, {"name":"clearUrl","parameterTypes":[] }, {"name":"getDescription","parameterTypes":[] }, {"name":"getUrl","parameterTypes":[] }, {"name":"setDescription","parameterTypes":["java.lang.String"] }, {"name":"setDescriptionBytes","parameterTypes":["com.google.protobuf.ByteString"] }, {"name":"setUrl","parameterTypes":["java.lang.String"] }, {"name":"setUrlBytes","parameterTypes":["com.google.protobuf.ByteString"] }]
-},
-{
-  "name":"engine.protoc.openapi.model.TagOuterClass$Tag",
-  "methods":[{"name":"newBuilder","parameterTypes":[] }]
-},
-{
-  "name":"java.nio.Buffer",
-  "fields":[{"name":"address"}]
-},
-{
-  "name":"libcore.io.Memory"
-},
-{
-  "name":"org.robolectric.Robolectric"
-},
-{
-  "name":"sun.misc.Unsafe",
-  "allDeclaredFields":true,
-  "methods":[{"name":"arrayBaseOffset","parameterTypes":["java.lang.Class"] }, {"name":"arrayIndexScale","parameterTypes":["java.lang.Class"] }, {"name":"copyMemory","parameterTypes":["long","long","long"] }, {"name":"copyMemory","parameterTypes":["java.lang.Object","long","java.lang.Object","long","long"] }, {"name":"getBoolean","parameterTypes":["java.lang.Object","long"] }, {"name":"getByte","parameterTypes":["long"] }, {"name":"getByte","parameterTypes":["java.lang.Object","long"] }, {"name":"getDouble","parameterTypes":["java.lang.Object","long"] }, {"name":"getFloat","parameterTypes":["java.lang.Object","long"] }, {"name":"getInt","parameterTypes":["long"] }, {"name":"getInt","parameterTypes":["java.lang.Object","long"] }, {"name":"getLong","parameterTypes":["long"] }, {"name":"getLong","parameterTypes":["java.lang.Object","long"] }, {"name":"getObject","parameterTypes":["java.lang.Object","long"] }, {"name":"objectFieldOffset","parameterTypes":["java.lang.reflect.Field"] }, {"name":"putBoolean","parameterTypes":["java.lang.Object","long","boolean"] }, {"name":"putByte","parameterTypes":["long","byte"] }, {"name":"putByte","parameterTypes":["java.lang.Object","long","byte"] }, {"name":"putDouble","parameterTypes":["java.lang.Object","long","double"] }, {"name":"putFloat","parameterTypes":["java.lang.Object","long","float"] }, {"name":"putInt","parameterTypes":["long","int"] }, {"name":"putInt","parameterTypes":["java.lang.Object","long","int"] }, {"name":"putLong","parameterTypes":["long","long"] }, {"name":"putLong","parameterTypes":["java.lang.Object","long","long"] }, {"name":"putObject","parameterTypes":["java.lang.Object","long","java.lang.Object"] }]
-}
+    {
+        "name": "[Ljava.lang.Class;"
+    },
+    {
+        "name": "[Ljava.lang.Object;"
+    },
+    {
+        "name": "[Ljava.lang.StackTraceElement;"
+    },
+    {
+        "name": "[Ljava.lang.String;"
+    },
+    {
+        "name": "[Ljava.lang.annotation.Annotation;"
+    },
+    {
+        "name": "[Ljava.lang.annotation.ElementType;"
+    },
+    {
+        "name": "[Ljava.lang.invoke.LambdaForm$Name;"
+    },
+    {
+        "name": "[Ljava.lang.invoke.MethodHandle;"
+    },
+    {
+        "name": "[Ljava.nio.ByteBuffer;"
+    },
+    {
+        "name": "[Ljava.time.format.DateTimeFormatterBuilder$DateTimePrinterParser;"
+    },
+    {
+        "name": "[Ljava.util.Map$Entry;"
+    },
+    {
+        "name": "[Ljava.util.logging.Handler;"
+    },
+    {
+        "name": "[Ljavax.crypto.CryptoPermission;"
+    },
+    {
+        "name": "[Ljdk.internal.net.http.AsyncEvent;"
+    },
+    {
+        "name": "[Lkotlin.annotation.AnnotationTarget;"
+    },
+    {
+        "name": "[Lkotlin.reflect.jvm.internal.impl.resolve.scopes.MemberScope;"
+    },
+    {
+        "name": "[Lorg.gradle.internal.service.ServiceRegistry;"
+    },
+    {
+        "name": "[Lsun.security.jca.ProviderConfig;"
+    },
+    {
+        "name": "[Lsun.security.util.DerValue;"
+    },
+    {
+        "name": "[Ltools.jackson.core.sym.CharsToNameCanonicalizer$Bucket;"
+    },
+    {
+        "name": "[Ltools.jackson.databind.cfg.CoercionAction;"
+    },
+    {
+        "name": "[Ltools.jackson.databind.deser.Deserializers;"
+    },
+    {
+        "name": "[Ltools.jackson.databind.deser.KeyDeserializers;"
+    },
+    {
+        "name": "[Ltools.jackson.databind.deser.ValueInstantiators;"
+    },
+    {
+        "name": "[Ltools.jackson.databind.introspect.POJOPropertyBuilder;"
+    },
+    {
+        "name": "[Ltools.jackson.databind.ser.Serializers;"
+    },
+    {
+        "name": "apple.security.AppleProvider",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "boolean"
+    },
+    {
+        "name": "byte"
+    },
+    {
+        "name": "char"
+    },
+    {
+        "name": "com.engine.protoc.openapi.ProtocGenOpenAPI"
+    },
+    {
+        "name": "com.engine.protoc.openapi.ProtocGenOpenAPI$Options"
+    },
+    {
+        "name": "com.engine.protoc.openapi.ProtocGenOpenAPI$Options$EnumValueFormat"
+    },
+    {
+        "name": "com.engine.protoc.openapi.ProtocGenOpenAPI$Options$OutputFormat"
+    },
+    {
+        "name": "com.engine.protoc.openapi.ProtocGenOpenAPI$Options$SchemaNamespaceCasing"
+    },
+    {
+        "name": "com.engine.protoc.openapi.ProtocGenOpenAPI$Options$SchemaNamespaceSeparator"
+    },
+    {
+        "name": "com.engine.protoc.openapi.ProtocGenOpenAPI$Options$SchemaNamespaceStrategy"
+    },
+    {
+        "name": "com.ethlo.time.ITU"
+    },
+    {
+        "name": "com.fasterxml.jackson.annotation.JacksonAnnotation",
+        "queryAllDeclaredMethods": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.reflect.InvocationHandler"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "com.fasterxml.jackson.annotation.JsonAnyGetter",
+        "queryAllDeclaredMethods": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.reflect.InvocationHandler"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "com.fasterxml.jackson.annotation.JsonAutoDetect",
+        "queryAllDeclaredMethods": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.reflect.InvocationHandler"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "com.fasterxml.jackson.annotation.JsonAutoDetect$Visibility",
+        "methods": [
+            {
+                "name": "values",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "com.fasterxml.jackson.annotation.JsonCreator",
+        "queryAllDeclaredMethods": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.reflect.InvocationHandler"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "com.fasterxml.jackson.annotation.JsonCreator$Mode",
+        "methods": [
+            {
+                "name": "values",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "com.fasterxml.jackson.annotation.JsonIgnore",
+        "queryAllDeclaredMethods": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.reflect.InvocationHandler"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "com.fasterxml.jackson.annotation.JsonInclude",
+        "queryAllDeclaredMethods": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.reflect.InvocationHandler"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "com.fasterxml.jackson.annotation.JsonInclude$Include",
+        "methods": [
+            {
+                "name": "values",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "com.fasterxml.jackson.annotation.JsonProperty",
+        "queryAllDeclaredMethods": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.reflect.InvocationHandler"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "com.fasterxml.jackson.annotation.JsonProperty$Access",
+        "methods": [
+            {
+                "name": "values",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "com.fasterxml.jackson.annotation.JsonPropertyOrder",
+        "queryAllDeclaredMethods": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.reflect.InvocationHandler"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "com.fasterxml.jackson.annotation.JsonSetter",
+        "queryAllDeclaredMethods": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.reflect.InvocationHandler"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "com.fasterxml.jackson.annotation.JsonValue",
+        "queryAllDeclaredMethods": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.reflect.InvocationHandler"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "com.fasterxml.jackson.annotation.Nulls",
+        "methods": [
+            {
+                "name": "values",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "com.fasterxml.jackson.annotation.OptBoolean",
+        "methods": [
+            {
+                "name": "values",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "com.google.common.util.concurrent.AbstractFutureState",
+        "fields": [
+            {
+                "name": "listenersField"
+            },
+            {
+                "name": "valueField"
+            },
+            {
+                "name": "waitersField"
+            }
+        ]
+    },
+    {
+        "name": "com.google.common.util.concurrent.AbstractFutureState$Waiter",
+        "fields": [
+            {
+                "name": "next"
+            },
+            {
+                "name": "thread"
+            }
+        ]
+    },
+    {
+        "name": "com.google.errorprone.annotations.CheckReturnValue",
+        "queryAllDeclaredMethods": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.reflect.InvocationHandler"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "com.google.errorprone.annotations.Keep"
+    },
+    {
+        "name": "com.google.protobuf.BoolValue",
+        "methods": [
+            {
+                "name": "getDefaultInstance",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "com.google.protobuf.BytesValue",
+        "methods": [
+            {
+                "name": "getDefaultInstance",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "com.google.protobuf.CheckReturnValue",
+        "queryAllDeclaredMethods": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.reflect.InvocationHandler"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "com.google.protobuf.DoubleValue",
+        "methods": [
+            {
+                "name": "getDefaultInstance",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "com.google.protobuf.Extension"
+    },
+    {
+        "name": "com.google.protobuf.ExtensionRegistry",
+        "methods": [
+            {
+                "name": "add",
+                "parameterTypes": [
+                    "com.google.protobuf.Extension"
+                ]
+            },
+            {
+                "name": "getEmptyRegistry",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "com.google.protobuf.FloatValue",
+        "methods": [
+            {
+                "name": "getDefaultInstance",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "com.google.protobuf.Int32Value",
+        "methods": [
+            {
+                "name": "getDefaultInstance",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "com.google.protobuf.Int64Value",
+        "methods": [
+            {
+                "name": "getDefaultInstance",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "com.google.protobuf.StringValue",
+        "methods": [
+            {
+                "name": "getDefaultInstance",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "com.google.protobuf.UInt32Value",
+        "methods": [
+            {
+                "name": "getDefaultInstance",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "com.google.protobuf.UInt64Value",
+        "methods": [
+            {
+                "name": "getDefaultInstance",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "com.google.protobuf.Value",
+        "methods": [
+            {
+                "name": "getDefaultInstance",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "com.networknt.schema.SpecificationVersion",
+        "methods": [
+            {
+                "name": "values",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "com.sun.crypto.provider.AESCipher$General",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "com.sun.crypto.provider.ARCFOURCipher",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "com.sun.crypto.provider.ChaCha20Cipher$ChaCha20Poly1305",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "com.sun.crypto.provider.DESCipher",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "com.sun.crypto.provider.DESedeCipher",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "com.sun.crypto.provider.DHParameters",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "com.sun.crypto.provider.GaloisCounterMode$AESGCM",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "com.sun.crypto.provider.TlsMasterSecretGenerator",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "com.sun.security.sasl.Provider",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "com.sun.security.sasl.gsskerb.JdkSASL",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "double"
+    },
+    {
+        "name": "float"
+    },
+    {
+        "name": "int"
+    },
+    {
+        "name": "io.perfmark.impl.SecretPerfMarkImpl$PerfMarkImpl"
+    },
+    {
+        "name": "java.io.Closeable"
+    },
+    {
+        "name": "java.io.Serializable",
+        "allPermittedSubclasses": true,
+        "queryAllDeclaredMethods": true
+    },
+    {
+        "name": "java.lang.AutoCloseable"
+    },
+    {
+        "name": "java.lang.Boolean",
+        "methods": [
+            {
+                "name": "hashCode",
+                "parameterTypes": [
+                    "boolean"
+                ]
+            },
+            {
+                "name": "toString",
+                "parameterTypes": [
+                    "boolean"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.Byte",
+        "methods": [
+            {
+                "name": "hashCode",
+                "parameterTypes": [
+                    "byte"
+                ]
+            },
+            {
+                "name": "toString",
+                "parameterTypes": [
+                    "byte"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.Character",
+        "methods": [
+            {
+                "name": "hashCode",
+                "parameterTypes": [
+                    "char"
+                ]
+            },
+            {
+                "name": "toString",
+                "parameterTypes": [
+                    "char"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.Class",
+        "methods": [
+            {
+                "name": "cast",
+                "parameterTypes": [
+                    "java.lang.Object"
+                ]
+            },
+            {
+                "name": "getModule",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "getPermittedSubclasses",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "getRecordComponents",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "isInstance",
+                "parameterTypes": [
+                    "java.lang.Object"
+                ]
+            },
+            {
+                "name": "isRecord",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "isSealed",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.ClassLoader",
+        "fields": [
+            {
+                "name": "classLoaderValueMap"
+            }
+        ]
+    },
+    {
+        "name": "java.lang.ClassValue"
+    },
+    {
+        "name": "java.lang.Cloneable"
+    },
+    {
+        "name": "java.lang.Comparable"
+    },
+    {
+        "name": "java.lang.Deprecated",
+        "queryAllDeclaredMethods": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.reflect.InvocationHandler"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.Double",
+        "methods": [
+            {
+                "name": "hashCode",
+                "parameterTypes": [
+                    "double"
+                ]
+            },
+            {
+                "name": "toString",
+                "parameterTypes": [
+                    "double"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.Enum"
+    },
+    {
+        "name": "java.lang.Float",
+        "methods": [
+            {
+                "name": "hashCode",
+                "parameterTypes": [
+                    "float"
+                ]
+            },
+            {
+                "name": "toString",
+                "parameterTypes": [
+                    "float"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.Integer",
+        "methods": [
+            {
+                "name": "hashCode",
+                "parameterTypes": [
+                    "int"
+                ]
+            },
+            {
+                "name": "toString",
+                "parameterTypes": [
+                    "int"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.Iterable",
+        "queryAllDeclaredMethods": true
+    },
+    {
+        "name": "java.lang.Long",
+        "methods": [
+            {
+                "name": "hashCode",
+                "parameterTypes": [
+                    "long"
+                ]
+            },
+            {
+                "name": "toString",
+                "parameterTypes": [
+                    "long"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.Module",
+        "methods": [
+            {
+                "name": "getDescriptor",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.Number"
+    },
+    {
+        "name": "java.lang.Object",
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "equals",
+                "parameterTypes": [
+                    "java.lang.Object"
+                ]
+            },
+            {
+                "name": "hashCode",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "readResolve",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "toString",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "writeReplace",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.ProcessHandle",
+        "methods": [
+            {
+                "name": "current",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "pid",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.SecurityManager"
+    },
+    {
+        "name": "java.lang.Short",
+        "methods": [
+            {
+                "name": "hashCode",
+                "parameterTypes": [
+                    "short"
+                ]
+            },
+            {
+                "name": "toString",
+                "parameterTypes": [
+                    "short"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.StackWalker$Option",
+        "methods": [
+            {
+                "name": "values",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.String",
+        "methods": [
+            {
+                "name": "format",
+                "parameterTypes": [
+                    "java.lang.String",
+                    "java.lang.Object[]"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.StringConcatHelper",
+        "methods": [
+            {
+                "name": "mix",
+                "parameterTypes": [
+                    "long",
+                    "char"
+                ]
+            },
+            {
+                "name": "mix",
+                "parameterTypes": [
+                    "long",
+                    "int"
+                ]
+            },
+            {
+                "name": "mix",
+                "parameterTypes": [
+                    "long",
+                    "long"
+                ]
+            },
+            {
+                "name": "mix",
+                "parameterTypes": [
+                    "long",
+                    "java.lang.String"
+                ]
+            },
+            {
+                "name": "newArray",
+                "parameterTypes": [
+                    "long"
+                ]
+            },
+            {
+                "name": "newArrayWithSuffix",
+                "parameterTypes": [
+                    "java.lang.String",
+                    "long"
+                ]
+            },
+            {
+                "name": "newString",
+                "parameterTypes": [
+                    "byte[]",
+                    "long"
+                ]
+            },
+            {
+                "name": "prepend",
+                "parameterTypes": [
+                    "long",
+                    "byte[]",
+                    "char",
+                    "java.lang.String"
+                ]
+            },
+            {
+                "name": "prepend",
+                "parameterTypes": [
+                    "long",
+                    "byte[]",
+                    "int",
+                    "java.lang.String"
+                ]
+            },
+            {
+                "name": "prepend",
+                "parameterTypes": [
+                    "long",
+                    "byte[]",
+                    "long",
+                    "java.lang.String"
+                ]
+            },
+            {
+                "name": "prepend",
+                "parameterTypes": [
+                    "long",
+                    "byte[]",
+                    "java.lang.String",
+                    "java.lang.String"
+                ]
+            },
+            {
+                "name": "simpleConcat",
+                "parameterTypes": [
+                    "java.lang.Object",
+                    "java.lang.Object"
+                ]
+            },
+            {
+                "name": "stringOf",
+                "parameterTypes": [
+                    "java.lang.Object"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.System$Logger$Level",
+        "methods": [
+            {
+                "name": "values",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.Thread",
+        "fields": [
+            {
+                "name": "inheritableThreadLocals"
+            },
+            {
+                "name": "inheritedAccessControlContext"
+            },
+            {
+                "name": "threadLocalRandomProbe"
+            },
+            {
+                "name": "threadLocalRandomSecondarySeed"
+            },
+            {
+                "name": "threadLocalRandomSeed"
+            },
+            {
+                "name": "threadLocals"
+            }
+        ],
+        "methods": [
+            {
+                "name": "isVirtual",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.Thread$ThreadNumbering",
+        "fields": [
+            {
+                "name": "next"
+            }
+        ]
+    },
+    {
+        "name": "java.lang.Void"
+    },
+    {
+        "name": "java.lang.annotation.Documented",
+        "queryAllDeclaredMethods": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.reflect.InvocationHandler"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.annotation.ElementType",
+        "methods": [
+            {
+                "name": "values",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.annotation.Inherited",
+        "queryAllDeclaredMethods": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.reflect.InvocationHandler"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.annotation.Retention",
+        "queryAllDeclaredMethods": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.reflect.InvocationHandler"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.annotation.RetentionPolicy",
+        "methods": [
+            {
+                "name": "values",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.annotation.Target",
+        "queryAllDeclaredMethods": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.reflect.InvocationHandler"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.constant.Constable"
+    },
+    {
+        "name": "java.lang.constant.ConstantDesc"
+    },
+    {
+        "name": "java.lang.invoke.BoundMethodHandle",
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.invoke.MethodType",
+                    "java.lang.invoke.LambdaForm"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.invoke.BoundMethodHandle$Species_I",
+        "fields": [
+            {
+                "name": "argI0"
+            }
+        ],
+        "methods": [
+            {
+                "name": "make",
+                "parameterTypes": [
+                    "java.lang.invoke.MethodType",
+                    "java.lang.invoke.LambdaForm",
+                    "int"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.invoke.BoundMethodHandle$Species_LI",
+        "fields": [
+            {
+                "name": "argI1"
+            },
+            {
+                "name": "argL0"
+            }
+        ],
+        "methods": [
+            {
+                "name": "make",
+                "parameterTypes": [
+                    "java.lang.invoke.MethodType",
+                    "java.lang.invoke.LambdaForm",
+                    "java.lang.Object",
+                    "int"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.invoke.BoundMethodHandle$Species_LJ",
+        "fields": [
+            {
+                "name": "argJ1"
+            },
+            {
+                "name": "argL0"
+            }
+        ],
+        "methods": [
+            {
+                "name": "make",
+                "parameterTypes": [
+                    "java.lang.invoke.MethodType",
+                    "java.lang.invoke.LambdaForm",
+                    "java.lang.Object",
+                    "long"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.invoke.BoundMethodHandle$Species_LL",
+        "fields": [
+            {
+                "name": "argL0"
+            },
+            {
+                "name": "argL1"
+            }
+        ],
+        "methods": [
+            {
+                "name": "make",
+                "parameterTypes": [
+                    "java.lang.invoke.MethodType",
+                    "java.lang.invoke.LambdaForm",
+                    "java.lang.Object",
+                    "java.lang.Object"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.invoke.BoundMethodHandle$Species_LLJ",
+        "fields": [
+            {
+                "name": "argJ2"
+            },
+            {
+                "name": "argL0"
+            },
+            {
+                "name": "argL1"
+            }
+        ],
+        "methods": [
+            {
+                "name": "make",
+                "parameterTypes": [
+                    "java.lang.invoke.MethodType",
+                    "java.lang.invoke.LambdaForm",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "long"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.invoke.BoundMethodHandle$Species_LLL",
+        "fields": [
+            {
+                "name": "argL0"
+            },
+            {
+                "name": "argL1"
+            },
+            {
+                "name": "argL2"
+            }
+        ],
+        "methods": [
+            {
+                "name": "make",
+                "parameterTypes": [
+                    "java.lang.invoke.MethodType",
+                    "java.lang.invoke.LambdaForm",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.invoke.BoundMethodHandle$Species_LLLJ",
+        "fields": [
+            {
+                "name": "argJ3"
+            },
+            {
+                "name": "argL0"
+            },
+            {
+                "name": "argL1"
+            },
+            {
+                "name": "argL2"
+            }
+        ],
+        "methods": [
+            {
+                "name": "make",
+                "parameterTypes": [
+                    "java.lang.invoke.MethodType",
+                    "java.lang.invoke.LambdaForm",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "long"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.invoke.BoundMethodHandle$Species_LLLL",
+        "fields": [
+            {
+                "name": "argL0"
+            },
+            {
+                "name": "argL1"
+            },
+            {
+                "name": "argL2"
+            },
+            {
+                "name": "argL3"
+            }
+        ],
+        "methods": [
+            {
+                "name": "make",
+                "parameterTypes": [
+                    "java.lang.invoke.MethodType",
+                    "java.lang.invoke.LambdaForm",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.invoke.BoundMethodHandle$Species_LLLLL",
+        "fields": [
+            {
+                "name": "argL0"
+            },
+            {
+                "name": "argL1"
+            },
+            {
+                "name": "argL2"
+            },
+            {
+                "name": "argL3"
+            },
+            {
+                "name": "argL4"
+            }
+        ],
+        "methods": [
+            {
+                "name": "make",
+                "parameterTypes": [
+                    "java.lang.invoke.MethodType",
+                    "java.lang.invoke.LambdaForm",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.invoke.BoundMethodHandle$Species_LLLLLL",
+        "fields": [
+            {
+                "name": "argL0"
+            },
+            {
+                "name": "argL1"
+            },
+            {
+                "name": "argL2"
+            },
+            {
+                "name": "argL3"
+            },
+            {
+                "name": "argL4"
+            },
+            {
+                "name": "argL5"
+            }
+        ],
+        "methods": [
+            {
+                "name": "make",
+                "parameterTypes": [
+                    "java.lang.invoke.MethodType",
+                    "java.lang.invoke.LambdaForm",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.invoke.BoundMethodHandle$Species_LLLLLLL",
+        "fields": [
+            {
+                "name": "argL0"
+            },
+            {
+                "name": "argL1"
+            },
+            {
+                "name": "argL2"
+            },
+            {
+                "name": "argL3"
+            },
+            {
+                "name": "argL4"
+            },
+            {
+                "name": "argL5"
+            },
+            {
+                "name": "argL6"
+            }
+        ],
+        "methods": [
+            {
+                "name": "make",
+                "parameterTypes": [
+                    "java.lang.invoke.MethodType",
+                    "java.lang.invoke.LambdaForm",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.invoke.MethodHandle"
+    },
+    {
+        "name": "java.lang.invoke.MethodHandleImpl",
+        "methods": [
+            {
+                "name": "checkSpreadArgument",
+                "parameterTypes": [
+                    "java.lang.Object",
+                    "int"
+                ]
+            },
+            {
+                "name": "profileBoolean",
+                "parameterTypes": [
+                    "boolean",
+                    "int[]"
+                ]
+            },
+            {
+                "name": "selectAlternative",
+                "parameterTypes": [
+                    "boolean",
+                    "java.lang.invoke.MethodHandle",
+                    "java.lang.invoke.MethodHandle"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.invoke.MethodHandleImpl$ArrayAccessor",
+        "methods": [
+            {
+                "name": "getElementL",
+                "parameterTypes": [
+                    "java.lang.Object[]",
+                    "int"
+                ]
+            },
+            {
+                "name": "lengthL",
+                "parameterTypes": [
+                    "java.lang.Object[]"
+                ]
+            },
+            {
+                "name": "setElementL",
+                "parameterTypes": [
+                    "java.lang.Object[]",
+                    "int",
+                    "java.lang.Object"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.invoke.MethodHandleImpl$CountingWrapper",
+        "methods": [
+            {
+                "name": "maybeStopCounting",
+                "parameterTypes": [
+                    "java.lang.Object"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.invoke.VarHandle",
+        "fields": [
+            {
+                "name": "vform"
+            }
+        ]
+    },
+    {
+        "name": "java.lang.module.ModuleDescriptor",
+        "methods": [
+            {
+                "name": "name",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.reflect.Array",
+        "methods": [
+            {
+                "name": "newInstance",
+                "parameterTypes": [
+                    "java.lang.Class",
+                    "int"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.runtime.ObjectMethods",
+        "methods": [
+            {
+                "name": "eq",
+                "parameterTypes": [
+                    "byte",
+                    "byte"
+                ]
+            },
+            {
+                "name": "eq",
+                "parameterTypes": [
+                    "char",
+                    "char"
+                ]
+            },
+            {
+                "name": "eq",
+                "parameterTypes": [
+                    "double",
+                    "double"
+                ]
+            },
+            {
+                "name": "eq",
+                "parameterTypes": [
+                    "float",
+                    "float"
+                ]
+            },
+            {
+                "name": "eq",
+                "parameterTypes": [
+                    "int",
+                    "int"
+                ]
+            },
+            {
+                "name": "eq",
+                "parameterTypes": [
+                    "long",
+                    "long"
+                ]
+            },
+            {
+                "name": "eq",
+                "parameterTypes": [
+                    "java.lang.Object",
+                    "java.lang.Object"
+                ]
+            },
+            {
+                "name": "eq",
+                "parameterTypes": [
+                    "short",
+                    "short"
+                ]
+            },
+            {
+                "name": "eq",
+                "parameterTypes": [
+                    "boolean",
+                    "boolean"
+                ]
+            },
+            {
+                "name": "hashCombiner",
+                "parameterTypes": [
+                    "int",
+                    "int"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.net.Inet6Address",
+        "fields": [
+            {
+                "name": "holder6"
+            }
+        ]
+    },
+    {
+        "name": "java.net.InetAddress",
+        "fields": [
+            {
+                "name": "holder"
+            }
+        ]
+    },
+    {
+        "name": "java.net.InetSocketAddress",
+        "fields": [
+            {
+                "name": "holder"
+            }
+        ]
+    },
+    {
+        "name": "java.net.Socket",
+        "fields": [
+            {
+                "name": "in"
+            },
+            {
+                "name": "out"
+            },
+            {
+                "name": "state"
+            }
+        ]
+    },
+    {
+        "name": "java.net.SocketException",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.String"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.net.UnixDomainSocketAddress",
+        "methods": [
+            {
+                "name": "of",
+                "parameterTypes": [
+                    "java.lang.String"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.nio.Buffer",
+        "fields": [
+            {
+                "name": "address"
+            }
+        ]
+    },
+    {
+        "name": "java.nio.ByteBuffer",
+        "fields": [
+            {
+                "name": "hb"
+            },
+            {
+                "name": "offset"
+            }
+        ]
+    },
+    {
+        "name": "java.nio.channels.SelectionKey",
+        "fields": [
+            {
+                "name": "attachment"
+            }
+        ]
+    },
+    {
+        "name": "java.nio.channels.spi.AbstractSelectionKey",
+        "fields": [
+            {
+                "name": "invalid"
+            }
+        ]
+    },
+    {
+        "name": "java.nio.channels.spi.AbstractSelector",
+        "fields": [
+            {
+                "name": "closed"
+            }
+        ]
+    },
+    {
+        "name": "java.nio.file.attribute.PosixFilePermission",
+        "methods": [
+            {
+                "name": "values",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.security.AlgorithmParametersSpi"
+    },
+    {
+        "name": "java.security.CryptoPrimitive",
+        "methods": [
+            {
+                "name": "values",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.security.KeyStoreSpi"
+    },
+    {
+        "name": "java.security.SecureRandomParameters"
+    },
+    {
+        "name": "java.util.AbstractCollection",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "methods": [
+            {
+                "name": "readResolve",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "writeReplace",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.util.AbstractList",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true
+    },
+    {
+        "name": "java.util.AbstractMap",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true
+    },
+    {
+        "name": "java.util.AbstractQueue",
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "readResolve",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "writeReplace",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.util.AbstractSet",
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "readResolve",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "writeReplace",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.util.Collection",
+        "queryAllDeclaredMethods": true
+    },
+    {
+        "name": "java.util.Collections$SingletonList",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true
+    },
+    {
+        "name": "java.util.Collections$SingletonMap",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true
+    },
+    {
+        "name": "java.util.Date"
+    },
+    {
+        "name": "java.util.HashMap"
+    },
+    {
+        "name": "java.util.HashSet",
+        "allDeclaredFields": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "readObject",
+                "parameterTypes": [
+                    "java.io.ObjectInputStream"
+                ]
+            },
+            {
+                "name": "readObjectNoData",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "readResolve",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "writeObject",
+                "parameterTypes": [
+                    "java.io.ObjectOutputStream"
+                ]
+            },
+            {
+                "name": "writeReplace",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.util.Iterator"
+    },
+    {
+        "name": "java.util.LinkedHashSet",
+        "allDeclaredFields": true,
+        "methods": [
+            {
+                "name": "readObject",
+                "parameterTypes": [
+                    "java.io.ObjectInputStream"
+                ]
+            },
+            {
+                "name": "readObjectNoData",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "readResolve",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "writeObject",
+                "parameterTypes": [
+                    "java.io.ObjectOutputStream"
+                ]
+            },
+            {
+                "name": "writeReplace",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.util.List",
+        "queryAllDeclaredMethods": true
+    },
+    {
+        "name": "java.util.ListIterator"
+    },
+    {
+        "name": "java.util.Map",
+        "queryAllDeclaredMethods": true
+    },
+    {
+        "name": "java.util.Map$Entry"
+    },
+    {
+        "name": "java.util.Objects",
+        "methods": [
+            {
+                "name": "equals",
+                "parameterTypes": [
+                    "java.lang.Object",
+                    "java.lang.Object"
+                ]
+            },
+            {
+                "name": "hashCode",
+                "parameterTypes": [
+                    "java.lang.Object"
+                ]
+            },
+            {
+                "name": "toString",
+                "parameterTypes": [
+                    "java.lang.Object"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.util.Random",
+        "fields": [
+            {
+                "name": "seed"
+            }
+        ]
+    },
+    {
+        "name": "java.util.RandomAccess",
+        "queryAllDeclaredMethods": true
+    },
+    {
+        "name": "java.util.SequencedCollection"
+    },
+    {
+        "name": "java.util.SequencedMap"
+    },
+    {
+        "name": "java.util.Set"
+    },
+    {
+        "name": "java.util.Spliterator"
+    },
+    {
+        "name": "java.util.concurrent.ArrayBlockingQueue",
+        "allDeclaredFields": true,
+        "methods": [
+            {
+                "name": "readObject",
+                "parameterTypes": [
+                    "java.io.ObjectInputStream"
+                ]
+            },
+            {
+                "name": "readObjectNoData",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "readResolve",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "writeObject",
+                "parameterTypes": [
+                    "java.io.ObjectOutputStream"
+                ]
+            },
+            {
+                "name": "writeReplace",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.util.concurrent.CancellationException",
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.String"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.util.concurrent.CompletableFuture",
+        "fields": [
+            {
+                "name": "result"
+            },
+            {
+                "name": "stack"
+            }
+        ]
+    },
+    {
+        "name": "java.util.concurrent.CompletableFuture$Completion",
+        "fields": [
+            {
+                "name": "next"
+            }
+        ]
+    },
+    {
+        "name": "java.util.concurrent.ConcurrentHashMap$TreeBin",
+        "fields": [
+            {
+                "name": "lockState"
+            },
+            {
+                "name": "waiter"
+            }
+        ]
+    },
+    {
+        "name": "java.util.concurrent.ConcurrentLinkedDeque",
+        "fields": [
+            {
+                "name": "head"
+            },
+            {
+                "name": "tail"
+            }
+        ]
+    },
+    {
+        "name": "java.util.concurrent.ConcurrentLinkedDeque$Node",
+        "fields": [
+            {
+                "name": "item"
+            },
+            {
+                "name": "next"
+            },
+            {
+                "name": "prev"
+            }
+        ]
+    },
+    {
+        "name": "java.util.concurrent.ConcurrentLinkedQueue",
+        "fields": [
+            {
+                "name": "head"
+            },
+            {
+                "name": "tail"
+            }
+        ]
+    },
+    {
+        "name": "java.util.concurrent.ConcurrentLinkedQueue$Node",
+        "fields": [
+            {
+                "name": "item"
+            },
+            {
+                "name": "next"
+            }
+        ]
+    },
+    {
+        "name": "java.util.concurrent.ConcurrentSkipListMap",
+        "fields": [
+            {
+                "name": "adder"
+            },
+            {
+                "name": "head"
+            }
+        ]
+    },
+    {
+        "name": "java.util.concurrent.ConcurrentSkipListMap$Index",
+        "fields": [
+            {
+                "name": "right"
+            }
+        ]
+    },
+    {
+        "name": "java.util.concurrent.ConcurrentSkipListMap$Node",
+        "fields": [
+            {
+                "name": "next"
+            },
+            {
+                "name": "val"
+            }
+        ]
+    },
+    {
+        "name": "java.util.concurrent.CountedCompleter",
+        "fields": [
+            {
+                "name": "pending"
+            }
+        ]
+    },
+    {
+        "name": "java.util.concurrent.ForkJoinPool",
+        "fields": [
+            {
+                "name": "ctl"
+            },
+            {
+                "name": "parallelism"
+            },
+            {
+                "name": "poolIds"
+            },
+            {
+                "name": "runState"
+            },
+            {
+                "name": "threadIds"
+            }
+        ]
+    },
+    {
+        "name": "java.util.concurrent.ForkJoinTask",
+        "fields": [
+            {
+                "name": "aux"
+            },
+            {
+                "name": "status"
+            }
+        ]
+    },
+    {
+        "name": "java.util.concurrent.FutureTask",
+        "fields": [
+            {
+                "name": "runner"
+            },
+            {
+                "name": "state"
+            },
+            {
+                "name": "waiters"
+            }
+        ]
+    },
+    {
+        "name": "java.util.concurrent.LinkedTransferQueue",
+        "fields": [
+            {
+                "name": "head"
+            },
+            {
+                "name": "sweepVotes"
+            },
+            {
+                "name": "tail"
+            }
+        ]
+    },
+    {
+        "name": "java.util.concurrent.LinkedTransferQueue$DualNode",
+        "fields": [
+            {
+                "name": "item"
+            },
+            {
+                "name": "next"
+            }
+        ]
+    },
+    {
+        "name": "java.util.concurrent.atomic.AtomicBoolean",
+        "fields": [
+            {
+                "name": "value"
+            }
+        ]
+    },
+    {
+        "name": "java.util.concurrent.atomic.AtomicMarkableReference",
+        "fields": [
+            {
+                "name": "pair"
+            }
+        ]
+    },
+    {
+        "name": "java.util.concurrent.atomic.AtomicReference",
+        "fields": [
+            {
+                "name": "value"
+            }
+        ]
+    },
+    {
+        "name": "java.util.concurrent.atomic.LongAdder",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "add",
+                "parameterTypes": [
+                    "long"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.util.concurrent.atomic.Striped64",
+        "fields": [
+            {
+                "name": "base"
+            },
+            {
+                "name": "cellsBusy"
+            }
+        ]
+    },
+    {
+        "name": "java.util.concurrent.locks.AbstractOwnableSynchronizer",
+        "allDeclaredFields": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "readObject",
+                "parameterTypes": [
+                    "java.io.ObjectInputStream"
+                ]
+            },
+            {
+                "name": "readObjectNoData",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "readResolve",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "writeObject",
+                "parameterTypes": [
+                    "java.io.ObjectOutputStream"
+                ]
+            },
+            {
+                "name": "writeReplace",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.util.concurrent.locks.AbstractQueuedSynchronizer",
+        "allDeclaredFields": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "readObject",
+                "parameterTypes": [
+                    "java.io.ObjectInputStream"
+                ]
+            },
+            {
+                "name": "readObjectNoData",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "readResolve",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "writeObject",
+                "parameterTypes": [
+                    "java.io.ObjectOutputStream"
+                ]
+            },
+            {
+                "name": "writeReplace",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject",
+        "allDeclaredFields": true,
+        "methods": [
+            {
+                "name": "readObject",
+                "parameterTypes": [
+                    "java.io.ObjectInputStream"
+                ]
+            },
+            {
+                "name": "readObjectNoData",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "readResolve",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "writeObject",
+                "parameterTypes": [
+                    "java.io.ObjectOutputStream"
+                ]
+            },
+            {
+                "name": "writeReplace",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.util.concurrent.locks.ReentrantLock",
+        "allDeclaredFields": true,
+        "methods": [
+            {
+                "name": "readObject",
+                "parameterTypes": [
+                    "java.io.ObjectInputStream"
+                ]
+            },
+            {
+                "name": "readObjectNoData",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "readResolve",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "writeObject",
+                "parameterTypes": [
+                    "java.io.ObjectOutputStream"
+                ]
+            },
+            {
+                "name": "writeReplace",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.util.concurrent.locks.ReentrantLock$NonfairSync",
+        "allDeclaredFields": true,
+        "methods": [
+            {
+                "name": "readObject",
+                "parameterTypes": [
+                    "java.io.ObjectInputStream"
+                ]
+            },
+            {
+                "name": "readObjectNoData",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "readResolve",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "writeObject",
+                "parameterTypes": [
+                    "java.io.ObjectOutputStream"
+                ]
+            },
+            {
+                "name": "writeReplace",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.util.concurrent.locks.ReentrantLock$Sync",
+        "allDeclaredFields": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "readObject",
+                "parameterTypes": [
+                    "java.io.ObjectInputStream"
+                ]
+            },
+            {
+                "name": "readObjectNoData",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "readResolve",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "writeObject",
+                "parameterTypes": [
+                    "java.io.ObjectOutputStream"
+                ]
+            },
+            {
+                "name": "writeReplace",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.util.logging.ConsoleHandler",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.util.logging.SimpleFormatter",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.util.stream.BaseStream"
+    },
+    {
+        "name": "java.util.stream.Stream"
+    },
+    {
+        "name": "javax.annotation.CheckForNull",
+        "queryAllDeclaredMethods": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.reflect.InvocationHandler"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "javax.annotation.Nonnull",
+        "queryAllDeclaredMethods": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.reflect.InvocationHandler"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "javax.annotation.meta.TypeQualifier",
+        "queryAllDeclaredMethods": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.reflect.InvocationHandler"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "javax.annotation.meta.When",
+        "methods": [
+            {
+                "name": "values",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "javax.net.ssl.SSLContext",
+        "fields": [
+            {
+                "name": "defaultContext"
+            }
+        ]
+    },
+    {
+        "name": "javax.security.auth.x500.X500Principal",
+        "fields": [
+            {
+                "name": "thisX500Name"
+            }
+        ],
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "sun.security.x509.X500Name"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "jdk.internal.event.EventHelper",
+        "fields": [
+            {
+                "name": "securityLogger"
+            }
+        ]
+    },
+    {
+        "name": "jdk.internal.misc.Unsafe"
+    },
+    {
+        "name": "jdk.internal.net.http.AuthenticationFilter",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "jdk.internal.net.http.Http1Response$ClientRefCountTracker",
+        "fields": [
+            {
+                "name": "state"
+            }
+        ]
+    },
+    {
+        "name": "jdk.internal.net.http.Http2Connection",
+        "fields": [
+            {
+                "name": "closedState"
+            }
+        ]
+    },
+    {
+        "name": "jdk.internal.net.http.RedirectFilter",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "jdk.internal.reflect.GeneratedSerializationConstructorAccessor1",
+        "unsafeAllocated": true
+    },
+    {
+        "name": "jdk.internal.reflect.GeneratedSerializationConstructorAccessor10",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "jdk.internal.reflect.GeneratedSerializationConstructorAccessor11",
+        "unsafeAllocated": true
+    },
+    {
+        "name": "jdk.internal.reflect.GeneratedSerializationConstructorAccessor12",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "jdk.internal.reflect.GeneratedSerializationConstructorAccessor13",
+        "unsafeAllocated": true
+    },
+    {
+        "name": "jdk.internal.reflect.GeneratedSerializationConstructorAccessor14",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "jdk.internal.reflect.GeneratedSerializationConstructorAccessor15",
+        "unsafeAllocated": true
+    },
+    {
+        "name": "jdk.internal.reflect.GeneratedSerializationConstructorAccessor16",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "jdk.internal.reflect.GeneratedSerializationConstructorAccessor17",
+        "unsafeAllocated": true
+    },
+    {
+        "name": "jdk.internal.reflect.GeneratedSerializationConstructorAccessor18",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "jdk.internal.reflect.GeneratedSerializationConstructorAccessor19",
+        "unsafeAllocated": true
+    },
+    {
+        "name": "jdk.internal.reflect.GeneratedSerializationConstructorAccessor2",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "jdk.internal.reflect.GeneratedSerializationConstructorAccessor20",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "jdk.internal.reflect.GeneratedSerializationConstructorAccessor21",
+        "unsafeAllocated": true
+    },
+    {
+        "name": "jdk.internal.reflect.GeneratedSerializationConstructorAccessor22",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "jdk.internal.reflect.GeneratedSerializationConstructorAccessor23",
+        "unsafeAllocated": true
+    },
+    {
+        "name": "jdk.internal.reflect.GeneratedSerializationConstructorAccessor24",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "jdk.internal.reflect.GeneratedSerializationConstructorAccessor25",
+        "unsafeAllocated": true
+    },
+    {
+        "name": "jdk.internal.reflect.GeneratedSerializationConstructorAccessor26",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "jdk.internal.reflect.GeneratedSerializationConstructorAccessor27",
+        "unsafeAllocated": true
+    },
+    {
+        "name": "jdk.internal.reflect.GeneratedSerializationConstructorAccessor28",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "jdk.internal.reflect.GeneratedSerializationConstructorAccessor3",
+        "unsafeAllocated": true
+    },
+    {
+        "name": "jdk.internal.reflect.GeneratedSerializationConstructorAccessor4",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "jdk.internal.reflect.GeneratedSerializationConstructorAccessor5",
+        "unsafeAllocated": true
+    },
+    {
+        "name": "jdk.internal.reflect.GeneratedSerializationConstructorAccessor6",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "jdk.internal.reflect.GeneratedSerializationConstructorAccessor7",
+        "unsafeAllocated": true
+    },
+    {
+        "name": "jdk.internal.reflect.GeneratedSerializationConstructorAccessor8",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "jdk.internal.reflect.GeneratedSerializationConstructorAccessor9",
+        "unsafeAllocated": true
+    },
+    {
+        "name": "jdk.internal.util.OperatingSystem",
+        "methods": [
+            {
+                "name": "values",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "jdk.internal.vm.SharedThreadContainer",
+        "fields": [
+            {
+                "name": "closed"
+            },
+            {
+                "name": "virtualThreads"
+            }
+        ]
+    },
+    {
+        "name": "jdk.net.ExtendedSocketOptions"
+    },
+    {
+        "name": "jdk.net.MacOSXSocketOptions",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "kotlin.Any"
+    },
+    {
+        "name": "kotlin.Boolean"
+    },
+    {
+        "name": "kotlin.Cloneable"
+    },
+    {
+        "name": "kotlin.Deprecated",
+        "queryAllDeclaredMethods": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.reflect.InvocationHandler"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "kotlin.DeprecationLevel",
+        "methods": [
+            {
+                "name": "values",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "kotlin.Function"
+    },
+    {
+        "name": "kotlin.Function2"
+    },
+    {
+        "name": "kotlin.Int"
+    },
+    {
+        "name": "kotlin.Metadata",
+        "queryAllDeclaredMethods": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.reflect.InvocationHandler"
+                ]
+            },
+            {
+                "name": "bv",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "d1",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "d2",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "k",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "mv",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "pn",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "xi",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "xs",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "kotlin.ReplaceWith",
+        "queryAllDeclaredMethods": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.reflect.InvocationHandler"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "kotlin.SafePublicationLazyImpl",
+        "fields": [
+            {
+                "name": "_value"
+            }
+        ]
+    },
+    {
+        "name": "kotlin.String"
+    },
+    {
+        "name": "kotlin.Unit"
+    },
+    {
+        "name": "kotlin.annotation.AnnotationRetention",
+        "methods": [
+            {
+                "name": "values",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "kotlin.annotation.AnnotationTarget",
+        "methods": [
+            {
+                "name": "values",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "kotlin.annotation.MustBeDocumented",
+        "queryAllDeclaredMethods": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.reflect.InvocationHandler"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "kotlin.annotation.Retention",
+        "queryAllDeclaredMethods": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.reflect.InvocationHandler"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "kotlin.annotation.Target",
+        "queryAllDeclaredMethods": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.reflect.InvocationHandler"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "kotlin.collections.EmptyList",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true
+    },
+    {
+        "name": "kotlin.collections.List"
+    },
+    {
+        "name": "kotlin.coroutines.Continuation"
+    },
+    {
+        "name": "kotlin.coroutines.jvm.internal.BaseContinuationImpl"
+    },
+    {
+        "name": "kotlin.coroutines.jvm.internal.ContinuationImpl"
+    },
+    {
+        "name": "kotlin.coroutines.jvm.internal.CoroutineStackFrame"
+    },
+    {
+        "name": "kotlin.coroutines.jvm.internal.DebugMetadata",
+        "queryAllDeclaredMethods": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.reflect.InvocationHandler"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "kotlin.coroutines.jvm.internal.SuspendFunction"
+    },
+    {
+        "name": "kotlin.coroutines.jvm.internal.SuspendLambda"
+    },
+    {
+        "name": "kotlin.jvm.JvmStatic",
+        "queryAllDeclaredMethods": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.reflect.InvocationHandler"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "kotlin.jvm.functions.Function2"
+    },
+    {
+        "name": "kotlin.jvm.internal.DefaultConstructorMarker"
+    },
+    {
+        "name": "kotlin.jvm.internal.FunctionBase"
+    },
+    {
+        "name": "kotlin.jvm.internal.markers.KMappedMarker",
+        "queryAllDeclaredMethods": true
+    },
+    {
+        "name": "kotlin.reflect.jvm.internal.ReflectionFactoryImpl",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "kotlin.reflect.jvm.internal.impl.builtins.PrimitiveType",
+        "methods": [
+            {
+                "name": "values",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "kotlin.reflect.jvm.internal.impl.km.jvm.internal.JvmMetadataExtensions",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "kotlin.reflect.jvm.internal.impl.load.java.ErasedOverridabilityCondition",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "kotlin.reflect.jvm.internal.impl.load.java.FieldOverridabilityCondition",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "kotlin.reflect.jvm.internal.impl.load.java.JavaIncompatibilityRulesOverridabilityCondition",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "libcore.io.Memory"
+    },
+    {
+        "name": "long"
+    },
+    {
+        "name": "org.apiguardian.api.API"
+    },
+    {
+        "name": "org.jcp.xml.dsig.internal.dom.XMLDSigRI",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "org.robolectric.Robolectric"
+    },
+    {
+        "name": "short"
+    },
+    {
+        "name": "sun.invoke.util.ValueConversions",
+        "methods": [
+            {
+                "name": "boxBoolean",
+                "parameterTypes": [
+                    "boolean"
+                ]
+            },
+            {
+                "name": "boxInteger",
+                "parameterTypes": [
+                    "int"
+                ]
+            },
+            {
+                "name": "boxLong",
+                "parameterTypes": [
+                    "long"
+                ]
+            },
+            {
+                "name": "unboxLong",
+                "parameterTypes": [
+                    "java.lang.Object",
+                    "boolean"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "sun.misc.Unsafe",
+        "allDeclaredFields": true,
+        "methods": [
+            {
+                "name": "arrayBaseOffset",
+                "parameterTypes": [
+                    "java.lang.Class"
+                ]
+            },
+            {
+                "name": "arrayIndexScale",
+                "parameterTypes": [
+                    "java.lang.Class"
+                ]
+            },
+            {
+                "name": "copyMemory",
+                "parameterTypes": [
+                    "long",
+                    "long",
+                    "long"
+                ]
+            },
+            {
+                "name": "copyMemory",
+                "parameterTypes": [
+                    "java.lang.Object",
+                    "long",
+                    "java.lang.Object",
+                    "long",
+                    "long"
+                ]
+            },
+            {
+                "name": "getBoolean",
+                "parameterTypes": [
+                    "java.lang.Object",
+                    "long"
+                ]
+            },
+            {
+                "name": "getByte",
+                "parameterTypes": [
+                    "long"
+                ]
+            },
+            {
+                "name": "getByte",
+                "parameterTypes": [
+                    "java.lang.Object",
+                    "long"
+                ]
+            },
+            {
+                "name": "getDouble",
+                "parameterTypes": [
+                    "java.lang.Object",
+                    "long"
+                ]
+            },
+            {
+                "name": "getFloat",
+                "parameterTypes": [
+                    "java.lang.Object",
+                    "long"
+                ]
+            },
+            {
+                "name": "getInt",
+                "parameterTypes": [
+                    "long"
+                ]
+            },
+            {
+                "name": "getInt",
+                "parameterTypes": [
+                    "java.lang.Object",
+                    "long"
+                ]
+            },
+            {
+                "name": "getLong",
+                "parameterTypes": [
+                    "long"
+                ]
+            },
+            {
+                "name": "getLong",
+                "parameterTypes": [
+                    "java.lang.Object",
+                    "long"
+                ]
+            },
+            {
+                "name": "getObject",
+                "parameterTypes": [
+                    "java.lang.Object",
+                    "long"
+                ]
+            },
+            {
+                "name": "invokeCleaner",
+                "parameterTypes": [
+                    "java.nio.ByteBuffer"
+                ]
+            },
+            {
+                "name": "objectFieldOffset",
+                "parameterTypes": [
+                    "java.lang.reflect.Field"
+                ]
+            },
+            {
+                "name": "putBoolean",
+                "parameterTypes": [
+                    "java.lang.Object",
+                    "long",
+                    "boolean"
+                ]
+            },
+            {
+                "name": "putByte",
+                "parameterTypes": [
+                    "long",
+                    "byte"
+                ]
+            },
+            {
+                "name": "putByte",
+                "parameterTypes": [
+                    "java.lang.Object",
+                    "long",
+                    "byte"
+                ]
+            },
+            {
+                "name": "putDouble",
+                "parameterTypes": [
+                    "java.lang.Object",
+                    "long",
+                    "double"
+                ]
+            },
+            {
+                "name": "putFloat",
+                "parameterTypes": [
+                    "java.lang.Object",
+                    "long",
+                    "float"
+                ]
+            },
+            {
+                "name": "putInt",
+                "parameterTypes": [
+                    "long",
+                    "int"
+                ]
+            },
+            {
+                "name": "putInt",
+                "parameterTypes": [
+                    "java.lang.Object",
+                    "long",
+                    "int"
+                ]
+            },
+            {
+                "name": "putLong",
+                "parameterTypes": [
+                    "long",
+                    "long"
+                ]
+            },
+            {
+                "name": "putLong",
+                "parameterTypes": [
+                    "java.lang.Object",
+                    "long",
+                    "long"
+                ]
+            },
+            {
+                "name": "putObject",
+                "parameterTypes": [
+                    "java.lang.Object",
+                    "long",
+                    "java.lang.Object"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "sun.net.spi.DefaultProxySelector",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "sun.net.www.protocol.http.Handler",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "sun.nio.ch.SelectionKeyImpl",
+        "fields": [
+            {
+                "name": "interestOps"
+            }
+        ]
+    },
+    {
+        "name": "sun.security.ec.SunEC",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "sun.security.jgss.SunProvider",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "sun.security.pkcs11.SunPKCS11",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "sun.security.pkcs12.PKCS12KeyStore",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "sun.security.pkcs12.PKCS12KeyStore$DualFormatPKCS12",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "sun.security.provider.DSA$SHA224withDSA",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "sun.security.provider.DSA$SHA256withDSA",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "sun.security.provider.NativePRNG",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.security.SecureRandomParameters"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "sun.security.provider.NativePRNG$NonBlocking",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.security.SecureRandomParameters"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "sun.security.provider.SHA",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "sun.security.provider.SHA2$SHA224",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "sun.security.provider.SHA2$SHA256",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "sun.security.provider.SHA5$SHA384",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "sun.security.provider.SHA5$SHA512",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "sun.security.provider.X509Factory",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "sun.security.provider.certpath.ldap.JdkLDAP",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "sun.security.rsa.PSSParameters",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "sun.security.rsa.RSAKeyFactory$Legacy",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "sun.security.rsa.RSAPSSSignature",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "sun.security.rsa.RSASignature$SHA224withRSA",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "sun.security.smartcardio.SunPCSC",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "sun.security.ssl.KeyManagerFactoryImpl$SunX509",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "sun.security.ssl.SSLContextImpl$DefaultSSLContext",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "sun.security.ssl.TrustManagerFactoryImpl$PKIXFactory",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "sun.security.x509.AuthorityInfoAccessExtension",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.Boolean",
+                    "java.lang.Object"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "sun.security.x509.AuthorityKeyIdentifierExtension",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.Boolean",
+                    "java.lang.Object"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "sun.security.x509.BasicConstraintsExtension",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.Boolean",
+                    "java.lang.Object"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "sun.security.x509.CRLDistributionPointsExtension",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.Boolean",
+                    "java.lang.Object"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "sun.security.x509.CertificatePoliciesExtension",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.Boolean",
+                    "java.lang.Object"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "sun.security.x509.ExtendedKeyUsageExtension",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.Boolean",
+                    "java.lang.Object"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "sun.security.x509.IssuerAlternativeNameExtension",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.Boolean",
+                    "java.lang.Object"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "sun.security.x509.KeyUsageExtension",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.Boolean",
+                    "java.lang.Object"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "sun.security.x509.NetscapeCertTypeExtension",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.Boolean",
+                    "java.lang.Object"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "sun.security.x509.PrivateKeyUsageExtension",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.Boolean",
+                    "java.lang.Object"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "sun.security.x509.SubjectAlternativeNameExtension",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.Boolean",
+                    "java.lang.Object"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "sun.security.x509.SubjectKeyIdentifierExtension",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.Boolean",
+                    "java.lang.Object"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "sun.text.resources.cldr.FormatData",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "sun.text.resources.cldr.FormatData_en",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "sun.util.cldr.CLDRLocaleProviderAdapter",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "sun.util.locale.provider.JRELocaleProviderAdapter",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "sun.util.logging.internal.LoggingProviderImpl",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "sun.util.logging.resources.logging",
+        "unsafeAllocated": true
+    },
+    {
+        "name": "sun.util.resources.cldr.CalendarData",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "sun.util.resources.cldr.TimeZoneNames",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "sun.util.resources.cldr.TimeZoneNames_en",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "sun.util.resources.cldr.provider.CLDRLocaleDataMetaInfo",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "sun.util.resources.provider.NonBaseLocaleDataMetaInfo",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "tools.jackson.core.tree.ObjectTreeNode"
+    },
+    {
+        "name": "tools.jackson.core.type.TypeReference"
+    },
+    {
+        "name": "tools.jackson.databind.DeserializationFeature",
+        "methods": [
+            {
+                "name": "values",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "tools.jackson.databind.PropertyNamingStrategies$SnakeCaseStrategy",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "tools.jackson.databind.PropertyNamingStrategy"
+    },
+    {
+        "name": "tools.jackson.databind.SerializationFeature",
+        "methods": [
+            {
+                "name": "values",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "tools.jackson.databind.annotation.JacksonStdImpl",
+        "queryAllDeclaredMethods": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.reflect.InvocationHandler"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "tools.jackson.databind.annotation.JsonNaming",
+        "queryAllDeclaredMethods": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.reflect.InvocationHandler"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "tools.jackson.databind.node.BaseJsonNode"
+    },
+    {
+        "name": "tools.jackson.databind.node.ContainerNode"
+    },
+    {
+        "name": "tools.jackson.databind.node.JsonNodeCreator"
+    },
+    {
+        "name": "tools.jackson.databind.node.ObjectNode",
+        "allPermittedSubclasses": true
+    }
 ]

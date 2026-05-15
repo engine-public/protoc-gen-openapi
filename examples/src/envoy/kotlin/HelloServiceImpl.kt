@@ -1,3 +1,5 @@
+package com.engine.protoc.openapi.example
+
 import com.engine.protoc.openapi.example.envoy.Greeting
 import com.engine.protoc.openapi.example.envoy.HelloRequest
 import com.engine.protoc.openapi.example.envoy.HelloResponse

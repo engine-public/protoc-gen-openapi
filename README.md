@@ -1,56 +1,116 @@
 # protoc-gen-openapi
-protoc compiler to turn gRPC services into openapi v3.1 specs
 
-Early chicken scratch notes:
-This project ultimately compiles the plugin down to a native binary so it can be used directly in a protoc invocation without special setup.
-Protobuf compilation uses some amount of reflection by default, which makes setting up the graalvm native-image somewhat tricky.
+A `protoc` compiler plugin that converts gRPC service definitions (protobuf) into [OpenAPI v3.1](https://spec.openapis.org/oas/v3.1.0) specifications.
+Designed to pair with Envoy's [`GrpcJsonTranscoder`](https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/filters/http/grpc_json_transcoder/v3/transcoder.proto): every compiler option that affects wire format has a corresponding Envoy filter option, so the generated OAS document describes what Envoy will actually emit.
+The plugin compiles to a native binary via GraalVM so it can be used directly in a `protoc` invocation without a JVM on `PATH`.
 
-## Run Configuration
+## Subprojects
 
-There are three intellij run configurations checked in to the repo to assist in this process.
+| path | description |
+|---|---|
+| **root** (`src/`) | The plugin executable. Reads `CodeGeneratorRequest` from stdin and writes `CodeGeneratorResponse` to stdout, per the protoc plugin protocol. |
+| [`model/`](model/README.md) | Protobuf definitions for the full OpenAPI v3.1 spec, plus the engine annotation extensions (`annotations.proto`, `openapi.proto`). These are the types the plugin reads from annotated `.proto` files. |
+| [`examples/`](examples/README.md) | Acceptance test suite. Each example is also an executable illustration of how to use a particular set of annotations or compiler options. |
 
-* `protoc-gen-openapi-example:generateProto`: Run the native plugin on the example project, capturing the Code Generator Request to /var/tmp/protoc-gen-openapi.cgreq
-* `MainKt`: Run the plugin from the command line, using the contents of /var/tmp/protoc-gen-openapi.cgreq as its input.  Useful for debugging.
-* `protoc-gen-openapi:run`: Run the non-native version of the plugin with the Graalvm agent to capture the reflection metadata.
+## Usage
 
-## Development/PR Process
-1. Do your general work, write your tests, mostly using `MainKt` or unit tests
-2. Run `protoc-gen-openapi-example:generateProto` to run your plugin in context of the example project.
-3. If the previous step failed...
-  * run `protoc-gen-openapi:run` to generate new metadata
-  * run `protoc-gen-openapi:metadataCopy` to copy and merge the metadata
-  * Repeat steps 1-3
+The plugin runs in two modes that can be mixed within a single proto file:
 
-## Plugin Options
+- **Convention-based** — no engine annotations required.
+  The plugin derives operations, path parameters, and request/response shapes from standard [`google.api.http`](https://github.com/googleapis/googleapis/blob/master/google/api/http.proto) bindings (or via `autoMapping=true`), and pulls `info.title` from the service name and `info.version` from the `version` option.
+  See the [`conventions` example](examples/src/conventions/README.md) for a complete working sample.
+- **Annotation-based** — import [`engine/protoc/openapi/annotations.proto`](model/src/main/proto/engine/protoc/openapi/annotations.proto) and attach engine annotations to add or override anything the conventions can't express: explicit `info`, tags, security schemes, per-field schema constraints, etc.
+  See the [model README](model/README.md#annotations) for the full annotation list and the [examples](examples/README.md) for richer illustrations.
 
-Options are passed via `--openapi_out=option=value,option2=value2:outdir`.
+The plugin executable must be `protoc-gen-openapi` on `PATH` (or pointed at explicitly — see the Gradle examples below).
+Options are passed as `--openapi_out=<comma-separated-options>:<outdir>`.
 
-| name                          | type    | default | description                                                                                                                                                                       |
-|-------------------------------|---------|---------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `merge`                       | boolean | `false` | Merge all services from all target files into a single OpenAPI document.                                                                                                          |
-| `version`                     | string  |         | Fallback `info.version` written to every generated document that does not already have a version from an annotation.                                                              |
-| `outputFormat`                | enum    | `JSON`  | Serialization format of generated documents. `JSON` (default) or `YAML` (case-insensitive).                                                                                      |
-| `autoTagServices`             | boolean | `false` | Automatically tag every operation with its enclosing service name, and emit a top-level `tags` entry per service using the service's proto comment as the description.            |
-| `validateOutput`              | boolean | `false` | Validate each generated document against the official OAS 3.1.1 schema and surface validation errors as compiler errors.                                                         |
-| `schemaNamespaceStrategy`          | enum    | `NONE`  | Controls how proto package segments are incorporated into `components/schemas` keys. `NONE` uses the unqualified message name. `FULL_PACKAGE` prefixes the key with every package segment. `SIMPLIFIED_PACKAGE` strips the longest common package prefix shared by all schemas in the same document before prefixing. |
-| `schemaNamespaceSeparator`         | enum    | `NONE`  | Separator between package segments and the message name. `NONE` concatenates directly. `UNDERSCORE` uses `_`. `DASH` uses `-`. `DOT` uses `.`. |
-| `schemaNamespaceCasing`            | enum    | `NONE`  | Capitalisation applied to each package segment. `NONE` leaves segments as written. `CAPITALIZED` uppercases the first character of each segment. `UPPER_CASE` uppercases every character. Version segments extracted via `schemaNamespaceVersionExtraction` are always kept lowercase. |
-| `schemaNamespaceVersionExtraction` | boolean | `false` | When `true`, package segments matching the proto versioning convention (`v1`, `v2beta1`, etc.) are moved to the end of the schema key, after the message name, and are never capitalised. |
-| `setSchemaTitleToMessageName`       | boolean | `false` | When `true`, adds a `"title"` field to each schema in `components/schemas` set to the unqualified proto message name. If a `engine.protoc.openapi.message` annotation explicitly sets `title`, the annotation value takes precedence. |
-| `serviceInclude`              | regex   | `^[a-zA-Z][a-zA-Z0-9_]*(\.[a-zA-Z][a-zA-Z0-9_]*)*$` | Regex matched (via `containsMatchIn`) against the fully-qualified service name (`<package>.<ServiceName>`). Only services whose name contains a match are included. Default matches every valid proto fully-qualified identifier, so all services pass. Schema types referenced exclusively by excluded services are also suppressed. |
-| `serviceExclude`              | regex   |         | Regex matched (via `containsMatchIn`) against the fully-qualified service name. Services whose name contains a match are excluded, even if they also matched `serviceInclude`. Absent by default — no services excluded. |
-| `recordCodeGeneratorRequest`  | path    |         | A path to which the Code Generator Request will be written after having been read from `stdin`.                                                                                   |
-| `recordCodeGeneratorResponse` | path    |         | A path to which the Code Generator Response will be written, in addition to `stdout`.                                                                                             |
+### Gradle
 
-## Environment Variables
+Configure the [`protobuf-gradle-plugin`](https://github.com/google/protobuf-gradle-plugin) to invoke `protoc-gen-openapi` as a code-generation plugin.
 
-Plugin options sent to protoc plugins are sent as a part of the serialized protobuf Code Generator Request pass as bytes via stdin.
-Unfortunately, any deserialization errors that occur (due to a improperly created native-image, for example) prevent you from capturing these options.
+```kotlin
+plugins {
+    id("com.google.protobuf") version "0.9.6"
+}
 
-The following environment variables are honored to support development of the plugin and debugging of issues.
+// optional: include the annotations in your project
+dependencies {
+    protobuf("com.engine:protoc-gen-openapi-model:<version>")
+}
 
-| name                              | description                                                                                                                                                                                                       |
-|-----------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `PROTOC_GEN_OPENAPI_RECORD_CGREQ` | A path to which the full contents of `stdin` will be written.<br/>This file can then be passed back in via the `PROTOC_GEN_OPENAPI_REPLAY_CGREQ` environment variable to debug the code outside the native-image. |
-| `PROTOC_GEN_OPENAPI_REPLAY_CGREQ` | A path from which a Code Generator Request will be read in place of `stdin`.                                                                                                                                      |
+protobuf {
+    plugins {
+        create("openapi") {
+            // path to the native binary; or set `artifact = ...` once the published artifact is available
+            artifact = "com.engine:protoc-gen-openapi:<version>"
+        }
+    }
+    generateProtoTasks {
+        all().all {
+            plugins {
+                create("openapi") {
+                    option("version=1.0.0")
+                    option("autoTagServices=true")
+                    // other options as desired
+                }
+            }
+        }
+    }
+}
+```
+
+### Bash
+
+```bash
+# optional one-time: download and extract the model protos
+curl -L -o protoc-gen-openapi-model-protos.zip \
+  https://github.com/HotelEngine/protoc-gen-openapi/releases/download/<version>/protoc-gen-openapi-model-protos.zip
+unzip -d build/proto/openapi-model protoc-gen-openapi-model-protos.zip
+
+protoc \
+  --proto_path=optional/path/to/extracted/model/protos \
+  --proto_path=path/to/your/protos \
+  --openapi_out=autoTagServices=true,otherOptionsAsDesired:./build/openapi \
+  src/main/proto/example/v1/service.proto
+```
+
+## Compiler Options
+
+All options are defined on [`ProtocGenOpenAPI.Options`](src/main/kotlin/com/engine/protoc/openapi/ProtocGenOpenAPI.kt).
+Click the option name to jump to its KDoc for full semantics, precedence rules, and Envoy interoperability notes.
+
+| name | type | default | summary |
+|---|---|---|---|
+| [`alwaysPrintPrimitiveFields`](src/main/kotlin/com/engine/protoc/openapi/ProtocGenOpenAPI.kt#L211) | boolean | `false` | Add every non-repeated, non-message field to `required`. Pair with Envoy's `always_print_primitive_fields`. |
+| [`autoMapping`](src/main/kotlin/com/engine/protoc/openapi/ProtocGenOpenAPI.kt#L196) | boolean | `false` | Auto-map gRPC methods without a `google.api.http` annotation to `POST /<package>.<ServiceName>/<MethodName>`. Mirrors Envoy's `auto_mapping`. |
+| [`autoTagServices`](src/main/kotlin/com/engine/protoc/openapi/ProtocGenOpenAPI.kt#L91) | boolean | `false` | Tag every operation with its enclosing service name and emit a top-level `tags` entry per service using the service's proto comment as the description. |
+| [`convertGrpcStatus`](src/main/kotlin/com/engine/protoc/openapi/ProtocGenOpenAPI.kt#L250) | boolean | `false` | Add a reusable `google.rpc.Status` schema and a `"default"` response entry referencing it on every operation. Mirrors Envoy's `convert_grpc_status`. |
+| [`enumValueFormat`](src/main/kotlin/com/engine/protoc/openapi/ProtocGenOpenAPI.kt#L177) | enum | `CANONICAL` | How enum values are written into OAS `enum` arrays: `CANONICAL`, `NUMERIC_VALUE`, or `LOWER_CASE`. Pair with Envoy's `always_print_enums_as_ints` / `case_insensitive_enum_parsing`. |
+| [`inlineEnums`](src/main/kotlin/com/engine/protoc/openapi/ProtocGenOpenAPI.kt#L155) | boolean | `false` | Emit enum values inline at every reference instead of as a shared `$ref` in `components/schemas`. |
+| [`merge`](src/main/kotlin/com/engine/protoc/openapi/ProtocGenOpenAPI.kt#L31) | boolean | `false` | Combine every service across every target file into a single OpenAPI document instead of one document per service. |
+| [`outputFormat`](src/main/kotlin/com/engine/protoc/openapi/ProtocGenOpenAPI.kt#L74) | enum | `JSON` | Serialization format of generated documents: `JSON` (default) or `YAML`. |
+| [`preserveProtoFieldNames`](src/main/kotlin/com/engine/protoc/openapi/ProtocGenOpenAPI.kt#L230) | boolean | `false` | Use raw proto field names (e.g. `my_field`) as schema property keys instead of `json_name` or lowerCamelCase. Pair with Envoy's `preserve_proto_field_names`. |
+| [`schemaNamespaceCasing`](src/main/kotlin/com/engine/protoc/openapi/ProtocGenOpenAPI.kt#L120) | enum | `NONE` | Case transformation applied to package segments of a namespaced schema key. `NONE`, `CAPITALIZED`, or `UPPER_CASE`. |
+| [`schemaNamespaceSeparator`](src/main/kotlin/com/engine/protoc/openapi/ProtocGenOpenAPI.kt#L111) | enum | `NONE` | Separator placed between package segments of a namespaced schema key. `NONE`, `UNDERSCORE`, `DASH`, or `DOT`. |
+| [`schemaNamespaceStrategy`](src/main/kotlin/com/engine/protoc/openapi/ProtocGenOpenAPI.kt#L104) | enum | `NONE` | Controls which package segments are prepended to schema keys in `components/schemas`. `NONE`, `FULL_PACKAGE`, or `SIMPLIFIED_PACKAGE`. |
+| [`schemaNamespaceVersionExtraction`](src/main/kotlin/com/engine/protoc/openapi/ProtocGenOpenAPI.kt#L131) | boolean | `false` | Move package segments that look like proto API version identifiers (e.g. `v1`, `v2beta1`) to the end of the schema key. |
+| [`serviceExclude`](src/main/kotlin/com/engine/protoc/openapi/ProtocGenOpenAPI.kt#L322) | regex | — | Exclude services whose fully-qualified name contains a match, even if they also matched `serviceInclude`. |
+| [`serviceInclude`](src/main/kotlin/com/engine/protoc/openapi/ProtocGenOpenAPI.kt#L309) | regex | `^[a-zA-Z][a-zA-Z0-9_]*(\.[a-zA-Z][a-zA-Z0-9_]*)*$` | Only include services whose fully-qualified name contains a match. Schemas referenced only by excluded services are also omitted. |
+| [`setSchemaTitleToProtoSimpleName`](src/main/kotlin/com/engine/protoc/openapi/ProtocGenOpenAPI.kt#L144) | boolean | `false` | Add a `"title"` field to each schema in `components/schemas` set to the unqualified proto type name. |
+| [`streamNewlineDelimited`](src/main/kotlin/com/engine/protoc/openapi/ProtocGenOpenAPI.kt#L269) | boolean | `false` | Document server-streaming responses with content-type `application/x-ndjson`. Mirrors Envoy's `stream_newline_delimited`. |
+| [`streamSseStyleDelimited`](src/main/kotlin/com/engine/protoc/openapi/ProtocGenOpenAPI.kt#L284) | boolean | `false` | Document server-streaming responses with content-type `text/event-stream`. Mirrors Envoy's `stream_sse_style_delimited`. Takes precedence over `streamNewlineDelimited`. |
+| [`suppressDefaultEnumValues`](src/main/kotlin/com/engine/protoc/openapi/ProtocGenOpenAPI.kt#L166) | boolean | `false` | Omit enum values whose proto number is `0` (the proto3 default value convention) from all OAS enum value lists. |
+| [`validateOutput`](src/main/kotlin/com/engine/protoc/openapi/ProtocGenOpenAPI.kt#L63) | boolean | `false` | Validate each generated document against the official OAS 3.1.1 schema and surface failures as compile errors. |
+| [`version`](src/main/kotlin/com/engine/protoc/openapi/ProtocGenOpenAPI.kt#L49) | string | — | Fallback `info.version` for documents whose annotations do not specify one. |
+
+Enum-valued options accept their values case-insensitively.
+
+## Related Projects
+
+- [engine-public/protoc-utils](https://github.com/HotelEngine/protoc-utils) — shared protoc plugin utilities (descriptor wrappers, comment parsing, parameter handling) and the `recorder` plugin used by this project's example suite.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for build commands, the native-image / reflection metadata workflow, and the PR process.
 

@@ -1,2 +1,152 @@
 [
+    {
+        "interfaces": [
+            "com.fasterxml.jackson.annotation.JacksonAnnotation"
+        ]
+    },
+    {
+        "interfaces": [
+            "com.fasterxml.jackson.annotation.JsonAnyGetter"
+        ]
+    },
+    {
+        "interfaces": [
+            "com.fasterxml.jackson.annotation.JsonAutoDetect"
+        ]
+    },
+    {
+        "interfaces": [
+            "com.fasterxml.jackson.annotation.JsonCreator"
+        ]
+    },
+    {
+        "interfaces": [
+            "com.fasterxml.jackson.annotation.JsonIgnore"
+        ]
+    },
+    {
+        "interfaces": [
+            "com.fasterxml.jackson.annotation.JsonInclude"
+        ]
+    },
+    {
+        "interfaces": [
+            "com.fasterxml.jackson.annotation.JsonProperty"
+        ]
+    },
+    {
+        "interfaces": [
+            "com.fasterxml.jackson.annotation.JsonPropertyOrder"
+        ]
+    },
+    {
+        "interfaces": [
+            "com.fasterxml.jackson.annotation.JsonSetter"
+        ]
+    },
+    {
+        "interfaces": [
+            "com.fasterxml.jackson.annotation.JsonValue"
+        ]
+    },
+    {
+        "interfaces": [
+            "com.google.errorprone.annotations.CheckReturnValue"
+        ]
+    },
+    {
+        "interfaces": [
+            "com.google.protobuf.CheckReturnValue"
+        ]
+    },
+    {
+        "interfaces": [
+            "java.lang.Deprecated"
+        ]
+    },
+    {
+        "interfaces": [
+            "java.lang.annotation.Documented"
+        ]
+    },
+    {
+        "interfaces": [
+            "java.lang.annotation.Inherited"
+        ]
+    },
+    {
+        "interfaces": [
+            "java.lang.annotation.Retention"
+        ]
+    },
+    {
+        "interfaces": [
+            "java.lang.annotation.Target"
+        ]
+    },
+    {
+        "interfaces": [
+            "javax.annotation.CheckForNull"
+        ]
+    },
+    {
+        "interfaces": [
+            "javax.annotation.Nonnull"
+        ]
+    },
+    {
+        "interfaces": [
+            "javax.annotation.meta.TypeQualifier"
+        ]
+    },
+    {
+        "interfaces": [
+            "kotlin.Deprecated"
+        ]
+    },
+    {
+        "interfaces": [
+            "kotlin.Metadata"
+        ]
+    },
+    {
+        "interfaces": [
+            "kotlin.ReplaceWith"
+        ]
+    },
+    {
+        "interfaces": [
+            "kotlin.annotation.MustBeDocumented"
+        ]
+    },
+    {
+        "interfaces": [
+            "kotlin.annotation.Retention"
+        ]
+    },
+    {
+        "interfaces": [
+            "kotlin.annotation.Target"
+        ]
+    },
+    {
+        "interfaces": [
+            "kotlin.coroutines.jvm.internal.DebugMetadata"
+        ]
+    },
+    {
+        "interfaces": [
+            "kotlin.jvm.JvmStatic"
+        ]
+    },
+    {
+        "interfaces": [
+            "tools.jackson.databind.annotation.JacksonStdImpl"
+        ]
+    },
+    {
+        "interfaces": [
+            "tools.jackson.databind.annotation.JsonNaming"
+        ]
+    }
 ]

@@ -1,3 +1,5 @@
+package com.engine.protoc.openapi.example
+
 import com.engine.protoc.openapi.ProtocGenOpenAPI
 import com.networknt.schema.InputFormat
 import com.networknt.schema.SchemaLocation
@@ -27,7 +29,7 @@ class PetStoreTest :
         val mapper = ObjectMapper()
         val json = mapper.readTree(generatedFile.content)
 
-        val expected = PetStoreTest::class.java.getResourceAsStream("swagger-api.petstore.openapi.yaml").shouldNotBeNull().reader().readText()
+        val expected = PetStoreTest::class.java.getResourceAsStream("/swagger-api.petstore.openapi.yaml").shouldNotBeNull().reader().readText()
 
         test("validate reference file") {
             val oasSchema by lazy {

@@ -1,7 +1,101 @@
 {
-  "resources":{
-  "includes":[{
-    "pattern":"\\QMETA-INF/services/java.lang.System$LoggerFinder\\E"
-  }]},
-  "bundles":[]
+    "resources": {
+        "includes": [
+            {
+                "pattern": "\\QMETA-INF/services/java.lang.System$LoggerFinder\\E"
+            },
+            {
+                "pattern": "\\QMETA-INF/services/java.net.spi.InetAddressResolverProvider\\E"
+            },
+            {
+                "pattern": "\\QMETA-INF/services/java.net.spi.URLStreamHandlerProvider\\E"
+            },
+            {
+                "pattern": "\\QMETA-INF/services/java.nio.channels.spi.SelectorProvider\\E"
+            },
+            {
+                "pattern": "\\QMETA-INF/services/java.time.zone.ZoneRulesProvider\\E"
+            },
+            {
+                "pattern": "\\QMETA-INF/services/kotlin.reflect.jvm.internal.impl.km.internal.extensions.MetadataExtensions\\E"
+            },
+            {
+                "pattern": "\\QMETA-INF/services/kotlin.reflect.jvm.internal.impl.resolve.ExternalOverridabilityCondition\\E"
+            },
+            {
+                "pattern": "\\QMETA-INF/services/kotlin.reflect.jvm.internal.impl.util.ModuleVisibilityHelper\\E"
+            },
+            {
+                "pattern": "\\QMETA-INF/services/org.slf4j.spi.SLF4JServiceProvider\\E"
+            },
+            {
+                "pattern": "\\Qdraft/2020-12/meta/applicator\\E"
+            },
+            {
+                "pattern": "\\Qdraft/2020-12/meta/content\\E"
+            },
+            {
+                "pattern": "\\Qdraft/2020-12/meta/core\\E"
+            },
+            {
+                "pattern": "\\Qdraft/2020-12/meta/format-annotation\\E"
+            },
+            {
+                "pattern": "\\Qdraft/2020-12/meta/meta-data\\E"
+            },
+            {
+                "pattern": "\\Qdraft/2020-12/meta/unevaluated\\E"
+            },
+            {
+                "pattern": "\\Qdraft/2020-12/meta/validation\\E"
+            },
+            {
+                "pattern": "\\Qdraft/2020-12/schema\\E"
+            },
+            {
+                "pattern": "\\Qkotlin/collections/collections.kotlin_builtins\\E"
+            },
+            {
+                "pattern": "\\Qkotlin/coroutines/coroutines.kotlin_builtins\\E"
+            },
+            {
+                "pattern": "\\Qkotlin/coroutines/jvm/internal/internal.kotlin_builtins\\E"
+            },
+            {
+                "pattern": "\\Qkotlin/jvm/internal/internal.kotlin_builtins\\E"
+            },
+            {
+                "pattern": "\\Qkotlin/kotlin.kotlin_builtins\\E"
+            },
+            {
+                "pattern": "\\Qorg/publicsuffix/list/effective_tld_names.dat\\E"
+            },
+            {
+                "pattern": "\\Qorg/slf4j/impl/StaticLoggerBinder.class\\E"
+            },
+            {
+                "pattern": "\\Qschemas/spec.openapis.org/oas/3.1/dialect/base\\E"
+            },
+            {
+                "pattern": "\\Qschemas/spec.openapis.org/oas/3.1/meta/base\\E"
+            },
+            {
+                "pattern": "\\Qschemas/spec.openapis.org/oas/3.1/schema-base/2022-10-07\\E"
+            },
+            {
+                "pattern": "\\Qschemas/spec.openapis.org/oas/3.1/schema/2022-10-07\\E"
+            },
+            {
+                "pattern": "java.base:\\Qjdk/internal/icu/impl/data/icudt72b/nfc.nrm\\E"
+            }
+        ]
+    },
+    "bundles": [
+        {
+            "name": "sun.util.logging.resources.logging",
+            "classNames": [
+                "sun.util.logging.resources.logging"
+            ]
+        }
+    ]
 }

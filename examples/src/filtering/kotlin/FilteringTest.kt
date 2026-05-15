@@ -1,3 +1,5 @@
+package com.engine.protoc.openapi.example
+
 import com.engine.protoc.openapi.ProtocGenOpenAPI
 import io.kotest.assertions.assertSoftly
 import io.kotest.core.spec.style.FunSpec

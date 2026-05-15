@@ -1,3 +1,5 @@
+package com.engine.protoc.openapi.example
+
 import com.engine.protoc.openapi.ProtocGenOpenAPI
 import com.engine.protoc.openapi.ProtocGenOpenAPI.Options.SchemaNamespaceCasing.CAPITALIZED
 import com.engine.protoc.openapi.ProtocGenOpenAPI.Options.SchemaNamespaceCasing.UPPER_CASE
@@ -68,7 +70,7 @@ class NamespacingTest :
         }
 
         test("run1: matches reference output") {
-            assertMatchesReference("run1", run1.fileList.first().content, "namespacing.run1.openapi.json")
+            assertMatchesReference("run1", run1.fileList.first().content, "engine.protoc.openapi.example.namespacing.run1.openapi.json")
         }
 
         // -----------------------------------------------------------------------
@@ -90,7 +92,7 @@ class NamespacingTest :
         }
 
         test("run2: matches reference output") {
-            assertMatchesReference("run2", run2.fileList.first().content, "namespacing.run2.openapi.json")
+            assertMatchesReference("run2", run2.fileList.first().content, "engine.protoc.openapi.example.namespacing.run2.openapi.json")
         }
 
         // -----------------------------------------------------------------------
@@ -114,7 +116,7 @@ class NamespacingTest :
         }
 
         test("run3: matches reference output") {
-            assertMatchesReference("run3", run3.fileList.first().content, "namespacing.run3.openapi.json")
+            assertMatchesReference("run3", run3.fileList.first().content, "engine.protoc.openapi.example.namespacing.run3.openapi.json")
         }
 
         // -----------------------------------------------------------------------
@@ -138,7 +140,7 @@ class NamespacingTest :
         }
 
         test("run4: matches reference output") {
-            assertMatchesReference("run4", run4.fileList.first().content, "namespacing.run4.openapi.json")
+            assertMatchesReference("run4", run4.fileList.first().content, "engine.protoc.openapi.example.namespacing.run4.openapi.json")
         }
 
         // -----------------------------------------------------------------------
@@ -163,7 +165,7 @@ class NamespacingTest :
         }
 
         test("run5: matches reference output") {
-            assertMatchesReference("run5", run5.fileList.first().content, "namespacing.run5.openapi.json")
+            assertMatchesReference("run5", run5.fileList.first().content, "engine.protoc.openapi.example.namespacing.run5.openapi.json")
         }
 
         // -----------------------------------------------------------------------
@@ -190,7 +192,7 @@ class NamespacingTest :
         }
 
         test("run6: matches reference output") {
-            assertMatchesReference("run6", run6.fileList.first().content, "namespacing.run6.openapi.json")
+            assertMatchesReference("run6", run6.fileList.first().content, "engine.protoc.openapi.example.namespacing.run6.openapi.json")
         }
 
         test("run6: annotation title takes precedence over auto-generated title") {

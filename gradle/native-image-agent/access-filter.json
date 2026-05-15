@@ -1,0 +1,16 @@
+{
+  "rules": [
+    {"includeClasses": "**"},
+    {"excludeClasses": "com.engine.protoc.openapi.example.**"},
+    {"excludeClasses": "worker.org.gradle.**"},
+    {"excludeClasses": "io.kotest.**"},
+    {"excludeClasses": "org.junit.**"},
+    {"excludeClasses": "org.opentest4j.**"},
+    {"excludeClasses": "org.testcontainers.**"},
+    {"excludeClasses": "io.grpc.**"},
+    {"excludeClasses": "io.netty.**"},
+    {"excludeClasses": "kotlinx.coroutines.**"},
+    {"excludeClasses": "ch.qos.logback.**"},
+    {"excludeClasses": "com.github.dockerjava.**"}
+  ]
+}

@@ -50,16 +50,16 @@ To regenerate metadata after adding new proto types, plugin options, or reflecti
 3. Verify by re-running the example suite without the agent:
    `./gradlew :protoc-gen-openapi-examples:check`
 4. Smoke-test the native binary:
-   `./gradlew :protoc-gen-openapi:nativeCompile`
+   `./gradlew :nativeCompile`
 
 Review the resulting diff under `src/main/resources/META-INF/native-image/...` by hand before committing — additions are expected, but unexpected entries (e.g. third-party classes only reachable from test code) signal a filter gap.
 
 ### One-off agent runs
 
-For debugging a single `CodeGeneratorRequest`, the `:protoc-gen-openapi:run` task still has an agent-aware `metadataCopy` wired up:
+For debugging a single `CodeGeneratorRequest`, the root project's `:run` task still has an agent-aware `metadataCopy` wired up:
 
-1. `./gradlew -Pagent :protoc-gen-openapi:run < your.binpb`
-2. `./gradlew :protoc-gen-openapi:metadataCopy`
+1. `./gradlew -Pagent :run < your.binpb`
+2. `./gradlew :metadataCopy`
 
 ## Code Style
 

@@ -28,6 +28,14 @@ import java.util.Locale
  *     `ch.qos.logback.classic.spi.LogbackServiceProvider`, so the entry must
  *     not be registered as empty here (it would shadow Logback's binding).
  *
+ *     Logback's `ContextInitializer.autoConfig()` is in this category, though:
+ *     it queries `META-INF/services/ch.qos.logback.classic.spi.Configurator`
+ *     during `LoggerFactory.getILoggerFactory()` (so before our programmatic
+ *     `ctx.reset()` ever runs), and no `Configurator` SPI is on the classpath.
+ *     Empty-payload registration lets the auto-config loop find zero providers
+ *     and fall through to the default `BasicConfigurator`, which our subsequent
+ *     `ctx.reset()` then discards.
+ *
  *  2. Phantom class-as-resource probes. SLF4J 2.x falls back to
  *     `getResources("org/slf4j/impl/StaticLoggerBinder.class")` to detect a
  *     pre-2.0 binding that does not exist in this build. Same empty-payload
@@ -71,6 +79,14 @@ public class PhantomServiceFilesFeature : Feature {
                 "kotlin.reflect.jvm.internal.impl.util.ModuleVisibilityHelper" to
                     "META-INF/services/kotlin.reflect.jvm.internal.impl.util.ModuleVisibilityHelper",
                 "org.slf4j.LoggerFactory" to "org/slf4j/impl/StaticLoggerBinder.class",
+                // Logback's ContextInitializer.autoConfig() runs during
+                // LoggerFactory.getILoggerFactory() — before we call ctx.reset()
+                // to install our programmatic config — and queries this SPI for
+                // a Configurator binding. We ship none, so the lookup must
+                // resolve to zero providers; under strict native-image the
+                // unrecorded query throws instead.
+                "ch.qos.logback.classic.spi.Configurator" to
+                    "META-INF/services/ch.qos.logback.classic.spi.Configurator",
                 // ResourceBundle.getBundle("jsv-messages", Locale.US) probes
                 // `_en_US` before falling back to `_en` / base. The validator
                 // ships `_en` and base only, so the `_en_US` candidate is a

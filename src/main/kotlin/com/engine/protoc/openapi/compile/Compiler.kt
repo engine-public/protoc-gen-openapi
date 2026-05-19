@@ -109,7 +109,31 @@ internal class Compiler(
 
     fun compile(): PluginProtos.CodeGeneratorResponse {
         log.info("compile starting with options: {}", options)
+        if (options.validationErrorsAreFatal && !options.validateOutput) {
+            log.warn(
+                "validationErrorsAreFatal=true has no effect because validateOutput=false; " +
+                    "no validation will be performed",
+            )
+        }
         return if (options.merge) compileMerged() else compileUnmerged()
+    }
+
+    /**
+     * Emits every validation issue at WARN; when [ProtocGenOpenAPI.Options.validationErrorsAreFatal]
+     * is also true, additionally adds each issue to the [response]'s error list so the plugin
+     * surfaces them as a protoc compile error.
+     */
+    private fun reportValidationIssues(
+        response: CodeGeneratorResponseWrapper,
+        issues: Iterable<*>,
+    ) {
+        for (issue in issues) {
+            val text = issue.toString()
+            log.warn("Validation issue: {}", text)
+            if (options.validationErrorsAreFatal) {
+                response.addError(text)
+            }
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -174,11 +198,12 @@ internal class Compiler(
                 val content = mapper.writeValueAsString(doc)
                 response.addFile(outputFileName(targetFiles), content)
                 if (options.validateOutput) {
-                    oasSchema.validate(content, inputFormat) { ctx ->
-                        ctx.executionConfig { cfg -> cfg.formatAssertionsEnabled(true) }
-                    }.forEach {
-                        response.addError(it.toString())
-                    }
+                    reportValidationIssues(
+                        response,
+                        oasSchema.validate(content, inputFormat) { ctx ->
+                            ctx.executionConfig { cfg -> cfg.formatAssertionsEnabled(true) }
+                        },
+                    )
                 }
             } catch (e: Exception) {
                 val msg = "Error serializing output: ${e.detail()}"
@@ -281,11 +306,12 @@ internal class Compiler(
                     response.addFile(fileName, content)
 
                     if (options.validateOutput) {
-                        oasSchema.validate(content, inputFormat) { ctx ->
-                            ctx.executionConfig { cfg -> cfg.formatAssertionsEnabled(true) }
-                        }.forEach {
-                            response.addError(it.toString())
-                        }
+                        reportValidationIssues(
+                            response,
+                            oasSchema.validate(content, inputFormat) { ctx ->
+                                ctx.executionConfig { cfg -> cfg.formatAssertionsEnabled(true) }
+                            },
+                        )
                     }
                 } catch (e: Exception) {
                     val msg = "[$svcLabel] Error generating output: ${e.detail()}"

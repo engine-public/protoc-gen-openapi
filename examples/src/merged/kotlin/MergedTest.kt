@@ -23,6 +23,7 @@ class MergedTest :
         val response = ProtocGenOpenAPI.from(request) {
             merge = true
             validateOutput = true
+            validationErrorsAreFatal = true
             autoTagServices = true
         }.compile()
         val generatedFile = response.fileList.find { it.name == "engine.protoc.openapi.example.merged.openapi.json" }.shouldNotBeNull()

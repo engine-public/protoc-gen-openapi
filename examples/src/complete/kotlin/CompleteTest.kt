@@ -24,6 +24,7 @@ class CompleteTest :
         val response = ProtocGenOpenAPI.from(request) {
             merge = false
             validateOutput = true
+            validationErrorsAreFatal = true
             outputFormat = ProtocGenOpenAPI.Options.OutputFormat.YAML
         }.compile()
 

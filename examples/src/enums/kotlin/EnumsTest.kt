@@ -33,6 +33,7 @@ class EnumsTest :
         val run1 =
             ProtocGenOpenAPI.from(request()) {
                 validateOutput = true
+                validationErrorsAreFatal = true
             }.compile()
 
         test("run1: no errors") {
@@ -73,6 +74,7 @@ class EnumsTest :
             ProtocGenOpenAPI.from(request()) {
                 inlineEnums = true
                 validateOutput = true
+                validationErrorsAreFatal = true
             }.compile()
 
         test("run2: no errors") {
@@ -114,6 +116,7 @@ class EnumsTest :
             ProtocGenOpenAPI.from(request()) {
                 suppressDefaultEnumValues = true
                 validateOutput = true
+                validationErrorsAreFatal = true
             }.compile()
 
         test("run3: no errors") {
@@ -155,6 +158,7 @@ class EnumsTest :
                 inlineEnums = true
                 suppressDefaultEnumValues = true
                 validateOutput = true
+                validationErrorsAreFatal = true
             }.compile()
 
         test("run4: no errors") {

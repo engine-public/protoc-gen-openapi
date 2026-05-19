@@ -69,6 +69,26 @@ public class ProtocGenOpenAPI(
         val validateOutput: Boolean,
 
         /**
+         * Controls how validation issues found by [validateOutput] are reported.
+         *
+         * When `false` (the default), every validation issue is emitted at the SLF4J `WARN`
+         * level and the compile completes successfully — the generated document is still
+         * written to the [CodeGeneratorResponse][com.google.protobuf.compiler.PluginProtos.CodeGeneratorResponse]
+         * and no error string is set.
+         *
+         * When `true`, each issue is still logged at `WARN` AND added to the
+         * `CodeGeneratorResponse.error` field, causing the plugin to exit non-zero and protoc
+         * to abort the generation step.
+         *
+         * Has no effect unless [validateOutput] is also `true`; when [validateOutput] is
+         * `false` no validation runs at all.  Setting this option to `true` while
+         * [validateOutput] is `false` is reported as a `WARN` at compile-start.
+         *
+         * Passed via `--openapi_out=validationErrorsAreFatal=true:outdir`.
+         */
+        val validationErrorsAreFatal: Boolean,
+
+        /**
          * The serialization format of every generated OpenAPI document.
          *
          * [OutputFormat.JSON] produces pretty-printed JSON (the default); files are named
@@ -485,6 +505,12 @@ public class ProtocGenOpenAPI(
             public var validateOutput: Boolean = parameters.get<Boolean>("validateOutput") ?: false
 
             /**
+             * @see [Options.validationErrorsAreFatal]
+             */
+            public var validationErrorsAreFatal: Boolean =
+                parameters.get<Boolean>("validationErrorsAreFatal") ?: false
+
+            /**
              * @see [Options.outputFormat]
              */
             public var outputFormat: OutputFormat =
@@ -617,6 +643,7 @@ public class ProtocGenOpenAPI(
                     merge = merge,
                     version = version,
                     validateOutput = validateOutput,
+                    validationErrorsAreFatal = validationErrorsAreFatal,
                     outputFormat = outputFormat,
                     autoTagServices = autoTagServices,
                     schemaNamespaceStrategy = schemaNamespaceStrategy,

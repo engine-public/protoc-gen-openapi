@@ -32,6 +32,7 @@ class FilteringTest :
             ProtocGenOpenAPI.from(request()) {
                 merge = true
                 validateOutput = true
+                validationErrorsAreFatal = true
             }.compile()
 
         test("run1: no errors") {

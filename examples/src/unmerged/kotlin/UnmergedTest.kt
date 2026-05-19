@@ -26,6 +26,7 @@ class UnmergedTest :
         val response = ProtocGenOpenAPI.from(request) {
             merge = false
             validateOutput = true
+            validationErrorsAreFatal = true
         }.compile()
         val mapper = ObjectMapper()
 

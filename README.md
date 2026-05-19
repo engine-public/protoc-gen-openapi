@@ -88,8 +88,8 @@ Click the option name to jump to its KDoc for full semantics, precedence rules, 
 | [`convertGrpcStatus`](src/main/kotlin/com/engine/protoc/openapi/ProtocGenOpenAPI.kt#L280) | boolean | `false` | Add a reusable `google.rpc.Status` schema and a `"default"` response entry referencing it on every operation. Mirrors Envoy's `convert_grpc_status`. |
 | [`enumValueFormat`](src/main/kotlin/com/engine/protoc/openapi/ProtocGenOpenAPI.kt#L207) | enum | `CANONICAL` | How enum values are written into OAS `enum` arrays: `CANONICAL`, `NUMERIC_VALUE`, or `LOWER_CASE`. Pair with Envoy's `always_print_enums_as_ints` / `case_insensitive_enum_parsing`. |
 | [`inlineEnums`](src/main/kotlin/com/engine/protoc/openapi/ProtocGenOpenAPI.kt#L185) | boolean | `false` | Emit enum values inline at every reference instead of as a shared `$ref` in `components/schemas`. |
-| [`logFile`](src/main/kotlin/com/engine/protoc/openapi/ProtocGenOpenAPI.kt#L335) | string | — | File path the SLF4J binding writes records to. When unset, records go to standard error. |
-| [`logLevel`](src/main/kotlin/com/engine/protoc/openapi/ProtocGenOpenAPI.kt#L323) | enum | `ERROR` | SLF4J threshold (`TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR`) applied to every logger the plugin and its dependencies create. |
+| [`logFile`](src/main/kotlin/com/engine/protoc/openapi/ProtocGenOpenAPI.kt#L340) | string | — | File path the Logback binding writes records to. When unset, records go to standard error. |
+| [`logLevel`](src/main/kotlin/com/engine/protoc/openapi/ProtocGenOpenAPI.kt#L328) | enum | `ERROR` | SLF4J threshold (`TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR`) applied to every logger the plugin and its dependencies create. |
 | [`merge`](src/main/kotlin/com/engine/protoc/openapi/ProtocGenOpenAPI.kt#L41) | boolean | `false` | Combine every service across every target file into a single OpenAPI document instead of one document per service. |
 | [`outputFormat`](src/main/kotlin/com/engine/protoc/openapi/ProtocGenOpenAPI.kt#L104) | enum | `JSON` | Serialization format of generated documents: `JSON` (default) or `YAML`. |
 | [`preserveProtoFieldNames`](src/main/kotlin/com/engine/protoc/openapi/ProtocGenOpenAPI.kt#L260) | boolean | `false` | Use raw proto field names (e.g. `my_field`) as schema property keys instead of `json_name` or lowerCamelCase. Pair with Envoy's `preserve_proto_field_names`. |
@@ -108,31 +108,6 @@ Click the option name to jump to its KDoc for full semantics, precedence rules, 
 | [`version`](src/main/kotlin/com/engine/protoc/openapi/ProtocGenOpenAPI.kt#L59) | string | — | Fallback `info.version` for documents whose annotations do not specify one. |
 
 Enum-valued options accept their values case-insensitively.
-
-## `google.api.http` body modes
-
-The plugin reads the `body` field of every `google.api.http` annotation and maps it to OpenAPI as
-specified in [`google/api/http.proto`](https://github.com/googleapis/googleapis/blob/master/google/api/http.proto)
-— the same semantics enforced at runtime by Envoy's gRPC-JSON transcoder.  The three modes are
-**identical across all five verbs** (GET, POST, PUT, PATCH, DELETE):
-
-| `body` value | HTTP request body | URL query parameters |
-|---|---|---|
-| **unset / `""`** | none | every request field not bound to a `{var}` in the URL template |
-| **`"*"`** | the whole request message | none |
-| **`"<field_name>"`** | the value of that single top-level field | every other request field not bound to the URL template |
-
-Auto-derived query parameters use the field's JSON name by default (or the snake_case proto name
-when [`preserveProtoFieldNames`](src/main/kotlin/com/engine/protoc/openapi/ProtocGenOpenAPI.kt#L260)
-is set), recurse into nested messages with dotted names (`?address.city=…`), and emit `style=form,
-explode=true` for repeated scalars.  Repeated message and map fields are skipped with a `WARN` log
-since OpenAPI has no faithful query-string representation for them.
-
-When a method also declares `(engine.protoc.openapi.parameters)` entries, those manual declarations
-win for any field they cover (matched by proto or JSON name) and a `WARN` log records the overlap.
-Worked examples live in [examples/src/envoy/](examples/src/envoy/) (live Envoy round-trip tests)
-and [examples/src/complete/](examples/src/complete/) (snapshot coverage of every verb/body
-combination).
 
 ## Related Projects
 

@@ -39,6 +39,7 @@ class VersionTest :
                 merge = false
                 version = "global-2.0.0"
                 validateOutput = true
+                validationErrorsAreFatal = true
             }.compile()
 
         test("with options version: no errors") {

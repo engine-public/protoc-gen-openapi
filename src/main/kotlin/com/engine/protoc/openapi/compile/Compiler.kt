@@ -13,6 +13,7 @@ import com.networknt.schema.InputFormat
 import com.networknt.schema.SchemaLocation
 import com.networknt.schema.SchemaRegistry
 import com.networknt.schema.SpecificationVersion
+import org.slf4j.LoggerFactory
 import tools.jackson.databind.JsonNode
 import tools.jackson.databind.ObjectMapper
 import tools.jackson.databind.SerializationFeature
@@ -52,6 +53,8 @@ internal class Compiler(
     private val request: CodeGeneratorRequestWrapper,
     private val options: ProtocGenOpenAPI.Options,
 ) {
+
+    private val log = LoggerFactory.getLogger(Compiler::class.java)
 
     internal companion object {
         internal val oasSchema =
@@ -104,7 +107,10 @@ internal class Compiler(
         return true
     }
 
-    fun compile(): PluginProtos.CodeGeneratorResponse = if (options.merge) compileMerged() else compileUnmerged()
+    fun compile(): PluginProtos.CodeGeneratorResponse {
+        log.info("compile starting with options: {}", options)
+        return if (options.merge) compileMerged() else compileUnmerged()
+    }
 
     // -------------------------------------------------------------------------
     // Merged path — one output covering all target files (original behaviour)
@@ -127,7 +133,9 @@ internal class Compiler(
                 val extension = file.options?.findExtension(Annotations.file)?.value ?: continue
                 extension.mergeInto(doc, ctx)
             } catch (e: Exception) {
-                response.addError("[${file.name}] Error merging OpenAPI extension: ${e.detail()}")
+                val msg = "[${file.name}] Error merging OpenAPI extension: ${e.detail()}"
+                log.error(msg, e)
+                response.addError(msg)
             }
         }
 
@@ -138,7 +146,9 @@ internal class Compiler(
             try {
                 mergePaths(doc, pathsBuilder.build(listOf(file), ::isServiceIncluded), ctx)
             } catch (e: Exception) {
-                response.addError("[${file.name}] Error building paths: ${e.detail()}")
+                val msg = "[${file.name}] Error building paths: ${e.detail()}"
+                log.error(msg, e)
+                response.addError(msg)
             }
         }
 
@@ -152,7 +162,9 @@ internal class Compiler(
         try {
             mergeSchemas(doc, SchemaBuilder(ctx, pathsBuilder).build(collector), ctx)
         } catch (e: Exception) {
-            response.addError("Error building component schemas: ${e.detail()}")
+            val msg = "Error building component schemas: ${e.detail()}"
+            log.error(msg, e)
+            response.addError(msg)
         }
 
         ctx.schemaKeyResolver.rewriteRefs(doc)
@@ -169,7 +181,9 @@ internal class Compiler(
                     }
                 }
             } catch (e: Exception) {
-                response.addError("Error serializing output: ${e.detail()}")
+                val msg = "Error serializing output: ${e.detail()}"
+                log.error(msg, e)
+                response.addError(msg)
             }
         }
 
@@ -188,7 +202,9 @@ internal class Compiler(
             val fileAnnotation = try {
                 file.options?.findExtension(Annotations.file)?.value
             } catch (e: Exception) {
-                response.addError("[${file.name}] Error reading file-level annotation: ${e.detail()}")
+                val msg = "[${file.name}] Error reading file-level annotation: ${e.detail()}"
+                log.error(msg, e)
+                response.addError(msg)
                 null
             }
 
@@ -208,7 +224,9 @@ internal class Compiler(
                         if (pkg.isEmpty()) "openapi.$outputExtension" else "$pkg.openapi.$outputExtension"
                     response.addFile(fileName, mapper.writeValueAsString(doc))
                 } catch (e: Exception) {
-                    response.addError("[${file.name}] Error generating file-only output: ${e.detail()}")
+                    val msg = "[${file.name}] Error generating file-only output: ${e.detail()}"
+                    log.error(msg, e)
+                    response.addError(msg)
                 }
                 continue
             }
@@ -270,7 +288,9 @@ internal class Compiler(
                         }
                     }
                 } catch (e: Exception) {
-                    response.addError("[$svcLabel] Error generating output: ${e.detail()}")
+                    val msg = "[$svcLabel] Error generating output: ${e.detail()}"
+                    log.error(msg, e)
+                    response.addError(msg)
                 }
             }
         }

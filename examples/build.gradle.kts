@@ -1,8 +1,12 @@
+@file:OptIn(ExperimentalTime::class)
+
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import org.gradle.internal.extensions.stdlib.capitalized
 import org.gradle.kotlin.dsl.idea
 import org.gradle.kotlin.dsl.`java-test-fixtures`
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 plugins {
     idea
@@ -156,7 +160,10 @@ protobuf {
              */
             if (name == "generate${suiteName.capitalized()}Proto") {
                 plugins {
-                    create("recorder")
+                    create("recorder") {
+                        option("logLevel=TRACE")
+                        option("logFile=${project.layout.buildDirectory.dir("logs/${Clock.System.now().epochSeconds}").map { it.file("${suiteName}.txt") }.get().asFile.absolutePath}")
+                    }
                 }
                 if (suiteName == "envoy") {
                     generateDescriptorSet = true

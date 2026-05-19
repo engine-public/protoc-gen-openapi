@@ -24,6 +24,9 @@
         "name": "[Ljava.lang.invoke.MethodHandle;"
     },
     {
+        "name": "[Ljava.lang.reflect.Field;"
+    },
+    {
         "name": "[Ljava.nio.ByteBuffer;"
     },
     {
@@ -73,6 +76,9 @@
     },
     {
         "name": "[Ltools.jackson.databind.introspect.POJOPropertyBuilder;"
+    },
+    {
+        "name": "[Ltools.jackson.databind.node.ContainerNode;"
     },
     {
         "name": "[Ltools.jackson.databind.ser.Serializers;"
@@ -862,6 +868,7 @@
     },
     {
         "name": "java.lang.Object",
+        "allDeclaredFields": true,
         "queryAllDeclaredConstructors": true,
         "methods": [
             {
@@ -994,6 +1001,13 @@
                 ]
             },
             {
+                "name": "mix",
+                "parameterTypes": [
+                    "long",
+                    "boolean"
+                ]
+            },
+            {
                 "name": "newArray",
                 "parameterTypes": [
                     "long"
@@ -1046,6 +1060,15 @@
                     "long",
                     "byte[]",
                     "java.lang.String",
+                    "java.lang.String"
+                ]
+            },
+            {
+                "name": "prepend",
+                "parameterTypes": [
+                    "long",
+                    "byte[]",
+                    "boolean",
                     "java.lang.String"
                 ]
             },
@@ -1504,6 +1527,342 @@
                 "parameterTypes": [
                     "java.lang.invoke.MethodType",
                     "java.lang.invoke.LambdaForm",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.invoke.BoundMethodHandle$Species_LLLLLLLL",
+        "fields": [
+            {
+                "name": "argL0"
+            },
+            {
+                "name": "argL1"
+            },
+            {
+                "name": "argL2"
+            },
+            {
+                "name": "argL3"
+            },
+            {
+                "name": "argL4"
+            },
+            {
+                "name": "argL5"
+            },
+            {
+                "name": "argL6"
+            },
+            {
+                "name": "argL7"
+            }
+        ],
+        "methods": [
+            {
+                "name": "make",
+                "parameterTypes": [
+                    "java.lang.invoke.MethodType",
+                    "java.lang.invoke.LambdaForm",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.invoke.BoundMethodHandle$Species_LLLLLLLLL",
+        "fields": [
+            {
+                "name": "argL0"
+            },
+            {
+                "name": "argL1"
+            },
+            {
+                "name": "argL2"
+            },
+            {
+                "name": "argL3"
+            },
+            {
+                "name": "argL4"
+            },
+            {
+                "name": "argL5"
+            },
+            {
+                "name": "argL6"
+            },
+            {
+                "name": "argL7"
+            },
+            {
+                "name": "argL8"
+            }
+        ],
+        "methods": [
+            {
+                "name": "make",
+                "parameterTypes": [
+                    "java.lang.invoke.MethodType",
+                    "java.lang.invoke.LambdaForm",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.invoke.BoundMethodHandle$Species_LLLLLLLLLL",
+        "fields": [
+            {
+                "name": "argL0"
+            },
+            {
+                "name": "argL1"
+            },
+            {
+                "name": "argL2"
+            },
+            {
+                "name": "argL3"
+            },
+            {
+                "name": "argL4"
+            },
+            {
+                "name": "argL5"
+            },
+            {
+                "name": "argL6"
+            },
+            {
+                "name": "argL7"
+            },
+            {
+                "name": "argL8"
+            },
+            {
+                "name": "argL9"
+            }
+        ],
+        "methods": [
+            {
+                "name": "make",
+                "parameterTypes": [
+                    "java.lang.invoke.MethodType",
+                    "java.lang.invoke.LambdaForm",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.invoke.BoundMethodHandle$Species_LLLLLLLLLLL",
+        "fields": [
+            {
+                "name": "argL0"
+            },
+            {
+                "name": "argL1"
+            },
+            {
+                "name": "argL10"
+            },
+            {
+                "name": "argL2"
+            },
+            {
+                "name": "argL3"
+            },
+            {
+                "name": "argL4"
+            },
+            {
+                "name": "argL5"
+            },
+            {
+                "name": "argL6"
+            },
+            {
+                "name": "argL7"
+            },
+            {
+                "name": "argL8"
+            },
+            {
+                "name": "argL9"
+            }
+        ],
+        "methods": [
+            {
+                "name": "make",
+                "parameterTypes": [
+                    "java.lang.invoke.MethodType",
+                    "java.lang.invoke.LambdaForm",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.invoke.BoundMethodHandle$Species_LLLLLLLLLLLL",
+        "fields": [
+            {
+                "name": "argL0"
+            },
+            {
+                "name": "argL1"
+            },
+            {
+                "name": "argL10"
+            },
+            {
+                "name": "argL11"
+            },
+            {
+                "name": "argL2"
+            },
+            {
+                "name": "argL3"
+            },
+            {
+                "name": "argL4"
+            },
+            {
+                "name": "argL5"
+            },
+            {
+                "name": "argL6"
+            },
+            {
+                "name": "argL7"
+            },
+            {
+                "name": "argL8"
+            },
+            {
+                "name": "argL9"
+            }
+        ],
+        "methods": [
+            {
+                "name": "make",
+                "parameterTypes": [
+                    "java.lang.invoke.MethodType",
+                    "java.lang.invoke.LambdaForm",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.invoke.BoundMethodHandle$Species_LLLLLLLLLLLLL",
+        "fields": [
+            {
+                "name": "argL0"
+            },
+            {
+                "name": "argL1"
+            },
+            {
+                "name": "argL10"
+            },
+            {
+                "name": "argL11"
+            },
+            {
+                "name": "argL12"
+            },
+            {
+                "name": "argL2"
+            },
+            {
+                "name": "argL3"
+            },
+            {
+                "name": "argL4"
+            },
+            {
+                "name": "argL5"
+            },
+            {
+                "name": "argL6"
+            },
+            {
+                "name": "argL7"
+            },
+            {
+                "name": "argL8"
+            },
+            {
+                "name": "argL9"
+            }
+        ],
+        "methods": [
+            {
+                "name": "make",
+                "parameterTypes": [
+                    "java.lang.invoke.MethodType",
+                    "java.lang.invoke.LambdaForm",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
                     "java.lang.Object",
                     "java.lang.Object",
                     "java.lang.Object",
@@ -2342,6 +2701,14 @@
             },
             {
                 "name": "cellsBusy"
+            }
+        ]
+    },
+    {
+        "name": "java.util.concurrent.atomic.Striped64$Cell",
+        "fields": [
+            {
+                "name": "value"
             }
         ]
     },
@@ -3320,6 +3687,17 @@
     },
     {
         "name": "org.robolectric.Robolectric"
+    },
+    {
+        "name": "org.slf4j.event.Level",
+        "methods": [
+            {
+                "name": "values",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
     },
     {
         "name": "short"

@@ -106,6 +106,19 @@ dependencies {
     implementation(libs.kotlin.reflect)
     implementation(libs.networknt.jsonSchemaValidator)
     implementation(libs.protobuf.java)
+
+    // slf4j-api is already on the classpath transitively (networknt). Ship
+    // Logback as the binding so the plugin's logLevel / logFile options can
+    // be applied programmatically via the LoggerContext API. The project
+    // publishes native binaries (pom-only) so this is not visible to library
+    // consumers as a transitive dep.
+    implementation(libs.logback.classic)
+
+    // GraalVM hosted API used by native-image Feature classes under
+    // com.engine.protoc.openapi.nativeimage. Compile-only — the
+    // org.graalvm.nativeimage module is provided by the GraalVM JDK at
+    // native-image build time and is not shipped to consumers.
+    compileOnly(libs.graalvm.sdk)
 }
 
 allprojects {

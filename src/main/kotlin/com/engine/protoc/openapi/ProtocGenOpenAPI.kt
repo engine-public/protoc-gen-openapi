@@ -1,5 +1,11 @@
 package com.engine.protoc.openapi
 
+import ch.qos.logback.classic.LoggerContext
+import ch.qos.logback.classic.encoder.PatternLayoutEncoder
+import ch.qos.logback.classic.spi.ILoggingEvent
+import ch.qos.logback.core.Appender
+import ch.qos.logback.core.ConsoleAppender
+import ch.qos.logback.core.FileAppender
 import com.engine.protoc.openapi.compile.Compiler
 import com.engine.protoc.util.compiler.CodeGeneratorRequestWrapper
 import com.engine.protoc.util.compiler.Parameters
@@ -7,7 +13,11 @@ import com.engine.protoc.util.extensions.wrap
 import com.google.api.AnnotationsProto
 import com.google.protobuf.ExtensionRegistry
 import com.google.protobuf.compiler.PluginProtos
+import org.slf4j.LoggerFactory
+import org.slf4j.event.Level
 import java.io.InputStream
+import ch.qos.logback.classic.Level as LogbackLevel
+import ch.qos.logback.classic.Logger as LogbackLogger
 
 public class ProtocGenOpenAPI(
     private val request: CodeGeneratorRequestWrapper,
@@ -284,6 +294,32 @@ public class ProtocGenOpenAPI(
         val streamSseStyleDelimited: Boolean,
 
         /**
+         * Threshold at which the plugin emits log records via SLF4J.  Accepts any value of
+         * [org.slf4j.event.Level] (`TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR`); a record is
+         * emitted when its level is greater than or equal to this threshold.  Defaults to
+         * `ERROR` so the plugin is quiet by default but still surfaces error-level reports.
+         *
+         * The option is realised at runtime by programmatically reconfiguring the Logback
+         * `LoggerContext` after [Options] is built, so it controls every logger the plugin
+         * (and its dependencies) creates.
+         *
+         * Passed via `--openapi_out=logLevel=DEBUG:outdir` (case-insensitive).
+         */
+        val logLevel: Level,
+
+        /**
+         * Optional path to a file that receives timestamped log records in addition to the
+         * stderr console output.  The stderr `ConsoleAppender` is always attached — its lines
+         * are prefixed with `[protoc-gen-openapi]` so they stand out from other compiler
+         * output protoc may multiplex on the same stream.  When this option is set, a
+         * [FileAppender][ch.qos.logback.core.FileAppender] is *also* attached at the given
+         * path with a `%d{HH:mm:ss.SSS}`-prefixed pattern.
+         *
+         * Passed via `--openapi_out=logFile=/tmp/protoc.log:outdir`.
+         */
+        val logFile: String?,
+
+        /**
          * A Java-compatible regular expression tested via [Regex.containsMatchIn] against the
          * fully-qualified service name (`<package>.<ServiceName>`, e.g.
          * `com.example.v1.WidgetService`).  A service is **included** in the generated output
@@ -551,6 +587,17 @@ public class ProtocGenOpenAPI(
                 parameters.get<Boolean>("streamSseStyleDelimited") ?: false
 
             /**
+             * @see [Options.logLevel]
+             */
+            public var logLevel: org.slf4j.event.Level =
+                parameters.get<org.slf4j.event.Level>("logLevel") ?: org.slf4j.event.Level.ERROR
+
+            /**
+             * @see [Options.logFile]
+             */
+            public var logFile: String? = parameters.get<String>("logFile")
+
+            /**
              * @see [Options.serviceInclude]
              */
             public var serviceInclude: String =
@@ -590,6 +637,8 @@ public class ProtocGenOpenAPI(
                     convertGrpcStatus = convertGrpcStatus,
                     streamNewlineDelimited = streamNewlineDelimited,
                     streamSseStyleDelimited = streamSseStyleDelimited,
+                    logLevel = logLevel,
+                    logFile = logFile,
                     serviceInclude = serviceInclude,
                     serviceExclude = serviceExclude,
                 )
@@ -609,11 +658,71 @@ public class ProtocGenOpenAPI(
             block: Options.Builder.() -> Unit = {},
         ): ProtocGenOpenAPI {
             val cgreq = PluginProtos.CodeGeneratorRequest.parseFrom(input, registry).wrap()
-            return ProtocGenOpenAPI(
-                cgreq,
-                Options.Builder.from(cgreq.parameters).apply(block).build(),
-            )
+            val options = Options.Builder.from(cgreq.parameters).apply(block).build()
+            applyLoggingConfiguration(options)
+            return ProtocGenOpenAPI(cgreq, options)
         }
+
+        /**
+         * Reconfigures the Logback `LoggerContext` from [Options.logLevel] and [Options.logFile].
+         *
+         * Appenders are attached to the `com.engine` logger only, so downstream dependencies'
+         * loggers stay silent regardless of their own level.  A stderr [ConsoleAppender] is
+         * always attached, prefixed with `[protoc-gen-openapi]` so its records stand out from
+         * other compiler output protoc may multiplex on the same stream.  When [Options.logFile]
+         * is non-null a [FileAppender] is also attached, writing timestamped records to the
+         * given path.  The root logger is silenced with `Level.OFF` to discard anything emitted
+         * outside the `com.engine` tree.  Invoked from [from] immediately after [Options] is
+         * built so subsequent `LoggerFactory.getLogger` calls observe the resolved configuration.
+         */
+        private fun applyLoggingConfiguration(options: Options) {
+            val ctx = LoggerFactory.getILoggerFactory() as LoggerContext
+            ctx.reset()
+            val appenders = mutableListOf<Appender<ILoggingEvent>>()
+            appenders.add(
+                ConsoleAppender<ILoggingEvent>().also {
+                    it.context = ctx
+                    it.target = "System.err"
+                    it.encoder = encoder(ctx, "[protoc-gen-openapi] %-5level %logger{36} - %msg%n")
+                    it.start()
+                },
+            )
+            options.logFile?.let { path ->
+                appenders.add(
+                    FileAppender<ILoggingEvent>().also {
+                        it.context = ctx
+                        it.file = path
+                        it.encoder = encoder(ctx, "%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n")
+                        it.start()
+                    },
+                )
+            }
+            ctx.getLogger(LogbackLogger.ROOT_LOGGER_NAME).level = LogbackLevel.OFF
+            val engine = ctx.getLogger("com.engine")
+            engine.detachAndStopAllAppenders()
+            engine.level = options.logLevel.toLogback()
+            engine.isAdditive = false
+            appenders.forEach(engine::addAppender)
+        }
+
+        private fun encoder(
+            ctx: LoggerContext,
+            pattern: String,
+        ): PatternLayoutEncoder =
+            PatternLayoutEncoder().also {
+                it.context = ctx
+                it.pattern = pattern
+                it.start()
+            }
+
+        private fun Level.toLogback(): LogbackLevel =
+            when (this) {
+                Level.ERROR -> LogbackLevel.ERROR
+                Level.WARN -> LogbackLevel.WARN
+                Level.INFO -> LogbackLevel.INFO
+                Level.DEBUG -> LogbackLevel.DEBUG
+                Level.TRACE -> LogbackLevel.TRACE
+            }
     }
 
     public fun compile(): PluginProtos.CodeGeneratorResponse = Compiler(request, options).compile()

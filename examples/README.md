@@ -65,6 +65,11 @@ Demonstrates every compiler option that mirrors an Envoy [`GrpcJsonTranscoder`](
 Each example maps one Envoy option to the corresponding compiler option and confirms — against a live Envoy container — that the generated OAS describes what Envoy actually emits.
 Covers `preserve_proto_field_names`, `always_print_primitive_fields`, `always_print_enums_as_ints`, `case_insensitive_enum_parsing`, `auto_mapping`, `convert_grpc_status`, `stream_newline_delimited`, and `stream_sse_style_delimited`, including selected two-option combinations.
 
+### [wellKnownTypes](src/wellKnownTypes/README.md)
+
+Demonstrates how the plugin emits inline OpenAPI schemas for structural protobuf well-known types — `Any`, `Struct`, `Value`, `ListValue`, `FieldMask`, and `Empty` — instead of dangling `$ref`s into `components/schemas`.
+Covers both first-party fields that carry these types and the canonical regression case where `google.api.HttpBody` is returned by an RPC and its `extensions` field bottoms out in `google.protobuf.Any`.
+
 ### [responseBodyError](src/responseBodyError/README.md)
 
 Demonstrates the compiler's error behavior when `response_body` or `body` annotations name a field that does not exist on the corresponding message.

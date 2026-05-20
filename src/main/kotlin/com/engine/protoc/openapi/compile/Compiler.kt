@@ -166,6 +166,19 @@ internal class Compiler(
         val collector = MessageCollector(ctx.messageIndex, ctx.enumIndex, options.inlineEnums)
         val pathsBuilder = PathsBuilder(ctx, collector, options.autoTagServices, options.autoMapping)
 
+        // Seed pass: populate `collector` from every method's i/o, honouring method-level
+        // inline_request_schema / inline_response_schema.  Must run before the emit pass so
+        // that emit-time `$ref`-vs-inline decisions see the final collected set.
+        for (file in targetFiles) {
+            try {
+                pathsBuilder.seed(listOf(file), ::isServiceIncluded)
+            } catch (e: Exception) {
+                val msg = "[${file.name}] Error seeding component schemas: ${e.detail()}"
+                log.error(msg, e)
+                response.addError(msg)
+            }
+        }
+
         for (file in targetFiles) {
             try {
                 mergePaths(doc, pathsBuilder.build(listOf(file), ::isServiceIncluded), ctx)
@@ -283,6 +296,7 @@ internal class Compiler(
                     // Paths — only this service's methods
                     val collector = MessageCollector(ctx.messageIndex, ctx.enumIndex, options.inlineEnums)
                     val pathsBuilder = PathsBuilder(ctx, collector, options.autoTagServices, options.autoMapping)
+                    pathsBuilder.seedForService(service, file.`package`?.value)
                     mergePaths(doc, pathsBuilder.buildForService(service, file.`package`?.value), ctx)
 
                     applyServiceTags(doc, pathsBuilder, ctx)

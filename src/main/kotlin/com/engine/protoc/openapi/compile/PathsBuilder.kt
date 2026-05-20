@@ -11,6 +11,8 @@ import com.engine.protoc.openapi.model.Schema
 import com.engine.protoc.util.enums.EnumDescriptorProtoWrapper
 import com.engine.protoc.util.enums.EnumValueDescriptorProtoWrapper
 import com.engine.protoc.util.file.FileDescriptorProtoWrapper
+import com.engine.protoc.util.message.DescriptorProtoWrapper
+import com.engine.protoc.util.message.FieldDescriptorProtoWrapper
 import com.engine.protoc.util.service.MethodDescriptorProtoWrapper
 import com.engine.protoc.util.service.ServiceDescriptorProtoWrapper
 import com.google.api.AnnotationsProto
@@ -46,6 +48,13 @@ internal class PathsBuilder(
     // Only populated when autoTagServices is true.
     private val contributingServices = LinkedHashMap<String, String?>()
 
+    // Stack of "currently expanding" type names used by [expandInline] for cycle detection.
+    // Each frame is the snapshot of expanded types up to the current depth; pushed on entry to
+    // expandInline and popped on exit.  Inside any [buildMessageSchema] / [baseFieldSchema] call
+    // chain triggered from expandInline, the top frame controls $ref-vs-inline decisions for
+    // nested message-typed fields.
+    private val inlineExpandingStack = ArrayDeque<Set<String>>()
+
     /**
      * Collects all paths from [files] into a merged `paths` ObjectNode.
      *
@@ -71,6 +80,96 @@ internal class PathsBuilder(
         service: ServiceDescriptorProtoWrapper,
         filePackage: String? = null,
     ): ObjectNode = buildForServicePairs(listOf(filePackage to service))
+
+    /**
+     * Seeding pass: walks every RPC across [files] and populates [collector] with the message
+     * types that must appear in `components/schemas`.  RPCs annotated with
+     * `inline_request_schema = true` or `inline_response_schema = true` do not contribute their
+     * request/response type to the collected set (those schemas will be inlined at the use site
+     * during [build]).
+     *
+     * Must be called before [build] / [buildForService] when method-level inline annotations may
+     * be present, so that emission-time `$ref`-vs-inline decisions see the final collected set.
+     * Safe to call multiple times — [MessageCollector.collect] is idempotent.
+     */
+    fun seed(
+        files: List<FileDescriptorProtoWrapper>,
+        serviceFilter: ((pkg: String?, svc: ServiceDescriptorProtoWrapper) -> Boolean)? = null,
+    ) {
+        for (file in files) {
+            val pkg = file.`package`?.value
+            for (service in file.services) {
+                if (serviceFilter != null && !serviceFilter(pkg, service)) continue
+                for (method in service.methods) {
+                    seedOperation(method, pkg, service.name?.value)
+                }
+            }
+        }
+    }
+
+    /** Single-service seed counterpart of [buildForService]. */
+    fun seedForService(
+        service: ServiceDescriptorProtoWrapper,
+        filePackage: String? = null,
+    ) {
+        for (method in service.methods) {
+            seedOperation(method, filePackage, service.name?.value)
+        }
+    }
+
+    private fun seedOperation(
+        method: MethodDescriptorProtoWrapper,
+        filePackage: String?,
+        serviceName: String?,
+    ) {
+        val httpRule = method.options?.findExtension(AnnotationsProto.http)?.value
+        val annotation = method.options?.findExtension(Annotations.method)?.value
+        val inlineRequest = method.options?.proto?.getExtension(Annotations.inlineRequestSchema) == true
+        val inlineResponse = method.options?.proto?.getExtension(Annotations.inlineResponseSchema) == true
+
+        val binding: HttpBinding = if (httpRule != null) {
+            httpRule.primaryBinding() ?: return
+        } else if (autoMapping) {
+            val pkg = filePackage?.let { "$it." } ?: ""
+            val svc = serviceName ?: return
+            val name = method.proto.name ?: return
+            HttpBinding("post", "/$pkg$svc/$name", "*")
+        } else {
+            return
+        }
+
+        // Response — skip when inlined.
+        if (!inlineResponse) {
+            val responseBodyField = httpRule?.responseBody?.takeIf { it.isNotEmpty() }
+            if (responseBodyField != null) {
+                // collectBodyFieldType is idempotent and tolerant of missing fields here; the
+                // build pass will surface a hard error for misconfigured response_body.
+                collectBodyFieldType(method.proto.outputType, responseBodyField)
+            } else {
+                collector.collect(method.proto.outputType)
+            }
+        }
+
+        // Request body — skip when inlined.
+        val hasExplicitRequestBody = annotation?.hasRequestBody() == true
+        if (!inlineRequest) {
+            when {
+                binding.body == "*" && !hasExplicitRequestBody ->
+                    collector.collect(method.proto.inputType)
+
+                binding.body.isNotEmpty() && binding.body != "*" && !hasExplicitRequestBody ->
+                    collectBodyFieldType(method.proto.inputType, binding.body)
+            }
+        }
+
+        // Explicit requestBody annotation seeds proto_message_ref'd component schemas — these
+        // are independent of the inline flag (the user explicitly requested a $ref to them).
+        if (hasExplicitRequestBody) {
+            annotation?.requestBody?.requestBody?.contentMap?.values?.forEach { mt ->
+                if (mt.hasSchema()) collector.collectFromSchema(mt.schema)
+            }
+        }
+    }
 
     /**
      * Returns a JSON array of tag objects for every service that contributed at least one
@@ -176,50 +275,25 @@ internal class PathsBuilder(
         val inputTypeName = method.proto.inputType
         val outputTypeName = method.proto.outputType
 
-        // When response_body names a field, the HTTP response carries that field's value directly
-        // rather than the full output message.  The wrapper message is not referenced in the
-        // output schema, so we collect the field's type instead.
-        val responseBodyField = httpRule?.responseBody?.takeIf { it.isNotEmpty() }
+        val inlineRequest = method.options?.proto?.getExtension(Annotations.inlineRequestSchema) == true
+        val inlineResponse = method.options?.proto?.getExtension(Annotations.inlineResponseSchema) == true
 
-        // Always collect the output type — it is an API entity that clients receive.
-        // When response_body names a field, we collect that field's type instead of the wrapper.
-        // If the field cannot be resolved the annotation is misconfigured; fail loudly so the
-        // developer gets a clear error rather than a silently invalid spec.
-        if (responseBodyField != null) {
-            if (!collectBodyFieldType(outputTypeName, responseBodyField)) {
-                val outputSimpleName = ctx.messageIndex.simpleNameOf(outputTypeName)
-                throw IllegalArgumentException(
-                    "response_body field '$responseBodyField' not found in $outputSimpleName",
-                )
-            }
-        } else {
-            collector.collect(outputTypeName)
+        // When response_body names a field the HTTP response carries that field's value
+        // directly rather than the full output message.  Collection has already happened in
+        // the [seed] pass; here we only validate that the named field actually exists so the
+        // operator sees a clear error rather than a silently invalid spec.
+        val responseBodyField = httpRule?.responseBody?.takeIf { it.isNotEmpty() }
+        if (responseBodyField != null && !fieldExists(outputTypeName, responseBodyField)) {
+            val outputSimpleName = ctx.messageIndex.simpleNameOf(outputTypeName)
+            throw IllegalArgumentException(
+                "response_body field '$responseBodyField' not found in $outputSimpleName",
+            )
         }
 
-        // Collect schema types for the request body, mirroring what the schema-emission
-        // phase will actually $ref.
-        //
-        //   body == ""  — The input message is a pure parameter bag; its fields become
-        //                 path/query/header parameters.  No body schema is emitted, so
-        //                 nothing needs to be collected.
-        //
-        //   body == "*" with explicit requestBody annotation — The annotation provides its
-        //                 own schema, so the input message itself is not $ref'd.  Types
-        //                 referenced via proto_message_ref in the annotation are handled by
-        //                 collectFromSchema at the annotation-processing site.
-        //
-        //   body == "*" without explicit requestBody annotation — inferRequestBody() emits a
-        //                 $ref to the full input type, so we must collect it.
-        //
-        //   body == "<field>" — inferRequestBodyField() emits a $ref to the named field's
-        //                 message type (if it is a message), so we must collect that type.
-        //                 If the field cannot be resolved the annotation is misconfigured;
-        //                 fail loudly rather than silently emitting an empty or dangling schema.
+        // Same validation for `body: "<field>"` on a request binding.
         val hasExplicitRequestBody = annotation?.hasRequestBody() == true
-        if (binding.body == "*" && !hasExplicitRequestBody) {
-            collector.collect(inputTypeName)
-        } else if (binding.body.isNotEmpty() && binding.body != "*" && !hasExplicitRequestBody) {
-            if (!collectBodyFieldType(inputTypeName, binding.body)) {
+        if (binding.body.isNotEmpty() && binding.body != "*" && !hasExplicitRequestBody) {
+            if (!fieldExists(inputTypeName, binding.body)) {
                 val inputSimpleName = ctx.messageIndex.simpleNameOf(inputTypeName)
                 throw IllegalArgumentException(
                     "body field '${binding.body}' not found in $inputSimpleName",
@@ -290,24 +364,21 @@ internal class PathsBuilder(
 
         // ---- Request body -----------------------------------------------
         // For auto-mapped methods (httpRule == null) the body defaults to "*" per Envoy convention.
+        // Explicit requestBody annotations always emit exactly what the user wrote — the
+        // `inline_request_schema` flag affects only the inferred-from-proto path.
         val body = httpRule?.body ?: binding.body
         when {
             annotation?.hasRequestBody() == true -> {
                 val requestBodyNode = annotation.requestBody.toJson(ctx)
                 injectMissingRef(requestBodyNode.get("content") as? ObjectNode, inputTypeName)
                 node.set("requestBody", requestBodyNode)
-                if (annotation.requestBody.hasRequestBody()) {
-                    annotation.requestBody.requestBody.contentMap.values.forEach { mt ->
-                        if (mt.hasSchema()) collector.collectFromSchema(mt.schema)
-                    }
-                }
             }
 
-            body == "*" -> node.set("requestBody", inferRequestBody(inputTypeName))
+            body == "*" -> node.set("requestBody", inferRequestBody(inputTypeName, inlineRequest))
 
             body.isNotEmpty() -> node.set(
                 "requestBody",
-                inferRequestBodyField(inputTypeName, body),
+                inferRequestBodyField(inputTypeName, body, inlineRequest),
             )
         }
 
@@ -315,7 +386,15 @@ internal class PathsBuilder(
         if (annotation?.hasResponses() == true) {
             node.set("responses", annotation.responses.toJson(ctx))
         } else {
-            node.set("responses", inferResponses(outputTypeName, responseBodyField, method.proto.serverStreaming))
+            node.set(
+                "responses",
+                inferResponses(
+                    outputTypeName,
+                    responseBodyField,
+                    method.proto.serverStreaming,
+                    inlineResponse,
+                ),
+            )
         }
 
         // ---- Security / deprecated --------------------------------------
@@ -457,11 +536,14 @@ internal class PathsBuilder(
 
     // ---- Request body inference ------------------------------------------
 
-    private fun inferRequestBody(inputTypeName: String): ObjectNode {
+    private fun inferRequestBody(
+        inputTypeName: String,
+        inline: Boolean,
+    ): ObjectNode {
         val node = ctx.obj()
         node.put("required", true)
         val content = ctx.obj()
-        content.set("application/json", schemaMediaType(inputTypeName))
+        content.set("application/json", schemaMediaType(inputTypeName, inline))
         node.set("content", content)
         return node
     }
@@ -469,10 +551,15 @@ internal class PathsBuilder(
     private fun inferRequestBodyField(
         inputTypeName: String,
         fieldName: String,
+        inline: Boolean,
     ): ObjectNode {
         val msg = ctx.messageIndex.find(inputTypeName)
         val field = msg?.proto?.fieldList?.find { it.name == fieldName || it.jsonName == fieldName }
-        val schema = if (field != null) fieldTypeSchema(field) else ctx.obj()
+        val schema = when {
+            field == null -> ctx.obj()
+            inline -> fieldTypeSchema(field, inlineMode = true)
+            else -> fieldTypeSchema(field)
+        }
 
         val node = ctx.obj()
         node.put("required", true)
@@ -484,10 +571,17 @@ internal class PathsBuilder(
         return node
     }
 
-    internal fun schemaMediaType(typeName: String): ObjectNode {
+    internal fun schemaMediaType(
+        typeName: String,
+        inline: Boolean = false,
+    ): ObjectNode {
         val schema = ctx.wellKnownTypeSchema(typeName)
-            ?: ctx.obj().also {
-                it.put("\$ref", "#/components/schemas/${ctx.schemaKeyResolver.buildPhaseKeyOf(typeName)}")
+            ?: if (inline) {
+                expandInline(typeName)
+            } else {
+                ctx.obj().also {
+                    it.put("\$ref", "#/components/schemas/${ctx.schemaKeyResolver.buildPhaseKeyOf(typeName)}")
+                }
             }
         val mediaType = ctx.obj()
         mediaType.set("schema", schema)
@@ -500,6 +594,7 @@ internal class PathsBuilder(
         outputTypeName: String,
         responseBodyField: String? = null,
         isServerStreaming: Boolean = false,
+        inline: Boolean = false,
     ): ObjectNode {
         val responses = ctx.obj()
         val response = ctx.obj()
@@ -512,13 +607,13 @@ internal class PathsBuilder(
             val useSse = isServerStreaming && ctx.streamSseStyleDelimited
             val useNdjson = isServerStreaming && ctx.streamNewlineDelimited && !useSse
             val mediaType = if (useSse || useNdjson) {
-                schemaMediaType(outputTypeName)
+                schemaMediaType(outputTypeName, inline)
             } else if (responseBodyField != null) {
-                responseBodyFieldSchema(outputTypeName, responseBodyField)
+                responseBodyFieldSchema(outputTypeName, responseBodyField, inline)
                     ?.let { schema -> ctx.obj().also { it.set("schema", schema) } }
-                    ?: schemaMediaType(outputTypeName)
+                    ?: schemaMediaType(outputTypeName, inline)
             } else {
-                schemaMediaType(outputTypeName)
+                schemaMediaType(outputTypeName, inline)
             }
             val contentType = when {
                 useSse -> "text/event-stream"
@@ -573,19 +668,172 @@ internal class PathsBuilder(
     private fun responseBodyFieldSchema(
         outputTypeName: String,
         fieldName: String,
+        inline: Boolean = false,
     ): ObjectNode? {
         val msg = ctx.messageIndex.find(outputTypeName) ?: return null
         val field = msg.proto.fieldList
             .find { it.name == fieldName || it.jsonName == fieldName } ?: return null
-        return fieldTypeSchema(field)
+        return fieldTypeSchema(field, inlineMode = inline)
+    }
+
+    /**
+     * Returns true if [typeName] resolves to a message that declares [fieldName] (by proto name
+     * or JSON name).  Side-effect-free counterpart to [collectBodyFieldType], used by build-pass
+     * validation; collection is the seed pass's responsibility.
+     */
+    private fun fieldExists(
+        typeName: String,
+        fieldName: String,
+    ): Boolean {
+        val msg = ctx.messageIndex.find(typeName) ?: return false
+        return msg.proto.fieldList.any { it.name == fieldName || it.jsonName == fieldName }
+    }
+
+    // ---- Inline expansion -----------------------------------------------
+
+    /**
+     * Returns the inline-expanded schema body for [typeName] for use at an inline boundary
+     * (method-level `inline_request_schema` / `inline_response_schema`, or field-level
+     * `inline_schema`).  Recursively expands nested message-typed fields whose target is not
+     * present in [collector]; targets that are in the collected set continue to emit `$ref`s
+     * pointing at the component schema.
+     *
+     * Cycles are broken by force-adding the cyclic type to [collector] (so a component schema
+     * is emitted for it) and substituting a `$ref` at the cycle point.
+     */
+    internal fun expandInline(typeName: String): ObjectNode {
+        ctx.wellKnownTypeSchema(typeName)?.let { return it }
+
+        val current = inlineExpandingStack.lastOrNull() ?: emptySet()
+        if (typeName in current) {
+            // Cycle — escape into a component schema and stop recursing.
+            collector.collect(typeName)
+            return ctx.obj().also {
+                it.put("\$ref", "#/components/schemas/${ctx.schemaKeyResolver.buildPhaseKeyOf(typeName)}")
+            }
+        }
+
+        val wrapper = ctx.messageIndex.find(typeName) ?: return ctx.obj()
+        inlineExpandingStack.addLast(current + typeName)
+        try {
+            return buildMessageSchema(wrapper, typeName)
+        } finally {
+            inlineExpandingStack.removeLast()
+        }
+    }
+
+    // ---- Message and field schema builders (used by SchemaBuilder + inline expansion) -------
+
+    /**
+     * Builds the JSON Schema body for a single message type.  Used by [SchemaBuilder] to emit
+     * `components/schemas` entries and by [expandInline] to emit inline message bodies at
+     * inline boundaries.  When invoked from [expandInline], the inline expansion frame on
+     * [inlineExpandingStack] redirects nested message-typed field `$ref`s through
+     * [expandInline] when the target is absent from [collector].
+     */
+    internal fun buildMessageSchema(
+        wrapper: DescriptorProtoWrapper,
+        typeName: String,
+    ): ObjectNode {
+        val base = ctx.obj()
+        base.put("type", "object")
+        ctx.schemaKeyResolver.titleFor(typeName)?.let { base.put("title", it) }
+
+        // ---- Leading comment → description ------------------------------
+        val comment = wrapper.location?.proto?.leadingComments?.trim()?.ifEmpty { null }
+        if (comment != null) base.put("description", comment)
+
+        // ---- Properties from fields -------------------------------------
+        val required = mutableListOf<String>()
+        val propsNode = ctx.obj()
+        for (fieldWrapper in wrapper.fields) {
+            val field = fieldWrapper.proto
+            val jsonName = if (ctx.preserveProtoFieldNames) {
+                // preserve_proto_field_names: always use the raw proto field name.
+                // This overrides both auto-camelCase conversion and explicit json_name annotations,
+                // matching Envoy's preserve_proto_field_names PrintOption behaviour.
+                field.name
+            } else {
+                field.jsonName.ifEmpty { field.name }
+            }
+            val fieldSchema = buildFieldSchema(fieldWrapper)
+            propsNode.set(jsonName, fieldSchema)
+
+            // proto3 required: proto2 LABEL_REQUIRED, or alwaysPrintPrimitiveFields for
+            // non-repeated scalar/enum fields (they will always appear in the response).
+            // oneof members (including proto3 optional, which uses a synthetic oneof) are never
+            // unconditionally present — only the set field in a oneof is serialized.
+            val isPrimitive = field.label != DescriptorProtos.FieldDescriptorProto.Label.LABEL_REPEATED &&
+                field.type != DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE &&
+                !field.hasOneofIndex()
+            if (field.label == DescriptorProtos.FieldDescriptorProto.Label.LABEL_REQUIRED ||
+                (ctx.alwaysPrintPrimitiveFields && isPrimitive)
+            ) {
+                required += jsonName
+            }
+        }
+        if (propsNode.size() > 0) base.set("properties", propsNode)
+        if (required.isNotEmpty()) {
+            val arr = ctx.mapper.createArrayNode()
+            for (r in required) arr.add(r)
+            base.set("required", arr)
+        }
+
+        // ---- engine.protoc.openapi.message annotation override ----------
+        val annotation = wrapper.options
+            ?.findExtension(Annotations.message)?.value
+
+        return if (annotation != null && annotation.schemaValueCase ==
+            Schema.SchemaValueCase.OBJECT
+        ) {
+            with(ctx) { base.deepMerge(annotation.`object`.toJson(ctx)) }
+        } else {
+            base
+        }
+    }
+
+    private fun buildFieldSchema(fieldWrapper: FieldDescriptorProtoWrapper): ObjectNode {
+        val field = fieldWrapper.proto
+        val base = fieldTypeSchema(field)
+
+        // ---- Leading comment → description -----------------------------
+        val comment = fieldWrapper.location?.proto?.leadingComments?.trim()?.ifEmpty { null }
+        if (comment != null && !base.has("description")) {
+            base.put("description", comment)
+        }
+
+        // ---- engine.protoc.openapi.field annotation override -----------
+        val annotation = fieldWrapper.options
+            ?.findExtension(Annotations.field)?.value
+
+        return if (annotation != null && annotation.schemaValueCase ==
+            Schema.SchemaValueCase.OBJECT
+        ) {
+            with(ctx) { base.deepMerge(annotation.`object`.toJson(ctx)) }
+        } else {
+            base
+        }
     }
 
     // ---- Field type → JSON Schema ----------------------------------------
 
-    internal fun fieldTypeSchema(field: DescriptorProtos.FieldDescriptorProto): ObjectNode {
+    /**
+     * Returns the JSON Schema for a single proto field, wrapping in `{type:array, items:...}`
+     * when the field is repeated and not a synthetic map entry.
+     *
+     * When [inlineMode] is true, the field's top-level message-typed schema (if any) is
+     * expanded via [expandInline] rather than emitted as a `$ref` — used by request-body /
+     * response-body callers that need to materialise the field's message type inline.  This is
+     * independent of [inlineExpandingStack], which controls inline expansion *inside* an
+     * already-running expansion.
+     */
+    internal fun fieldTypeSchema(
+        field: DescriptorProtos.FieldDescriptorProto,
+        inlineMode: Boolean = false,
+    ): ObjectNode {
         val isRepeated =
             field.label == DescriptorProtos.FieldDescriptorProto.Label.LABEL_REPEATED
-        val base = baseFieldSchema(field)
+        val base = baseFieldSchema(field, inlineMode)
         return if (isRepeated && !isMapField(field)) {
             ctx.obj().also {
                 it.put("type", "array")
@@ -596,7 +844,10 @@ internal class PathsBuilder(
         }
     }
 
-    private fun baseFieldSchema(field: DescriptorProtos.FieldDescriptorProto): ObjectNode {
+    private fun baseFieldSchema(
+        field: DescriptorProtos.FieldDescriptorProto,
+        inlineMode: Boolean = false,
+    ): ObjectNode {
         val node = ctx.obj()
         return when (field.type) {
             DescriptorProtos.FieldDescriptorProto.Type.TYPE_INT32,
@@ -663,11 +914,25 @@ internal class PathsBuilder(
 
             DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE -> {
                 val typeName = field.typeName
-                ctx.wellKnownTypeSchema(typeName) ?: node.also {
-                    it.put(
-                        "\$ref",
-                        "#/components/schemas/${ctx.schemaKeyResolver.buildPhaseKeyOf(typeName)}",
-                    )
+                val wkt = ctx.wellKnownTypeSchema(typeName)
+                when {
+                    wkt != null -> wkt
+
+                    // Caller explicitly requested an inline schema for this field's message
+                    // (e.g. inline_request_schema on a `body: "<field>"` binding).
+                    inlineMode -> expandInline(typeName)
+
+                    // Inside an active inline expansion: if the target isn't in the collected
+                    // set it has no component schema to $ref, so inline-expand it here.
+                    inlineExpandingStack.isNotEmpty() && typeName !in collector.collected ->
+                        expandInline(typeName)
+
+                    else -> node.also {
+                        it.put(
+                            "\$ref",
+                            "#/components/schemas/${ctx.schemaKeyResolver.buildPhaseKeyOf(typeName)}",
+                        )
+                    }
                 }
             }
 

@@ -28,6 +28,15 @@ extend .google.protobuf.ServiceOptions {
 extend .google.protobuf.MethodOptions {
     // Adds the ability to add an OpenAPI operation to a rpc in a proto `service`
     .engine.protoc.openapi.model.Operation method = 20231016;
+
+    // When true, the RPC's request body schema is inlined at the use site instead of emitted as
+    // a `$ref` into `components/schemas`.  Transitive: messages reached only through this inline
+    // path are themselves inlined; messages also reachable through a non-inlined path remain in
+    // components and are `$ref`'d from the inline expansion.
+    optional bool inline_request_schema = 202310162;
+
+    // Same as `inline_request_schema`, but for the RPC's response body.
+    optional bool inline_response_schema = 202310163;
 }
 
 extend .google.protobuf.MessageOptions {

@@ -8,6 +8,7 @@ import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 import org.jreleaser.gradle.plugin.JReleaserExtension
 import org.jreleaser.model.Active
 import java.util.Calendar
+import java.util.function.Predicate
 
 buildscript {
     configurations.classpath {
@@ -313,6 +314,14 @@ graalvmNative {
     }
     agent {
         enabled = true
+        /*
+         * Scope the native-image-agent to the `run` task only.  By default the plugin attaches
+         * the agent as a JVMTI agent to every JavaExec/Test task, which conflicts with the IDE
+         * debugger's own JVMTI agent and aborts test runs with `JVMTI_ERROR_NOT_AVAILABLE`.
+         * `metadataCopy` only consumes output from `run` anyway, so instrumenting other tasks
+         * provides no benefit.
+         */
+        tasksToInstrumentPredicate.set(Predicate<Task> { it.name == "run" })
         metadataCopy {
             inputTaskNames.add("run")
             outputDirectories.add("src/main/resources/META-INF/native-image/com.engine/protoc-gen-openapi")

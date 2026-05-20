@@ -70,6 +70,11 @@ Covers `preserve_proto_field_names`, `always_print_primitive_fields`, `always_pr
 Demonstrates the method-level `inline_request_schema` / `inline_response_schema` annotations, which expand the request or response body schema at the use site instead of emitting a `$ref` into `components/schemas`.
 Transitive: a message reached only through inlined boundaries is also inlined; one that has any non-inlined reference stays in components and is `$ref`'d from the inline expansion.
 
+### [inlineFieldSchema](src/inlineFieldSchema/README.md)
+
+Demonstrates the field-level `inline_schema` annotation, which inlines a single message-typed field's schema at the field site.
+Shares the transitivity rule with [inlineSchemas](src/inlineSchemas/README.md) but operates at the field granularity rather than the request/response boundary.
+
 ### [wellKnownTypes](src/wellKnownTypes/README.md)
 
 Demonstrates how the plugin emits inline OpenAPI schemas for structural protobuf well-known types — `Any`, `Struct`, `Value`, `ListValue`, `FieldMask`, and `Empty` — instead of dangling `$ref`s into `components/schemas`.

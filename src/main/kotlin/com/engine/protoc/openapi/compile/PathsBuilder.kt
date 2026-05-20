@@ -164,8 +164,10 @@ internal class PathsBuilder(
 
         // Explicit requestBody annotation seeds proto_message_ref'd component schemas — these
         // are independent of the inline flag (the user explicitly requested a $ref to them).
-        if (hasExplicitRequestBody) {
-            annotation?.requestBody?.requestBody?.contentMap?.values?.forEach { mt ->
+        // Only the inlined RequestBody branch carries a contentMap; the Reference branch points
+        // at a `components/requestBodies` entry that doesn't need additional collection here.
+        if (hasExplicitRequestBody && annotation!!.requestBody.hasRequestBody()) {
+            annotation.requestBody.requestBody.contentMap.values.forEach { mt ->
                 if (mt.hasSchema()) collector.collectFromSchema(mt.schema)
             }
         }
@@ -915,12 +917,14 @@ internal class PathsBuilder(
             DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE -> {
                 val typeName = field.typeName
                 val wkt = ctx.wellKnownTypeSchema(typeName)
+                val fieldInline = field.options.getExtension(Annotations.inlineSchema)
                 when {
                     wkt != null -> wkt
 
                     // Caller explicitly requested an inline schema for this field's message
-                    // (e.g. inline_request_schema on a `body: "<field>"` binding).
-                    inlineMode -> expandInline(typeName)
+                    // (e.g. inline_request_schema on a `body: "<field>"` binding), or the field
+                    // itself carries `(engine.protoc.openapi.inline_schema) = true`.
+                    inlineMode || fieldInline -> expandInline(typeName)
 
                     // Inside an active inline expansion: if the target isn't in the collected
                     // set it has no component schema to $ref, so inline-expand it here.

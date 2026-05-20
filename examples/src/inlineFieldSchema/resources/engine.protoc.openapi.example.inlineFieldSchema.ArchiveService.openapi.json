@@ -1,0 +1,172 @@
+{
+  "openapi" : "3.1.0",
+  "paths" : {
+    "/archives/{id}" : {
+      "get" : {
+        "summary" : "Archive is in components.",
+        "description" : "Archive is in components.  Its `manifest` field is `inline_schema`d, so the inline\n expansion appears inside the Archive component schema (and inside every $ref chain\n that reaches Archive).  Manifest itself is also in components via GetManifest below;\n the inline expansion's nested `entry` field $refs Entry.",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Archive"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/manifests/{id}" : {
+      "get" : {
+        "summary" : "Non-inline path that pulls Manifest (and transitively Entry) into components.",
+        "description" : "Non-inline path that pulls Manifest (and transitively Entry) into components.",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Manifest"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/previews/{id}" : {
+      "get" : {
+        "summary" : "Preview is in components.",
+        "description" : "Preview is in components.  Its `snapshot` field is `inline_schema`d, and Snapshot is\n reached only through this field — so Snapshot and Tag are absent from components and\n expand inline inside the Preview component schema.",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Preview"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "info" : {
+    "title" : "Inline Field Schema Example API",
+    "version" : "1.0.0"
+  },
+  "components" : {
+    "schemas" : {
+      "Archive" : {
+        "type" : "object",
+        "description" : "An archive carries its manifest as an inline field.  Because Manifest is also returned\n directly by GetManifest below (non-inline), it stays in components and the inline expansion\n here `$refs` into the component schema for its nested `entry` field.",
+        "properties" : {
+          "id" : {
+            "type" : "string"
+          },
+          "header" : {
+            "$ref" : "#/components/schemas/Header"
+          },
+          "manifest" : {
+            "type" : "object",
+            "properties" : {
+              "format" : {
+                "type" : "string"
+              },
+              "entry" : {
+                "$ref" : "#/components/schemas/Entry"
+              }
+            }
+          }
+        }
+      },
+      "Header" : {
+        "type" : "object",
+        "properties" : {
+          "contentType" : {
+            "type" : "string"
+          }
+        }
+      },
+      "Manifest" : {
+        "type" : "object",
+        "properties" : {
+          "format" : {
+            "type" : "string"
+          },
+          "entry" : {
+            "$ref" : "#/components/schemas/Entry"
+          }
+        }
+      },
+      "Entry" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
+      "Preview" : {
+        "type" : "object",
+        "description" : "A preview carries a snapshot reachable only through the inline field below — so neither\n Snapshot nor its Tag sub-field appear in components/schemas; both expand inline.",
+        "properties" : {
+          "id" : {
+            "type" : "string"
+          },
+          "snapshot" : {
+            "type" : "object",
+            "description" : "Reached only through Preview.snapshot — inline-only.",
+            "properties" : {
+              "kind" : {
+                "type" : "string"
+              },
+              "tag" : {
+                "type" : "object",
+                "description" : "Reached only through Snapshot.tag — also inline-only (transitive).",
+                "properties" : {
+                  "label" : {
+                    "type" : "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

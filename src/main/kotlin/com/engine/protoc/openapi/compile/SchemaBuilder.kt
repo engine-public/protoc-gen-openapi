@@ -1,6 +1,7 @@
 package com.engine.protoc.openapi.compile
 
 import com.engine.protoc.openapi.compile.json.JsonContext
+import tools.jackson.databind.JsonNode
 import tools.jackson.databind.node.ObjectNode
 
 /**
@@ -16,22 +17,36 @@ internal class SchemaBuilder(
     private val pathsBuilder: PathsBuilder,
 ) {
 
-    /** Returns an ObjectNode containing all component schemas (messages and enums) keyed by schema name. */
+    /**
+     * Returns an ObjectNode containing all component schemas (messages and enums) keyed by
+     * schema name.  Entries are emitted in alphabetical order of the final schema key, so the
+     * output is stable across runs regardless of the order in which types were first reached
+     * during collection.
+     */
     fun build(collector: MessageCollector): ObjectNode {
-        val schemas = ctx.obj()
+        // Collect into a sorted map so the final emission order is alphabetical by schema key.
+        // [ctx.schemaKeyResolver.keyOf] already returns the final key (SIMPLIFIED_PACKAGE
+        // resolution happens in [SchemaKeyResolver.finalizeKeys], which Compiler calls before
+        // invoking us), so sorting here matches the names that will appear in the output.
+        val sorted = sortedMapOf<String, JsonNode>()
         for (typeName in collector.collected) {
             val wrapper = ctx.messageIndex.find(typeName) ?: continue
             if (wrapper.proto.options.mapEntry) continue
             val schemaKey = ctx.schemaKeyResolver.keyOf(typeName)
-            schemas.set(schemaKey, pathsBuilder.buildMessageSchema(wrapper, typeName))
+            sorted[schemaKey] = pathsBuilder.buildMessageSchema(wrapper, typeName)
         }
         for (typeName in collector.collectedEnums) {
             val wrapper = ctx.enumIndex.find(typeName) ?: continue
             val schemaKey = ctx.schemaKeyResolver.keyOf(typeName)
-            schemas.set(schemaKey, pathsBuilder.buildEnumSchema(typeName, wrapper, includeTitle = true))
+            sorted[schemaKey] = pathsBuilder.buildEnumSchema(typeName, wrapper, includeTitle = true)
         }
         if (ctx.convertGrpcStatus) {
-            schemas.set("google.rpc.Status", buildGrpcStatusSchema())
+            sorted["google.rpc.Status"] = buildGrpcStatusSchema()
+        }
+
+        val schemas = ctx.obj()
+        for ((key, value) in sorted) {
+            schemas.set(key, value)
         }
         return schemas
     }

@@ -44,10 +44,12 @@ class ServiceOrderingTest :
         test("paths appear in index_order then encounter-ordinal order") {
             val tree = mapper.readTree(generatedFile.content)
             val pathKeys = tree.get("paths").propertyNames().asSequence().toList()
-            // Beta (-1), Alpha (encounter 0), Gamma (encounter 2), Delta (10)
+            // Beta (-1), Alpha (impl 0, src 0), Epsilon (expl 0, src 4 — collides with Alpha,
+            // falls back to source order), Gamma (impl 2), Delta (expl 10).
             pathKeys shouldBe listOf(
                 "/beta/{id}",
                 "/alpha/{id}",
+                "/epsilon/{id}",
                 "/gamma/{id}",
                 "/delta/{id}",
             )
@@ -60,6 +62,7 @@ class ServiceOrderingTest :
             tagNames shouldBe listOf(
                 "BetaService",
                 "AlphaService",
+                "EpsilonService",
                 "GammaService",
                 "DeltaService",
             )

@@ -51,6 +51,31 @@
         }
       }
     },
+    "/epsilon/{id}" : {
+      "get" : {
+        "tags" : [ "EpsilonService" ],
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EpsilonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/gamma/{id}" : {
       "get" : {
         "tags" : [ "GammaService" ],
@@ -113,6 +138,9 @@
     "name" : "AlphaService",
     "description" : "Source-position 0 — no `index_order`, so it falls into its encounter ordinal (0)."
   }, {
+    "name" : "EpsilonService",
+    "description" : "Source-position 4 — explicit `index_order = 0` collides with AlphaService's implicit\n ordinal of 0.  The compiler logs a WARN naming both services and falls back to source\n order; AlphaService keeps the earlier slot because it appears first in source."
+  }, {
     "name" : "GammaService",
     "description" : "Source-position 2 — no annotation, so it sorts at ordinal 2.  Sparse: nothing fills the\n gap between Alpha (0) and Gamma (10) other than this one."
   }, {
@@ -138,6 +166,14 @@
         }
       },
       "DeltaResponse" : {
+        "type" : "object",
+        "properties" : {
+          "value" : {
+            "type" : "string"
+          }
+        }
+      },
+      "EpsilonResponse" : {
         "type" : "object",
         "properties" : {
           "value" : {

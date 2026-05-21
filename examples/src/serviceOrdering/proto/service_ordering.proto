@@ -27,6 +27,9 @@ message GammaResponse { string value = 1; }
 message DeltaRequest { string id = 1; }
 message DeltaResponse { string value = 1; }
 
+message EpsilonRequest { string id = 1; }
+message EpsilonResponse { string value = 1; }
+
 // Source-position 0 — no `index_order`, so it falls into its encounter ordinal (0).
 service AlphaService {
     rpc Get(AlphaRequest) returns (AlphaResponse) {
@@ -56,5 +59,15 @@ service DeltaService {
     option (engine.protoc.openapi.index_order) = 10;
     rpc Get(DeltaRequest) returns (DeltaResponse) {
         option (google.api.http) = { get: "/delta/{id}" };
+    }
+}
+
+// Source-position 4 — explicit `index_order = 0` collides with AlphaService's implicit
+// ordinal of 0.  The compiler logs a WARN naming both services and falls back to source
+// order; AlphaService keeps the earlier slot because it appears first in source.
+service EpsilonService {
+    option (engine.protoc.openapi.index_order) = 0;
+    rpc Get(EpsilonRequest) returns (EpsilonResponse) {
+        option (google.api.http) = { get: "/epsilon/{id}" };
     }
 }

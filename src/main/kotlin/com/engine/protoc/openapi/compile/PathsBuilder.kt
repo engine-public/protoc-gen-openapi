@@ -21,11 +21,13 @@ import com.google.protobuf.DescriptorProtos
 import org.commonmark.node.*
 import org.commonmark.parser.Parser
 import org.commonmark.renderer.markdown.MarkdownRenderer
+import org.slf4j.LoggerFactory
 import tools.jackson.databind.node.ArrayNode
 import tools.jackson.databind.node.ObjectNode
 
 private val markdownParser: Parser = Parser.builder().build()
 private val markdownRenderer: MarkdownRenderer = MarkdownRenderer.builder().build()
+private val log = LoggerFactory.getLogger(PathsBuilder::class.java)
 
 /**
  * Builds the `paths` section of the OpenAPI document from gRPC service definitions and their
@@ -197,17 +199,54 @@ internal class PathsBuilder(
      * falling back to encounter ordinal for any service without the annotation.  Stable: ties
      * (including the implicit `index = encounter ordinal` baseline for un-annotated services)
      * preserve source order.
+     *
+     * Logs a WARN for every sort-key collision (two explicit annotations landing on the same
+     * value, or an explicit value colliding with an un-annotated service's encounter ordinal)
+     * naming the conflicting services and the index they share.  The stable-sort fallback then
+     * resolves the order automatically.
      */
     private fun orderByIndex(
         services: List<Pair<String?, ServiceDescriptorProtoWrapper>>,
-    ): List<Pair<String?, ServiceDescriptorProtoWrapper>> =
-        services.mapIndexed { encounterOrdinal, pair ->
+    ): List<Pair<String?, ServiceDescriptorProtoWrapper>> {
+        data class Keyed(
+            val pair: Pair<String?, ServiceDescriptorProtoWrapper>,
+            val sortKey: Int,
+            val explicit: Boolean,
+        )
+
+        val keyed = services.mapIndexed { encounterOrdinal, pair ->
             val opts = pair.second.options?.proto
             val explicit = opts
                 ?.takeIf { it.hasExtension(Annotations.indexOrder) }
                 ?.getExtension(Annotations.indexOrder)
-            (explicit ?: encounterOrdinal) to pair
-        }.sortedBy { it.first }.map { it.second }
+            Keyed(pair, explicit ?: encounterOrdinal, explicit != null)
+        }
+
+        keyed.groupBy { it.sortKey }
+            .filterValues { it.size > 1 }
+            .forEach { (index, group) ->
+                val parties = group.joinToString(", ") {
+                    val tag = if (it.explicit) "explicit" else "implicit"
+                    "${fqn(it.pair.first, it.pair.second)} ($tag)"
+                }
+                log.warn(
+                    "index_order conflict at {}: {} — falling back to source order",
+                    index,
+                    parties,
+                )
+            }
+
+        return keyed.sortedBy { it.sortKey }.map { it.pair }
+    }
+
+    private fun fqn(
+        filePackage: String?,
+        service: ServiceDescriptorProtoWrapper,
+    ): String {
+        val pkg = filePackage.orEmpty()
+        val name = service.name?.value ?: "<unknown>"
+        return if (pkg.isEmpty()) name else "$pkg.$name"
+    }
 
     private fun buildForServicePairs(
         services: List<Pair<String?, ServiceDescriptorProtoWrapper>>,

@@ -1,0 +1,60 @@
+syntax = "proto3";
+
+package engine.protoc.openapi.example.serviceOrdering;
+
+option java_package = "com.engine.protoc.openapi.example.serviceOrdering";
+option java_multiple_files = true;
+
+import "google/api/annotations.proto";
+import "engine/protoc/openapi/annotations.proto";
+
+option (.engine.protoc.openapi.file) = {
+    info: {
+        title: "Service Ordering Example API"
+        version: "1.0.0"
+    }
+};
+
+message AlphaRequest { string id = 1; }
+message AlphaResponse { string value = 1; }
+
+message BetaRequest { string id = 1; }
+message BetaResponse { string value = 1; }
+
+message GammaRequest { string id = 1; }
+message GammaResponse { string value = 1; }
+
+message DeltaRequest { string id = 1; }
+message DeltaResponse { string value = 1; }
+
+// Source-position 0 — no `index_order`, so it falls into its encounter ordinal (0).
+service AlphaService {
+    rpc Get(AlphaRequest) returns (AlphaResponse) {
+        option (google.api.http) = { get: "/alpha/{id}" };
+    }
+}
+
+// Source-position 1 — explicit `index_order = -1` places it ahead of every un-annotated
+// service.  Negative indices are intended for exactly this case.
+service BetaService {
+    option (engine.protoc.openapi.index_order) = -1;
+    rpc Get(BetaRequest) returns (BetaResponse) {
+        option (google.api.http) = { get: "/beta/{id}" };
+    }
+}
+
+// Source-position 2 — no annotation, so it sorts at ordinal 2.  Sparse: nothing fills the
+// gap between Alpha (0) and Gamma (10) other than this one.
+service GammaService {
+    rpc Get(GammaRequest) returns (GammaResponse) {
+        option (google.api.http) = { get: "/gamma/{id}" };
+    }
+}
+
+// Source-position 3 — explicit `index_order = 10` pushes it well past the un-annotated tail.
+service DeltaService {
+    option (engine.protoc.openapi.index_order) = 10;
+    rpc Get(DeltaRequest) returns (DeltaResponse) {
+        option (google.api.http) = { get: "/delta/{id}" };
+    }
+}

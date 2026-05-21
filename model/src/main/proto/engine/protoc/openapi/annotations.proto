@@ -23,6 +23,14 @@ extend .google.protobuf.ServiceOptions {
     // Adds the ability to define tags to be applied to all RPCs (OAS Operations) within a gRPC service.
     // Fully enriched tags must be created within one of the available layers of OpenAPI annotation (at the file or service annotation).
     repeated string tags = 202310162;
+
+    // Sort key controlling the order this service's paths (and its auto-generated service tag,
+    // when `autoTagServices` is enabled) appear in the emitted OpenAPI document.  Services with
+    // an explicit `index_order` are positioned by that integer; services without one fall back
+    // to their encounter ordinal across the target file set (the first service is index 0, the
+    // second is 1, etc.).  Negative values place a service ahead of the un-annotated baseline,
+    // indices may be sparse, and ties are broken by source order (stable sort).
+    optional int32 index_order = 202310163;
 }
 
 extend .google.protobuf.MethodOptions {

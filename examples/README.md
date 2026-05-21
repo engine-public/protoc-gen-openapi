@@ -75,6 +75,11 @@ Transitive: a message reached only through inlined boundaries is also inlined; o
 Demonstrates the field-level `inline_schema` annotation, which inlines a single message-typed field's schema at the field site.
 Shares the transitivity rule with [inlineSchemas](src/inlineSchemas/README.md) but operates at the field granularity rather than the request/response boundary.
 
+### [serviceOrdering](src/serviceOrdering/README.md)
+
+Demonstrates the service-level `index_order` annotation, which controls the order in which a service's paths and auto-generated tag appear in the emitted document.
+Un-annotated services fall into their encounter ordinal, annotated services use their explicit value, negative indices are valid, and ties break by source order.
+
 ### [wellKnownTypes](src/wellKnownTypes/README.md)
 
 Demonstrates how the plugin emits inline OpenAPI schemas for structural protobuf well-known types — `Any`, `Struct`, `Value`, `ListValue`, `FieldMask`, and `Empty` — instead of dangling `$ref`s into `components/schemas`.

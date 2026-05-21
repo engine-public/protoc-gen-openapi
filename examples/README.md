@@ -80,6 +80,11 @@ Shares the transitivity rule with [inlineSchemas](src/inlineSchemas/README.md) b
 Demonstrates the service-level `index_order` annotation, which controls the order in which a service's paths and auto-generated tag appear in the emitted document.
 Un-annotated services fall into their encounter ordinal, annotated services use their explicit value, negative indices are valid, and ties break by source order.
 
+### [errorResponses](src/errorResponses/README.md)
+
+Demonstrates the method-level `error_responses` shortcut: one line per `(HTTP status, error class)` pair expands into a fully-formed response whose schema is `google.rpc.Status` (via `allOf`) typed with the error class's `$ref`.
+Covers single error, multiple errors, optional `grpc_code` (emitted as `x-grpc-code` plus a seeded `examples` block), and the two collision shapes (explicit `responses` vs `error_responses`, and duplicate status within `error_responses`).
+
 ### [wellKnownTypes](src/wellKnownTypes/README.md)
 
 Demonstrates how the plugin emits inline OpenAPI schemas for structural protobuf well-known types — `Any`, `Struct`, `Value`, `ListValue`, `FieldMask`, and `Empty` — instead of dangling `$ref`s into `components/schemas`.

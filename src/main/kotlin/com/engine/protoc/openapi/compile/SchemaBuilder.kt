@@ -40,7 +40,7 @@ internal class SchemaBuilder(
             val schemaKey = ctx.schemaKeyResolver.keyOf(typeName)
             sorted[schemaKey] = pathsBuilder.buildEnumSchema(typeName, wrapper, includeTitle = true)
         }
-        if (ctx.convertGrpcStatus) {
+        if (ctx.convertGrpcStatus || pathsBuilder.requiresGrpcStatus) {
             sorted["google.rpc.Status"] = buildGrpcStatusSchema()
         }
 

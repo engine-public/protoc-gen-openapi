@@ -1,0 +1,127 @@
+syntax = "proto3";
+
+package engine.protoc.openapi.example.errorResponses;
+
+option java_package = "com.engine.protoc.openapi.example.errorResponses";
+option java_multiple_files = true;
+
+import "google/api/annotations.proto";
+import "engine/protoc/openapi/annotations.proto";
+
+option (.engine.protoc.openapi.file) = {
+    info: {
+        title: "Error Responses Example API"
+        version: "1.0.0"
+    }
+};
+
+// One or more proto field validation failures.
+message ValidationError {
+    repeated string field_paths = 1;
+    string detail = 2;
+}
+
+// Caller is unauthenticated or lacks permission for this resource.
+message AuthError {
+    string reason = 1;
+}
+
+// The requested entity changed underneath the caller.
+message ConflictError {
+    string current_version = 1;
+}
+
+// Catch-all for unexpected server-side failures.
+message ServerError {
+    string trace_id = 1;
+}
+
+message ItemRequest { string id = 1; }
+message Item { string id = 1; string value = 2; }
+message UpdateItemRequest { string id = 1; Item item = 2; }
+
+service ItemService {
+    // Single error scenario, with `grpc_code` to drive the example payload.
+    rpc Get(ItemRequest) returns (Item) {
+        option (google.api.http) = { get: "/items/{id}" };
+        option (engine.protoc.openapi.method) = {
+            error_responses: [
+                {
+                    status: "404"
+                    error_type: { [type.googleapis.com/engine.protoc.openapi.example.errorResponses.ValidationError] {} }
+                    description: "Item not found."
+                    grpc_code: NOT_FOUND
+                }
+            ]
+        };
+    }
+
+    // Multiple error scenarios across distinct status codes.
+    rpc List(ItemRequest) returns (Item) {
+        option (google.api.http) = { get: "/items" };
+        option (engine.protoc.openapi.method) = {
+            error_responses: [
+                { status: "400" error_type: { [type.googleapis.com/engine.protoc.openapi.example.errorResponses.ValidationError] {} } grpc_code: INVALID_ARGUMENT },
+                { status: "401" error_type: { [type.googleapis.com/engine.protoc.openapi.example.errorResponses.AuthError] {} } grpc_code: UNAUTHENTICATED },
+                { status: "500" error_type: { [type.googleapis.com/engine.protoc.openapi.example.errorResponses.ServerError] {} } grpc_code: INTERNAL }
+            ]
+        };
+    }
+
+    // Collision between an explicit `responses` entry and an `error_responses` entry at the
+    // same status.  The shortcut wins (last-write-wins); the compiler emits a WARN.
+    rpc Update(UpdateItemRequest) returns (Item) {
+        option (google.api.http) = {
+            put: "/items/{id}"
+            body: "item"
+        };
+        option (engine.protoc.openapi.method) = {
+            responses: {
+                codes: {
+                    key: "200"
+                    value: {
+                        response_object: {
+                            description: "Inline 200 from explicit responses block."
+                            content: {
+                                key: "application/json"
+                                value: {
+                                    schema: {
+                                        object: { proto_message_ref: { [type.googleapis.com/engine.protoc.openapi.example.errorResponses.Item] {} } }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                codes: {
+                    key: "409"
+                    value: {
+                        response_object: {
+                            description: "Verbose-form 409 that will be overwritten by error_responses."
+                        }
+                    }
+                }
+            }
+            error_responses: [
+                {
+                    status: "409"
+                    error_type: { [type.googleapis.com/engine.protoc.openapi.example.errorResponses.ConflictError] {} }
+                    description: "Last write loses to a concurrent update."
+                    grpc_code: ABORTED
+                }
+            ]
+        };
+    }
+
+    // Duplicate status within `error_responses` itself.  The compiler emits a WARN and the
+    // last entry wins.
+    rpc Delete(ItemRequest) returns (Item) {
+        option (google.api.http) = { delete: "/items/{id}" };
+        option (engine.protoc.openapi.method) = {
+            error_responses: [
+                { status: "404" error_type: { [type.googleapis.com/engine.protoc.openapi.example.errorResponses.ValidationError] {} } description: "First declaration." },
+                { status: "404" error_type: { [type.googleapis.com/engine.protoc.openapi.example.errorResponses.ConflictError] {} } description: "Second declaration overwrites the first." }
+            ]
+        };
+    }
+}

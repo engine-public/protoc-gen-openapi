@@ -5,6 +5,7 @@ import com.engine.protoc.openapi.ProtocGenOpenAPI
 import com.engine.protoc.openapi.compile.json.JsonContext
 import com.engine.protoc.openapi.compile.json.putExtensionsInto
 import com.engine.protoc.openapi.compile.json.toJson
+import com.engine.protoc.openapi.model.ErrorResponse
 import com.engine.protoc.openapi.model.Operation
 import com.engine.protoc.openapi.model.ParameterOrReference
 import com.engine.protoc.openapi.model.Schema
@@ -56,6 +57,12 @@ internal class PathsBuilder(
     // chain triggered from expandInline, the top frame controls $ref-vs-inline decisions for
     // nested message-typed fields.
     private val inlineExpandingStack = ArrayDeque<Set<String>>()
+
+    // Set during the seed pass when any operation declares `error_responses`.  Consulted by
+    // [SchemaBuilder] so `google.rpc.Status` lands in `components/schemas` even when the
+    // `convertGrpcStatus` compiler option is off.
+    internal var requiresGrpcStatus: Boolean = false
+        private set
 
     /**
      * Collects all paths from [files] into a merged `paths` ObjectNode.
@@ -173,6 +180,24 @@ internal class PathsBuilder(
                 if (mt.hasSchema()) collector.collectFromSchema(mt.schema)
             }
         }
+
+        // error_responses shortcut: collect each referenced error type, and mark that
+        // google.rpc.Status must be emitted into components/schemas.
+        annotation?.errorResponsesList?.forEach { er ->
+            errorResponseTypeName(er)?.let { collector.collect(it) }
+            requiresGrpcStatus = true
+        }
+    }
+
+    /**
+     * Returns the fully-qualified proto type name (leading dot, e.g. `.pkg.MyError`) referenced
+     * by an [ErrorResponse]'s `error_type`, or `null` when no type URL is set.
+     */
+    private fun errorResponseTypeName(er: ErrorResponse): String? {
+        if (!er.hasErrorType()) return null
+        val typeUrl = er.errorType.typeUrl
+        if (typeUrl.isEmpty()) return null
+        return ".${typeUrl.substringAfterLast('/')}"
     }
 
     /**
@@ -447,19 +472,48 @@ internal class PathsBuilder(
         }
 
         // ---- Responses --------------------------------------------------
-        if (annotation?.hasResponses() == true) {
-            node.set("responses", annotation.responses.toJson(ctx))
+        val responsesNode: ObjectNode = if (annotation?.hasResponses() == true) {
+            annotation.responses.toJson(ctx) as ObjectNode
         } else {
-            node.set(
-                "responses",
-                inferResponses(
-                    outputTypeName,
-                    responseBodyField,
-                    method.proto.serverStreaming,
-                    inlineResponse,
-                ),
+            inferResponses(
+                outputTypeName,
+                responseBodyField,
+                method.proto.serverStreaming,
+                inlineResponse,
             )
         }
+
+        // error_responses shortcut: apply each entry on top of `responsesNode` with
+        // last-wins semantics, warning on collisions (within error_responses, or against
+        // an entry already produced by the inferred / explicit `responses` path).
+        if (annotation?.errorResponsesList?.isNotEmpty() == true) {
+            val operationFqn = "${binding.httpMethod.uppercase()} ${binding.path}"
+            val seen = mutableMapOf<String, ErrorResponse>()
+            for (er in annotation.errorResponsesList) {
+                val status = er.status
+                val incoming = errorResponseTypeName(er) ?: "<unset>"
+                val prevInErrors = seen[status]
+                if (prevInErrors != null) {
+                    val prevName = errorResponseTypeName(prevInErrors) ?: "<unset>"
+                    log.warn(
+                        "$operationFqn: error_responses declares status '{}' twice (previous error_type={}, new error_type={}) — last declaration wins",
+                        status,
+                        prevName,
+                        incoming,
+                    )
+                } else if (responsesNode.has(status)) {
+                    log.warn(
+                        "$operationFqn: status '{}' already declared by `responses`; the `error_responses` entry (error_type={}) overwrites — last declaration wins",
+                        status,
+                        incoming,
+                    )
+                }
+                seen[status] = er
+                responsesNode.set(status, buildErrorResponseEntry(er))
+            }
+        }
+
+        node.set("responses", responsesNode)
 
         // ---- Security / deprecated --------------------------------------
         if (annotation?.securityList?.isNotEmpty() == true) {
@@ -699,6 +753,90 @@ internal class PathsBuilder(
             responses.set("default", errorResponse)
         }
         return responses
+    }
+
+    /**
+     * Builds the Response object for a single [`ErrorResponse`] entry: a `google.rpc.Status`
+     * schema (via `allOf`) whose `details.items` $refs the named error type, plus the
+     * `x-grpc-code` extension and a seeded `examples` block when `grpc_code` is present.
+     */
+    private fun buildErrorResponseEntry(er: ErrorResponse): ObjectNode {
+        val response = ctx.obj()
+        response.put("description", resolveErrorDescription(er))
+
+        if (er.hasGrpcCode()) {
+            response.put("x-grpc-code", er.grpcCode.name)
+        }
+
+        val mediaType = ctx.obj()
+        if (er.hasGrpcCode()) {
+            val examples = ctx.obj()
+            val grpcError = ctx.obj()
+            grpcError.put("summary", er.grpcCode.name)
+            val value = ctx.obj()
+            value.put("code", er.grpcCode.number)
+            value.put("message", "")
+            value.set("details", ctx.mapper.createArrayNode())
+            grpcError.set("value", value)
+            examples.set("grpc-error", grpcError)
+            mediaType.set("examples", examples)
+        }
+        mediaType.set("schema", buildErrorAllOfSchema(er))
+
+        val content = ctx.obj()
+        content.set("application/json", mediaType)
+        response.set("content", content)
+        return response
+    }
+
+    /**
+     * Resolves an [`ErrorResponse`]'s description with the layered fallback documented on the
+     * annotation: explicit `description`, then the error type's leading proto comment, then
+     * the literal "Error".
+     */
+    private fun resolveErrorDescription(er: ErrorResponse): String {
+        if (er.hasDescription() && er.description.isNotEmpty()) return er.description
+        val typeName = errorResponseTypeName(er)
+        if (typeName != null) {
+            val comment = ctx.messageIndex.find(typeName)
+                ?.location?.proto?.leadingComments?.trim()?.ifEmpty { null }
+            if (comment != null) return comment
+        }
+        return "Error"
+    }
+
+    /**
+     * Produces an `allOf: [ $ref:google.rpc.Status, { properties: { details: { items: $ref:T }}}]`
+     * schema that types the Status's `details` array items as the [`ErrorResponse`]'s error type.
+     */
+    private fun buildErrorAllOfSchema(er: ErrorResponse): ObjectNode {
+        val schema = ctx.obj()
+        val allOf = ctx.mapper.createArrayNode()
+
+        val statusRef = ctx.obj()
+        statusRef.put("\$ref", "#/components/schemas/google.rpc.Status")
+        allOf.add(statusRef)
+
+        val typeName = errorResponseTypeName(er)
+        if (typeName != null) {
+            val override = ctx.obj()
+            override.put("type", "object")
+            val props = ctx.obj()
+            val details = ctx.obj()
+            details.put("type", "array")
+            details.set(
+                "items",
+                ctx.obj().also {
+                    it.put("\$ref", "#/components/schemas/${ctx.schemaKeyResolver.buildPhaseKeyOf(typeName)}")
+                },
+            )
+            props.set("details", details)
+            override.set("properties", props)
+            allOf.add(override)
+        }
+
+        schema.set("allOf", allOf)
+        return schema
     }
 
     /**

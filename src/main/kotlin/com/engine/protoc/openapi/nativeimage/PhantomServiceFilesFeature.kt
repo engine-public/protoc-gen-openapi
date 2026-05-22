@@ -23,18 +23,10 @@ import java.util.Locale
  *     empty payload via the three-arg form lets `ServiceLoader` parse zero
  *     providers, matching the JVM outcome.
  *
- *     `slf4j-api` 2.x is no longer in this category — Logback ships a real
- *     `META-INF/services/org.slf4j.spi.SLF4JServiceProvider` that lists
- *     `ch.qos.logback.classic.spi.LogbackServiceProvider`, so the entry must
- *     not be registered as empty here (it would shadow Logback's binding).
- *
- *     Logback's `ContextInitializer.autoConfig()` is in this category, though:
- *     it queries `META-INF/services/ch.qos.logback.classic.spi.Configurator`
- *     during `LoggerFactory.getILoggerFactory()` (so before our programmatic
- *     `ctx.reset()` ever runs), and no `Configurator` SPI is on the classpath.
- *     Empty-payload registration lets the auto-config loop find zero providers
- *     and fall through to the default `BasicConfigurator`, which our subsequent
- *     `ctx.reset()` then discards.
+ *     `slf4j-api` 2.x is no longer in this category — `log4j-slf4j2-impl`
+ *     ships a real `META-INF/services/org.slf4j.spi.SLF4JServiceProvider`
+ *     that binds SLF4J to Log4j 2, so the entry must not be registered as
+ *     empty here (it would shadow the binding).
  *
  *  2. Phantom class-as-resource probes. SLF4J 2.x falls back to
  *     `getResources("org/slf4j/impl/StaticLoggerBinder.class")` to detect a
@@ -79,14 +71,6 @@ public class PhantomServiceFilesFeature : Feature {
                 "kotlin.reflect.jvm.internal.impl.util.ModuleVisibilityHelper" to
                     "META-INF/services/kotlin.reflect.jvm.internal.impl.util.ModuleVisibilityHelper",
                 "org.slf4j.LoggerFactory" to "org/slf4j/impl/StaticLoggerBinder.class",
-                // Logback's ContextInitializer.autoConfig() runs during
-                // LoggerFactory.getILoggerFactory() — before we call ctx.reset()
-                // to install our programmatic config — and queries this SPI for
-                // a Configurator binding. We ship none, so the lookup must
-                // resolve to zero providers; under strict native-image the
-                // unrecorded query throws instead.
-                "ch.qos.logback.classic.spi.Configurator" to
-                    "META-INF/services/ch.qos.logback.classic.spi.Configurator",
                 // ResourceBundle.getBundle("jsv-messages", Locale.US) probes
                 // `_en_US` before falling back to `_en` / base. The validator
                 // ships `_en` and base only, so the `_en_US` candidate is a

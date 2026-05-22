@@ -13,7 +13,7 @@ testcontainers = "2.0.5"
 kotest = "6.1.4"
 engine-protoc-utils = "1.0.0"
 graalvm-sdk = "23.1.2"
-logback = "1.5.25"
+log4j = "2.26.0"
 
 # plugin versions
 google-osdetector-plugin = "1.7.3"
@@ -53,8 +53,9 @@ grpc-protoc-java = { group = "io.grpc", name = "protoc-gen-grpc-java", version.r
 grpc-protoc-kotlin = { group = "io.grpc", name = "protoc-gen-grpc-kotlin", version.ref = "grpcKotlin"}
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 testcontainers = { group = "org.testcontainers", name = "testcontainers", version.ref = "testcontainers" }
-slf4j-simple = { group = "org.slf4j", name = "slf4j-simple", version = "1.7.36" }
-logback-classic = { group = "ch.qos.logback", name = "logback-classic", version.ref = "logback" }
+log4j-api = { group = "org.apache.logging.log4j", name = "log4j-api", version.ref = "log4j" }
+log4j-core = { group = "org.apache.logging.log4j", name = "log4j-core", version.ref = "log4j" }
+log4j-slf4j2-impl = { group = "org.apache.logging.log4j", name = "log4j-slf4j2-impl", version.ref = "log4j" }
 
 # test dependencies
 test-kotest-assertions-core = { group = "io.kotest", name = "kotest-assertions-core", version.ref = "kotest" }

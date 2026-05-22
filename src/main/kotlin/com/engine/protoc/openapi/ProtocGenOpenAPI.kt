@@ -1,11 +1,5 @@
 package com.engine.protoc.openapi
 
-import ch.qos.logback.classic.LoggerContext
-import ch.qos.logback.classic.encoder.PatternLayoutEncoder
-import ch.qos.logback.classic.spi.ILoggingEvent
-import ch.qos.logback.core.Appender
-import ch.qos.logback.core.ConsoleAppender
-import ch.qos.logback.core.FileAppender
 import com.engine.protoc.openapi.compile.Compiler
 import com.engine.protoc.util.compiler.CodeGeneratorRequestWrapper
 import com.engine.protoc.util.compiler.Parameters
@@ -13,11 +7,12 @@ import com.engine.protoc.util.extensions.wrap
 import com.google.api.AnnotationsProto
 import com.google.protobuf.ExtensionRegistry
 import com.google.protobuf.compiler.PluginProtos
-import org.slf4j.LoggerFactory
+import org.apache.logging.log4j.core.appender.ConsoleAppender
+import org.apache.logging.log4j.core.config.Configurator
+import org.apache.logging.log4j.core.config.builder.api.ConfigurationBuilderFactory
 import org.slf4j.event.Level
 import java.io.InputStream
-import ch.qos.logback.classic.Level as LogbackLevel
-import ch.qos.logback.classic.Logger as LogbackLogger
+import org.apache.logging.log4j.Level as Log4jLevel
 
 public class ProtocGenOpenAPI(
     private val request: CodeGeneratorRequestWrapper,
@@ -319,8 +314,8 @@ public class ProtocGenOpenAPI(
          * emitted when its level is greater than or equal to this threshold.  Defaults to
          * `ERROR` so the plugin is quiet by default but still surfaces error-level reports.
          *
-         * The option is realised at runtime by programmatically reconfiguring the Logback
-         * `LoggerContext` after [Options] is built, so it controls every logger the plugin
+         * The option is realised at runtime by programmatically reconfiguring the Log4j 2
+         * `Configuration` after [Options] is built, so it controls every logger the plugin
          * (and its dependencies) creates.
          *
          * Passed via `--openapi_out=logLevel=DEBUG:outdir` (case-insensitive).
@@ -329,11 +324,11 @@ public class ProtocGenOpenAPI(
 
         /**
          * Optional path to a file that receives timestamped log records in addition to the
-         * stderr console output.  The stderr `ConsoleAppender` is always attached — its lines
+         * stderr console output.  The stderr `Console` appender is always attached — its lines
          * are prefixed with `[protoc-gen-openapi]` so they stand out from other compiler
-         * output protoc may multiplex on the same stream.  When this option is set, a
-         * [FileAppender][ch.qos.logback.core.FileAppender] is *also* attached at the given
-         * path with a `%d{HH:mm:ss.SSS}`-prefixed pattern.
+         * output protoc may multiplex on the same stream.  When this option is set, a `File`
+         * appender is *also* attached at the given path with a `%d{HH:mm:ss.SSS}`-prefixed
+         * pattern.
          *
          * Passed via `--openapi_out=logFile=/tmp/protoc.log:outdir`.
          */
@@ -691,64 +686,59 @@ public class ProtocGenOpenAPI(
         }
 
         /**
-         * Reconfigures the Logback `LoggerContext` from [Options.logLevel] and [Options.logFile].
+         * Reconfigures the Log4j 2 `Configuration` from [Options.logLevel] and [Options.logFile].
          *
          * Appenders are attached to the `com.engine` logger only, so downstream dependencies'
-         * loggers stay silent regardless of their own level.  A stderr [ConsoleAppender] is
+         * loggers stay silent regardless of their own level.  A stderr `Console` appender is
          * always attached, prefixed with `[protoc-gen-openapi]` so its records stand out from
          * other compiler output protoc may multiplex on the same stream.  When [Options.logFile]
-         * is non-null a [FileAppender] is also attached, writing timestamped records to the
+         * is non-null a `File` appender is also attached, writing timestamped records to the
          * given path.  The root logger is silenced with `Level.OFF` to discard anything emitted
          * outside the `com.engine` tree.  Invoked from [from] immediately after [Options] is
          * built so subsequent `LoggerFactory.getLogger` calls observe the resolved configuration.
          */
         private fun applyLoggingConfiguration(options: Options) {
-            val ctx = LoggerFactory.getILoggerFactory() as LoggerContext
-            ctx.reset()
-            val appenders = mutableListOf<Appender<ILoggingEvent>>()
-            appenders.add(
-                ConsoleAppender<ILoggingEvent>().also {
-                    it.context = ctx
-                    it.target = "System.err"
-                    it.encoder = encoder(ctx, "[protoc-gen-openapi] %-5level %logger{36} - %msg%n")
-                    it.start()
-                },
+            val cb = ConfigurationBuilderFactory.newConfigurationBuilder()
+            cb.setStatusLevel(Log4jLevel.OFF)
+
+            cb.add(
+                cb.newAppender("stderr", "Console")
+                    .addAttribute("target", ConsoleAppender.Target.SYSTEM_ERR)
+                    .add(
+                        cb.newLayout("PatternLayout")
+                            .addAttribute("pattern", "[protoc-gen-openapi] %-5level %logger{36} - %msg%n"),
+                    ),
             )
+
+            val engine =
+                cb.newLogger("com.engine", options.logLevel.toLog4j())
+                    .addAttribute("additivity", false)
+                    .add(cb.newAppenderRef("stderr"))
+
             options.logFile?.let { path ->
-                appenders.add(
-                    FileAppender<ILoggingEvent>().also {
-                        it.context = ctx
-                        it.file = path
-                        it.encoder = encoder(ctx, "%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n")
-                        it.start()
-                    },
+                cb.add(
+                    cb.newAppender("file", "File")
+                        .addAttribute("fileName", path)
+                        .add(
+                            cb.newLayout("PatternLayout")
+                                .addAttribute("pattern", "%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n"),
+                        ),
                 )
+                engine.add(cb.newAppenderRef("file"))
             }
-            ctx.getLogger(LogbackLogger.ROOT_LOGGER_NAME).level = LogbackLevel.OFF
-            val engine = ctx.getLogger("com.engine")
-            engine.detachAndStopAllAppenders()
-            engine.level = options.logLevel.toLogback()
-            engine.isAdditive = false
-            appenders.forEach(engine::addAppender)
+
+            cb.add(engine)
+            cb.add(cb.newRootLogger(Log4jLevel.OFF))
+            Configurator.reconfigure(cb.build(false))
         }
 
-        private fun encoder(
-            ctx: LoggerContext,
-            pattern: String,
-        ): PatternLayoutEncoder =
-            PatternLayoutEncoder().also {
-                it.context = ctx
-                it.pattern = pattern
-                it.start()
-            }
-
-        private fun Level.toLogback(): LogbackLevel =
+        private fun Level.toLog4j(): Log4jLevel =
             when (this) {
-                Level.ERROR -> LogbackLevel.ERROR
-                Level.WARN -> LogbackLevel.WARN
-                Level.INFO -> LogbackLevel.INFO
-                Level.DEBUG -> LogbackLevel.DEBUG
-                Level.TRACE -> LogbackLevel.TRACE
+                Level.ERROR -> Log4jLevel.ERROR
+                Level.WARN -> Log4jLevel.WARN
+                Level.INFO -> Log4jLevel.INFO
+                Level.DEBUG -> Log4jLevel.DEBUG
+                Level.TRACE -> Log4jLevel.TRACE
             }
     }
 

@@ -1,5 +1,11 @@
 [
     {
+        "name": "[B"
+    },
+    {
+        "name": "[C"
+    },
+    {
         "name": "[Ljava.lang.Class;"
     },
     {
@@ -21,13 +27,25 @@
         "name": "[Ljava.lang.invoke.LambdaForm$Name;"
     },
     {
+        "name": "[Ljava.lang.invoke.LambdaFormEditor$Transform;"
+    },
+    {
         "name": "[Ljava.lang.invoke.MethodHandle;"
     },
     {
         "name": "[Ljava.lang.reflect.Field;"
     },
     {
+        "name": "[Ljava.lang.reflect.Type;"
+    },
+    {
+        "name": "[Ljava.net.InetAddress;"
+    },
+    {
         "name": "[Ljava.nio.ByteBuffer;"
+    },
+    {
+        "name": "[Ljava.nio.file.attribute.FileAttribute;"
     },
     {
         "name": "[Ljava.time.format.DateTimeFormatterBuilder$DateTimePrinterParser;"
@@ -79,6 +97,9 @@
     },
     {
         "name": "[Ltools.jackson.databind.node.ContainerNode;"
+    },
+    {
+        "name": "[Ltools.jackson.databind.ser.BeanPropertyWriter;"
     },
     {
         "name": "[Ltools.jackson.databind.ser.Serializers;"
@@ -641,6 +662,9 @@
     },
     {
         "name": "java.io.Closeable"
+    },
+    {
+        "name": "java.io.File"
     },
     {
         "name": "java.io.Serializable",
@@ -2048,6 +2072,12 @@
         ]
     },
     {
+        "name": "java.math.BigDecimal"
+    },
+    {
+        "name": "java.math.BigInteger"
+    },
+    {
         "name": "java.net.Inet6Address",
         "fields": [
             {
@@ -2096,6 +2126,12 @@
                 ]
             }
         ]
+    },
+    {
+        "name": "java.net.URI"
+    },
+    {
+        "name": "java.net.URL"
     },
     {
         "name": "java.net.UnixDomainSocketAddress",
@@ -2152,6 +2188,12 @@
         ]
     },
     {
+        "name": "java.nio.charset.Charset"
+    },
+    {
+        "name": "java.nio.file.Path"
+    },
+    {
         "name": "java.nio.file.attribute.PosixFilePermission",
         "methods": [
             {
@@ -2178,6 +2220,9 @@
     },
     {
         "name": "java.security.KeyStoreSpi"
+    },
+    {
+        "name": "java.security.Provider"
     },
     {
         "name": "java.security.SecureRandomParameters"
@@ -2258,6 +2303,12 @@
                 ]
             }
         ]
+    },
+    {
+        "name": "java.util.Arrays$ArrayList",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true
     },
     {
         "name": "java.util.Collection",
@@ -2418,6 +2469,9 @@
     },
     {
         "name": "java.util.Spliterator"
+    },
+    {
+        "name": "java.util.UUID"
     },
     {
         "name": "java.util.concurrent.ArrayBlockingQueue",
@@ -2954,6 +3008,9 @@
                 ]
             }
         ]
+    },
+    {
+        "name": "java.util.regex.Pattern"
     },
     {
         "name": "java.util.stream.BaseStream"
@@ -3671,6 +3728,18 @@
         "name": "long"
     },
     {
+        "name": "org.apache.logging.slf4j.SLF4JServiceProvider",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
         "name": "org.apiguardian.api.API"
     },
     {
@@ -3681,6 +3750,18 @@
                 "name": "<init>",
                 "parameterTypes": [
                     
+                ]
+            }
+        ]
+    },
+    {
+        "name": "org.jspecify.annotations.NullMarked",
+        "queryAllDeclaredMethods": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.reflect.InvocationHandler"
                 ]
             }
         ]

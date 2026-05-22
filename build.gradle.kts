@@ -109,11 +109,19 @@ dependencies {
     implementation(libs.protobuf.java)
 
     // slf4j-api is already on the classpath transitively (networknt). Ship
-    // Logback as the binding so the plugin's logLevel / logFile options can
-    // be applied programmatically via the LoggerContext API. The project
-    // publishes native binaries (pom-only) so this is not visible to library
-    // consumers as a transitive dep.
-    implementation(libs.logback.classic)
+    // Log4j 2 as the binding so the plugin's logLevel / logFile options can
+    // be applied programmatically via the Configurator API. log4j-core is
+    // used directly in applyLoggingConfiguration() (ConfigurationBuilder,
+    // Configurator, ConsoleAppender.Target), so it sits on the compile
+    // classpath alongside log4j-api. log4j-slf4j2-impl bridges SLF4J 2.x
+    // (networknt's transitive slf4j-api line) to log4j-core at runtime.
+    // log4j-core 2.25.0+ ships its own GraalVM native-image reachability
+    // metadata, so no hand-rolled reflect/resource config is required. The
+    // project publishes native binaries (pom-only) so these aren't visible
+    // to library consumers as transitive deps.
+    implementation(libs.log4j.api)
+    implementation(libs.log4j.core)
+    runtimeOnly(libs.log4j.slf4j2.impl)
 
     // GraalVM hosted API used by native-image Feature classes under
     // com.engine.protoc.openapi.nativeimage. Compile-only — the

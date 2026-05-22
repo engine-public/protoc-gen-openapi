@@ -10,6 +10,7 @@
     {"excludeClasses": "io.grpc.**"},
     {"excludeClasses": "io.netty.**"},
     {"excludeClasses": "kotlinx.coroutines.**"},
-    {"excludeClasses": "com.github.dockerjava.**"}
+    {"excludeClasses": "com.github.dockerjava.**"},
+    {"excludeClasses": "org.apache.logging.log4j.**"}
   ]
 }

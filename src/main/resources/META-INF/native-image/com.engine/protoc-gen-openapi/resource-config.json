@@ -68,12 +68,6 @@
                 "pattern": "\\Qkotlin/kotlin.kotlin_builtins\\E"
             },
             {
-                "pattern": "\\Qlogback-test.xml\\E"
-            },
-            {
-                "pattern": "\\Qlogback.xml\\E"
-            },
-            {
                 "pattern": "\\Qorg/publicsuffix/list/effective_tld_names.dat\\E"
             },
             {

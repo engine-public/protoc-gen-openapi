@@ -88,7 +88,6 @@ testing {
                 implementation(libs.grpc.kotlin.stub)
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.testcontainers)
-                runtimeOnly(libs.slf4j.simple)
             }
             tasks.named("processEnvoyResources", ProcessResources::class) {
                 dependsOn("generateEnvoyProto")
@@ -305,6 +304,14 @@ val pruneNativeImageMetadata = tasks.register("pruneNativeImageMetadata") {
         // Envoy test setup resources.
         "envoy/envoy.template.yaml",
         "hello.pb",
+        // Log4j 2 probes for a long list of `log4j2*.{xml,json,properties,…}`
+        // config files at startup before our programmatic Configurator.reconfigure
+        // call takes over. The agent records every probe even though no file
+        // exists for any of them, and log4j-core 2.25.0+ ships its own
+        // native-image metadata for the ones it actually needs at runtime.
+        // Strip these duplicates so the file stays focused on entries we own.
+        "log4j2",
+        "META-INF/log4j-provider.properties",
     )
 
     doLast {

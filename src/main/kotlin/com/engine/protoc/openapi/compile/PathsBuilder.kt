@@ -429,13 +429,56 @@ internal class PathsBuilder(
             buildAnnotatedPathParams(binding.path, inputTypeName, annotatedPathParams)
         }
 
+        // Per the canonical HttpRule spec (and Envoy's gRPC-JSON transcoder), the `body` field has
+        // three modes — identical across all five verbs:
+        //   body == "*"     →  whole request message is the body; no query parameters
+        //   body unset/""   →  no body; every non-path field becomes a query parameter
+        //   body == "<f>"   →  field `f` is the body; every other non-path field is a query param
+        // The Envoy default for auto-mapped methods (no `google.api.http` annotation) is "*", so
+        // bare auto-mapped methods carry no query parameters.  Explicit `(engine.protoc.openapi
+        // .method).request_body` annotations short-circuit body inference — when present, the
+        // operator is in full control and we skip query-parameter auto-derivation as well.
+        val body = httpRule?.body ?: binding.body
+        val hasExplicitRequestBodyAnnotation = annotation?.hasRequestBody() == true
+        // Path-bound field names come from the *original* URL template — annotation-driven path
+        // param renaming changes the URL placeholder but the underlying field that binds the path
+        // is still named after the proto field, not the rewritten placeholder.
+        val pathVarNames = pathParamRegex.findAll(binding.path).map { it.groupValues[1] }.toSet()
+        val methodLabel = "${binding.httpMethod.uppercase()} ${binding.path}"
+
+        // Collect every name declared manually via `(engine.protoc.openapi.parameters)`, regardless
+        // of `in`.  A top-level request field is considered "claimed by the operator" when its
+        // proto name or JSON name matches one of these — whether the operator chose to expose it
+        // as a query parameter, a header, a cookie, or anything else.  Auto-derivation honours
+        // that choice by leaving the field alone (and logging a WARN so the overlap is visible).
+        val manualClaimedNames: Set<String> = annotatedParams
+            .filter { it.hasParameter() }
+            .mapNotNull { it.parameter.name.takeIf { n -> n.isNotEmpty() } }
+            .toSet()
+
+        val autoQueryParams: List<ObjectNode> = when {
+            hasExplicitRequestBodyAnnotation -> emptyList()
+
+            body == "*" -> emptyList()
+
+            body.isEmpty() ->
+                inferQueryParameters(inputTypeName, pathVarNames, null, manualClaimedNames, methodLabel)
+
+            else ->
+                inferQueryParameters(inputTypeName, pathVarNames, body, manualClaimedNames, methodLabel)
+        }
+
         val allParams = if (annotatedPathParams.isEmpty()) {
-            // No annotated path params: inferred path params first, then annotated non-path params
+            // No annotated path params: inferred path params, then annotated non-path params in
+            // annotation order, then any remaining auto-derived query params at the end.
             val annotatedNonPathParams = annotatedParams
                 .filter { !it.hasParameter() || it.parameter.`in` != "path" }
-            pathParamNodes + annotatedNonPathParams.map { it.toJson(ctx) }
+            pathParamNodes +
+                annotatedNonPathParams.map { it.toJson(ctx) } +
+                autoQueryParams
         } else {
-            // Annotated path params exist: preserve full annotation order
+            // Annotated path params exist: preserve full annotation order, then auto-derived
+            // query params after.
             var pathParamIndex = 0
             annotatedParams.map { param ->
                 if (param.hasParameter() && param.parameter.`in` == "path") {
@@ -443,7 +486,7 @@ internal class PathsBuilder(
                 } else {
                     param.toJson(ctx)
                 }
-            }
+            } + autoQueryParams
         }
         if (allParams.isNotEmpty()) {
             val arr = ctx.mapper.createArrayNode()
@@ -452,12 +495,10 @@ internal class PathsBuilder(
         }
 
         // ---- Request body -----------------------------------------------
-        // For auto-mapped methods (httpRule == null) the body defaults to "*" per Envoy convention.
         // Explicit requestBody annotations always emit exactly what the user wrote — the
         // `inline_request_schema` flag affects only the inferred-from-proto path.
-        val body = httpRule?.body ?: binding.body
         when {
-            annotation?.hasRequestBody() == true -> {
+            hasExplicitRequestBodyAnnotation -> {
                 val requestBodyNode = annotation.requestBody.toJson(ctx)
                 injectMissingRef(requestBodyNode.get("content") as? ObjectNode, inputTypeName)
                 node.set("requestBody", requestBodyNode)
@@ -651,6 +692,152 @@ internal class PathsBuilder(
             ?: return ctx.obj()
         return fieldTypeSchema(field)
     }
+
+    // ---- Query parameter inference ---------------------------------------
+
+    /**
+     * Infers query parameters from non-path, non-body fields of the request message, mirroring the
+     * `google.api.HttpRule` body semantics enforced by Envoy's gRPC-JSON transcoder.  Called for
+     * the two body modes that imply query parameters:
+     *
+     *  - `body` unset (`""`)  — every non-path field of the request message
+     *  - `body: "<field>"`    — every non-path field of the request message except the named one
+     *
+     * Walks nested messages recursively, flattening to leaf scalars with dotted parameter names
+     * (`address.city`) so the emitted spec matches Envoy's permissive runtime binding.  Repeated
+     * scalar / enum fields produce `style=form, explode=true` array parameters.  Repeated message
+     * and map fields are skipped with a WARN — OpenAPI 3.1 has no faithful query-parameter
+     * representation for them and callers should declare a manual override or move them into the
+     * body.
+     *
+     * Parameter names follow [JsonContext.preserveProtoFieldNames]: the JSON name (camelCase by
+     * default, or the explicit `json_name` annotation) when false, the raw proto name when true.
+     * This mirrors how the same flag drives response-body field naming and is one of the two
+     * forms Envoy's `TypeInfo::FindField` accepts at runtime.
+     */
+    private fun inferQueryParameters(
+        inputTypeName: String,
+        pathVarNames: Set<String>,
+        excludeFieldName: String?,
+        manualClaimedNames: Set<String>,
+        methodLabel: String,
+    ): List<ObjectNode> {
+        val msg = ctx.messageIndex.find(inputTypeName) ?: return emptyList()
+        val result = mutableListOf<ObjectNode>()
+        for (field in msg.proto.fieldList) {
+            // Skip the named-body field (it lives in the request body, not the query string).
+            if (excludeFieldName != null &&
+                (field.name == excludeFieldName || field.jsonName == excludeFieldName)
+            ) {
+                continue
+            }
+            // Skip path variables — match both proto and JSON names so that the URL template
+            // `{your_name}` correctly elides whether the field's JSON name is `yourName` or
+            // `your_name`.
+            if (field.name in pathVarNames || field.jsonName in pathVarNames) continue
+            // Skip fields the operator has already declared manually via
+            // `(engine.protoc.openapi.parameters)` — manual declarations win regardless of the
+            // chosen `in` position (query, header, cookie, …) and we leave the field's nested
+            // children alone too, since manual annotations cover the field semantically.
+            if (field.name in manualClaimedNames || field.jsonName in manualClaimedNames) {
+                log.warn(
+                    "{}: request field '{}' is auto-derivable as a query parameter but is also declared in (engine.protoc.openapi.parameters); using the manual declaration.",
+                    methodLabel,
+                    field.name,
+                )
+                continue
+            }
+            appendQueryParam(field, prefix = "", out = result, methodLabel = methodLabel)
+        }
+        return result
+    }
+
+    /**
+     * Emits one parameter into [out] for a leaf-scalar or repeated-scalar field, or recurses into
+     * a nested message field with the given dotted [prefix].  Repeated message and map fields are
+     * skipped with a WARN.
+     */
+    private fun appendQueryParam(
+        field: DescriptorProtos.FieldDescriptorProto,
+        prefix: String,
+        out: MutableList<ObjectNode>,
+        methodLabel: String,
+    ) {
+        val isRepeated =
+            field.label == DescriptorProtos.FieldDescriptorProto.Label.LABEL_REPEATED
+        val isMessage = field.type == DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE
+        val name = prefix + queryParamFieldName(field)
+
+        if (isMessage && isMapField(field)) {
+            log.warn(
+                "{}: map field '{}' cannot be expressed as a query parameter; skipping. Declare it manually via (engine.protoc.openapi.parameters) or move it into the request body.",
+                methodLabel,
+                name,
+            )
+            return
+        }
+        if (isRepeated && isMessage) {
+            // Well-known scalar wrappers are messages structurally but encode as scalars in JSON,
+            // so `repeated google.protobuf.Int64Value` is still a flat array parameter.
+            if (ctx.wellKnownScalarSchema(field.typeName) == null) {
+                log.warn(
+                    "{}: repeated message field '{}' cannot be expressed as a query parameter; skipping. Declare it manually via (engine.protoc.openapi.parameters) or move it into the request body.",
+                    methodLabel,
+                    name,
+                )
+                return
+            }
+        }
+        if (isMessage && !isRepeated) {
+            val wktScalar = ctx.wellKnownScalarSchema(field.typeName)
+            if (wktScalar != null) {
+                out += buildQueryParam(name, wktScalar, repeated = false)
+                return
+            }
+            // Skip structural well-known types (Struct, Any, Value, ...) — there is no useful
+            // query-string representation of arbitrary JSON.
+            if (ctx.wellKnownTypeSchema(field.typeName) != null) {
+                log.warn(
+                    "{}: structural well-known type field '{}' (type {}) cannot be expressed as a query parameter; skipping.",
+                    methodLabel,
+                    name,
+                    field.typeName,
+                )
+                return
+            }
+            val nested = ctx.messageIndex.find(field.typeName) ?: return
+            for (sub in nested.proto.fieldList) {
+                appendQueryParam(sub, "$name.", out, methodLabel)
+            }
+            return
+        }
+
+        out += buildQueryParam(name, fieldTypeSchema(field), repeated = isRepeated)
+    }
+
+    private fun buildQueryParam(
+        name: String,
+        schema: ObjectNode,
+        repeated: Boolean,
+    ): ObjectNode {
+        val node = ctx.obj()
+        node.put("name", name)
+        node.put("in", "query")
+        node.put("required", false)
+        if (repeated) {
+            node.put("style", "form")
+            node.put("explode", true)
+        }
+        node.set("schema", schema)
+        return node
+    }
+
+    private fun queryParamFieldName(field: DescriptorProtos.FieldDescriptorProto): String =
+        if (ctx.preserveProtoFieldNames) {
+            field.name
+        } else {
+            field.jsonName.ifEmpty { field.name }
+        }
 
     // ---- Request body inference ------------------------------------------
 

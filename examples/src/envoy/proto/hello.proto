@@ -43,3 +43,55 @@ service HelloService {
   // exercised via Envoy's auto_mapping feature.
   rpc PingHello(HelloRequest) returns (HelloResponse) {}
 }
+
+// A nested address used to exercise dotted query-parameter recursion.
+message Address {
+  string city = 1;
+  string zip = 2;
+}
+
+// Request used by BodyService methods that take a path variable plus other
+// fields.  `your_name` is bound to the URL path when annotated; `greeting_type`
+// is bound to query string under `body` unset semantics; `address` is a nested
+// message that recursively contributes `address.city` and `address.zip`
+// parameters; `tags` is a repeated scalar query parameter.
+message BodyRequest {
+  string your_name = 1;
+  Greeting greeting_type = 2;
+  Address address = 3;
+  repeated string tags = 4;
+}
+
+// BodyService exercises the three HttpRule.body modes (unset, "*", and a named
+// field) across multiple HTTP verbs.  Each RPC asserts the canonical
+// transcoder behaviour described in google/api/http.proto: with body unset
+// every non-path field becomes a URL query parameter; with body="<field>"
+// that field is the request body and the rest become query parameters.
+service BodyService {
+  // GET with one path-bound field and the rest becoming query parameters.
+  // Canonical "REST-style" mapping.
+  rpc GreetByPath(BodyRequest) returns (HelloResponse) {
+    option (google.api.http) = { get: "/greet/{your_name}" };
+  }
+
+  // POST with body unset — Envoy permits this and binds all non-path fields
+  // as query parameters regardless of verb.  Atypical, but spec-allowed.
+  rpc EchoNoBody(BodyRequest) returns (HelloResponse) {
+    option (google.api.http) = { post: "/echo" };
+  }
+
+  // POST with body naming a single sub-field; remaining non-path fields
+  // become query parameters.
+  rpc GreetWithNamedBody(BodyRequest) returns (HelloResponse) {
+    option (google.api.http) = {
+      post: "/greet/named"
+      body: "address"
+    };
+  }
+
+  // DELETE with one path-bound field; remaining fields become query
+  // parameters.  Confirms DELETE behaves identically to GET.
+  rpc DeleteByName(BodyRequest) returns (HelloResponse) {
+    option (google.api.http) = { delete: "/greet/{your_name}" };
+  }
+}

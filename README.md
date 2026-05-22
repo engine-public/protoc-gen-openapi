@@ -109,6 +109,31 @@ Click the option name to jump to its KDoc for full semantics, precedence rules, 
 
 Enum-valued options accept their values case-insensitively.
 
+## `google.api.http` body modes
+
+The plugin reads the `body` field of every `google.api.http` annotation and maps it to OpenAPI as
+specified in [`google/api/http.proto`](https://github.com/googleapis/googleapis/blob/master/google/api/http.proto)
+— the same semantics enforced at runtime by Envoy's gRPC-JSON transcoder.  The three modes are
+**identical across all five verbs** (GET, POST, PUT, PATCH, DELETE):
+
+| `body` value | HTTP request body | URL query parameters |
+|---|---|---|
+| **unset / `""`** | none | every request field not bound to a `{var}` in the URL template |
+| **`"*"`** | the whole request message | none |
+| **`"<field_name>"`** | the value of that single top-level field | every other request field not bound to the URL template |
+
+Auto-derived query parameters use the field's JSON name by default (or the snake_case proto name
+when [`preserveProtoFieldNames`](src/main/kotlin/com/engine/protoc/openapi/ProtocGenOpenAPI.kt#L260)
+is set), recurse into nested messages with dotted names (`?address.city=…`), and emit `style=form,
+explode=true` for repeated scalars.  Repeated message and map fields are skipped with a `WARN` log
+since OpenAPI has no faithful query-string representation for them.
+
+When a method also declares `(engine.protoc.openapi.parameters)` entries, those manual declarations
+win for any field they cover (matched by proto or JSON name) and a `WARN` log records the overlap.
+Worked examples live in [examples/src/envoy/](examples/src/envoy/) (live Envoy round-trip tests)
+and [examples/src/complete/](examples/src/complete/) (snapshot coverage of every verb/body
+combination).
+
 ## Related Projects
 
 - [engine-public/protoc-utils](https://github.com/HotelEngine/protoc-utils) — shared protoc plugin utilities (descriptor wrappers, comment parsing, parameter handling) and the `recorder` plugin used by this project's example suite.

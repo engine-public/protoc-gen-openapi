@@ -54,6 +54,7 @@ class CaseInsensitiveEnumParsingAndAlwaysPrintAsIntsTest :
                     .getResourceAsStream("/code-generator-request.binpb")!!
                 val result = ProtocGenOpenAPI.from(request) {
                     enumValueFormat = ProtocGenOpenAPI.Options.EnumValueFormat.NUMERIC_VALUE
+                    serviceInclude = "HelloService"
                     version = "1.0.0"
                 }.compile()
                 result.hasError() shouldBe false

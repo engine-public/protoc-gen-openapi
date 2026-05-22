@@ -1448,6 +1448,40 @@ service StorefrontService {
         };
     }
 
+    // Update only the shipping address on an existing order.  Exercises the named-field body
+    // mode: `shipping_address` is the request body string, while the remaining non-path fields
+    // (`status`, `total`) become URL query parameters auto-derived from the Order message.
+    rpc UpdateOrderShipping(Order) returns (Order) {
+        option (google.api.http) = {
+            patch: "/orders/{order_id}/shipping"
+            body: "shipping_address"
+        };
+        option (.engine.protoc.openapi.method) = {
+            tags: ["orders"]
+            summary: "Update order shipping address"
+            operationId: "updateOrderShipping"
+            responses: {
+                codes: {
+                    key: "200"
+                    value: {
+                        response_object: {
+                            description: "Updated order"
+                            content: {
+                                key: "application/json"
+                                value: {
+                                    schema: {
+                                        object: { proto_message_ref: { [type.googleapis.com/engine.protoc.openapi.example.complete.Order] {} } }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                codes: { key: "404" value: { reference: { uri_ref: "#/components/responses/NotFound" } } }
+            }
+        };
+    }
+
     // Get the current status of an order.
     rpc GetOrderStatus(Order) returns (Order) {
         option (google.api.http) = { get: "/orders/{order_id}" };

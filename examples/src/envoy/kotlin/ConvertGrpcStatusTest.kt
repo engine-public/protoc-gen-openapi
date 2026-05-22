@@ -42,6 +42,7 @@ class ConvertGrpcStatusTest : EnvoyTestBase(GrpcJsonTranscoder(convertGrpcStatus
 
             val result = ProtocGenOpenAPI.from(request()) {
                 convertGrpcStatus = true
+                serviceInclude = "HelloService"
                 version = "1.0.0"
             }.compile()
 

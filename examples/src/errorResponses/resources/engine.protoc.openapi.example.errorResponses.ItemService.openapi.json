@@ -177,6 +177,14 @@
       "get" : {
         "summary" : "Multiple error scenarios across distinct status codes.",
         "description" : "Multiple error scenarios across distinct status codes.",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
         "responses" : {
           "200" : {
             "description" : "OK",

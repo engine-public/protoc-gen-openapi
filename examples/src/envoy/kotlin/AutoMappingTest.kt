@@ -40,6 +40,7 @@ class AutoMappingTest : EnvoyTestBase(GrpcJsonTranscoder(autoMapping = true)) {
 
             val result = ProtocGenOpenAPI.from(request()) {
                 autoMapping = true
+                serviceInclude = "HelloService"
                 version = "1.0.0"
             }.compile()
 

@@ -71,6 +71,29 @@ public class PhantomServiceFilesFeature : Feature {
                 "kotlin.reflect.jvm.internal.impl.util.ModuleVisibilityHelper" to
                     "META-INF/services/kotlin.reflect.jvm.internal.impl.util.ModuleVisibilityHelper",
                 "org.slf4j.LoggerFactory" to "org/slf4j/impl/StaticLoggerBinder.class",
+                // Log4j 2's ThreadContext init calls
+                // ProviderUtil.lazyInit, which probes for the Log4j 1.x
+                // bridge file at this path. It is absent in this build,
+                // but `getResources` under strict mode still requires a
+                // registration. Empty payload lets the enumeration return
+                // no providers and the Log4j 2 ServiceLoader path takes
+                // over.
+                "org.apache.logging.log4j.util.LoaderUtil" to
+                    "META-INF/log4j-provider.properties",
+                // log4j-core enumerates WatchEventService providers via
+                // ServiceLoader during configuration build. No jar on the
+                // classpath ships this service file, so the lookup needs
+                // an empty registration to satisfy strict-mode checks.
+                "org.apache.logging.log4j.core.util.WatchManager" to
+                    "META-INF/services/org.apache.logging.log4j.core.util.WatchEventService",
+                // Log4j 2's setConfiguration populates a `${hostName}`
+                // interpolation by calling `InetAddress.getLocalHost`,
+                // which routes through `InetAddress.loadResolver` and
+                // `ServiceLoader.findFirst(InetAddressResolverProvider)`.
+                // The JDK ships no default provider, so the lookup needs
+                // an empty registration.
+                "java.net.InetAddress" to
+                    "META-INF/services/java.net.spi.InetAddressResolverProvider",
                 // ResourceBundle.getBundle("jsv-messages", Locale.US) probes
                 // `_en_US` before falling back to `_en` / base. The validator
                 // ships `_en` and base only, so the `_en_US` candidate is a

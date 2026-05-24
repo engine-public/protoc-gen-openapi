@@ -729,7 +729,15 @@ public class ProtocGenOpenAPI(
 
             cb.add(engine)
             cb.add(cb.newRootLogger(Log4jLevel.OFF))
-            Configurator.reconfigure(cb.build(false))
+            val config = cb.build(false)
+            // `initialize` first so a fresh LoggerContext starts with our
+            // configuration directly, bypassing Log4j's default config-file
+            // probing (~24 file paths) that breaks under native-image's
+            // strict missing-resource registration. `reconfigure` then
+            // re-applies the same config so subsequent `from(...)` calls
+            // in the same process pick up updated log levels.
+            Configurator.initialize(config)
+            Configurator.reconfigure(config)
         }
 
         private fun Level.toLog4j(): Log4jLevel =

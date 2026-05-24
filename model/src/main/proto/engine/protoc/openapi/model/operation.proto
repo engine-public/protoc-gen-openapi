@@ -5,7 +5,6 @@ package engine.protoc.openapi.model;
 option java_package = "com.engine.protoc.openapi.model";
 option java_multiple_files = true;
 
-import "engine/protoc/openapi/model/error_response.proto";
 import "engine/protoc/openapi/model/external_documentation.proto";
 import "engine/protoc/openapi/model/parameter_or_reference.proto";
 import "engine/protoc/openapi/model/request_body_or_reference.proto";
@@ -90,17 +89,4 @@ message Operation {
   // The extension value can be a primitive, an array, an object or null. If the value is an
   // object or array of objects, the object's property names do not need to start with x-.
   map<string, google.protobuf.Value> extensions = 13;
-
-  // Shortcut for error scenario responses.  Each entry expands into a `responses[status]`
-  // entry whose schema is `google.rpc.Status` with `details.items` $ref'ing the named
-  // error class.  Equivalent to writing the full `responses` tree by hand but one line
-  // per error case.  See [`ErrorResponse`] for the per-entry semantics.
-  //
-  // Conflicts (same status appearing in both `responses` and `error_responses`, or twice
-  // in `error_responses` itself) resolve as last-wins with a WARN log identifying the
-  // operation, the contested status, and the conflicting payloads.
-  //
-  // Field number 100 leaves room for future OAS-spec additions to slot into their natural
-  // positions (1–99) without renumbering this convenience field.
-  repeated .engine.protoc.openapi.model.ErrorResponse error_responses = 100;
 }

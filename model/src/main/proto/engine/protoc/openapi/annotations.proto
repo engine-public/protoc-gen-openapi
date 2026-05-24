@@ -6,6 +6,7 @@ option java_package = "com.engine.protoc.openapi";
 option java_multiple_files = true;
 
 import "engine/protoc/openapi/openapi.proto";
+import "engine/protoc/openapi/model/error_response.proto";
 import "engine/protoc/openapi/model/operation.proto";
 import "engine/protoc/openapi/model/schema.proto";
 
@@ -49,6 +50,16 @@ message Method {
 
     // Same as `inline_request`, but for the RPC's response body.
     optional bool inline_response = 3;
+
+    // Shortcut for error scenario responses.  Each entry expands into a `responses[status]`
+    // entry whose schema is `google.rpc.Status` with `details.items` $ref'ing the named
+    // error class.  Equivalent to writing the full `operation.responses` tree by hand but
+    // one line per error case.  See [`ErrorResponse`] for the per-entry semantics.
+    //
+    // Conflicts (same status appearing in both `operation.responses` and `error_responses`,
+    // or twice in `error_responses` itself) resolve as last-wins with a WARN log identifying
+    // the operation, the contested status, and the conflicting payloads.
+    repeated .engine.protoc.openapi.model.ErrorResponse error_responses = 4;
 }
 
 // Message-level OpenAPI annotation: applied via `(engine.protoc.openapi.message)` on a proto message.

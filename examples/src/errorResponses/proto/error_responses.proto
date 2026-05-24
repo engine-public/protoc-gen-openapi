@@ -47,16 +47,14 @@ service ItemService {
     rpc Get(ItemRequest) returns (Item) {
         option (google.api.http) = { get: "/items/{id}" };
         option (engine.protoc.openapi.method) = {
-            operation: {
-                error_responses: [
-                    {
-                        status: "404"
-                        error_type: { [type.googleapis.com/engine.protoc.openapi.example.errorResponses.ValidationError] {} }
-                        description: "Item not found."
-                        grpc_code: NOT_FOUND
-                    }
-                ]
-            }
+            error_responses: [
+                {
+                    status: "404"
+                    error_type: { [type.googleapis.com/engine.protoc.openapi.example.errorResponses.ValidationError] {} }
+                    description: "Item not found."
+                    grpc_code: NOT_FOUND
+                }
+            ]
         };
     }
 
@@ -64,13 +62,11 @@ service ItemService {
     rpc List(ItemRequest) returns (Item) {
         option (google.api.http) = { get: "/items" };
         option (engine.protoc.openapi.method) = {
-            operation: {
-                error_responses: [
-                    { status: "400" error_type: { [type.googleapis.com/engine.protoc.openapi.example.errorResponses.ValidationError] {} } grpc_code: INVALID_ARGUMENT },
-                    { status: "401" error_type: { [type.googleapis.com/engine.protoc.openapi.example.errorResponses.AuthError] {} } grpc_code: UNAUTHENTICATED },
-                    { status: "500" error_type: { [type.googleapis.com/engine.protoc.openapi.example.errorResponses.ServerError] {} } grpc_code: INTERNAL }
-                ]
-            }
+            error_responses: [
+                { status: "400" error_type: { [type.googleapis.com/engine.protoc.openapi.example.errorResponses.ValidationError] {} } grpc_code: INVALID_ARGUMENT },
+                { status: "401" error_type: { [type.googleapis.com/engine.protoc.openapi.example.errorResponses.AuthError] {} } grpc_code: UNAUTHENTICATED },
+                { status: "500" error_type: { [type.googleapis.com/engine.protoc.openapi.example.errorResponses.ServerError] {} } grpc_code: INTERNAL }
+            ]
         };
     }
 
@@ -109,15 +105,15 @@ service ItemService {
                         }
                     }
                 }
-                error_responses: [
-                    {
-                        status: "409"
-                        error_type: { [type.googleapis.com/engine.protoc.openapi.example.errorResponses.ConflictError] {} }
-                        description: "Last write loses to a concurrent update."
-                        grpc_code: ABORTED
-                    }
-                ]
             }
+            error_responses: [
+                {
+                    status: "409"
+                    error_type: { [type.googleapis.com/engine.protoc.openapi.example.errorResponses.ConflictError] {} }
+                    description: "Last write loses to a concurrent update."
+                    grpc_code: ABORTED
+                }
+            ]
         };
     }
 
@@ -126,12 +122,10 @@ service ItemService {
     rpc Delete(ItemRequest) returns (Item) {
         option (google.api.http) = { delete: "/items/{id}" };
         option (engine.protoc.openapi.method) = {
-            operation: {
-                error_responses: [
-                    { status: "404" error_type: { [type.googleapis.com/engine.protoc.openapi.example.errorResponses.ValidationError] {} } description: "First declaration." },
-                    { status: "404" error_type: { [type.googleapis.com/engine.protoc.openapi.example.errorResponses.ConflictError] {} } description: "Second declaration overwrites the first." }
-                ]
-            }
+            error_responses: [
+                { status: "404" error_type: { [type.googleapis.com/engine.protoc.openapi.example.errorResponses.ValidationError] {} } description: "First declaration." },
+                { status: "404" error_type: { [type.googleapis.com/engine.protoc.openapi.example.errorResponses.ConflictError] {} } description: "Second declaration overwrites the first." }
+            ]
         };
     }
 }

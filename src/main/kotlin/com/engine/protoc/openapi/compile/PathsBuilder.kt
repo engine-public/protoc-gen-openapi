@@ -184,7 +184,7 @@ internal class PathsBuilder(
 
         // error_responses shortcut: collect each referenced error type, and mark that
         // google.rpc.Status must be emitted into components/schemas.
-        annotation?.errorResponsesList?.forEach { er ->
+        methodWrapper?.errorResponsesList?.forEach { er ->
             errorResponseTypeName(er)?.let { collector.collect(it) }
             requiresGrpcStatus = true
         }
@@ -531,10 +531,10 @@ internal class PathsBuilder(
         // error_responses shortcut: apply each entry on top of `responsesNode` with
         // last-wins semantics, warning on collisions (within error_responses, or against
         // an entry already produced by the inferred / explicit `responses` path).
-        if (annotation?.errorResponsesList?.isNotEmpty() == true) {
+        if (methodWrapper?.errorResponsesList?.isNotEmpty() == true) {
             val operationFqn = "${binding.httpMethod.uppercase()} ${binding.path}"
             val seen = mutableMapOf<String, ErrorResponse>()
-            for (er in annotation.errorResponsesList) {
+            for (er in methodWrapper.errorResponsesList) {
                 val status = er.status
                 val incoming = errorResponseTypeName(er) ?: "<unset>"
                 val prevInErrors = seen[status]

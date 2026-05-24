@@ -2,8 +2,8 @@
 
 Demonstrates `(engine.protoc.openapi.method).error_responses`, the shortcut for attaching typed error scenarios to an operation without writing the full nested `responses` tree.
 
-Each `ErrorResponse` entry expands at compile time into a `responses[status]` entry whose schema is `google.rpc.Status` (via `allOf`) carrying a `details.items` `$ref` to the named error class.
-The referenced error class is added to `components/schemas` as a normal component, and `google.rpc.Status` is auto-emitted into components whenever any `error_responses` entry appears (no need to set `convertGrpcStatus`).
+Each `ErrorResponse` entry expands at compile time into a `responses[status]` entry whose schema is an inline `google.rpc.Status` body carrying a `details.items` `$ref` to the named error class.
+The referenced error class is added to `components/schemas` as a normal component; the `google.rpc.Status` envelope is always inlined and never lands in `components/schemas`, because it is an Envoy implementation detail rather than a reusable OAS schema unit.
 
 ## What it exercises
 
@@ -53,14 +53,17 @@ responses:
               message: ""
               details: []
         schema:
-          allOf:
-            - $ref: "#/components/schemas/google.rpc.Status"
-            - type: object
-              properties:
-                details:
-                  type: array
-                  items:
-                    $ref: "#/components/schemas/ValidationError"
+          type: object
+          properties:
+            code:
+              type: integer
+              format: int32
+            message:
+              type: string
+            details:
+              type: array
+              items:
+                $ref: "#/components/schemas/ValidationError"
 ```
 
 ## Resolution rules

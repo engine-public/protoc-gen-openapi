@@ -12,8 +12,9 @@ import tools.jackson.databind.node.ObjectNode
 
 /**
  * Verifies that convertGrpcStatus works even when google/rpc/status.proto is absent from the
- * descriptor set. The compiler builds the google.rpc.Status schema inline rather than looking it
- * up in the descriptor, so the $ref it emits on every operation can never dangle.
+ * descriptor set. The compiler builds the google.rpc.Status body inline at the use site rather
+ * than looking it up in the descriptor or registering it in components/schemas, so no part of
+ * the emitted document can dangle on a type the generator never saw.
  */
 class ConvertGrpcStatusNoProtoDepTest :
     FunSpec({
@@ -62,21 +63,22 @@ class ConvertGrpcStatusNoProtoDepTest :
 
             val doc = mapper.readTree(result.fileList.single().content)
 
-            // The inline schema must be present — no dangling $ref.
-            val statusSchema = doc.path("components").path("schemas").path("google.rpc.Status") as? ObjectNode
-            statusSchema?.get("type")?.asString() shouldBe "object"
-            val props = statusSchema?.path("properties")
-            props?.has("code") shouldBe true
-            props?.has("message") shouldBe true
-            props?.has("details") shouldBe true
+            // The Status envelope must NOT appear in components/schemas — it is always inlined.
+            doc.path("components").path("schemas").has("google.rpc.Status") shouldBe false
 
-            // Every operation must have a "default" error response referencing the schema.
+            // Every operation must have a "default" error response whose schema is the inline
+            // google.rpc.Status body (no $ref).
             val defaultResponse = doc
                 .path("paths").path("/do").path("post")
                 .path("responses").path("default")
             defaultResponse.isMissingNode shouldBe false
-            val ref = defaultResponse.path("content")
-                .path("application/json").path("schema").path("\$ref").asString()
-            ref shouldBe "#/components/schemas/google.rpc.Status"
+            val schema = defaultResponse.path("content")
+                .path("application/json").path("schema") as ObjectNode
+            schema.has("\$ref") shouldBe false
+            schema.path("type").asString() shouldBe "object"
+            val props = schema.path("properties")
+            props.has("code") shouldBe true
+            props.has("message") shouldBe true
+            props.has("details") shouldBe true
         }
     })

@@ -40,19 +40,22 @@
                   }
                 },
                 "schema" : {
-                  "allOf" : [ {
-                    "$ref" : "#/components/schemas/google.rpc.Status"
-                  }, {
-                    "type" : "object",
-                    "properties" : {
-                      "details" : {
-                        "type" : "array",
-                        "items" : {
-                          "$ref" : "#/components/schemas/ValidationError"
-                        }
+                  "type" : "object",
+                  "properties" : {
+                    "code" : {
+                      "type" : "integer",
+                      "format" : "int32"
+                    },
+                    "message" : {
+                      "type" : "string"
+                    },
+                    "details" : {
+                      "type" : "array",
+                      "items" : {
+                        "$ref" : "#/components/schemas/ValidationError"
                       }
                     }
-                  } ]
+                  }
                 }
               }
             }
@@ -107,19 +110,22 @@
                   }
                 },
                 "schema" : {
-                  "allOf" : [ {
-                    "$ref" : "#/components/schemas/google.rpc.Status"
-                  }, {
-                    "type" : "object",
-                    "properties" : {
-                      "details" : {
-                        "type" : "array",
-                        "items" : {
-                          "$ref" : "#/components/schemas/ConflictError"
-                        }
+                  "type" : "object",
+                  "properties" : {
+                    "code" : {
+                      "type" : "integer",
+                      "format" : "int32"
+                    },
+                    "message" : {
+                      "type" : "string"
+                    },
+                    "details" : {
+                      "type" : "array",
+                      "items" : {
+                        "$ref" : "#/components/schemas/ConflictError"
                       }
                     }
-                  } ]
+                  }
                 }
               }
             }
@@ -153,19 +159,22 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "allOf" : [ {
-                    "$ref" : "#/components/schemas/google.rpc.Status"
-                  }, {
-                    "type" : "object",
-                    "properties" : {
-                      "details" : {
-                        "type" : "array",
-                        "items" : {
-                          "$ref" : "#/components/schemas/ConflictError"
-                        }
+                  "type" : "object",
+                  "properties" : {
+                    "code" : {
+                      "type" : "integer",
+                      "format" : "int32"
+                    },
+                    "message" : {
+                      "type" : "string"
+                    },
+                    "details" : {
+                      "type" : "array",
+                      "items" : {
+                        "$ref" : "#/components/schemas/ConflictError"
                       }
                     }
-                  } ]
+                  }
                 }
               }
             }
@@ -212,19 +221,22 @@
                   }
                 },
                 "schema" : {
-                  "allOf" : [ {
-                    "$ref" : "#/components/schemas/google.rpc.Status"
-                  }, {
-                    "type" : "object",
-                    "properties" : {
-                      "details" : {
-                        "type" : "array",
-                        "items" : {
-                          "$ref" : "#/components/schemas/ValidationError"
-                        }
+                  "type" : "object",
+                  "properties" : {
+                    "code" : {
+                      "type" : "integer",
+                      "format" : "int32"
+                    },
+                    "message" : {
+                      "type" : "string"
+                    },
+                    "details" : {
+                      "type" : "array",
+                      "items" : {
+                        "$ref" : "#/components/schemas/ValidationError"
                       }
                     }
-                  } ]
+                  }
                 }
               }
             }
@@ -245,19 +257,22 @@
                   }
                 },
                 "schema" : {
-                  "allOf" : [ {
-                    "$ref" : "#/components/schemas/google.rpc.Status"
-                  }, {
-                    "type" : "object",
-                    "properties" : {
-                      "details" : {
-                        "type" : "array",
-                        "items" : {
-                          "$ref" : "#/components/schemas/AuthError"
-                        }
+                  "type" : "object",
+                  "properties" : {
+                    "code" : {
+                      "type" : "integer",
+                      "format" : "int32"
+                    },
+                    "message" : {
+                      "type" : "string"
+                    },
+                    "details" : {
+                      "type" : "array",
+                      "items" : {
+                        "$ref" : "#/components/schemas/AuthError"
                       }
                     }
-                  } ]
+                  }
                 }
               }
             }
@@ -278,19 +293,22 @@
                   }
                 },
                 "schema" : {
-                  "allOf" : [ {
-                    "$ref" : "#/components/schemas/google.rpc.Status"
-                  }, {
-                    "type" : "object",
-                    "properties" : {
-                      "details" : {
-                        "type" : "array",
-                        "items" : {
-                          "$ref" : "#/components/schemas/ServerError"
-                        }
+                  "type" : "object",
+                  "properties" : {
+                    "code" : {
+                      "type" : "integer",
+                      "format" : "int32"
+                    },
+                    "message" : {
+                      "type" : "string"
+                    },
+                    "details" : {
+                      "type" : "array",
+                      "items" : {
+                        "$ref" : "#/components/schemas/ServerError"
                       }
                     }
-                  } ]
+                  }
                 }
               }
             }
@@ -355,24 +373,6 @@
           },
           "detail" : {
             "type" : "string"
-          }
-        }
-      },
-      "google.rpc.Status" : {
-        "type" : "object",
-        "properties" : {
-          "code" : {
-            "type" : "integer",
-            "format" : "int32"
-          },
-          "message" : {
-            "type" : "string"
-          },
-          "details" : {
-            "type" : "array",
-            "items" : {
-              "type" : "object"
-            }
           }
         }
       }

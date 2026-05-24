@@ -73,12 +73,6 @@ internal class PathsBuilder(
     // nested message-typed fields.
     private val inlineExpandingStack = ArrayDeque<Set<String>>()
 
-    // Set during the seed pass when any operation declares `error_responses`.  Consulted by
-    // [SchemaBuilder] so `google.rpc.Status` lands in `components/schemas` even when the
-    // `convertGrpcStatus` compiler option is off.
-    internal var requiresGrpcStatus: Boolean = false
-        private set
-
     /**
      * Collects all paths from [files] into a merged `paths` ObjectNode.
      *
@@ -197,11 +191,11 @@ internal class PathsBuilder(
             }
         }
 
-        // error_responses shortcut: collect each referenced error type, and mark that
-        // google.rpc.Status must be emitted into components/schemas.
+        // error_responses shortcut: collect each referenced error type.  The Status envelope
+        // itself is always inlined at the use site (see [buildErrorBodySchema]), so it never
+        // needs a components/schemas entry — only the per-error `details.items` types do.
         methodWrapper?.errorResponsesList?.forEach { er ->
             errorResponseTypeName(er)?.let { collector.collect(it) }
-            requiresGrpcStatus = true
         }
     }
 
@@ -964,7 +958,7 @@ internal class PathsBuilder(
             errorResponse.put("description", "Error")
             val content = ctx.obj()
             val mediaType = ctx.obj()
-            mediaType.set("schema", ctx.obj().also { it.put("\$ref", "#/components/schemas/google.rpc.Status") })
+            mediaType.set("schema", buildGrpcStatusBody())
             content.set("application/json", mediaType)
             errorResponse.set("content", content)
             responses.set("default", errorResponse)
@@ -973,8 +967,41 @@ internal class PathsBuilder(
     }
 
     /**
-     * Builds the Response object for a single [`ErrorResponse`] entry: a `google.rpc.Status`
-     * schema (via `allOf`) whose `details.items` $refs the named error type, plus the
+     * Builds an inline `google.rpc.Status` schema body.  When [detailsItemsRef] is non-null the
+     * `details` array items are typed by `$ref` to that schema key; otherwise items are loose
+     * `{ type: "object" }`.  The Status envelope is intentionally always inlined — it is an
+     * Envoy implementation detail, not a reusable OAS schema unit.
+     */
+    private fun buildGrpcStatusBody(detailsItemsRef: String? = null): ObjectNode {
+        val schema = ctx.obj()
+        schema.put("type", "object")
+        val props = ctx.obj()
+        props.set(
+            "code",
+            ctx.obj().also {
+                it.put("type", "integer")
+                it.put("format", "int32")
+            },
+        )
+        props.set("message", ctx.obj().also { it.put("type", "string") })
+        val details = ctx.obj()
+        details.put("type", "array")
+        details.set(
+            "items",
+            if (detailsItemsRef != null) {
+                ctx.obj().also { it.put("\$ref", detailsItemsRef) }
+            } else {
+                ctx.obj().also { it.put("type", "object") }
+            },
+        )
+        props.set("details", details)
+        schema.set("properties", props)
+        return schema
+    }
+
+    /**
+     * Builds the Response object for a single [`ErrorResponse`] entry: an inline
+     * `google.rpc.Status` body whose `details.items` $refs the named error type, plus the
      * `x-grpc-code` extension and a seeded `examples` block when `grpc_code` is present.
      */
     private fun buildErrorResponseEntry(er: ErrorResponse): ObjectNode {
@@ -998,7 +1025,7 @@ internal class PathsBuilder(
             examples.set("grpc-error", grpcError)
             mediaType.set("examples", examples)
         }
-        mediaType.set("schema", buildErrorAllOfSchema(er))
+        mediaType.set("schema", buildErrorBodySchema(er))
 
         val content = ctx.obj()
         content.set("application/json", mediaType)
@@ -1023,37 +1050,16 @@ internal class PathsBuilder(
     }
 
     /**
-     * Produces an `allOf: [ $ref:google.rpc.Status, { properties: { details: { items: $ref:T }}}]`
-     * schema that types the Status's `details` array items as the [`ErrorResponse`]'s error type.
+     * Produces a flat `type: object` schema for an [`ErrorResponse`]: an inline
+     * `google.rpc.Status` body whose `details.items` is `$ref`'d to the error type when one is
+     * set, or left as `{ type: "object" }` otherwise.
      */
-    private fun buildErrorAllOfSchema(er: ErrorResponse): ObjectNode {
-        val schema = ctx.obj()
-        val allOf = ctx.mapper.createArrayNode()
-
-        val statusRef = ctx.obj()
-        statusRef.put("\$ref", "#/components/schemas/google.rpc.Status")
-        allOf.add(statusRef)
-
+    private fun buildErrorBodySchema(er: ErrorResponse): ObjectNode {
         val typeName = errorResponseTypeName(er)
-        if (typeName != null) {
-            val override = ctx.obj()
-            override.put("type", "object")
-            val props = ctx.obj()
-            val details = ctx.obj()
-            details.put("type", "array")
-            details.set(
-                "items",
-                ctx.obj().also {
-                    it.put("\$ref", "#/components/schemas/${ctx.schemaKeyResolver.buildPhaseKeyOf(typeName)}")
-                },
-            )
-            props.set("details", details)
-            override.set("properties", props)
-            allOf.add(override)
+        val itemsRef = typeName?.let {
+            "#/components/schemas/${ctx.schemaKeyResolver.buildPhaseKeyOf(it)}"
         }
-
-        schema.set("allOf", allOf)
-        return schema
+        return buildGrpcStatusBody(detailsItemsRef = itemsRef)
     }
 
     /**

@@ -52,9 +52,11 @@ message Method {
     optional bool inline_response = 3;
 
     // Shortcut for error scenario responses.  Each entry expands into a `responses[status]`
-    // entry whose schema is `google.rpc.Status` with `details.items` $ref'ing the named
-    // error class.  Equivalent to writing the full `operation.responses` tree by hand but
-    // one line per error case.  See [`ErrorResponse`] for the per-entry semantics.
+    // entry whose schema is an inline `google.rpc.Status` body with `details.items` $ref'ing
+    // the named error class.  The Status envelope is never added to `components/schemas` —
+    // it is an Envoy implementation detail, not a reusable OAS schema unit.  Equivalent to
+    // writing the full `operation.responses` tree by hand but one line per error case.
+    // See [`ErrorResponse`] for the per-entry semantics.
     //
     // Conflicts (same status appearing in both `operation.responses` and `error_responses`,
     // or twice in `error_responses` itself) resolve as last-wins with a WARN log identifying

@@ -9,9 +9,10 @@ import "google/protobuf/any.proto";
 import "google/rpc/code.proto";
 
 // Shortcut declaration of an error scenario on a single operation.  Each entry expands at
-// compile time into a `responses[status]` entry whose schema is `google.rpc.Status` carrying
-// a typed `details.items` $ref.  Mirrors `Operation.responses` in expressive power for the
-// common error-shape case, without requiring the user to write the full nested tree.
+// compile time into a `responses[status]` entry whose schema is an inline `google.rpc.Status`
+// body carrying a typed `details.items` $ref.  The Status envelope is always inlined and
+// never lands in `components/schemas`.  Mirrors `Operation.responses` in expressive power
+// for the common error-shape case, without requiring the user to write the full nested tree.
 message ErrorResponse {
     // HTTP status code emitted on the operation's `responses` map.  Accepts any OAS-legal
     // key: a numeric string ("400", "409"), an OAS range ("4XX"), or "default".
@@ -24,8 +25,8 @@ message ErrorResponse {
     //
     // The empty `{}` body is intentional: only the resolved type is consulted, the value
     // is ignored.  The referenced message is added to `components/schemas` as a normal
-    // component, and `google.rpc.Status` is added unconditionally whenever any
-    // `error_responses` entry appears (independent of the `convertGrpcStatus` option).
+    // component.  The surrounding `google.rpc.Status` envelope is always inlined at the
+    // use site and never registered as a component.
     .google.protobuf.Any error_type = 2;
 
     // Optional response description.  When omitted, falls back to the error message's

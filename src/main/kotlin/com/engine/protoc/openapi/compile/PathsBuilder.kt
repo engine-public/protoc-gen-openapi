@@ -1,6 +1,7 @@
 package com.engine.protoc.openapi.compile
 
 import com.engine.protoc.openapi.Annotations
+import com.engine.protoc.openapi.Method
 import com.engine.protoc.openapi.ProtocGenOpenAPI
 import com.engine.protoc.openapi.compile.json.JsonContext
 import com.engine.protoc.openapi.compile.json.putExtensionsInto
@@ -31,6 +32,18 @@ private val markdownRenderer: MarkdownRenderer = MarkdownRenderer.builder().buil
 private val log = LoggerFactory.getLogger(PathsBuilder::class.java)
 
 /**
+ * Returns the explicit `inline_request` value when the method-level annotation set it, otherwise
+ * `null` to signal that the global `inlineRequestSchemas` option should apply.
+ */
+private fun Method.resolvedInlineRequest(): Boolean? = takeIf { it.hasInlineRequest() }?.inlineRequest
+
+/**
+ * Returns the explicit `inline_response` value when the method-level annotation set it, otherwise
+ * `null` to signal that the global `inlineResponseSchemas` option should apply.
+ */
+private fun Method.resolvedInlineResponse(): Boolean? = takeIf { it.hasInlineResponse() }?.inlineResponse
+
+/**
  * Builds the `paths` section of the OpenAPI document from gRPC service definitions and their
  * `google.api.http` + `engine.protoc.openapi.method` annotations.
  *
@@ -46,6 +59,8 @@ internal class PathsBuilder(
     private val collector: MessageCollector,
     private val autoTagServices: Boolean = false,
     private val autoMapping: Boolean = false,
+    private val inlineRequestSchemas: Boolean = false,
+    private val inlineResponseSchemas: Boolean = false,
 ) {
     // Services (name → leading comment) that contributed ≥1 operation, in encounter order.
     // Only populated when autoTagServices is true.
@@ -134,8 +149,8 @@ internal class PathsBuilder(
         val httpRule = method.options?.findExtension(AnnotationsProto.http)?.value
         val methodWrapper = method.options?.findExtension(Annotations.method)?.value
         val annotation = methodWrapper?.takeIf { it.hasOperation() }?.operation
-        val inlineRequest = methodWrapper?.inlineRequest == true
-        val inlineResponse = methodWrapper?.inlineResponse == true
+        val inlineRequest = methodWrapper?.resolvedInlineRequest() ?: inlineRequestSchemas
+        val inlineResponse = methodWrapper?.resolvedInlineResponse() ?: inlineResponseSchemas
 
         val binding: HttpBinding = if (httpRule != null) {
             httpRule.primaryBinding() ?: return
@@ -368,8 +383,8 @@ internal class PathsBuilder(
         val inputTypeName = method.proto.inputType
         val outputTypeName = method.proto.outputType
 
-        val inlineRequest = methodWrapper?.inlineRequest == true
-        val inlineResponse = methodWrapper?.inlineResponse == true
+        val inlineRequest = methodWrapper?.resolvedInlineRequest() ?: inlineRequestSchemas
+        val inlineResponse = methodWrapper?.resolvedInlineResponse() ?: inlineResponseSchemas
 
         // When response_body names a field the HTTP response carries that field's value
         // directly rather than the full output message.  Collection has already happened in

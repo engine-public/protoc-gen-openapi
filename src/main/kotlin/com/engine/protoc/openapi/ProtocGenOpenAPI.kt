@@ -180,6 +180,36 @@ public class ProtocGenOpenAPI(
         val inlineEnums: Boolean,
 
         /**
+         * Global default for inlining an RPC's request body schema at the use site rather than
+         * emitting a `$ref` into `components/schemas`.  Equivalent in effect to setting
+         * `inline_request: true` on every method's `engine.protoc.openapi.method` annotation.
+         *
+         * The per-method `inline_request` annotation overrides this option for a specific RPC,
+         * regardless of the global setting — an explicit `inline_request: false` keeps the `$ref`
+         * even when this option is `true`, and an explicit `inline_request: true` inlines even
+         * when this option is `false`.
+         *
+         * Transitivity is unchanged: messages reached only through an inlined boundary are
+         * themselves inlined; messages also reachable through a non-inlined path remain in
+         * components and are `$ref`'d from the inline expansion.
+         *
+         * Passed via `--openapi_out=inlineRequestSchemas=false:outdir`.
+         */
+        val inlineRequestSchemas: Boolean,
+
+        /**
+         * Global default for inlining an RPC's response body schema at the use site rather than
+         * emitting a `$ref` into `components/schemas`.  Equivalent in effect to setting
+         * `inline_response: true` on every method's `engine.protoc.openapi.method` annotation.
+         *
+         * The per-method `inline_response` annotation overrides this option for a specific RPC,
+         * regardless of the global setting.
+         *
+         * Passed via `--openapi_out=inlineResponseSchemas=false:outdir`.
+         */
+        val inlineResponseSchemas: Boolean,
+
+        /**
          * When `true`, enum values whose proto number is `0` (the proto3 default value
          * convention) are omitted from all OAS enum value lists.
          *
@@ -560,6 +590,18 @@ public class ProtocGenOpenAPI(
             public var inlineEnums: Boolean = parameters.get<Boolean>("inlineEnums") ?: false
 
             /**
+             * @see [Options.inlineRequestSchemas]
+             */
+            public var inlineRequestSchemas: Boolean =
+                parameters.get<Boolean>("inlineRequestSchemas") ?: true
+
+            /**
+             * @see [Options.inlineResponseSchemas]
+             */
+            public var inlineResponseSchemas: Boolean =
+                parameters.get<Boolean>("inlineResponseSchemas") ?: true
+
+            /**
              * @see [Options.suppressDefaultEnumValues]
              */
             public var suppressDefaultEnumValues: Boolean =
@@ -651,6 +693,8 @@ public class ProtocGenOpenAPI(
                     schemaNamespaceVersionExtraction = schemaNamespaceVersionExtraction,
                     setSchemaTitleToProtoSimpleName = setSchemaTitleToProtoSimpleName,
                     inlineEnums = inlineEnums,
+                    inlineRequestSchemas = inlineRequestSchemas,
+                    inlineResponseSchemas = inlineResponseSchemas,
                     suppressDefaultEnumValues = suppressDefaultEnumValues,
                     enumValueFormat = enumValueFormat,
                     autoMapping = autoMapping,

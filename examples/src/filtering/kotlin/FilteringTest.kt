@@ -30,6 +30,8 @@ class FilteringTest :
         // -----------------------------------------------------------------------
         val run1 =
             ProtocGenOpenAPI.from(request()) {
+                inlineRequestSchemas = false
+                inlineResponseSchemas = false
                 merge = true
                 validateOutput = true
                 validationErrorsAreFatal = true
@@ -62,6 +64,8 @@ class FilteringTest :
         // -----------------------------------------------------------------------
         val run2 =
             ProtocGenOpenAPI.from(request()) {
+                inlineRequestSchemas = false
+                inlineResponseSchemas = false
                 merge = true
                 serviceInclude = "AlphaService"
             }.compile()
@@ -93,6 +97,8 @@ class FilteringTest :
         // -----------------------------------------------------------------------
         val run3 =
             ProtocGenOpenAPI.from(request()) {
+                inlineRequestSchemas = false
+                inlineResponseSchemas = false
                 merge = true
                 serviceExclude = "BetaService"
             }.compile()
@@ -124,6 +130,8 @@ class FilteringTest :
         // -----------------------------------------------------------------------
         val run4 =
             ProtocGenOpenAPI.from(request()) {
+                inlineRequestSchemas = false
+                inlineResponseSchemas = false
                 merge = true
                 serviceInclude = "Alpha|Gamma"
             }.compile()
@@ -145,6 +153,8 @@ class FilteringTest :
         // -----------------------------------------------------------------------
         val run5 =
             ProtocGenOpenAPI.from(request()) {
+                inlineRequestSchemas = false
+                inlineResponseSchemas = false
                 merge = true
                 serviceInclude =
                     """engine\.protoc\.openapi\.example\.filtering\.GammaService"""
@@ -177,6 +187,8 @@ class FilteringTest :
         // -----------------------------------------------------------------------
         val run6 =
             ProtocGenOpenAPI.from(request()) {
+                inlineRequestSchemas = false
+                inlineResponseSchemas = false
                 merge = true
                 serviceExclude = "AlphaService|BetaService"
             }.compile()
@@ -212,6 +224,8 @@ class FilteringTest :
         // -----------------------------------------------------------------------
         val run7 =
             ProtocGenOpenAPI.from(request()) {
+                inlineRequestSchemas = false
+                inlineResponseSchemas = false
                 merge = false
                 serviceInclude = "AlphaService"
             }.compile()

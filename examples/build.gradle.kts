@@ -71,6 +71,7 @@ testing {
         register<JvmTestSuite>("filtering")
         register<JvmTestSuite>("wellKnownTypes")
         register<JvmTestSuite>("inlineSchemas")
+        register<JvmTestSuite>("inlineSchemasGlobal")
         register<JvmTestSuite>("inlineFieldSchema")
         register<JvmTestSuite>("serviceOrdering")
         register<JvmTestSuite>("errorResponses")

@@ -52,6 +52,10 @@ class AlwaysPrintEnumsAsIntsTest : EnvoyTestBase(GrpcJsonTranscoder(printOptions
                     .shouldNotBeNull()
 
             val result = ProtocGenOpenAPI.from(request()) {
+
+                inlineRequestSchemas = false
+
+                inlineResponseSchemas = false
                 enumValueFormat = ProtocGenOpenAPI.Options.EnumValueFormat.NUMERIC_VALUE
                 serviceInclude = "HelloService"
                 version = "1.0.0"

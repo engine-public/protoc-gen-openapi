@@ -8,29 +8,27 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import tools.jackson.databind.ObjectMapper
 
-class InlineFieldSchemaTest :
+class InlineSchemasGlobalTest :
     FunSpec({
 
         assertSoftly = true
 
         val request =
-            InlineFieldSchemaTest::class.java
+            InlineSchemasGlobalTest::class.java
                 .getResourceAsStream("/code-generator-request.binpb")
                 .shouldNotBeNull()
         val response =
             ProtocGenOpenAPI.from(request) {
-                inlineRequestSchemas = false
-                inlineResponseSchemas = false
                 validateOutput = true
                 validationErrorsAreFatal = true
             }.compile()
 
         val mapper = ObjectMapper()
         val outputName =
-            "engine.protoc.openapi.example.inlineFieldSchema.ArchiveService.openapi.json"
+            "engine.protoc.openapi.example.inlineSchemasGlobal.InventoryService.openapi.json"
         val generatedFile = response.fileList.find { it.name == outputName }.shouldNotBeNull()
         val expected =
-            InlineFieldSchemaTest::class.java
+            InlineSchemasGlobalTest::class.java
                 .getResourceAsStream("/$outputName")
                 .shouldNotBeNull()
                 .reader()

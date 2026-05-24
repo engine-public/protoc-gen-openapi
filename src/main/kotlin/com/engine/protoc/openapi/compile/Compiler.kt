@@ -165,7 +165,14 @@ internal class Compiler(
         }
 
         val collector = MessageCollector(ctx.messageIndex, ctx.enumIndex, options.inlineEnums)
-        val pathsBuilder = PathsBuilder(ctx, collector, options.autoTagServices, options.autoMapping)
+        val pathsBuilder = PathsBuilder(
+            ctx,
+            collector,
+            options.autoTagServices,
+            options.autoMapping,
+            options.inlineRequestSchemas,
+            options.inlineResponseSchemas,
+        )
 
         // Seed pass: populate `collector` from every method's i/o, honouring method-level
         // inline_request_schema / inline_response_schema.  Must run before the emit pass so
@@ -300,7 +307,14 @@ internal class Compiler(
 
                     // Paths — only this service's methods
                     val collector = MessageCollector(ctx.messageIndex, ctx.enumIndex, options.inlineEnums)
-                    val pathsBuilder = PathsBuilder(ctx, collector, options.autoTagServices, options.autoMapping)
+                    val pathsBuilder = PathsBuilder(
+                        ctx,
+                        collector,
+                        options.autoTagServices,
+                        options.autoMapping,
+                        options.inlineRequestSchemas,
+                        options.inlineResponseSchemas,
+                    )
                     pathsBuilder.seedForService(service, file.`package`?.value)
                     mergePaths(doc, pathsBuilder.buildForService(service, file.`package`?.value), ctx)
 

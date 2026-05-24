@@ -22,6 +22,8 @@ class ConventionsTest :
             ConventionsTest::class.java.getResourceAsStream("/code-generator-request.binpb").shouldNotBeNull()
         val response =
             ProtocGenOpenAPI.from(request) {
+                inlineRequestSchemas = false
+                inlineResponseSchemas = false
                 // The output omits info.version — that field requires an engine annotation and
                 // this example deliberately uses only google.api.http.  OAS schema validation is
                 // therefore skipped; structure is verified by the reference-file comparison below.

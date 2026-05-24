@@ -43,6 +43,10 @@ class StreamSseStyleDelimitedTest : EnvoyTestBase(GrpcJsonTranscoder(printOption
                     .shouldNotBeNull()
 
             val result = ProtocGenOpenAPI.from(request()) {
+
+                inlineRequestSchemas = false
+
+                inlineResponseSchemas = false
                 streamSseStyleDelimited = true
                 serviceInclude = "HelloService"
                 version = "1.0.0"
@@ -78,6 +82,8 @@ class StreamSseStyleDelimitedTest : EnvoyTestBase(GrpcJsonTranscoder(printOption
                     .getResourceAsStream("/code-generator-request.binpb")
                     .shouldNotBeNull()
                 val result = ProtocGenOpenAPI.from(request) {
+                    inlineRequestSchemas = false
+                    inlineResponseSchemas = false
                     streamSseStyleDelimited = true
                     streamNewlineDelimited = true
                     serviceInclude = "HelloService"
@@ -96,6 +102,8 @@ class StreamSseStyleDelimitedTest : EnvoyTestBase(GrpcJsonTranscoder(printOption
                     .getResourceAsStream("/code-generator-request.binpb")
                     .shouldNotBeNull()
                 val result = ProtocGenOpenAPI.from(request) {
+                    inlineRequestSchemas = false
+                    inlineResponseSchemas = false
                     streamSseStyleDelimited = true
                     serviceInclude = "HelloService"
                     version = "1.0.0"

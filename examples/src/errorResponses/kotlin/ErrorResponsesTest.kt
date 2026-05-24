@@ -19,6 +19,8 @@ class ErrorResponsesTest :
                 .shouldNotBeNull()
         val response =
             ProtocGenOpenAPI.from(request) {
+                inlineRequestSchemas = false
+                inlineResponseSchemas = false
                 validateOutput = true
                 validationErrorsAreFatal = true
             }.compile()

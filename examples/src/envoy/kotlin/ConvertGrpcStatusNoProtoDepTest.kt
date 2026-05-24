@@ -53,6 +53,8 @@ class ConvertGrpcStatusNoProtoDepTest :
 
         test("convertGrpcStatus emits inline schema without google/rpc/status.proto in the descriptor set") {
             val result = ProtocGenOpenAPI.from(rawRequest.toByteArray().inputStream()) {
+                inlineRequestSchemas = false
+                inlineResponseSchemas = false
                 convertGrpcStatus = true
             }.compile()
 

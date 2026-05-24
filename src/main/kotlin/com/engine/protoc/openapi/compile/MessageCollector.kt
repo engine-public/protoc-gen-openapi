@@ -45,7 +45,7 @@ internal class MessageCollector(
             // expanded inline at the field's emission site, so it must not contribute to the
             // component-schema set from this path.  Reached non-inline elsewhere it still lands
             // in components via that path (collect is idempotent).
-            val inlineSchema = field.options.getExtension(Annotations.inlineSchema)
+            val inlineSchema = field.options.getExtension(Annotations.field).inline
             when {
                 field.type == DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE && !inlineSchema ->
                     collect(field.typeName)
@@ -64,7 +64,9 @@ internal class MessageCollector(
      */
     fun collectEnum(typeName: String) {
         val wrapper = enumIndex.find(typeName) ?: return
-        val annotationInline = wrapper.options?.findExtension(Annotations.inline)?.value
+        val annotationInline = wrapper.options
+            ?.findExtension(Annotations.enum_)?.value
+            ?.takeIf { it.hasInline() }?.inline
         val shouldInline = annotationInline ?: inlineEnums
         if (!shouldInline) {
             _collectedEnums.add(typeName)

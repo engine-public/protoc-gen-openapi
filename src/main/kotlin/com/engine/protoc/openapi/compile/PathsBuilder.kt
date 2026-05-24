@@ -132,9 +132,10 @@ internal class PathsBuilder(
         serviceName: String?,
     ) {
         val httpRule = method.options?.findExtension(AnnotationsProto.http)?.value
-        val annotation = method.options?.findExtension(Annotations.method)?.value
-        val inlineRequest = method.options?.proto?.getExtension(Annotations.inlineRequestSchema) == true
-        val inlineResponse = method.options?.proto?.getExtension(Annotations.inlineResponseSchema) == true
+        val methodWrapper = method.options?.findExtension(Annotations.method)?.value
+        val annotation = methodWrapper?.takeIf { it.hasOperation() }?.operation
+        val inlineRequest = methodWrapper?.inlineRequest == true
+        val inlineResponse = methodWrapper?.inlineResponse == true
 
         val binding: HttpBinding = if (httpRule != null) {
             httpRule.primaryBinding() ?: return
@@ -175,7 +176,7 @@ internal class PathsBuilder(
         // are independent of the inline flag (the user explicitly requested a $ref to them).
         // Only the inlined RequestBody branch carries a contentMap; the Reference branch points
         // at a `components/requestBodies` entry that doesn't need additional collection here.
-        if (hasExplicitRequestBody && annotation!!.requestBody.hasRequestBody()) {
+        if (hasExplicitRequestBody && annotation.requestBody.hasRequestBody()) {
             annotation.requestBody.requestBody.contentMap.values.forEach { mt ->
                 if (mt.hasSchema()) collector.collectFromSchema(mt.schema)
             }
@@ -240,10 +241,10 @@ internal class PathsBuilder(
         )
 
         val keyed = services.mapIndexed { encounterOrdinal, pair ->
-            val opts = pair.second.options?.proto
-            val explicit = opts
-                ?.takeIf { it.hasExtension(Annotations.indexOrder) }
-                ?.getExtension(Annotations.indexOrder)
+            val explicit = pair.second.options
+                ?.findExtension(Annotations.service)?.value
+                ?.takeIf { it.hasIndexOrder() }
+                ?.indexOrder
             Keyed(pair, explicit ?: encounterOrdinal, explicit != null)
         }
 
@@ -290,7 +291,9 @@ internal class PathsBuilder(
             // Resolve the auto-tag name once per service; null when feature is disabled.
             val autoTagName = if (autoTagServices) service.name?.value else null
             // Service-level tags applied to every operation in this service.
-            val serviceTags: List<String> = service.options?.proto?.getExtension(Annotations.tags)
+            val serviceTags: List<String> = service.options
+                ?.findExtension(Annotations.service)?.value
+                ?.tagsList
                 ?: emptyList()
             var contributed = false
 
@@ -356,16 +359,17 @@ internal class PathsBuilder(
         // Tags from the service-level `engine.protoc.openapi.tags` option, applied to all methods.
         serviceTags: List<String> = emptyList(),
     ): Pair<String, ObjectNode> {
+        val methodWrapper = method.options?.findExtension(Annotations.method)?.value
         val defaultInstance = Operation.getDefaultInstance()
-        val annotation: Operation? = method.options
-            ?.findExtension(Annotations.method)?.value
+        val annotation: Operation? = methodWrapper
+            ?.takeIf { it.hasOperation() }?.operation
             ?.takeIf { it != defaultInstance }
 
         val inputTypeName = method.proto.inputType
         val outputTypeName = method.proto.outputType
 
-        val inlineRequest = method.options?.proto?.getExtension(Annotations.inlineRequestSchema) == true
-        val inlineResponse = method.options?.proto?.getExtension(Annotations.inlineResponseSchema) == true
+        val inlineRequest = methodWrapper?.inlineRequest == true
+        val inlineResponse = methodWrapper?.inlineResponse == true
 
         // When response_body names a field the HTTP response carries that field's value
         // directly rather than the full output message.  Collection has already happened in
@@ -514,7 +518,7 @@ internal class PathsBuilder(
 
         // ---- Responses --------------------------------------------------
         val responsesNode: ObjectNode = if (annotation?.hasResponses() == true) {
-            annotation.responses.toJson(ctx) as ObjectNode
+            annotation.responses.toJson(ctx)
         } else {
             inferResponses(
                 outputTypeName,
@@ -1171,6 +1175,7 @@ internal class PathsBuilder(
         // ---- engine.protoc.openapi.message annotation override ----------
         val annotation = wrapper.options
             ?.findExtension(Annotations.message)?.value
+            ?.takeIf { it.hasSchema() }?.schema
 
         return if (annotation != null && annotation.schemaValueCase ==
             Schema.SchemaValueCase.OBJECT
@@ -1194,6 +1199,7 @@ internal class PathsBuilder(
         // ---- engine.protoc.openapi.field annotation override -----------
         val annotation = fieldWrapper.options
             ?.findExtension(Annotations.field)?.value
+            ?.takeIf { it.hasSchema() }?.schema
 
         return if (annotation != null && annotation.schemaValueCase ==
             Schema.SchemaValueCase.OBJECT
@@ -1286,7 +1292,9 @@ internal class PathsBuilder(
             DescriptorProtos.FieldDescriptorProto.Type.TYPE_ENUM -> {
                 val typeName = field.typeName
                 val enumWrapper = ctx.enumIndex.find(typeName)
-                val annotationInline = enumWrapper?.options?.findExtension(Annotations.inline)?.value
+                val annotationInline = enumWrapper?.options
+                    ?.findExtension(Annotations.enum_)?.value
+                    ?.takeIf { it.hasInline() }?.inline
                 val shouldInline = annotationInline ?: ctx.inlineEnums
                 if (shouldInline) {
                     buildEnumSchema(typeName, enumWrapper)
@@ -1304,7 +1312,7 @@ internal class PathsBuilder(
             DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE -> {
                 val typeName = field.typeName
                 val wkt = ctx.wellKnownTypeSchema(typeName)
-                val fieldInline = field.options.getExtension(Annotations.inlineSchema)
+                val fieldInline = field.options.getExtension(Annotations.field).inline
                 when {
                     wkt != null -> wkt
 
@@ -1378,7 +1386,9 @@ internal class PathsBuilder(
             }
             if (valuesArr.size() > 0) node.set("enum", valuesArr)
 
-            val annotation = enumWrapper.options?.findExtension(Annotations.enum_)?.value
+            val annotation = enumWrapper.options
+                ?.findExtension(Annotations.enum_)?.value
+                ?.takeIf { it.hasSchema() }?.schema
             if (annotation != null && annotation.schemaValueCase == Schema.SchemaValueCase.OBJECT) {
                 with(ctx) { node.deepMerge(annotation.`object`.toJson(ctx)) }
             }
@@ -1486,7 +1496,9 @@ internal class PathsBuilder(
         valueWrapper: EnumValueDescriptorProtoWrapper,
         suppressDefaults: Boolean,
     ): Boolean {
-        val annotation = valueWrapper.options?.findExtension(Annotations.suppress)?.value
+        val annotation = valueWrapper.options
+            ?.findExtension(Annotations.enumValue)?.value
+            ?.takeIf { it.hasSuppress() }?.suppress
         return annotation ?: (suppressDefaults && valueWrapper.proto.number == 0)
     }
 

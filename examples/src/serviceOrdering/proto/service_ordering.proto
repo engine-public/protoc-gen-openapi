@@ -9,9 +9,11 @@ import "google/api/annotations.proto";
 import "engine/protoc/openapi/annotations.proto";
 
 option (.engine.protoc.openapi.file) = {
-    info: {
-        title: "Service Ordering Example API"
-        version: "1.0.0"
+    openapi: {
+        info: {
+            title: "Service Ordering Example API"
+            version: "1.0.0"
+        }
     }
 };
 
@@ -40,7 +42,7 @@ service AlphaService {
 // Source-position 1 — explicit `index_order = -1` places it ahead of every un-annotated
 // service.  Negative indices are intended for exactly this case.
 service BetaService {
-    option (engine.protoc.openapi.index_order) = -1;
+    option (engine.protoc.openapi.service) = { index_order: -1 };
     rpc Get(BetaRequest) returns (BetaResponse) {
         option (google.api.http) = { get: "/beta/{id}" };
     }
@@ -56,7 +58,7 @@ service GammaService {
 
 // Source-position 3 — explicit `index_order = 10` pushes it well past the un-annotated tail.
 service DeltaService {
-    option (engine.protoc.openapi.index_order) = 10;
+    option (engine.protoc.openapi.service) = { index_order: 10 };
     rpc Get(DeltaRequest) returns (DeltaResponse) {
         option (google.api.http) = { get: "/delta/{id}" };
     }
@@ -66,7 +68,7 @@ service DeltaService {
 // ordinal of 0.  The compiler logs a WARN naming both services and falls back to source
 // order; AlphaService keeps the earlier slot because it appears first in source.
 service EpsilonService {
-    option (engine.protoc.openapi.index_order) = 0;
+    option (engine.protoc.openapi.service) = { index_order: 0 };
     rpc Get(EpsilonRequest) returns (EpsilonResponse) {
         option (google.api.http) = { get: "/epsilon/{id}" };
     }

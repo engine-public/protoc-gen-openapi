@@ -11,18 +11,21 @@ import "engine/protoc/openapi/model/schema.proto";
 
 import "google/protobuf/descriptor.proto";
 
-extend .google.protobuf.FileOptions {
-    // Adds the ability to add an OpenAPI definition to a proto file
-    .engine.protoc.openapi.OpenAPI file = 20231016;
+// File-level OpenAPI annotation: applied via `(engine.protoc.openapi.file)` on a proto file.
+message File {
+    // OpenAPI definition merged into the emitted document for this file.
+    .engine.protoc.openapi.OpenAPI openapi = 1;
 }
 
-extend .google.protobuf.ServiceOptions {
-    // Adds the ability to add an OpenAPI definition to a proto `service`
-    .engine.protoc.openapi.OpenAPI service = 20231016;
+// Service-level OpenAPI annotation: applied via `(engine.protoc.openapi.service)` on a proto service.
+message Service {
+    // OpenAPI definition merged into the emitted document for this service.
+    .engine.protoc.openapi.OpenAPI openapi = 1;
 
-    // Adds the ability to define tags to be applied to all RPCs (OAS Operations) within a gRPC service.
-    // Fully enriched tags must be created within one of the available layers of OpenAPI annotation (at the file or service annotation).
-    repeated string tags = 202310162;
+    // Tags applied to every RPC (OAS Operation) within this gRPC service.
+    // Fully enriched tags must be created within one of the available layers of OpenAPI annotation
+    // (at the file or service annotation).
+    repeated string tags = 2;
 
     // Sort key controlling the order this service's paths (and its auto-generated service tag,
     // when `autoTagServices` is enabled) appear in the emitted OpenAPI document.  Services with
@@ -30,53 +33,86 @@ extend .google.protobuf.ServiceOptions {
     // to their encounter ordinal across the target file set (the first service is index 0, the
     // second is 1, etc.).  Negative values place a service ahead of the un-annotated baseline,
     // indices may be sparse, and ties are broken by source order (stable sort).
-    optional int32 index_order = 202310163;
+    optional int32 index_order = 3;
 }
 
-extend .google.protobuf.MethodOptions {
-    // Adds the ability to add an OpenAPI operation to a rpc in a proto `service`
-    .engine.protoc.openapi.model.Operation method = 20231016;
+// Method-level OpenAPI annotation: applied via `(engine.protoc.openapi.method)` on an RPC.
+message Method {
+    // OpenAPI Operation definition for this RPC.
+    .engine.protoc.openapi.model.Operation operation = 1;
 
     // When true, the RPC's request body schema is inlined at the use site instead of emitted as
     // a `$ref` into `components/schemas`.  Transitive: messages reached only through this inline
     // path are themselves inlined; messages also reachable through a non-inlined path remain in
     // components and are `$ref`'d from the inline expansion.
-    optional bool inline_request_schema = 202310162;
+    optional bool inline_request = 2;
 
-    // Same as `inline_request_schema`, but for the RPC's response body.
-    optional bool inline_response_schema = 202310163;
+    // Same as `inline_request`, but for the RPC's response body.
+    optional bool inline_response = 3;
 }
 
-extend .google.protobuf.MessageOptions {
-    // Adds the ability to add an OpenAPI schema to a proto `message`
-    .engine.protoc.openapi.model.Schema message = 20231016;
+// Message-level OpenAPI annotation: applied via `(engine.protoc.openapi.message)` on a proto message.
+message Message {
+    // OpenAPI schema merged on top of the auto-derived schema for this proto message.
+    .engine.protoc.openapi.model.Schema schema = 1;
 }
 
-extend .google.protobuf.FieldOptions {
-    // Adds the ability to add an OpenAPI schema to a field in a proto `message`
-    .engine.protoc.openapi.model.Schema field = 20231016;
+// Field-level OpenAPI annotation: applied via `(engine.protoc.openapi.field)` on a proto field.
+message Field {
+    // OpenAPI schema merged on top of the auto-derived schema for this proto field.
+    .engine.protoc.openapi.model.Schema schema = 1;
 
     // When true on a message-typed field, the referenced message's schema is inlined at the
     // field site instead of emitted as a `$ref` into `components/schemas`.  Transitive:
     // messages reached only through this inline path are themselves inlined; messages also
     // reachable through a non-inlined path remain in components and are `$ref`'d from the
-    // inline expansion.  Ignored on scalar fields; the per-enum `(engine.protoc.openapi.inline)`
-    // annotation continues to govern enum inlining.
-    //
-    // Named `inline_schema` to avoid a Java symbol clash with the `(engine.protoc.openapi.inline)`
-    // extension on `EnumOptions` (both generate static fields on `Annotations.java`).
-    optional bool inline_schema = 202310162;
+    // inline expansion.  Ignored on scalar fields; the per-enum `(engine.protoc.openapi.enum)`
+    // `inline` flag continues to govern enum inlining.
+    optional bool inline = 2;
+}
+
+// Enum-level OpenAPI annotation: applied via `(engine.protoc.openapi.enum)` on a proto enum.
+message Enum {
+    // OpenAPI schema merged on top of the auto-derived schema for this proto enum.
+    .engine.protoc.openapi.model.Schema schema = 1;
+
+    // When true, this enum will be inlined wherever it's used instead of emitted as a separate
+    // schema in `components/schemas`.
+    optional bool inline = 2;
+}
+
+// EnumValue-level OpenAPI annotation: applied via `(engine.protoc.openapi.enum_value)` on a proto
+// enum value.
+message EnumValue {
+    // When true, suppress this enum value from OAS schema output.  Helpful for the conventional
+    // "default" value of proto enums with the assigned 0 number.
+    optional bool suppress = 1;
+}
+
+extend .google.protobuf.FileOptions {
+    .engine.protoc.openapi.File file = 20231016;
+}
+
+extend .google.protobuf.ServiceOptions {
+    .engine.protoc.openapi.Service service = 20231016;
+}
+
+extend .google.protobuf.MethodOptions {
+    .engine.protoc.openapi.Method method = 20231016;
+}
+
+extend .google.protobuf.MessageOptions {
+    .engine.protoc.openapi.Message message = 20231016;
+}
+
+extend .google.protobuf.FieldOptions {
+    .engine.protoc.openapi.Field field = 20231016;
 }
 
 extend .google.protobuf.EnumOptions {
-    // Adds the ability to add an OpenAPI schema to a proto `enum`
-    .engine.protoc.openapi.model.Schema enum = 20231016;
-    // When true, this enum will be inlined when used instead of created as a separate schema in components.
-    optional bool inline = 202310162;
+    .engine.protoc.openapi.Enum enum = 20231016;
 }
 
 extend .google.protobuf.EnumValueOptions {
-    // When true, suppress this enum value from OAS schema output.
-    // This is helpful for the conventional "default" value of proto enums with the assigned 0 number.
-    optional bool suppress = 202310162;
+    .engine.protoc.openapi.EnumValue enum_value = 20231016;
 }

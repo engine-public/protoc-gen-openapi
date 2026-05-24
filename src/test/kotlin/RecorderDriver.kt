@@ -12,39 +12,37 @@ import java.io.File
  * spec under the IDE debugger to walk the request, the wrapped request, the proto files, the
  * file_to_generate list, etc.
  *
- * Override the file path with the `RECORDER_BINPB` env var or `-Drecorder.binpb=…` system property
- * if you want to point at a different recording without editing this file.
+ * Point at a recording with the `RECORDER_BINPB` env var or `-Drecorder.binpb=…` system property.
+ * When neither is set the spec silently skips, so `./gradlew test` stays green on machines that
+ * don't have a recording staged.
  */
 class RecorderDriver :
     FunSpec({
-
-        val defaultPath =
-            "code-generator-request.binpb"
         val path =
             System.getenv("RECORDER_BINPB")
                 ?: System.getProperty("recorder.binpb")
-                ?: defaultPath
 
-        val file = File(path)
+        val enabled = path != null
+        val file = path?.let(::File)
 
         // Raw proto (no wrapper, no options application) — handy for `proto.toString()` dumps.
         val raw: PluginProtos.CodeGeneratorRequest by lazy {
             val registry = ExtensionRegistry.newInstance().prepare()
-            file.inputStream().use { PluginProtos.CodeGeneratorRequest.parseFrom(it, registry) }
+            file!!.inputStream().use { PluginProtos.CodeGeneratorRequest.parseFrom(it, registry) }
         }
 
         // Plugin's own facade — applies logging configuration and gives us the wrapped CGRequest
         // along with parsed Options. Useful when reproducing real plugin behaviour.
         val plugin: ProtocGenOpenAPI by lazy {
-            file.inputStream().use { ProtocGenOpenAPI.from(it) }
+            file!!.inputStream().use { ProtocGenOpenAPI.from(it) }
         }
 
-        test("recorder binpb exists") {
-            check(file.exists()) { "Recorder file does not exist: $path" }
+        test("recorder binpb exists").config(enabled = enabled) {
+            check(file!!.exists()) { "Recorder file does not exist: $path" }
             println("Loaded recorder request from: $path (${file.length()} bytes)")
         }
 
-        test("dump request summary") {
+        test("dump request summary").config(enabled = enabled) {
             println("=== parameter ===")
             println(raw.parameter)
 
@@ -84,7 +82,7 @@ class RecorderDriver :
 
         // Set a breakpoint inside this test to interactively poke at the wrapped objects.
         // `plugin.request` is a CodeGeneratorRequestWrapper; `plugin.options` are the parsed Options.
-        test("debug breakpoint") {
+        test("debug breakpoint").config(enabled = enabled) {
             val req = plugin // force load — put a breakpoint on the next line
             println("Wrapped request ready. Inspect `req`, `raw`, etc. in the debugger.")
             check(req.toString().isNotEmpty())

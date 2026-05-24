@@ -113,6 +113,8 @@ paths:
       - $ref: "#/components/parameters/ProductId"
       - name: "name"
         in: "query"
+        description: "covers SchemaObject.write_only, min_length, max_length, pattern,\
+          \ multi-type (type repeated)"
         required: false
         schema:
           type: "string"
@@ -123,17 +125,22 @@ paths:
           type: "string"
       - name: "price"
         in: "query"
+        description: "covers SchemaObject.minimum, exclusive_minimum, maximum, exclusive_maximum,\n\
+          \ multiple_of, default, example (SchemaObject.example deprecated field)"
         required: false
         schema:
           type: "number"
           format: "double"
       - name: "category"
         in: "query"
+        description: "covers SchemaObject.enum (repeated Any), SchemaObject.const (Any)"
         required: false
         schema:
           type: "string"
       - name: "tags"
         in: "query"
+        description: "covers SchemaObject.items, prefix_items, contains, min_contains,\
+          \ max_contains,\n min_items, max_items, unique_items, unevaluated_items (Schema.boolean=false)"
         required: false
         style: "form"
         explode: true
@@ -143,6 +150,8 @@ paths:
             type: "string"
       - name: "stockQuantity"
         in: "query"
+        description: "covers SchemaObject.deprecated (on field), SchemaObject.examples\
+          \ (repeated Any),\n SchemaObject.title (on field)"
         required: false
         schema:
           type: "integer"
@@ -257,6 +266,8 @@ paths:
       - $ref: "#/components/parameters/ProductId"
       - name: "name"
         in: "query"
+        description: "covers SchemaObject.write_only, min_length, max_length, pattern,\
+          \ multi-type (type repeated)"
         required: false
         schema:
           type: "string"
@@ -267,17 +278,22 @@ paths:
           type: "string"
       - name: "price"
         in: "query"
+        description: "covers SchemaObject.minimum, exclusive_minimum, maximum, exclusive_maximum,\n\
+          \ multiple_of, default, example (SchemaObject.example deprecated field)"
         required: false
         schema:
           type: "number"
           format: "double"
       - name: "category"
         in: "query"
+        description: "covers SchemaObject.enum (repeated Any), SchemaObject.const (Any)"
         required: false
         schema:
           type: "string"
       - name: "tags"
         in: "query"
+        description: "covers SchemaObject.items, prefix_items, contains, min_contains,\
+          \ max_contains,\n min_items, max_items, unique_items, unevaluated_items (Schema.boolean=false)"
         required: false
         style: "form"
         explode: true
@@ -287,6 +303,8 @@ paths:
             type: "string"
       - name: "stockQuantity"
         in: "query"
+        description: "covers SchemaObject.deprecated (on field), SchemaObject.examples\
+          \ (repeated Any),\n SchemaObject.title (on field)"
         required: false
         schema:
           type: "integer"
@@ -400,6 +418,7 @@ paths:
           type: "string"
       - name: "status"
         in: "query"
+        description: "covers SchemaObject.content_encoding, content_media_type, content_schema"
         required: false
         schema:
           type: "string"
@@ -440,6 +459,7 @@ paths:
           format: "uuid"
       - name: "status"
         in: "query"
+        description: "covers SchemaObject.content_encoding, content_media_type, content_schema"
         required: false
         schema:
           type: "string"

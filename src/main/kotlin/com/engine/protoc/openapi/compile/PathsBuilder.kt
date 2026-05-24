@@ -728,7 +728,8 @@ internal class PathsBuilder(
     ): List<ObjectNode> {
         val msg = ctx.messageIndex.find(inputTypeName) ?: return emptyList()
         val result = mutableListOf<ObjectNode>()
-        for (field in msg.proto.fieldList) {
+        for (fieldWrapper in msg.fields) {
+            val field = fieldWrapper.proto
             // Skip the named-body field (it lives in the request body, not the query string).
             if (excludeFieldName != null &&
                 (field.name == excludeFieldName || field.jsonName == excludeFieldName)
@@ -751,7 +752,7 @@ internal class PathsBuilder(
                 )
                 continue
             }
-            appendQueryParam(field, prefix = "", out = result, methodLabel = methodLabel)
+            appendQueryParam(fieldWrapper, prefix = "", out = result, methodLabel = methodLabel)
         }
         return result
     }
@@ -760,17 +761,25 @@ internal class PathsBuilder(
      * Emits one parameter into [out] for a leaf-scalar or repeated-scalar field, or recurses into
      * a nested message field with the given dotted [prefix].  Repeated message and map fields are
      * skipped with a WARN.
+     *
+     * The emitted parameter's `description` comes from the field's leading proto comment so that
+     * the same documentation that drives the response-schema property's `description` also shows
+     * up on the auto-derived query parameter.  For nested-message recursion the description of
+     * the leaf sub-field is used — parent prefixes do not contribute prose, since the dotted
+     * name (`address.city`) already signals the hierarchy.
      */
     private fun appendQueryParam(
-        field: DescriptorProtos.FieldDescriptorProto,
+        fieldWrapper: FieldDescriptorProtoWrapper,
         prefix: String,
         out: MutableList<ObjectNode>,
         methodLabel: String,
     ) {
+        val field = fieldWrapper.proto
         val isRepeated =
             field.label == DescriptorProtos.FieldDescriptorProto.Label.LABEL_REPEATED
         val isMessage = field.type == DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE
         val name = prefix + queryParamFieldName(field)
+        val description = fieldWrapper.location?.proto?.leadingComments?.trim()?.ifEmpty { null }
 
         if (isMessage && isMapField(field)) {
             log.warn(
@@ -795,7 +804,7 @@ internal class PathsBuilder(
         if (isMessage && !isRepeated) {
             val wktScalar = ctx.wellKnownScalarSchema(field.typeName)
             if (wktScalar != null) {
-                out += buildQueryParam(name, wktScalar, repeated = false)
+                out += buildQueryParam(name, wktScalar, repeated = false, description = description)
                 return
             }
             // Skip structural well-known types (Struct, Any, Value, ...) — there is no useful
@@ -810,23 +819,25 @@ internal class PathsBuilder(
                 return
             }
             val nested = ctx.messageIndex.find(field.typeName) ?: return
-            for (sub in nested.proto.fieldList) {
+            for (sub in nested.fields) {
                 appendQueryParam(sub, "$name.", out, methodLabel)
             }
             return
         }
 
-        out += buildQueryParam(name, fieldTypeSchema(field), repeated = isRepeated)
+        out += buildQueryParam(name, fieldTypeSchema(field), repeated = isRepeated, description = description)
     }
 
     private fun buildQueryParam(
         name: String,
         schema: ObjectNode,
         repeated: Boolean,
+        description: String? = null,
     ): ObjectNode {
         val node = ctx.obj()
         node.put("name", name)
         node.put("in", "query")
+        if (description != null) node.put("description", description)
         node.put("required", false)
         if (repeated) {
             node.put("style", "form")

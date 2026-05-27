@@ -12,6 +12,7 @@ import org.apache.logging.log4j.core.config.Configurator
 import org.apache.logging.log4j.core.config.builder.api.ConfigurationBuilderFactory
 import org.slf4j.event.Level
 import java.io.InputStream
+import java.util.concurrent.atomic.AtomicBoolean
 import org.apache.logging.log4j.Level as Log4jLevel
 
 public class ProtocGenOpenAPI(
@@ -778,15 +779,25 @@ public class ProtocGenOpenAPI(
             cb.add(engine)
             cb.add(cb.newRootLogger(Log4jLevel.OFF))
             val config = cb.build(false)
-            // `initialize` first so a fresh LoggerContext starts with our
-            // configuration directly, bypassing Log4j's default config-file
-            // probing (~24 file paths) that breaks under native-image's
-            // strict missing-resource registration. `reconfigure` then
-            // re-applies the same config so subsequent `from(...)` calls
-            // in the same process pick up updated log levels.
-            Configurator.initialize(config)
-            Configurator.reconfigure(config)
+            // First call in this JVM: `initialize` so a fresh LoggerContext
+            // starts with our configuration directly, bypassing Log4j's default
+            // config-file probing (~24 file paths) that breaks under
+            // native-image's strict missing-resource registration.
+            // Subsequent calls (test harnesses re-entering `from(...)` with
+            // different `logLevel` / `logFile`): `reconfigure` swaps in the
+            // freshly-built configuration.  Calling `reconfigure` on the same
+            // config object that was just installed by `initialize` triggers a
+            // start-then-immediate-stop sequence inside log4j2 that leaves
+            // every appender in the `stopped` state, silently dropping all
+            // subsequent events — the gate below avoids that.
+            if (configurationInitialized.compareAndSet(false, true)) {
+                Configurator.initialize(config)
+            } else {
+                Configurator.reconfigure(config)
+            }
         }
+
+        private val configurationInitialized = AtomicBoolean(false)
 
         private fun Level.toLog4j(): Log4jLevel =
             when (this) {

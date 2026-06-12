@@ -1,46 +1,52 @@
 package com.engine.protoc.openapi.compile
 
-import com.engine.protoc.openapi.Annotations
 import com.engine.protoc.openapi.compile.json.JsonContext
-import com.engine.protoc.openapi.compile.json.toJson
-import com.engine.protoc.openapi.model.Schema
-import com.engine.protoc.util.message.DescriptorProtoWrapper
-import com.engine.protoc.util.message.FieldDescriptorProtoWrapper
-import com.google.protobuf.DescriptorProtos
 import tools.jackson.databind.JsonNode
 import tools.jackson.databind.node.ObjectNode
 
 /**
  * Builds the `components/schemas` section from all message types identified by [collector].
  *
- * For each collected type the schema is derived by:
- * 1. Generating a default schema from the proto message descriptor (fields → JSON Schema properties)
- * 2. Deep-merging any `engine.protoc.openapi.message` annotation on top
- *
- * Individual fields follow the same pattern: auto-generated type schema merged with any
- * `engine.protoc.openapi.field` annotation.
+ * The per-message schema construction lives on [PathsBuilder] (see `buildMessageSchema` and
+ * `buildFieldSchema`) so that the same logic can also produce inline-expanded schemas at request
+ * and response boundaries marked with `inline_request_schema` / `inline_response_schema`.  This
+ * class is the outer loop that decides which messages and enums get a component entry.
  */
 internal class SchemaBuilder(
     private val ctx: JsonContext,
     private val pathsBuilder: PathsBuilder,
 ) {
 
-    /** Returns an ObjectNode containing all component schemas (messages and enums) keyed by schema name. */
+    /**
+     * Returns an ObjectNode containing all component schemas (messages and enums) keyed by
+     * schema name.  Entries are emitted in alphabetical order of the final schema key, so the
+     * output is stable across runs regardless of the order in which types were first reached
+     * during collection.
+     */
     fun build(collector: MessageCollector): ObjectNode {
-        val schemas = ctx.obj()
+        // Collect into a sorted map so the final emission order is alphabetical by schema key.
+        // [ctx.schemaKeyResolver.keyOf] already returns the final key (SIMPLIFIED_PACKAGE
+        // resolution happens in [SchemaKeyResolver.finalizeKeys], which Compiler calls before
+        // invoking us), so sorting here matches the names that will appear in the output.
+        val sorted = sortedMapOf<String, JsonNode>()
         for (typeName in collector.collected) {
             val wrapper = ctx.messageIndex.find(typeName) ?: continue
             if (wrapper.proto.options.mapEntry) continue
             val schemaKey = ctx.schemaKeyResolver.keyOf(typeName)
-            schemas.set(schemaKey, buildMessageSchema(wrapper, typeName))
+            sorted[schemaKey] = pathsBuilder.buildMessageSchema(wrapper, typeName)
         }
         for (typeName in collector.collectedEnums) {
             val wrapper = ctx.enumIndex.find(typeName) ?: continue
             val schemaKey = ctx.schemaKeyResolver.keyOf(typeName)
-            schemas.set(schemaKey, pathsBuilder.buildEnumSchema(typeName, wrapper, includeTitle = true))
+            sorted[schemaKey] = pathsBuilder.buildEnumSchema(typeName, wrapper, includeTitle = true)
         }
         if (ctx.convertGrpcStatus) {
-            schemas.set("google.rpc.Status", buildGrpcStatusSchema())
+            sorted["google.rpc.Status"] = buildGrpcStatusSchema()
+        }
+
+        val schemas = ctx.obj()
+        for ((key, value) in sorted) {
+            schemas.set(key, value)
         }
         return schemas
     }
@@ -63,89 +69,5 @@ internal class SchemaBuilder(
         props.set("details", details)
         schema.set("properties", props)
         return schema
-    }
-
-    private fun buildMessageSchema(
-        wrapper: DescriptorProtoWrapper,
-        typeName: String,
-    ): ObjectNode {
-        val base = ctx.obj()
-        base.put("type", "object")
-        ctx.schemaKeyResolver.titleFor(typeName)?.let { base.put("title", it) }
-
-        // ---- Leading comment → description ------------------------------
-        val comment = wrapper.location?.proto?.leadingComments?.trim()?.ifEmpty { null }
-        if (comment != null) base.put("description", comment)
-
-        // ---- Properties from fields -------------------------------------
-        val required = mutableListOf<String>()
-        val propsNode = ctx.obj()
-        for (fieldWrapper in wrapper.fields) {
-            val field = fieldWrapper.proto
-            val jsonName = if (ctx.preserveProtoFieldNames) {
-                // preserve_proto_field_names: always use the raw proto field name.
-                // This overrides both auto-camelCase conversion and explicit json_name annotations,
-                // matching Envoy's preserve_proto_field_names PrintOption behaviour.
-                field.name
-            } else {
-                field.jsonName.ifEmpty { field.name }
-            }
-            val fieldSchema = buildFieldSchema(fieldWrapper)
-            propsNode.set(jsonName, fieldSchema)
-
-            // proto3 required: proto2 LABEL_REQUIRED, or alwaysPrintPrimitiveFields for
-            // non-repeated scalar/enum fields (they will always appear in the response).
-            // oneof members (including proto3 optional, which uses a synthetic oneof) are never
-            // unconditionally present — only the set field in a oneof is serialized.
-            val isPrimitive = field.label != DescriptorProtos.FieldDescriptorProto.Label.LABEL_REPEATED &&
-                field.type != DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE &&
-                !field.hasOneofIndex()
-            if (field.label == DescriptorProtos.FieldDescriptorProto.Label.LABEL_REQUIRED ||
-                (ctx.alwaysPrintPrimitiveFields && isPrimitive)
-            ) {
-                required += jsonName
-            }
-        }
-        if (propsNode.size() > 0) base.set("properties", propsNode)
-        if (required.isNotEmpty()) {
-            val arr = ctx.mapper.createArrayNode()
-            for (r in required) arr.add(r)
-            base.set("required", arr)
-        }
-
-        // ---- engine.protoc.openapi.message annotation override ----------
-        val annotation = wrapper.options
-            ?.findExtension(Annotations.message)?.value
-
-        return if (annotation != null && annotation.schemaValueCase ==
-            Schema.SchemaValueCase.OBJECT
-        ) {
-            with(ctx) { base.deepMerge(annotation.`object`.toJson(ctx)) }
-        } else {
-            base
-        }
-    }
-
-    private fun buildFieldSchema(fieldWrapper: FieldDescriptorProtoWrapper): ObjectNode {
-        val field = fieldWrapper.proto
-        val base = pathsBuilder.fieldTypeSchema(field)
-
-        // ---- Leading comment → description -----------------------------
-        val comment = fieldWrapper.location?.proto?.leadingComments?.trim()?.ifEmpty { null }
-        if (comment != null && !base.has("description")) {
-            base.put("description", comment)
-        }
-
-        // ---- engine.protoc.openapi.field annotation override -----------
-        val annotation = fieldWrapper.options
-            ?.findExtension(Annotations.field)?.value
-
-        return if (annotation != null && annotation.schemaValueCase ==
-            Schema.SchemaValueCase.OBJECT
-        ) {
-            with(ctx) { base.deepMerge(annotation.`object`.toJson(ctx)) }
-        } else {
-            base
-        }
     }
 }

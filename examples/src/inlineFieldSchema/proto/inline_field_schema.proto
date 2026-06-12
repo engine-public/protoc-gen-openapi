@@ -1,0 +1,83 @@
+syntax = "proto3";
+
+package engine.protoc.openapi.example.inlineFieldSchema;
+
+option java_package = "com.engine.protoc.openapi.example.inlineFieldSchema";
+option java_multiple_files = true;
+
+import "google/api/annotations.proto";
+import "engine/protoc/openapi/annotations.proto";
+
+option (.engine.protoc.openapi.file) = {
+    info: {
+        title: "Inline Field Schema Example API"
+        version: "1.0.0"
+    }
+};
+
+// An archive carries its manifest as an inline field.  Because Manifest is also returned
+// directly by GetManifest below (non-inline), it stays in components and the inline expansion
+// here `$refs` into the component schema for its nested `entry` field.
+message Archive {
+    string id = 1;
+    Header header = 2;
+    Manifest manifest = 3 [(engine.protoc.openapi.inline_schema) = true];
+}
+
+// A preview carries a snapshot reachable only through the inline field below — so neither
+// Snapshot nor its Tag sub-field appear in components/schemas; both expand inline.
+message Preview {
+    string id = 1;
+    Snapshot snapshot = 2 [(engine.protoc.openapi.inline_schema) = true];
+}
+
+message Header {
+    string content_type = 1;
+}
+
+message Manifest {
+    string format = 1;
+    Entry entry = 2;
+}
+
+message Entry {
+    string name = 1;
+    int32 size = 2;
+}
+
+// Reached only through Preview.snapshot — inline-only.
+message Snapshot {
+    string kind = 1;
+    Tag tag = 2;
+}
+
+// Reached only through Snapshot.tag — also inline-only (transitive).
+message Tag {
+    string label = 1;
+}
+
+message ArchiveRequest { string id = 1; }
+message ManifestRequest { string id = 1; }
+message PreviewRequest { string id = 1; }
+
+service ArchiveService {
+    // Archive is in components.  Its `manifest` field is `inline_schema`d, so the inline
+    // expansion appears inside the Archive component schema (and inside every $ref chain
+    // that reaches Archive).  Manifest itself is also in components via GetManifest below;
+    // the inline expansion's nested `entry` field $refs Entry.
+    rpc GetArchive(ArchiveRequest) returns (Archive) {
+        option (google.api.http) = { get: "/archives/{id}" };
+    }
+
+    // Non-inline path that pulls Manifest (and transitively Entry) into components.
+    rpc GetManifest(ManifestRequest) returns (Manifest) {
+        option (google.api.http) = { get: "/manifests/{id}" };
+    }
+
+    // Preview is in components.  Its `snapshot` field is `inline_schema`d, and Snapshot is
+    // reached only through this field — so Snapshot and Tag are absent from components and
+    // expand inline inside the Preview component schema.
+    rpc GetPreview(PreviewRequest) returns (Preview) {
+        option (google.api.http) = { get: "/previews/{id}" };
+    }
+}

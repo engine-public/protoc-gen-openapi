@@ -28,6 +28,15 @@ extend .google.protobuf.ServiceOptions {
 extend .google.protobuf.MethodOptions {
     // Adds the ability to add an OpenAPI operation to a rpc in a proto `service`
     .engine.protoc.openapi.model.Operation method = 20231016;
+
+    // When true, the RPC's request body schema is inlined at the use site instead of emitted as
+    // a `$ref` into `components/schemas`.  Transitive: messages reached only through this inline
+    // path are themselves inlined; messages also reachable through a non-inlined path remain in
+    // components and are `$ref`'d from the inline expansion.
+    optional bool inline_request_schema = 202310162;
+
+    // Same as `inline_request_schema`, but for the RPC's response body.
+    optional bool inline_response_schema = 202310163;
 }
 
 extend .google.protobuf.MessageOptions {
@@ -38,6 +47,17 @@ extend .google.protobuf.MessageOptions {
 extend .google.protobuf.FieldOptions {
     // Adds the ability to add an OpenAPI schema to a field in a proto `message`
     .engine.protoc.openapi.model.Schema field = 20231016;
+
+    // When true on a message-typed field, the referenced message's schema is inlined at the
+    // field site instead of emitted as a `$ref` into `components/schemas`.  Transitive:
+    // messages reached only through this inline path are themselves inlined; messages also
+    // reachable through a non-inlined path remain in components and are `$ref`'d from the
+    // inline expansion.  Ignored on scalar fields; the per-enum `(engine.protoc.openapi.inline)`
+    // annotation continues to govern enum inlining.
+    //
+    // Named `inline_schema` to avoid a Java symbol clash with the `(engine.protoc.openapi.inline)`
+    // extension on `EnumOptions` (both generate static fields on `Annotations.java`).
+    optional bool inline_schema = 202310162;
 }
 
 extend .google.protobuf.EnumOptions {

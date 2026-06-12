@@ -69,6 +69,9 @@ testing {
         register<JvmTestSuite>("namespacing")
         register<JvmTestSuite>("enums")
         register<JvmTestSuite>("filtering")
+        register<JvmTestSuite>("wellKnownTypes")
+        register<JvmTestSuite>("inlineSchemas")
+        register<JvmTestSuite>("inlineFieldSchema")
 
         /*
          * Envoy integration suite: runs Envoy in a container (via testcontainers) and exercises

@@ -1,0 +1,68 @@
+syntax = "proto3";
+
+package engine.protoc.openapi.example.wellKnownTypes;
+
+option java_package = "com.engine.protoc.openapi.example.wellKnownTypes";
+option java_multiple_files = true;
+
+import "google/api/annotations.proto";
+import "google/api/httpbody.proto";
+import "google/protobuf/any.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/field_mask.proto";
+import "google/protobuf/struct.proto";
+import "engine/protoc/openapi/annotations.proto";
+
+option (.engine.protoc.openapi.file) = {
+    info: {
+        title: "Well-Known Types Example API"
+        version: "1.0.0"
+    }
+};
+
+// Carries a structural well-known type at every field position so the generated
+// component schema exercises the inline-WKT code path for each one.
+message Envelope {
+    // Stable identifier for the envelope.
+    string id = 1;
+
+    // Free-form payload — Any inlines to an open object.
+    google.protobuf.Any payload = 2;
+
+    // Free-form attribute bag — Struct inlines to an open object.
+    google.protobuf.Struct attributes = 3;
+
+    // Single JSON value of any type — Value inlines to the empty schema.
+    google.protobuf.Value annotation = 4;
+
+    // Heterogeneous tag list — ListValue inlines to an unconstrained array.
+    google.protobuf.ListValue tags = 5;
+
+    // Update mask for partial updates — FieldMask inlines to a string.
+    google.protobuf.FieldMask update_mask = 6;
+
+    // Sentinel "no payload" marker — Empty inlines to a strictly empty object.
+    google.protobuf.Empty acknowledgement = 7;
+}
+
+message GetEnvelopeRequest {
+    string id = 1;
+}
+
+service EnvelopeService {
+    // Fetches an envelope by id; exercises Any-bearing fields inside a component schema.
+    rpc GetEnvelope(GetEnvelopeRequest) returns (Envelope) {
+        option (google.api.http) = {
+            get: "/envelopes/{id}"
+        };
+    }
+
+    // Returns a binary blob via google.api.HttpBody.  HttpBody itself becomes a
+    // component schema whose `extensions` field is `repeated google.protobuf.Any` —
+    // the regression that motivated the inline-WKT fix.
+    rpc DownloadEnvelope(GetEnvelopeRequest) returns (.google.api.HttpBody) {
+        option (google.api.http) = {
+            get: "/envelopes/{id}/blob"
+        };
+    }
+}

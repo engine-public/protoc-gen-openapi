@@ -65,6 +65,21 @@ Demonstrates every compiler option that mirrors an Envoy [`GrpcJsonTranscoder`](
 Each example maps one Envoy option to the corresponding compiler option and confirms — against a live Envoy container — that the generated OAS describes what Envoy actually emits.
 Covers `preserve_proto_field_names`, `always_print_primitive_fields`, `always_print_enums_as_ints`, `case_insensitive_enum_parsing`, `auto_mapping`, `convert_grpc_status`, `stream_newline_delimited`, and `stream_sse_style_delimited`, including selected two-option combinations.
 
+### [inlineSchemas](src/inlineSchemas/README.md)
+
+Demonstrates the method-level `inline_request_schema` / `inline_response_schema` annotations, which expand the request or response body schema at the use site instead of emitting a `$ref` into `components/schemas`.
+Transitive: a message reached only through inlined boundaries is also inlined; one that has any non-inlined reference stays in components and is `$ref`'d from the inline expansion.
+
+### [inlineFieldSchema](src/inlineFieldSchema/README.md)
+
+Demonstrates the field-level `inline_schema` annotation, which inlines a single message-typed field's schema at the field site.
+Shares the transitivity rule with [inlineSchemas](src/inlineSchemas/README.md) but operates at the field granularity rather than the request/response boundary.
+
+### [wellKnownTypes](src/wellKnownTypes/README.md)
+
+Demonstrates how the plugin emits inline OpenAPI schemas for structural protobuf well-known types — `Any`, `Struct`, `Value`, `ListValue`, `FieldMask`, and `Empty` — instead of dangling `$ref`s into `components/schemas`.
+Covers both first-party fields that carry these types and the canonical regression case where `google.api.HttpBody` is returned by an RPC and its `extensions` field bottoms out in `google.protobuf.Any`.
+
 ### [responseBodyError](src/responseBodyError/README.md)
 
 Demonstrates the compiler's error behavior when `response_body` or `body` annotations name a field that does not exist on the corresponding message.

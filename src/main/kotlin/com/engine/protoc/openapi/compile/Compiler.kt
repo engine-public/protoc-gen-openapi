@@ -155,7 +155,8 @@ internal class Compiler(
 
         for (file in targetFiles) {
             try {
-                val extension = file.options?.findExtension(Annotations.file)?.value ?: continue
+                val extension = file.options?.findExtension(Annotations.file)?.value
+                    ?.takeIf { it.hasOpenapi() }?.openapi ?: continue
                 extension.mergeInto(doc, ctx)
             } catch (e: Exception) {
                 val msg = "[${file.name}] Error merging OpenAPI extension: ${e.detail()}"
@@ -170,6 +171,8 @@ internal class Compiler(
             collector,
             options.autoTagServices,
             options.autoMapping,
+            options.inlineRequestSchemas,
+            options.inlineResponseSchemas,
             collectComponentParameterNames(targetFiles),
         )
 
@@ -249,6 +252,7 @@ internal class Compiler(
         for (file in targetFiles) {
             val fileAnnotation = try {
                 file.options?.findExtension(Annotations.file)?.value
+                    ?.takeIf { it.hasOpenapi() }?.openapi
             } catch (e: Exception) {
                 val msg = "[${file.name}] Error reading file-level annotation: ${e.detail()}"
                 log.error(msg, e)
@@ -301,6 +305,7 @@ internal class Compiler(
 
                     // Layer 4: explicit service-level annotation (highest priority)
                     service.options?.findExtension(Annotations.service)?.value
+                        ?.takeIf { it.hasOpenapi() }?.openapi
                         ?.mergeInto(doc, ctx)
 
                     // Paths — only this service's methods
@@ -310,6 +315,8 @@ internal class Compiler(
                         collector,
                         options.autoTagServices,
                         options.autoMapping,
+                        options.inlineRequestSchemas,
+                        options.inlineResponseSchemas,
                         componentParameterNames,
                     )
                     pathsBuilder.seedForService(service, file.`package`?.value)
@@ -430,9 +437,19 @@ internal class Compiler(
         }
 
         for (file in files) {
-            runCatching { ingest(file.options?.findExtension(Annotations.file)?.value) }
+            runCatching {
+                ingest(
+                    file.options?.findExtension(Annotations.file)?.value
+                        ?.takeIf { it.hasOpenapi() }?.openapi,
+                )
+            }
             for (service in file.services) {
-                runCatching { ingest(service.options?.findExtension(Annotations.service)?.value) }
+                runCatching {
+                    ingest(
+                        service.options?.findExtension(Annotations.service)?.value
+                            ?.takeIf { it.hasOpenapi() }?.openapi,
+                    )
+                }
             }
         }
         return byKey

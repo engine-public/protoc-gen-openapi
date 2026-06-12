@@ -14,7 +14,7 @@ import "google/protobuf/wrappers.proto";
 
 // File-level OpenAPI annotation exercising every root-level field and all
 // components sub-maps (§1–§12 gap fixes plus full SchemaObject coverage).
-option (.engine.protoc.openapi.file) = {
+option (.engine.protoc.openapi.file) = { openapi: {
     // covers OpenAPI.json_schema_dialect
     json_schema_dialect: "https://spec.openapis.org/oas/3.1/dialect/base"
 
@@ -744,7 +744,7 @@ option (.engine.protoc.openapi.file) = {
             fields: { key: "altText" value: { string_value: "Sporting Goods Logo" } }
         } }
     }
-};
+ }};
 
 // ----------------------------------------------------------------
 // Domain messages with SchemaObject annotations
@@ -759,7 +759,7 @@ option (.engine.protoc.openapi.file) = {
 // max_contains, min_items, max_items, unique_items, unevaluated_items (Schema.boolean),
 // deprecated (SchemaObject on field), examples (SchemaObject repeated Any), title (on field).
 message Product {
-    option (.engine.protoc.openapi.message) = {
+    option (.engine.protoc.openapi.message) = { schema: {
         object: {
             title: "Sporting Goods Product"
             description: "A product available in the sporting goods catalog."
@@ -796,18 +796,18 @@ message Product {
                 value: { string_value: "physical" }
             }
         }
-    };
+     }};
 
     // covers SchemaObject.read_only, SchemaObject.format
-    string id = 1 [(.engine.protoc.openapi.field) = {
+    string id = 1 [(.engine.protoc.openapi.field) = { schema: {
         object: {
             read_only: true
             format: "uuid"
         }
-    }];
+     }}];
 
     // covers SchemaObject.write_only, min_length, max_length, pattern, multi-type (type repeated)
-    string name = 2 [(.engine.protoc.openapi.field) = {
+    string name = 2 [(.engine.protoc.openapi.field) = { schema: {
         object: {
             write_only: true
             min_length: 1
@@ -816,13 +816,13 @@ message Product {
             type: "string"
             type: "null"
         }
-    }];
+     }}];
 
     string description = 3;
 
     // covers SchemaObject.minimum, exclusive_minimum, maximum, exclusive_maximum,
     // multiple_of, default, example (SchemaObject.example deprecated field)
-    double price = 4 [(.engine.protoc.openapi.field) = {
+    double price = 4 [(.engine.protoc.openapi.field) = { schema: {
         object: {
             minimum: 0.01
             exclusive_minimum: 0.0
@@ -832,21 +832,21 @@ message Product {
             default: { [type.googleapis.com/google.protobuf.Value] { number_value: 9.99 } }
             example: { [type.googleapis.com/google.protobuf.Value] { number_value: 29.99 } }
         }
-    }];
+     }}];
 
     // covers SchemaObject.enum (repeated Any), SchemaObject.const (Any)
-    string category = 5 [(.engine.protoc.openapi.field) = {
+    string category = 5 [(.engine.protoc.openapi.field) = { schema: {
         object: {
             enum: { [type.googleapis.com/google.protobuf.Value] { string_value: "footwear" } }
             enum: { [type.googleapis.com/google.protobuf.Value] { string_value: "apparel" } }
             enum: { [type.googleapis.com/google.protobuf.Value] { string_value: "equipment" } }
             const: { [type.googleapis.com/google.protobuf.Value] { string_value: "footwear" } }
         }
-    }];
+     }}];
 
     // covers SchemaObject.items, prefix_items, contains, min_contains, max_contains,
     // min_items, max_items, unique_items, unevaluated_items (Schema.boolean=false)
-    repeated string tags = 6 [(.engine.protoc.openapi.field) = {
+    repeated string tags = 6 [(.engine.protoc.openapi.field) = { schema: {
         object: {
             items: { object: { type: "string" min_length: 1 } }
             prefix_items: { object: { type: "string" pattern: "^[a-z]+$" } }
@@ -859,25 +859,25 @@ message Product {
             unique_items: true
             unevaluated_items: { boolean: false }
         }
-    }];
+     }}];
 
     // covers SchemaObject.deprecated (on field), SchemaObject.examples (repeated Any),
     // SchemaObject.title (on field)
-    int32 stock_quantity = 7 [(.engine.protoc.openapi.field) = {
+    int32 stock_quantity = 7 [(.engine.protoc.openapi.field) = { schema: {
         object: {
             deprecated: true
             title: "Stock Quantity"
             examples: { [type.googleapis.com/google.protobuf.Value] { number_value: 0 } }
             examples: { [type.googleapis.com/google.protobuf.Value] { number_value: 100 } }
         }
-    }];
+     }}];
 }
 
 // ProductList covers: all_of (Schema.boolean=true), any_of, one_of,
 // not (Schema.boolean=false), if_schema, then_schema, else_schema,
 // unevaluated_properties (Schema.boolean=false), additional_properties_schema (Schema.boolean=true).
 message ProductList {
-    option (.engine.protoc.openapi.message) = {
+    option (.engine.protoc.openapi.message) = { schema: {
         object: {
             all_of: { boolean: true }
             all_of: { object: { type: "object" } }
@@ -892,7 +892,7 @@ message ProductList {
             unevaluated_properties: { boolean: false }
             additional_properties_schema: { boolean: true }
         }
-    };
+     }};
 
     repeated Product products = 1;
     int32 total = 2;
@@ -964,7 +964,7 @@ message CreateOrderRequest {
 // uri_ref ($ref at SchemaObject level).
 // Order.status field covers: content_encoding, content_media_type, content_schema.
 message Order {
-    option (.engine.protoc.openapi.message) = {
+    option (.engine.protoc.openapi.message) = { schema: {
         object: {
             id: "https://example.com/schemas/Order"
             schema: "https://spec.openapis.org/oas/3.1/dialect/base"
@@ -984,19 +984,19 @@ message Order {
             }
             uri_ref: "#/components/schemas/Order"
         }
-    };
+     }};
 
     string order_id = 1;
     repeated OrderItem items = 2;
 
     // covers SchemaObject.content_encoding, content_media_type, content_schema
-    string status = 3 [(.engine.protoc.openapi.field) = {
+    string status = 3 [(.engine.protoc.openapi.field) = { schema: {
         object: {
             content_encoding: "utf-8"
             content_media_type: "text/plain"
             content_schema: { object: { type: "string" } }
         }
-    }];
+     }}];
 
     double total = 4;
     string shipping_address = 5;
@@ -1012,7 +1012,7 @@ service StorefrontService {
     // List products in the catalog with optional filtering.
     rpc ListProducts(StockFilter) returns (ProductList) {
         option (google.api.http) = { get: "/products" };
-        option (.engine.protoc.openapi.method) = {
+        option (.engine.protoc.openapi.method) = { operation: {
             tags: ["products", "inventory"]
             summary: "List products"
             description: "Returns a paginated list of products. Supports filtering by category, price range, and stock status."
@@ -1090,7 +1090,7 @@ service StorefrontService {
             }
             security: { names: { key: "bearerAuth" value: {} } }
             extensions: { key: "x-rate-limit" value: { number_value: 100 } }
-        };
+         }};
     }
 
     // Search products.  Exercises query-parameter override precedence (see SearchFilter): both a
@@ -1098,7 +1098,7 @@ service StorefrontService {
     // request's `page_size` and `geo.city` fields are not auto-derived as duplicate parameters.
     rpc SearchProducts(SearchFilter) returns (ProductList) {
         option (google.api.http) = { get: "/search" };
-        option (.engine.protoc.openapi.method) = {
+        option (.engine.protoc.openapi.method) = { operation: {
             tags: ["products"]
             summary: "Search products"
             operationId: "searchProducts"
@@ -1134,13 +1134,13 @@ service StorefrontService {
                     }
                 }
             }
-        };
+        } };
     }
 
     // Retrieve a single product by ID.
     rpc GetProduct(Product) returns (Product) {
         option (google.api.http) = { get: "/products/{id}" };
-        option (.engine.protoc.openapi.method) = {
+        option (.engine.protoc.openapi.method) = { operation: {
             tags: ["products"]
             summary: "Get product"
             description: "Returns a single product by its unique identifier."
@@ -1207,13 +1207,13 @@ service StorefrontService {
             }
             // covers SecurityRequirementValues.values (non-empty scope list)
             security: { names: { key: "oauth2Auth" value: { values: "read:products" } } }
-        };
+         }};
     }
 
     // Create a new product in the catalog.
     rpc CreateProduct(CreateProductRequest) returns (Product) {
         option (google.api.http) = { post: "/products" body: "*" };
-        option (.engine.protoc.openapi.method) = {
+        option (.engine.protoc.openapi.method) = { operation: {
             tags: ["products"]
             summary: "Create product"
             description: "Adds a new product to the catalog. Requires admin privileges."
@@ -1246,14 +1246,14 @@ service StorefrontService {
             }
             security: { names: { key: "bearerAuth" value: {} } }
             security: { names: { key: "apiKeyAuth" value: {} } }
-        };
+         }};
     }
 
     // Update a product (PUT) — covers PathItem.put, Parameter.deprecated,
     // Parameter.allow_empty_value, Parameter.extensions, ResponseObject.extensions.
     rpc UpdateProduct(UpdateProductRequest) returns (Product) {
         option (google.api.http) = { put: "/products/{id}" body: "*" };
-        option (.engine.protoc.openapi.method) = {
+        option (.engine.protoc.openapi.method) = { operation: {
             tags: ["products"]
             summary: "Update product"
             description: "Fully replaces a product by its identifier."
@@ -1311,14 +1311,14 @@ service StorefrontService {
                 codes: { key: "404" value: { reference: { uri_ref: "#/components/responses/NotFound" } } }
                 codes: { key: "401" value: { reference: { uri_ref: "#/components/responses/Unauthorized" } } }
             }
-        };
+         }};
     }
 
     // Patch a product (PATCH) — covers PathItem.patch, Reference.proto_rpc_ref,
     // Reference.summary, Reference.description.
     rpc PatchProduct(UpdateProductRequest) returns (Product) {
         option (google.api.http) = { patch: "/products/{id}" body: "*" };
-        option (.engine.protoc.openapi.method) = {
+        option (.engine.protoc.openapi.method) = { operation: {
             tags: ["products"]
             summary: "Patch product"
             description: "Partially updates a product by its identifier."
@@ -1352,13 +1352,13 @@ service StorefrontService {
                 }
                 codes: { key: "404" value: { reference: { uri_ref: "#/components/responses/NotFound" } } }
             }
-        };
+         }};
     }
 
     // Upload a product image.
     rpc UploadProductImage(UploadRequest) returns (google.protobuf.Empty) {
         option (google.api.http) = { post: "/products/{product_id}/image" body: "*" };
-        option (.engine.protoc.openapi.method) = {
+        option (.engine.protoc.openapi.method) = { operation: {
             tags: ["products"]
             summary: "Upload product image"
             description: "Uploads a binary image for the given product (PNG or JPEG)."
@@ -1433,13 +1433,13 @@ service StorefrontService {
                 }
                 codes: { key: "400" value: { reference: { uri_ref: "#/components/responses/ValidationError" } } }
             }
-        };
+         }};
     }
 
     // Delete a product (deprecated).
     rpc DeleteProduct(Product) returns (google.protobuf.Empty) {
         option (google.api.http) = { delete: "/products/{id}" };
-        option (.engine.protoc.openapi.method) = {
+        option (.engine.protoc.openapi.method) = { operation: {
             tags: ["products"]
             summary: "Delete product"
             description: "Removes a product from the catalog. This action is irreversible."
@@ -1456,13 +1456,13 @@ service StorefrontService {
                 description: "Deprecation notice"
                 url: "https://example.com/docs/deprecations"
             }
-        };
+         }};
     }
 
     // Place a new order.
     rpc PlaceOrder(CreateOrderRequest) returns (Order) {
         option (google.api.http) = { post: "/orders" body: "*" };
-        option (.engine.protoc.openapi.method) = {
+        option (.engine.protoc.openapi.method) = { operation: {
             tags: ["orders"]
             summary: "Place order"
             description: "Creates a new order. Triggers an async callback when order status changes."
@@ -1508,7 +1508,7 @@ service StorefrontService {
             }
             servers: [{ url: "https://orders.example.com/v1" description: "Dedicated order service" }]
             external_docs: { description: "Order flow docs" url: "https://example.com/docs/orders" }
-        };
+         }};
     }
 
     // Update only the shipping address on an existing order.  Exercises the named-field body
@@ -1519,7 +1519,7 @@ service StorefrontService {
             patch: "/orders/{order_id}/shipping"
             body: "shipping_address"
         };
-        option (.engine.protoc.openapi.method) = {
+        option (.engine.protoc.openapi.method) = { operation: {
             tags: ["orders"]
             summary: "Update order shipping address"
             operationId: "updateOrderShipping"
@@ -1542,13 +1542,13 @@ service StorefrontService {
                 }
                 codes: { key: "404" value: { reference: { uri_ref: "#/components/responses/NotFound" } } }
             }
-        };
+         }};
     }
 
     // Get the current status of an order.
     rpc GetOrderStatus(Order) returns (Order) {
         option (google.api.http) = { get: "/orders/{order_id}" };
-        option (.engine.protoc.openapi.method) = {
+        option (.engine.protoc.openapi.method) = { operation: {
             tags: ["orders"]
             summary: "Get order status"
             operationId: "getOrderStatus"
@@ -1581,6 +1581,6 @@ service StorefrontService {
                 }
                 codes: { key: "404" value: { reference: { uri_ref: "#/components/responses/NotFound" } } }
             }
-        };
+         }};
     }
 }

@@ -1,10 +1,12 @@
 package com.engine.protoc.openapi.compile
 
 import com.engine.protoc.openapi.Annotations
+import com.engine.protoc.openapi.Method
 import com.engine.protoc.openapi.ProtocGenOpenAPI
 import com.engine.protoc.openapi.compile.json.JsonContext
 import com.engine.protoc.openapi.compile.json.putExtensionsInto
 import com.engine.protoc.openapi.compile.json.toJson
+import com.engine.protoc.openapi.model.ErrorResponse
 import com.engine.protoc.openapi.model.Operation
 import com.engine.protoc.openapi.model.ParameterOrReference
 import com.engine.protoc.openapi.model.Reference
@@ -31,6 +33,18 @@ private val markdownRenderer: MarkdownRenderer = MarkdownRenderer.builder().buil
 private val log = LoggerFactory.getLogger(PathsBuilder::class.java)
 
 /**
+ * Returns the explicit `inline_request` value when the method-level annotation set it, otherwise
+ * `null` to signal that the global `inlineRequestSchemas` option should apply.
+ */
+private fun Method.resolvedInlineRequest(): Boolean? = takeIf { it.hasInlineRequest() }?.inlineRequest
+
+/**
+ * Returns the explicit `inline_response` value when the method-level annotation set it, otherwise
+ * `null` to signal that the global `inlineResponseSchemas` option should apply.
+ */
+private fun Method.resolvedInlineResponse(): Boolean? = takeIf { it.hasInlineResponse() }?.inlineResponse
+
+/**
  * Builds the `paths` section of the OpenAPI document from gRPC service definitions and their
  * `google.api.http` + `engine.protoc.openapi.method` annotations.
  *
@@ -46,6 +60,8 @@ internal class PathsBuilder(
     private val collector: MessageCollector,
     private val autoTagServices: Boolean = false,
     private val autoMapping: Boolean = false,
+    private val inlineRequestSchemas: Boolean = false,
+    private val inlineResponseSchemas: Boolean = false,
     // Resolved `components/parameters` entries (component key → declared parameter `name`),
     // gathered from file- and service-level OpenAPI annotations.  Lets query-parameter
     // auto-derivation honour manual `(engine.protoc.openapi.parameters)` declarations that point
@@ -132,9 +148,10 @@ internal class PathsBuilder(
         serviceName: String?,
     ) {
         val httpRule = method.options?.findExtension(AnnotationsProto.http)?.value
-        val annotation = method.options?.findExtension(Annotations.method)?.value
-        val inlineRequest = method.options?.proto?.getExtension(Annotations.inlineRequestSchema) == true
-        val inlineResponse = method.options?.proto?.getExtension(Annotations.inlineResponseSchema) == true
+        val methodWrapper = method.options?.findExtension(Annotations.method)?.value
+        val annotation = methodWrapper?.takeIf { it.hasOperation() }?.operation
+        val inlineRequest = methodWrapper?.resolvedInlineRequest() ?: inlineRequestSchemas
+        val inlineResponse = methodWrapper?.resolvedInlineResponse() ?: inlineResponseSchemas
 
         val binding: HttpBinding = if (httpRule != null) {
             httpRule.primaryBinding() ?: return
@@ -175,11 +192,29 @@ internal class PathsBuilder(
         // are independent of the inline flag (the user explicitly requested a $ref to them).
         // Only the inlined RequestBody branch carries a contentMap; the Reference branch points
         // at a `components/requestBodies` entry that doesn't need additional collection here.
-        if (hasExplicitRequestBody && annotation!!.requestBody.hasRequestBody()) {
+        if (hasExplicitRequestBody && annotation.requestBody.hasRequestBody()) {
             annotation.requestBody.requestBody.contentMap.values.forEach { mt ->
                 if (mt.hasSchema()) collector.collectFromSchema(mt.schema)
             }
         }
+
+        // error_responses shortcut: collect each referenced error type.  The Status envelope
+        // itself is always inlined at the use site (see [buildErrorBodySchema]), so it never
+        // needs a components/schemas entry — only the per-error `details.items` types do.
+        methodWrapper?.errorResponsesList?.forEach { er ->
+            errorResponseTypeName(er)?.let { collector.collect(it) }
+        }
+    }
+
+    /**
+     * Returns the fully-qualified proto type name (leading dot, e.g. `.pkg.MyError`) referenced
+     * by an [ErrorResponse]'s `error_type`, or `null` when no type URL is set.
+     */
+    private fun errorResponseTypeName(er: ErrorResponse): String? {
+        if (!er.hasErrorType()) return null
+        val typeUrl = er.errorType.typeUrl
+        if (typeUrl.isEmpty()) return null
+        return ".${typeUrl.substringAfterLast('/')}"
     }
 
     /**
@@ -222,10 +257,10 @@ internal class PathsBuilder(
         )
 
         val keyed = services.mapIndexed { encounterOrdinal, pair ->
-            val opts = pair.second.options?.proto
-            val explicit = opts
-                ?.takeIf { it.hasExtension(Annotations.indexOrder) }
-                ?.getExtension(Annotations.indexOrder)
+            val explicit = pair.second.options
+                ?.findExtension(Annotations.service)?.value
+                ?.takeIf { it.hasIndexOrder() }
+                ?.indexOrder
             Keyed(pair, explicit ?: encounterOrdinal, explicit != null)
         }
 
@@ -272,7 +307,9 @@ internal class PathsBuilder(
             // Resolve the auto-tag name once per service; null when feature is disabled.
             val autoTagName = if (autoTagServices) service.name?.value else null
             // Service-level tags applied to every operation in this service.
-            val serviceTags: List<String> = service.options?.proto?.getExtension(Annotations.tags)
+            val serviceTags: List<String> = service.options
+                ?.findExtension(Annotations.service)?.value
+                ?.tagsList
                 ?: emptyList()
             var contributed = false
 
@@ -338,16 +375,17 @@ internal class PathsBuilder(
         // Tags from the service-level `engine.protoc.openapi.tags` option, applied to all methods.
         serviceTags: List<String> = emptyList(),
     ): Pair<String, ObjectNode> {
+        val methodWrapper = method.options?.findExtension(Annotations.method)?.value
         val defaultInstance = Operation.getDefaultInstance()
-        val annotation: Operation? = method.options
-            ?.findExtension(Annotations.method)?.value
+        val annotation: Operation? = methodWrapper
+            ?.takeIf { it.hasOperation() }?.operation
             ?.takeIf { it != defaultInstance }
 
         val inputTypeName = method.proto.inputType
         val outputTypeName = method.proto.outputType
 
-        val inlineRequest = method.options?.proto?.getExtension(Annotations.inlineRequestSchema) == true
-        val inlineResponse = method.options?.proto?.getExtension(Annotations.inlineResponseSchema) == true
+        val inlineRequest = methodWrapper?.resolvedInlineRequest() ?: inlineRequestSchemas
+        val inlineResponse = methodWrapper?.resolvedInlineResponse() ?: inlineResponseSchemas
 
         // When response_body names a field the HTTP response carries that field's value
         // directly rather than the full output message.  Collection has already happened in
@@ -510,19 +548,48 @@ internal class PathsBuilder(
         }
 
         // ---- Responses --------------------------------------------------
-        if (annotation?.hasResponses() == true) {
-            node.set("responses", annotation.responses.toJson(ctx))
+        val responsesNode: ObjectNode = if (annotation?.hasResponses() == true) {
+            annotation.responses.toJson(ctx)
         } else {
-            node.set(
-                "responses",
-                inferResponses(
-                    outputTypeName,
-                    responseBodyField,
-                    method.proto.serverStreaming,
-                    inlineResponse,
-                ),
+            inferResponses(
+                outputTypeName,
+                responseBodyField,
+                method.proto.serverStreaming,
+                inlineResponse,
             )
         }
+
+        // error_responses shortcut: apply each entry on top of `responsesNode` with
+        // last-wins semantics, warning on collisions (within error_responses, or against
+        // an entry already produced by the inferred / explicit `responses` path).
+        if (methodWrapper?.errorResponsesList?.isNotEmpty() == true) {
+            val operationFqn = "${binding.httpMethod.uppercase()} ${binding.path}"
+            val seen = mutableMapOf<String, ErrorResponse>()
+            for (er in methodWrapper.errorResponsesList) {
+                val status = er.status
+                val incoming = errorResponseTypeName(er) ?: "<unset>"
+                val prevInErrors = seen[status]
+                if (prevInErrors != null) {
+                    val prevName = errorResponseTypeName(prevInErrors) ?: "<unset>"
+                    log.warn(
+                        "$operationFqn: error_responses declares status '{}' twice (previous error_type={}, new error_type={}) — last declaration wins",
+                        status,
+                        prevName,
+                        incoming,
+                    )
+                } else if (responsesNode.has(status)) {
+                    log.warn(
+                        "$operationFqn: status '{}' already declared by `responses`; the `error_responses` entry (error_type={}) overwrites — last declaration wins",
+                        status,
+                        incoming,
+                    )
+                }
+                seen[status] = er
+                responsesNode.set(status, buildErrorResponseEntry(er))
+            }
+        }
+
+        node.set("responses", responsesNode)
 
         // ---- Security / deprecated --------------------------------------
         if (annotation?.securityList?.isNotEmpty() == true) {
@@ -856,6 +923,7 @@ internal class PathsBuilder(
         // description the field annotation contributes is lifted onto the parameter object.
         val baseHadDescription = base.has("description")
         val annotation = fieldWrapper.options?.findExtension(Annotations.field)?.value
+            ?.takeIf { it.hasSchema() }?.schema
         val schema = if (annotation != null && annotation.schemaValueCase == Schema.SchemaValueCase.OBJECT) {
             with(ctx) { base.deepMerge(annotation.`object`.toJson(ctx)) }
         } else {
@@ -992,12 +1060,108 @@ internal class PathsBuilder(
             errorResponse.put("description", "Error")
             val content = ctx.obj()
             val mediaType = ctx.obj()
-            mediaType.set("schema", ctx.obj().also { it.put("\$ref", "#/components/schemas/google.rpc.Status") })
+            mediaType.set("schema", buildGrpcStatusBody())
             content.set("application/json", mediaType)
             errorResponse.set("content", content)
             responses.set("default", errorResponse)
         }
         return responses
+    }
+
+    /**
+     * Builds an inline `google.rpc.Status` schema body.  When [detailsItemsRef] is non-null the
+     * `details` array items are typed by `$ref` to that schema key; otherwise items are loose
+     * `{ type: "object" }`.  The Status envelope is intentionally always inlined — it is an
+     * Envoy implementation detail, not a reusable OAS schema unit.
+     */
+    private fun buildGrpcStatusBody(detailsItemsRef: String? = null): ObjectNode {
+        val schema = ctx.obj()
+        schema.put("type", "object")
+        val props = ctx.obj()
+        props.set(
+            "code",
+            ctx.obj().also {
+                it.put("type", "integer")
+                it.put("format", "int32")
+            },
+        )
+        props.set("message", ctx.obj().also { it.put("type", "string") })
+        val details = ctx.obj()
+        details.put("type", "array")
+        details.set(
+            "items",
+            if (detailsItemsRef != null) {
+                ctx.obj().also { it.put("\$ref", detailsItemsRef) }
+            } else {
+                ctx.obj().also { it.put("type", "object") }
+            },
+        )
+        props.set("details", details)
+        schema.set("properties", props)
+        return schema
+    }
+
+    /**
+     * Builds the Response object for a single [`ErrorResponse`] entry: an inline
+     * `google.rpc.Status` body whose `details.items` $refs the named error type, plus the
+     * `x-grpc-code` extension and a seeded `examples` block when `grpc_code` is present.
+     */
+    private fun buildErrorResponseEntry(er: ErrorResponse): ObjectNode {
+        val response = ctx.obj()
+        response.put("description", resolveErrorDescription(er))
+
+        if (er.hasGrpcCode()) {
+            response.put("x-grpc-code", er.grpcCode.name)
+        }
+
+        val mediaType = ctx.obj()
+        if (er.hasGrpcCode()) {
+            val examples = ctx.obj()
+            val grpcError = ctx.obj()
+            grpcError.put("summary", er.grpcCode.name)
+            val value = ctx.obj()
+            value.put("code", er.grpcCode.number)
+            value.put("message", "")
+            value.set("details", ctx.mapper.createArrayNode())
+            grpcError.set("value", value)
+            examples.set("grpc-error", grpcError)
+            mediaType.set("examples", examples)
+        }
+        mediaType.set("schema", buildErrorBodySchema(er))
+
+        val content = ctx.obj()
+        content.set("application/json", mediaType)
+        response.set("content", content)
+        return response
+    }
+
+    /**
+     * Resolves an [`ErrorResponse`]'s description with the layered fallback documented on the
+     * annotation: explicit `description`, then the error type's leading proto comment, then
+     * the literal "Error".
+     */
+    private fun resolveErrorDescription(er: ErrorResponse): String {
+        if (er.hasDescription() && er.description.isNotEmpty()) return er.description
+        val typeName = errorResponseTypeName(er)
+        if (typeName != null) {
+            val comment = ctx.messageIndex.find(typeName)
+                ?.location?.proto?.leadingComments?.trim()?.ifEmpty { null }
+            if (comment != null) return comment
+        }
+        return "Error"
+    }
+
+    /**
+     * Produces a flat `type: object` schema for an [`ErrorResponse`]: an inline
+     * `google.rpc.Status` body whose `details.items` is `$ref`'d to the error type when one is
+     * set, or left as `{ type: "object" }` otherwise.
+     */
+    private fun buildErrorBodySchema(er: ErrorResponse): ObjectNode {
+        val typeName = errorResponseTypeName(er)
+        val itemsRef = typeName?.let {
+            "#/components/schemas/${ctx.schemaKeyResolver.buildPhaseKeyOf(it)}"
+        }
+        return buildGrpcStatusBody(detailsItemsRef = itemsRef)
     }
 
     /**
@@ -1145,6 +1309,7 @@ internal class PathsBuilder(
         // ---- engine.protoc.openapi.message annotation override ----------
         val annotation = wrapper.options
             ?.findExtension(Annotations.message)?.value
+            ?.takeIf { it.hasSchema() }?.schema
 
         return if (annotation != null && annotation.schemaValueCase ==
             Schema.SchemaValueCase.OBJECT
@@ -1168,6 +1333,7 @@ internal class PathsBuilder(
         // ---- engine.protoc.openapi.field annotation override -----------
         val annotation = fieldWrapper.options
             ?.findExtension(Annotations.field)?.value
+            ?.takeIf { it.hasSchema() }?.schema
 
         return if (annotation != null && annotation.schemaValueCase ==
             Schema.SchemaValueCase.OBJECT
@@ -1260,7 +1426,9 @@ internal class PathsBuilder(
             DescriptorProtos.FieldDescriptorProto.Type.TYPE_ENUM -> {
                 val typeName = field.typeName
                 val enumWrapper = ctx.enumIndex.find(typeName)
-                val annotationInline = enumWrapper?.options?.findExtension(Annotations.inline)?.value
+                val annotationInline = enumWrapper?.options
+                    ?.findExtension(Annotations.enum_)?.value
+                    ?.takeIf { it.hasInline() }?.inline
                 val shouldInline = annotationInline ?: ctx.inlineEnums
                 if (shouldInline) {
                     buildEnumSchema(typeName, enumWrapper)
@@ -1278,7 +1446,7 @@ internal class PathsBuilder(
             DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE -> {
                 val typeName = field.typeName
                 val wkt = ctx.wellKnownTypeSchema(typeName)
-                val fieldInline = field.options.getExtension(Annotations.inlineSchema)
+                val fieldInline = field.options.getExtension(Annotations.field).inline
                 when {
                     wkt != null -> wkt
 
@@ -1352,7 +1520,9 @@ internal class PathsBuilder(
             }
             if (valuesArr.size() > 0) node.set("enum", valuesArr)
 
-            val annotation = enumWrapper.options?.findExtension(Annotations.enum_)?.value
+            val annotation = enumWrapper.options
+                ?.findExtension(Annotations.enum_)?.value
+                ?.takeIf { it.hasSchema() }?.schema
             if (annotation != null && annotation.schemaValueCase == Schema.SchemaValueCase.OBJECT) {
                 with(ctx) { node.deepMerge(annotation.`object`.toJson(ctx)) }
             }
@@ -1460,7 +1630,9 @@ internal class PathsBuilder(
         valueWrapper: EnumValueDescriptorProtoWrapper,
         suppressDefaults: Boolean,
     ): Boolean {
-        val annotation = valueWrapper.options?.findExtension(Annotations.suppress)?.value
+        val annotation = valueWrapper.options
+            ?.findExtension(Annotations.enumValue)?.value
+            ?.takeIf { it.hasSuppress() }?.suppress
         return annotation ?: (suppressDefaults && valueWrapper.proto.number == 0)
     }
 

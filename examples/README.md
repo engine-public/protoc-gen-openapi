@@ -70,6 +70,11 @@ Covers `preserve_proto_field_names`, `always_print_primitive_fields`, `always_pr
 Demonstrates the method-level `inline_request_schema` / `inline_response_schema` annotations, which expand the request or response body schema at the use site instead of emitting a `$ref` into `components/schemas`.
 Transitive: a message reached only through inlined boundaries is also inlined; one that has any non-inlined reference stays in components and is `$ref`'d from the inline expansion.
 
+### [inlineSchemasGlobal](src/inlineSchemasGlobal/README.md)
+
+Demonstrates the `inlineRequestSchemas` and `inlineResponseSchemas` compiler options, the global counterparts of the per-method `inline_request` / `inline_response` annotations.
+Both default to `true`, so every RPC's request and response body schema is inlined at the use site unless the method's annotation explicitly opts out.
+
 ### [inlineFieldSchema](src/inlineFieldSchema/README.md)
 
 Demonstrates the field-level `inline_schema` annotation, which inlines a single message-typed field's schema at the field site.
@@ -79,6 +84,11 @@ Shares the transitivity rule with [inlineSchemas](src/inlineSchemas/README.md) b
 
 Demonstrates the service-level `index_order` annotation, which controls the order in which a service's paths and auto-generated tag appear in the emitted document.
 Un-annotated services fall into their encounter ordinal, annotated services use their explicit value, negative indices are valid, and ties break by source order.
+
+### [errorResponses](src/errorResponses/README.md)
+
+Demonstrates the method-level `error_responses` shortcut: one line per `(HTTP status, error class)` pair expands into a fully-formed response whose schema is `google.rpc.Status` (via `allOf`) typed with the error class's `$ref`.
+Covers single error, multiple errors, optional `grpc_code` (emitted as `x-grpc-code` plus a seeded `examples` block), and the two collision shapes (explicit `responses` vs `error_responses`, and duplicate status within `error_responses`).
 
 ### [wellKnownTypes](src/wellKnownTypes/README.md)
 

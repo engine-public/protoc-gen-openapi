@@ -53,6 +53,10 @@ class AlwaysPrintPrimitiveFieldsTest : EnvoyTestBase(GrpcJsonTranscoder(printOpt
                     .shouldNotBeNull()
 
             val result = ProtocGenOpenAPI.from(request()) {
+
+                inlineRequestSchemas = false
+
+                inlineResponseSchemas = false
                 alwaysPrintPrimitiveFields = true
                 serviceInclude = "HelloService"
                 version = "1.0.0"

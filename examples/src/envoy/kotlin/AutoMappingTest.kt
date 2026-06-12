@@ -39,6 +39,10 @@ class AutoMappingTest : EnvoyTestBase(GrpcJsonTranscoder(autoMapping = true)) {
                     .shouldNotBeNull()
 
             val result = ProtocGenOpenAPI.from(request()) {
+
+                inlineRequestSchemas = false
+
+                inlineResponseSchemas = false
                 autoMapping = true
                 serviceInclude = "HelloService"
                 version = "1.0.0"

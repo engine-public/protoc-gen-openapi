@@ -21,6 +21,8 @@ class MergedTest :
 
         val request = MergedTest::class.java.getResourceAsStream("/code-generator-request.binpb").shouldNotBeNull()
         val response = ProtocGenOpenAPI.from(request) {
+            inlineRequestSchemas = false
+            inlineResponseSchemas = false
             merge = true
             validateOutput = true
             validationErrorsAreFatal = true

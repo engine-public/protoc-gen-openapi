@@ -20,6 +20,8 @@ class ServiceOrderingTest :
                 .shouldNotBeNull()
         val response =
             ProtocGenOpenAPI.from(request) {
+                inlineRequestSchemas = false
+                inlineResponseSchemas = false
                 merge = true
                 autoTagServices = true
                 validateOutput = true

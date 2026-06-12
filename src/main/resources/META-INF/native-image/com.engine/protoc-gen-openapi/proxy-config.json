@@ -141,6 +141,11 @@
     },
     {
         "interfaces": [
+            "org.jspecify.annotations.NullMarked"
+        ]
+    },
+    {
+        "interfaces": [
             "tools.jackson.databind.annotation.JacksonStdImpl"
         ]
     },

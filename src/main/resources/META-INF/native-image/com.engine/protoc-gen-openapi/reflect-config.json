@@ -1,5 +1,11 @@
 [
     {
+        "name": "[B"
+    },
+    {
+        "name": "[C"
+    },
+    {
         "name": "[Ljava.lang.Class;"
     },
     {
@@ -21,10 +27,25 @@
         "name": "[Ljava.lang.invoke.LambdaForm$Name;"
     },
     {
+        "name": "[Ljava.lang.invoke.LambdaFormEditor$Transform;"
+    },
+    {
         "name": "[Ljava.lang.invoke.MethodHandle;"
     },
     {
+        "name": "[Ljava.lang.reflect.Field;"
+    },
+    {
+        "name": "[Ljava.lang.reflect.Type;"
+    },
+    {
+        "name": "[Ljava.net.InetAddress;"
+    },
+    {
         "name": "[Ljava.nio.ByteBuffer;"
+    },
+    {
+        "name": "[Ljava.nio.file.attribute.FileAttribute;"
     },
     {
         "name": "[Ljava.time.format.DateTimeFormatterBuilder$DateTimePrinterParser;"
@@ -73,6 +94,12 @@
     },
     {
         "name": "[Ltools.jackson.databind.introspect.POJOPropertyBuilder;"
+    },
+    {
+        "name": "[Ltools.jackson.databind.node.ContainerNode;"
+    },
+    {
+        "name": "[Ltools.jackson.databind.ser.BeanPropertyWriter;"
     },
     {
         "name": "[Ltools.jackson.databind.ser.Serializers;"
@@ -637,6 +664,9 @@
         "name": "java.io.Closeable"
     },
     {
+        "name": "java.io.File"
+    },
+    {
         "name": "java.io.Serializable",
         "allPermittedSubclasses": true,
         "queryAllDeclaredMethods": true
@@ -862,6 +892,7 @@
     },
     {
         "name": "java.lang.Object",
+        "allDeclaredFields": true,
         "queryAllDeclaredConstructors": true,
         "methods": [
             {
@@ -994,6 +1025,13 @@
                 ]
             },
             {
+                "name": "mix",
+                "parameterTypes": [
+                    "long",
+                    "boolean"
+                ]
+            },
+            {
                 "name": "newArray",
                 "parameterTypes": [
                     "long"
@@ -1046,6 +1084,15 @@
                     "long",
                     "byte[]",
                     "java.lang.String",
+                    "java.lang.String"
+                ]
+            },
+            {
+                "name": "prepend",
+                "parameterTypes": [
+                    "long",
+                    "byte[]",
+                    "boolean",
                     "java.lang.String"
                 ]
             },
@@ -1516,6 +1563,342 @@
         ]
     },
     {
+        "name": "java.lang.invoke.BoundMethodHandle$Species_LLLLLLLL",
+        "fields": [
+            {
+                "name": "argL0"
+            },
+            {
+                "name": "argL1"
+            },
+            {
+                "name": "argL2"
+            },
+            {
+                "name": "argL3"
+            },
+            {
+                "name": "argL4"
+            },
+            {
+                "name": "argL5"
+            },
+            {
+                "name": "argL6"
+            },
+            {
+                "name": "argL7"
+            }
+        ],
+        "methods": [
+            {
+                "name": "make",
+                "parameterTypes": [
+                    "java.lang.invoke.MethodType",
+                    "java.lang.invoke.LambdaForm",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.invoke.BoundMethodHandle$Species_LLLLLLLLL",
+        "fields": [
+            {
+                "name": "argL0"
+            },
+            {
+                "name": "argL1"
+            },
+            {
+                "name": "argL2"
+            },
+            {
+                "name": "argL3"
+            },
+            {
+                "name": "argL4"
+            },
+            {
+                "name": "argL5"
+            },
+            {
+                "name": "argL6"
+            },
+            {
+                "name": "argL7"
+            },
+            {
+                "name": "argL8"
+            }
+        ],
+        "methods": [
+            {
+                "name": "make",
+                "parameterTypes": [
+                    "java.lang.invoke.MethodType",
+                    "java.lang.invoke.LambdaForm",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.invoke.BoundMethodHandle$Species_LLLLLLLLLL",
+        "fields": [
+            {
+                "name": "argL0"
+            },
+            {
+                "name": "argL1"
+            },
+            {
+                "name": "argL2"
+            },
+            {
+                "name": "argL3"
+            },
+            {
+                "name": "argL4"
+            },
+            {
+                "name": "argL5"
+            },
+            {
+                "name": "argL6"
+            },
+            {
+                "name": "argL7"
+            },
+            {
+                "name": "argL8"
+            },
+            {
+                "name": "argL9"
+            }
+        ],
+        "methods": [
+            {
+                "name": "make",
+                "parameterTypes": [
+                    "java.lang.invoke.MethodType",
+                    "java.lang.invoke.LambdaForm",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.invoke.BoundMethodHandle$Species_LLLLLLLLLLL",
+        "fields": [
+            {
+                "name": "argL0"
+            },
+            {
+                "name": "argL1"
+            },
+            {
+                "name": "argL10"
+            },
+            {
+                "name": "argL2"
+            },
+            {
+                "name": "argL3"
+            },
+            {
+                "name": "argL4"
+            },
+            {
+                "name": "argL5"
+            },
+            {
+                "name": "argL6"
+            },
+            {
+                "name": "argL7"
+            },
+            {
+                "name": "argL8"
+            },
+            {
+                "name": "argL9"
+            }
+        ],
+        "methods": [
+            {
+                "name": "make",
+                "parameterTypes": [
+                    "java.lang.invoke.MethodType",
+                    "java.lang.invoke.LambdaForm",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.invoke.BoundMethodHandle$Species_LLLLLLLLLLLL",
+        "fields": [
+            {
+                "name": "argL0"
+            },
+            {
+                "name": "argL1"
+            },
+            {
+                "name": "argL10"
+            },
+            {
+                "name": "argL11"
+            },
+            {
+                "name": "argL2"
+            },
+            {
+                "name": "argL3"
+            },
+            {
+                "name": "argL4"
+            },
+            {
+                "name": "argL5"
+            },
+            {
+                "name": "argL6"
+            },
+            {
+                "name": "argL7"
+            },
+            {
+                "name": "argL8"
+            },
+            {
+                "name": "argL9"
+            }
+        ],
+        "methods": [
+            {
+                "name": "make",
+                "parameterTypes": [
+                    "java.lang.invoke.MethodType",
+                    "java.lang.invoke.LambdaForm",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.invoke.BoundMethodHandle$Species_LLLLLLLLLLLLL",
+        "fields": [
+            {
+                "name": "argL0"
+            },
+            {
+                "name": "argL1"
+            },
+            {
+                "name": "argL10"
+            },
+            {
+                "name": "argL11"
+            },
+            {
+                "name": "argL12"
+            },
+            {
+                "name": "argL2"
+            },
+            {
+                "name": "argL3"
+            },
+            {
+                "name": "argL4"
+            },
+            {
+                "name": "argL5"
+            },
+            {
+                "name": "argL6"
+            },
+            {
+                "name": "argL7"
+            },
+            {
+                "name": "argL8"
+            },
+            {
+                "name": "argL9"
+            }
+        ],
+        "methods": [
+            {
+                "name": "make",
+                "parameterTypes": [
+                    "java.lang.invoke.MethodType",
+                    "java.lang.invoke.LambdaForm",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object"
+                ]
+            }
+        ]
+    },
+    {
         "name": "java.lang.invoke.MethodHandle"
     },
     {
@@ -1689,6 +2072,12 @@
         ]
     },
     {
+        "name": "java.math.BigDecimal"
+    },
+    {
+        "name": "java.math.BigInteger"
+    },
+    {
         "name": "java.net.Inet6Address",
         "fields": [
             {
@@ -1737,6 +2126,12 @@
                 ]
             }
         ]
+    },
+    {
+        "name": "java.net.URI"
+    },
+    {
+        "name": "java.net.URL"
     },
     {
         "name": "java.net.UnixDomainSocketAddress",
@@ -1793,6 +2188,12 @@
         ]
     },
     {
+        "name": "java.nio.charset.Charset"
+    },
+    {
+        "name": "java.nio.file.Path"
+    },
+    {
         "name": "java.nio.file.attribute.PosixFilePermission",
         "methods": [
             {
@@ -1819,6 +2220,9 @@
     },
     {
         "name": "java.security.KeyStoreSpi"
+    },
+    {
+        "name": "java.security.Provider"
     },
     {
         "name": "java.security.SecureRandomParameters"
@@ -1899,6 +2303,12 @@
                 ]
             }
         ]
+    },
+    {
+        "name": "java.util.Arrays$ArrayList",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true
     },
     {
         "name": "java.util.Collection",
@@ -2059,6 +2469,9 @@
     },
     {
         "name": "java.util.Spliterator"
+    },
+    {
+        "name": "java.util.UUID"
     },
     {
         "name": "java.util.concurrent.ArrayBlockingQueue",
@@ -2346,6 +2759,14 @@
         ]
     },
     {
+        "name": "java.util.concurrent.atomic.Striped64$Cell",
+        "fields": [
+            {
+                "name": "value"
+            }
+        ]
+    },
+    {
         "name": "java.util.concurrent.locks.AbstractOwnableSynchronizer",
         "allDeclaredFields": true,
         "queryAllDeclaredConstructors": true,
@@ -2587,6 +3008,9 @@
                 ]
             }
         ]
+    },
+    {
+        "name": "java.util.regex.Pattern"
     },
     {
         "name": "java.util.stream.BaseStream"
@@ -3304,6 +3728,18 @@
         "name": "long"
     },
     {
+        "name": "org.apache.logging.slf4j.SLF4JServiceProvider",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
         "name": "org.apiguardian.api.API"
     },
     {
@@ -3319,7 +3755,30 @@
         ]
     },
     {
+        "name": "org.jspecify.annotations.NullMarked",
+        "queryAllDeclaredMethods": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.reflect.InvocationHandler"
+                ]
+            }
+        ]
+    },
+    {
         "name": "org.robolectric.Robolectric"
+    },
+    {
+        "name": "org.slf4j.event.Level",
+        "methods": [
+            {
+                "name": "values",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
     },
     {
         "name": "short"

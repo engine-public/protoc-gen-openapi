@@ -278,5 +278,16 @@
                 ]
             }
         ]
+    },
+    {
+        "name": "sun.nio.fs.UnixException",
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "int"
+                ]
+            }
+        ]
     }
 ]

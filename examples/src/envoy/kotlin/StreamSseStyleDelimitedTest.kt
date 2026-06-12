@@ -44,6 +44,7 @@ class StreamSseStyleDelimitedTest : EnvoyTestBase(GrpcJsonTranscoder(printOption
 
             val result = ProtocGenOpenAPI.from(request()) {
                 streamSseStyleDelimited = true
+                serviceInclude = "HelloService"
                 version = "1.0.0"
             }.compile()
 
@@ -79,6 +80,7 @@ class StreamSseStyleDelimitedTest : EnvoyTestBase(GrpcJsonTranscoder(printOption
                 val result = ProtocGenOpenAPI.from(request) {
                     streamSseStyleDelimited = true
                     streamNewlineDelimited = true
+                    serviceInclude = "HelloService"
                     version = "1.0.0"
                 }.compile()
                 result.hasError() shouldBe false
@@ -95,6 +97,7 @@ class StreamSseStyleDelimitedTest : EnvoyTestBase(GrpcJsonTranscoder(printOption
                     .shouldNotBeNull()
                 val result = ProtocGenOpenAPI.from(request) {
                     streamSseStyleDelimited = true
+                    serviceInclude = "HelloService"
                     version = "1.0.0"
                 }.compile()
                 result.hasError() shouldBe false

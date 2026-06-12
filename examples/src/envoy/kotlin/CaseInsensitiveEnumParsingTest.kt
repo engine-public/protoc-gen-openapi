@@ -49,6 +49,7 @@ class CaseInsensitiveEnumParsingTest : EnvoyTestBase(GrpcJsonTranscoder(caseInse
 
             val result = ProtocGenOpenAPI.from(request()) {
                 enumValueFormat = ProtocGenOpenAPI.Options.EnumValueFormat.LOWER_CASE
+                serviceInclude = "HelloService"
                 version = "1.0.0"
             }.compile()
 

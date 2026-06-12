@@ -53,6 +53,7 @@ class AlwaysPrintEnumsAsIntsPrimitiveFieldsTest :
             val result = ProtocGenOpenAPI.from(request()) {
                 enumValueFormat = ProtocGenOpenAPI.Options.EnumValueFormat.NUMERIC_VALUE
                 alwaysPrintPrimitiveFields = true
+                serviceInclude = "HelloService"
                 version = "1.0.0"
             }.compile()
 

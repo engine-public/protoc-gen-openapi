@@ -44,6 +44,7 @@ class PreserveProtoFieldNamesTest : EnvoyTestBase(GrpcJsonTranscoder(printOption
 
             val result = ProtocGenOpenAPI.from(request()) {
                 preserveProtoFieldNames = true
+                serviceInclude = "HelloService"
                 version = "1.0.0"
             }.compile()
 

@@ -3,6 +3,7 @@
   "paths" : {
     "/beta/{id}" : {
       "get" : {
+        "operationId" : "BetaService_Get",
         "tags" : [ "BetaService" ],
         "parameters" : [ {
           "name" : "id",
@@ -28,6 +29,7 @@
     },
     "/alpha/{id}" : {
       "get" : {
+        "operationId" : "AlphaService_Get",
         "tags" : [ "AlphaService" ],
         "parameters" : [ {
           "name" : "id",
@@ -53,6 +55,7 @@
     },
     "/epsilon/{id}" : {
       "get" : {
+        "operationId" : "EpsilonService_Get",
         "tags" : [ "EpsilonService" ],
         "parameters" : [ {
           "name" : "id",
@@ -78,6 +81,7 @@
     },
     "/gamma/{id}" : {
       "get" : {
+        "operationId" : "GammaService_Get",
         "tags" : [ "GammaService" ],
         "parameters" : [ {
           "name" : "id",
@@ -103,6 +107,7 @@
     },
     "/delta/{id}" : {
       "get" : {
+        "operationId" : "DeltaService_Get",
         "tags" : [ "DeltaService" ],
         "parameters" : [ {
           "name" : "id",

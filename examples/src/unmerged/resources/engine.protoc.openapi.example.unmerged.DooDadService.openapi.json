@@ -28,6 +28,7 @@
     "/doodad": {
       "get": {
         "description": "List all DooDads in the system",
+        "operationId": "DooDadService_ListDooDads",
         "responses": {
           "200": {
             "content": {
@@ -49,6 +50,7 @@
     "/doodad/{doodad_id}": {
       "get": {
         "description": "Retrieve a single DooDad by its id",
+        "operationId": "DooDadService_GetDooDad",
         "parameters": [
           {
             "in": "path",

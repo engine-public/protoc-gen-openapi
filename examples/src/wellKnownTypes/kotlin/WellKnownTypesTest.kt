@@ -29,6 +29,7 @@ class WellKnownTypesTest :
         val outputName =
             "engine.protoc.openapi.example.wellKnownTypes.EnvelopeService.openapi.json"
         val generatedFile = response.fileList.find { it.name == outputName }.shouldNotBeNull()
+        GoldenFiles.maybeWriteGolden("wellKnownTypes", outputName, generatedFile.content)
         val expected =
             WellKnownTypesTest::class.java
                 .getResourceAsStream("/$outputName")

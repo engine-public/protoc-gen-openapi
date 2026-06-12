@@ -28,6 +28,7 @@
     "/widget": {
       "get": {
         "description": "List all widgets in the system",
+        "operationId": "WidgetService_ListWidgets",
         "responses": {
           "200": {
             "content": {
@@ -52,6 +53,7 @@
         ]
       },
       "post": {
+        "operationId": "SecondaryService_AnotherThingToDoWithWidgets",
         "responses": {
           "200": {
             "content": {
@@ -72,6 +74,7 @@
     "/widget/{widget_id}": {
       "get": {
         "description": "Retrieve a single widget by its id",
+        "operationId": "WidgetService_GetWidget",
         "parameters": [
           {
             "in": "path",

@@ -39,6 +39,7 @@ class NamespacingTest :
             actual: String,
             refName: String,
         ) {
+            GoldenFiles.maybeWriteGolden("namespacing", refName, actual)
             val actualTree = mapper.readTree(actual)
             val expectedTree = mapper.readTree(reference(refName))
             assertSoftly {

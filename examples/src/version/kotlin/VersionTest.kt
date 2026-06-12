@@ -76,6 +76,8 @@ class VersionTest :
             doc["info"]["version"].asString() shouldBe "global-2.0.0"
         }
 
+        withVersion.fileList.forEach { GoldenFiles.maybeWriteGolden("version", it.name, it.content) }
+
         // Full reference-file comparison for regression protection.
         withData<PluginProtos.CodeGeneratorResponse.File>(
             { "with options version: matches reference: " + it.name },

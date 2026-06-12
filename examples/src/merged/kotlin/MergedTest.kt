@@ -29,6 +29,7 @@ class MergedTest :
             autoTagServices = true
         }.compile()
         val generatedFile = response.fileList.find { it.name == "engine.protoc.openapi.example.merged.openapi.json" }.shouldNotBeNull()
+        GoldenFiles.maybeWriteGolden("merged", generatedFile.name, generatedFile.content)
         val mapper = ObjectMapper()
         val json = mapper.readTree(generatedFile.content)
 

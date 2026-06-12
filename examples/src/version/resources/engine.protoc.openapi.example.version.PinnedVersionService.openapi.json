@@ -9,6 +9,7 @@
     "/DoIt": {
       "get": {
         "description": "Gets a widget by its identifier.",
+        "operationId": "PinnedVersionService_DoIt",
         "responses": {
           "200": {
             "description": "OK"

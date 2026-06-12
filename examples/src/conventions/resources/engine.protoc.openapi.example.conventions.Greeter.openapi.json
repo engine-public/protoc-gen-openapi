@@ -9,6 +9,7 @@
     "/hello/{name}": {
       "get": {
         "description": "Sends a greeting to the named person.",
+        "operationId": "Greeter_SayHello",
         "parameters": [
           {
             "in": "path",

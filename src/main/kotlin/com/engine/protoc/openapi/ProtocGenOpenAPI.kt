@@ -406,6 +406,37 @@ public class ProtocGenOpenAPI(
          * Passed via `--openapi_out=serviceExclude=<pattern>:outdir`.
          */
         val serviceExclude: String?,
+
+        /**
+         * Selects the documentation-renderer dialect that CommonMark **reference links** in
+         * `description` fields resolve against.  A reference link is a bracketed token such as
+         * `[Widget]`, `[catalog.v1.Widget]`, or `[WidgetService.GetWidget]` written in a proto
+         * leading comment; when it resolves, it is rewritten to a same-document anchor pointing at
+         * the referenced operation, tag, or schema.
+         *
+         * Anchor fragment formats are renderer-specific and **not** portable, so a target must be
+         * chosen explicitly:
+         *
+         * - [ReferenceLinkTarget.SWAGGER_UI] (default) — operations resolve to `#/{tag}/{operationId}`
+         *   and services (tags) to `#/{tag}`.  Swagger UI has no stable anchor for component
+         *   schemas, so message/enum references cannot be linked (see the unresolved behaviour below).
+         *   Requires the consumer to enable Swagger UI's `deepLinking` option.
+         * - [ReferenceLinkTarget.REDOC] — operations resolve to `#operation/{operationId}`, tags to
+         *   `#tag/{tagName}`, and message/enum references to plugin-generated schema sections (see
+         *   below).  Because Redoc has no stable standalone-schema anchor, enabling this target also
+         *   emits a `<SchemaDefinition>` section per component schema, grouped under an
+         *   `x-tagGroups` "Schemas" group, so every schema reference has a controlled `#tag/{name}`
+         *   anchor to point at.
+         * - [ReferenceLinkTarget.NONE] — reference-link resolution is disabled.  `description`
+         *   fields still emit clean CommonMark, but bracketed tokens are left untouched.
+         *
+         * Unresolved or non-portable references never fail the build: the brackets are stripped and
+         * the label is rendered as an inline code span (e.g. `[Property]` → `` `Property` ``) with a
+         * warning.  (In a derived `summary`, which is plain text, the label is emitted bare.)
+         *
+         * Passed via `--openapi_out=referenceLinkTarget=redoc:outdir` (case-insensitive).
+         */
+        val referenceLinkTarget: ReferenceLinkTarget,
     ) {
         /**
          * The serialization format for generated OpenAPI documents.
@@ -468,6 +499,23 @@ public class ProtocGenOpenAPI(
              * See: [GrpcJsonTranscoder.case_insensitive_enum_parsing](https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/filters/http/grpc_json_transcoder/v3/transcoder.proto#extensions-filters-http-grpc-json-transcoder-v3-grpcjsontranscoder)
              */
             LOWER_CASE,
+        }
+
+        /**
+         * Selects the documentation-renderer dialect that CommonMark reference links in
+         * `description` fields resolve against.  See [Options.referenceLinkTarget] for the
+         * per-target anchor formats and behaviour.  All values are matched case-insensitively in
+         * `--openapi_out` parameters.
+         */
+        public enum class ReferenceLinkTarget {
+            /** Reference-link resolution is disabled; bracketed tokens are left untouched. */
+            NONE,
+
+            /** Resolve operation and tag references to Swagger UI anchors; schemas are not linked. */
+            SWAGGER_UI,
+
+            /** Resolve operation, tag, and schema references to Redoc anchors. */
+            REDOC,
         }
 
         /**
@@ -677,6 +725,12 @@ public class ProtocGenOpenAPI(
             public var serviceExclude: String? =
                 parameters.get<String>("serviceExclude")
 
+            /**
+             * @see [Options.referenceLinkTarget]
+             */
+            public var referenceLinkTarget: ReferenceLinkTarget =
+                parameters.get<ReferenceLinkTarget>("referenceLinkTarget") ?: ReferenceLinkTarget.SWAGGER_UI
+
             public companion object {
                 private const val SERVICE_INCLUDE_DEFAULT =
                     """^[a-zA-Z][a-zA-Z0-9_]*(\.[a-zA-Z][a-zA-Z0-9_]*)*$"""
@@ -712,6 +766,7 @@ public class ProtocGenOpenAPI(
                     logFile = logFile,
                     serviceInclude = serviceInclude,
                     serviceExclude = serviceExclude,
+                    referenceLinkTarget = referenceLinkTarget,
                 )
         }
     }

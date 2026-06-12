@@ -15,7 +15,6 @@ import com.networknt.schema.SchemaLocation
 import com.networknt.schema.SchemaRegistry
 import com.networknt.schema.SpecificationVersion
 import org.slf4j.LoggerFactory
-import tools.jackson.databind.JsonNode
 import tools.jackson.databind.ObjectMapper
 import tools.jackson.databind.SerializationFeature
 import tools.jackson.databind.json.JsonMapper
@@ -173,6 +172,7 @@ internal class Compiler(
             options.autoMapping,
             options.inlineRequestSchemas,
             options.inlineResponseSchemas,
+            referenceLinkResolverFor(targetFiles, ctx),
             collectComponentParameterNames(targetFiles),
         )
 
@@ -217,6 +217,7 @@ internal class Compiler(
         }
 
         ctx.schemaKeyResolver.rewriteRefs(doc)
+        emitRedocSchemaSections(doc, ctx)
 
         if (!response.hasErrors) {
             try {
@@ -317,6 +318,7 @@ internal class Compiler(
                         options.autoMapping,
                         options.inlineRequestSchemas,
                         options.inlineResponseSchemas,
+                        referenceLinkResolverFor(listOf(file), ctx),
                         componentParameterNames,
                     )
                     pathsBuilder.seedForService(service, file.`package`?.value)
@@ -333,6 +335,7 @@ internal class Compiler(
                     mergeSchemas(doc, SchemaBuilder(ctx, pathsBuilder).build(collector), ctx)
 
                     ctx.schemaKeyResolver.rewriteRefs(doc)
+                    emitRedocSchemaSections(doc, ctx)
 
                     val pkg = file.`package`?.value.orEmpty()
                     val svcName = service.name?.value.orEmpty()
@@ -364,6 +367,80 @@ internal class Compiler(
     // -------------------------------------------------------------------------
     // Shared helpers
     // -------------------------------------------------------------------------
+
+    /**
+     * Builds the reference-link resolver for a document spanning [files], or `null` when
+     * `referenceLinkTarget = NONE`.  The resolver indexes those files' schemas, services, and
+     * operations so CommonMark reference links in `description` fields rewrite to anchors.
+     */
+    private fun referenceLinkResolverFor(
+        files: List<FileDescriptorProtoWrapper>,
+        ctx: JsonContext,
+    ): ReferenceLinkResolver? =
+        if (options.referenceLinkTarget == ProtocGenOpenAPI.Options.ReferenceLinkTarget.NONE) {
+            null
+        } else {
+            ReferenceLinkResolver(
+                files,
+                options.referenceLinkTarget,
+                options.autoTagServices,
+                options.autoMapping,
+                ctx.schemaKeyResolver,
+            )
+        }
+
+    /**
+     * Under `referenceLinkTarget = REDOC`, gives every `components/schemas` entry an addressable
+     * section so message/enum reference links can point at it.  Redoc has no stable anchor for a
+     * standalone component schema, so for each schema we emit a top-level tag named after the
+     * schema key whose description is a Redoc `<SchemaDefinition>` directive; Redoc renders that
+     * tag as the schema's section, reachable at `#tag/{key}` — exactly the anchor
+     * [ReferenceLinkResolver] emits.
+     *
+     * When `autoTagServices` is enabled (so every operation already carries a service tag) we also
+     * emit an `x-tagGroups` navigation split — operation/service tags under "API", schema sections
+     * under "Schemas" — unless the document already declares `x-tagGroups`.  We never emit
+     * `x-tagGroups` otherwise, because doing so would hide untagged operations from Redoc's menu.
+     */
+    private fun emitRedocSchemaSections(
+        doc: ObjectNode,
+        ctx: JsonContext,
+    ) {
+        if (options.referenceLinkTarget != ProtocGenOpenAPI.Options.ReferenceLinkTarget.REDOC) return
+        val schemas = (doc.get("components") as? ObjectNode)?.get("schemas") as? ObjectNode ?: return
+        if (schemas.size() == 0) return
+
+        val tags = doc.get("tags") as? ArrayNode
+            ?: ctx.mapper.createArrayNode().also { doc.set("tags", it) }
+        val existingTagNames = tags.mapNotNull { (it as? ObjectNode)?.get("name")?.asString() }
+
+        val schemaKeys = schemas.properties().map { it.key }
+        for (key in schemaKeys) {
+            val tag = ctx.obj()
+            tag.put("name", key)
+            tag.put("description", "<SchemaDefinition schemaRef=\"#/components/schemas/$key\" />")
+            tags.add(tag)
+        }
+
+        if (options.autoTagServices && !doc.has("x-tagGroups")) {
+            val groups = ctx.mapper.createArrayNode()
+            if (existingTagNames.isNotEmpty()) {
+                groups.add(
+                    ctx.obj().also { g ->
+                        g.put("name", "API")
+                        g.set("tags", ctx.mapper.createArrayNode().also { a -> existingTagNames.forEach(a::add) })
+                    },
+                )
+            }
+            groups.add(
+                ctx.obj().also { g ->
+                    g.put("name", "Schemas")
+                    g.set("tags", ctx.mapper.createArrayNode().also { a -> schemaKeys.forEach(a::add) })
+                },
+            )
+            doc.set("x-tagGroups", groups)
+        }
+    }
 
     private data class Setup(
         val mapper: ObjectMapper,

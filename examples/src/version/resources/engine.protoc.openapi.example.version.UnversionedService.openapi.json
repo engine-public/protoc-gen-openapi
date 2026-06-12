@@ -9,6 +9,7 @@
     "/DoItAgain": {
       "get": {
         "description": "Gets a gadget by its identifier.",
+        "operationId": "UnversionedService_DoItAgain",
         "responses": {
           "200": {
             "description": "OK"

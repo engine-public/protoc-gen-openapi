@@ -27,6 +27,7 @@ class InlineSchemasGlobalTest :
         val outputName =
             "engine.protoc.openapi.example.inlineSchemasGlobal.InventoryService.openapi.json"
         val generatedFile = response.fileList.find { it.name == outputName }.shouldNotBeNull()
+        GoldenFiles.maybeWriteGolden("inlineSchemasGlobal", outputName, generatedFile.content)
         val expected =
             InlineSchemasGlobalTest::class.java
                 .getResourceAsStream("/$outputName")

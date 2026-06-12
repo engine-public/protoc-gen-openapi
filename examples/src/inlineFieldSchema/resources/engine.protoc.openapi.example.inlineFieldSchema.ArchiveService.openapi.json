@@ -5,6 +5,7 @@
       "get" : {
         "summary" : "Archive is in components.",
         "description" : "Archive is in components.  Its `manifest` field is `inline`d, so the inline\n expansion appears inside the Archive component schema (and inside every $ref chain\n that reaches Archive).  Manifest itself is also in components via GetManifest below;\n the inline expansion's nested `entry` field $refs Entry.",
+        "operationId" : "ArchiveService_GetArchive",
         "parameters" : [ {
           "name" : "id",
           "in" : "path",
@@ -31,6 +32,7 @@
       "get" : {
         "summary" : "Non-inline path that pulls Manifest (and transitively Entry) into components.",
         "description" : "Non-inline path that pulls Manifest (and transitively Entry) into components.",
+        "operationId" : "ArchiveService_GetManifest",
         "parameters" : [ {
           "name" : "id",
           "in" : "path",
@@ -57,6 +59,7 @@
       "get" : {
         "summary" : "Preview is in components.",
         "description" : "Preview is in components.  Its `snapshot` field is `inline`d, and Snapshot is\n reached only through this field — so Snapshot and Tag are absent from components and\n expand inline inside the Preview component schema.",
+        "operationId" : "ArchiveService_GetPreview",
         "parameters" : [ {
           "name" : "id",
           "in" : "path",
@@ -109,6 +112,18 @@
           }
         }
       },
+      "Entry" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
       "Header" : {
         "type" : "object",
         "properties" : {
@@ -125,18 +140,6 @@
           },
           "entry" : {
             "$ref" : "#/components/schemas/Entry"
-          }
-        }
-      },
-      "Entry" : {
-        "type" : "object",
-        "properties" : {
-          "name" : {
-            "type" : "string"
-          },
-          "size" : {
-            "type" : "integer",
-            "format" : "int32"
           }
         }
       },

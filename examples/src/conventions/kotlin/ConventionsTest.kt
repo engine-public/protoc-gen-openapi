@@ -35,6 +35,8 @@ class ConventionsTest :
             response.fileList
                 .find { it.name == "engine.protoc.openapi.example.conventions.Greeter.openapi.json" }
                 .shouldNotBeNull()
+        GoldenFiles.maybeWriteGolden("conventions", generatedFile.name, generatedFile.content)
+        GoldenFiles.maybeWriteGolden("conventions", generatedFile.name, generatedFile.content)
         val json = mapper.readTree(generatedFile.content)
         val expected =
             ConventionsTest::class.java

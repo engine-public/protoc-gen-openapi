@@ -29,6 +29,7 @@ class InlineSchemasTest :
         val outputName =
             "engine.protoc.openapi.example.inlineSchemas.EnvelopeService.openapi.json"
         val generatedFile = response.fileList.find { it.name == outputName }.shouldNotBeNull()
+        GoldenFiles.maybeWriteGolden("inlineSchemas", outputName, generatedFile.content)
         val expected =
             InlineSchemasTest::class.java
                 .getResourceAsStream("/$outputName")

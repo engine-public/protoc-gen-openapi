@@ -70,6 +70,7 @@ class AlwaysPrintEnumsAsIntsTest : EnvoyTestBase(GrpcJsonTranscoder(printOptions
                 { "matches reference: " + it.name },
                 result.fileList,
             ) { file ->
+                GoldenFiles.maybeWriteGolden("envoy", "${file.name}.AlwaysPrintEnumsAsIntsTest.json", file.content)
                 val expected = jsonMapper.readTree(
                     AlwaysPrintEnumsAsIntsTest::class.java
                         .getResourceAsStream("/${file.name}.AlwaysPrintEnumsAsIntsTest.json")

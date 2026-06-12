@@ -179,14 +179,16 @@ internal class Compiler(
             }
         }
 
-        for (file in targetFiles) {
-            try {
-                mergePaths(doc, pathsBuilder.build(listOf(file), ::isServiceIncluded), ctx)
-            } catch (e: Exception) {
-                val msg = "[${file.name}] Error building paths: ${e.detail()}"
-                log.error(msg, e)
-                response.addError(msg)
-            }
+        // Build all targetFiles in a single call so that services with
+        // `(engine.protoc.openapi.index_order)` can be sorted across file boundaries — the
+        // per-file fallback ordinal in PathsBuilder.orderByIndex is computed against this
+        // flattened list.
+        try {
+            mergePaths(doc, pathsBuilder.build(targetFiles, ::isServiceIncluded), ctx)
+        } catch (e: Exception) {
+            val msg = "Error building paths: ${e.detail()}"
+            log.error(msg, e)
+            response.addError(msg)
         }
 
         applyServiceTags(doc, pathsBuilder, ctx)

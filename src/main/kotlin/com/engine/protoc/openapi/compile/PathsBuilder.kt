@@ -21,11 +21,13 @@ import com.google.protobuf.DescriptorProtos
 import org.commonmark.node.*
 import org.commonmark.parser.Parser
 import org.commonmark.renderer.markdown.MarkdownRenderer
+import org.slf4j.LoggerFactory
 import tools.jackson.databind.node.ArrayNode
 import tools.jackson.databind.node.ObjectNode
 
 private val markdownParser: Parser = Parser.builder().build()
 private val markdownRenderer: MarkdownRenderer = MarkdownRenderer.builder().build()
+private val log = LoggerFactory.getLogger(PathsBuilder::class.java)
 
 /**
  * Builds the `paths` section of the OpenAPI document from gRPC service definitions and their
@@ -192,6 +194,60 @@ internal class PathsBuilder(
         return arr
     }
 
+    /**
+     * Returns [services] reordered by `(engine.protoc.openapi.index_order)` on the service,
+     * falling back to encounter ordinal for any service without the annotation.  Stable: ties
+     * (including the implicit `index = encounter ordinal` baseline for un-annotated services)
+     * preserve source order.
+     *
+     * Logs a WARN for every sort-key collision (two explicit annotations landing on the same
+     * value, or an explicit value colliding with an un-annotated service's encounter ordinal)
+     * naming the conflicting services and the index they share.  The stable-sort fallback then
+     * resolves the order automatically.
+     */
+    private fun orderByIndex(
+        services: List<Pair<String?, ServiceDescriptorProtoWrapper>>,
+    ): List<Pair<String?, ServiceDescriptorProtoWrapper>> {
+        data class Keyed(
+            val pair: Pair<String?, ServiceDescriptorProtoWrapper>,
+            val sortKey: Int,
+            val explicit: Boolean,
+        )
+
+        val keyed = services.mapIndexed { encounterOrdinal, pair ->
+            val opts = pair.second.options?.proto
+            val explicit = opts
+                ?.takeIf { it.hasExtension(Annotations.indexOrder) }
+                ?.getExtension(Annotations.indexOrder)
+            Keyed(pair, explicit ?: encounterOrdinal, explicit != null)
+        }
+
+        keyed.groupBy { it.sortKey }
+            .filterValues { it.size > 1 }
+            .forEach { (index, group) ->
+                val parties = group.joinToString(", ") {
+                    val tag = if (it.explicit) "explicit" else "implicit"
+                    "${fqn(it.pair.first, it.pair.second)} ($tag)"
+                }
+                log.warn(
+                    "index_order conflict at {}: {} — falling back to source order",
+                    index,
+                    parties,
+                )
+            }
+
+        return keyed.sortedBy { it.sortKey }.map { it.pair }
+    }
+
+    private fun fqn(
+        filePackage: String?,
+        service: ServiceDescriptorProtoWrapper,
+    ): String {
+        val pkg = filePackage.orEmpty()
+        val name = service.name?.value ?: "<unknown>"
+        return if (pkg.isEmpty()) name else "$pkg.$name"
+    }
+
     private fun buildForServicePairs(
         services: List<Pair<String?, ServiceDescriptorProtoWrapper>>,
     ): ObjectNode {
@@ -199,7 +255,13 @@ internal class PathsBuilder(
         // Tracks (path, httpMethod) → "Service/Method" for conflict reporting.
         val occupiedSlots = mutableMapOf<Pair<String, String>, String>()
 
-        for ((filePackage, service) in services) {
+        // Per `(engine.protoc.openapi.index_order)` on the service, reorder before emission.
+        // Sort key: explicit annotation value when present, otherwise the encounter ordinal
+        // (the first service is 0, the second 1, ...).  Kotlin's `sortedBy` is stable so
+        // services that tie on sort key keep their original source order.
+        val ordered = orderByIndex(services)
+
+        for ((filePackage, service) in ordered) {
             // Resolve the auto-tag name once per service; null when feature is disabled.
             val autoTagName = if (autoTagServices) service.name?.value else null
             // Service-level tags applied to every operation in this service.

@@ -40,34 +40,11 @@ internal class SchemaBuilder(
             val schemaKey = ctx.schemaKeyResolver.keyOf(typeName)
             sorted[schemaKey] = pathsBuilder.buildEnumSchema(typeName, wrapper, includeTitle = true)
         }
-        if (ctx.convertGrpcStatus) {
-            sorted["google.rpc.Status"] = buildGrpcStatusSchema()
-        }
 
         val schemas = ctx.obj()
         for ((key, value) in sorted) {
             schemas.set(key, value)
         }
         return schemas
-    }
-
-    private fun buildGrpcStatusSchema(): ObjectNode {
-        val schema = ctx.obj()
-        schema.put("type", "object")
-        val props = ctx.obj()
-        props.set(
-            "code",
-            ctx.obj().also {
-                it.put("type", "integer")
-                it.put("format", "int32")
-            },
-        )
-        props.set("message", ctx.obj().also { it.put("type", "string") })
-        val details = ctx.obj()
-        details.put("type", "array")
-        details.set("items", ctx.obj().also { it.put("type", "object") })
-        props.set("details", details)
-        schema.set("properties", props)
-        return schema
     }
 }

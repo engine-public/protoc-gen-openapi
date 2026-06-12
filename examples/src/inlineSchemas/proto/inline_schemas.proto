@@ -9,9 +9,11 @@ import "google/api/annotations.proto";
 import "engine/protoc/openapi/annotations.proto";
 
 option (.engine.protoc.openapi.file) = {
-    info: {
-        title: "Inline Schemas Example API"
-        version: "1.0.0"
+    openapi: {
+        info: {
+            title: "Inline Schemas Example API"
+            version: "1.0.0"
+        }
     }
 };
 
@@ -44,7 +46,7 @@ message NoteAttachment {
     bytes content = 2;
 }
 
-// Request bag whose body is a sub-message.  When inline_request_schema=true on the method, the
+// Request bag whose body is a sub-message.  When inline_request=true on the method, the
 // sub-message is inlined at the requestBody site.
 message UpdateEnvelopeRequest {
     string envelope_id = 1;
@@ -74,7 +76,7 @@ service EnvelopeService {
         option (google.api.http) = {
             get: "/envelopes/{id}/peek"
         };
-        option (engine.protoc.openapi.inline_response_schema) = true;
+        option (engine.protoc.openapi.method) = { inline_response: true };
     }
 
     // Inline response of a type that is reached *only* through this inline path.  PrivateNote
@@ -84,7 +86,7 @@ service EnvelopeService {
         option (google.api.http) = {
             get: "/notes/{id}"
         };
-        option (engine.protoc.openapi.inline_response_schema) = true;
+        option (engine.protoc.openapi.method) = { inline_response: true };
     }
 
     // Inline request: the body's referenced message (Envelope, via body: "envelope") is
@@ -95,6 +97,6 @@ service EnvelopeService {
             post: "/envelopes/{envelope_id}"
             body: "envelope"
         };
-        option (engine.protoc.openapi.inline_request_schema) = true;
+        option (engine.protoc.openapi.method) = { inline_request: true };
     }
 }

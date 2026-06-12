@@ -1,0 +1,89 @@
+syntax = "proto3";
+
+package engine.protoc.openapi.example.inlineSchemasGlobal;
+
+option java_package = "com.engine.protoc.openapi.example.inlineSchemasGlobal";
+option java_multiple_files = true;
+
+import "google/api/annotations.proto";
+import "engine/protoc/openapi/annotations.proto";
+
+option (.engine.protoc.openapi.file) = {
+    openapi: {
+        info: {
+            title: "Inline Schemas (Global) Example API"
+            version: "1.0.0"
+        }
+    }
+};
+
+// Reached only through inlined RPC sites — gets fully expanded inline at every use.
+message Widget {
+    string id = 1;
+    string name = 2;
+}
+
+// Reached through at least one non-inlined RPC (GetGadget with inline_response=false),
+// so it lands in components/schemas and inlined sites $ref into it.
+message Gadget {
+    string id = 1;
+    string label = 2;
+}
+
+message UpdateWidgetRequest {
+    string envelope_id = 1;
+    Widget widget = 2;
+}
+
+message UpdateGadgetRequest {
+    string envelope_id = 1;
+    Gadget gadget = 2;
+}
+
+message GetWidgetRequest {
+    string id = 1;
+}
+
+message GetGadgetRequest {
+    string id = 1;
+}
+
+service InventoryService {
+    // No method-level annotation: inherits the global inlineResponseSchemas=true default, so the
+    // Widget response schema is inlined directly at the use site.  Widget is reached only via
+    // inlined paths in this service, so it never lands in components/schemas.
+    rpc GetWidget(GetWidgetRequest) returns (Widget) {
+        option (google.api.http) = {
+            get: "/widgets/{id}"
+        };
+    }
+
+    // Per-method override: inline_response=false forces a $ref to components/schemas even though
+    // the global default is true.  Because of this non-inlined path, Gadget appears in components
+    // and the other (inlined) Gadget call sites $ref into it.
+    rpc GetGadget(GetGadgetRequest) returns (Gadget) {
+        option (google.api.http) = {
+            get: "/gadgets/{id}"
+        };
+        option (engine.protoc.openapi.method) = { inline_response: false };
+    }
+
+    // No method-level annotation: inherits the global inlineRequestSchemas=true default, so the
+    // request body schema is inlined.
+    rpc UpdateWidget(UpdateWidgetRequest) returns (Widget) {
+        option (google.api.http) = {
+            post: "/widgets/{envelope_id}"
+            body: "widget"
+        };
+    }
+
+    // Per-method override: inline_request=false forces a $ref to components/schemas for the
+    // request body even though the global default is true.
+    rpc UpdateGadget(UpdateGadgetRequest) returns (Gadget) {
+        option (google.api.http) = {
+            post: "/gadgets/{envelope_id}"
+            body: "gadget"
+        };
+        option (engine.protoc.openapi.method) = { inline_request: false };
+    }
+}

@@ -97,6 +97,10 @@ class BodyHandlingTest :
                     .shouldNotBeNull()
 
             val result = ProtocGenOpenAPI.from(request()) {
+
+                inlineRequestSchemas = false
+
+                inlineResponseSchemas = false
                 serviceInclude = "BodyService"
                 version = "1.0.0"
             }.compile()

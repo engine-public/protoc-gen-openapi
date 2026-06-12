@@ -8,12 +8,14 @@ option java_multiple_files = true;
 import "engine/protoc/openapi/annotations.proto";
 
 option (.engine.protoc.openapi.file) = {
-    info: {
-        title: "Example: Un-merged Proto Services"
-        summary: "Shows multiple Protobuf services each receiving their own OpenAPI spec"
-        version: "1.2.3"
-    }
-    servers: {
-        url: "https://unmerged.example.com"
+    openapi: {
+        info: {
+            title: "Example: Un-merged Proto Services"
+            summary: "Shows multiple Protobuf services each receiving their own OpenAPI spec"
+            version: "1.2.3"
+        }
+        servers: {
+            url: "https://unmerged.example.com"
+        }
     }
 };

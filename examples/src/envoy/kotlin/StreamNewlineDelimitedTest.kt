@@ -41,6 +41,10 @@ class StreamNewlineDelimitedTest : EnvoyTestBase(GrpcJsonTranscoder(printOptions
                     .shouldNotBeNull()
 
             val result = ProtocGenOpenAPI.from(request()) {
+
+                inlineRequestSchemas = false
+
+                inlineResponseSchemas = false
                 streamNewlineDelimited = true
                 serviceInclude = "HelloService"
                 version = "1.0.0"

@@ -56,6 +56,8 @@ class AutoMappingConflictTest :
 
         test("annotated route conflicting with auto-mapped route is a compiler error") {
             val result = ProtocGenOpenAPI.from(rawRequest.toByteArray().inputStream()) {
+                inlineRequestSchemas = false
+                inlineResponseSchemas = false
                 autoMapping = true
             }.compile()
 

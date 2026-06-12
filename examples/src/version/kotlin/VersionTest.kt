@@ -36,6 +36,8 @@ class VersionTest :
         // -----------------------------------------------------------------------
         val withVersion =
             ProtocGenOpenAPI.from(request()) {
+                inlineRequestSchemas = false
+                inlineResponseSchemas = false
                 merge = false
                 version = "global-2.0.0"
                 validateOutput = true
@@ -112,6 +114,8 @@ class VersionTest :
         // -----------------------------------------------------------------------
         val withoutVersion =
             ProtocGenOpenAPI.from(request()) {
+                inlineRequestSchemas = false
+                inlineResponseSchemas = false
                 merge = false
                 validateOutput = false
             }.compile()

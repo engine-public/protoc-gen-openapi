@@ -22,6 +22,8 @@ class CompleteTest :
 
         val request = CompleteTest::class.java.getResourceAsStream("/code-generator-request.binpb").shouldNotBeNull()
         val response = ProtocGenOpenAPI.from(request) {
+            inlineRequestSchemas = false
+            inlineResponseSchemas = false
             merge = false
             validateOutput = true
             validationErrorsAreFatal = true

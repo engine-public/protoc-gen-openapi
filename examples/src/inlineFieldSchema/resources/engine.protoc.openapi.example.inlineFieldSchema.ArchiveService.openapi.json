@@ -4,7 +4,7 @@
     "/archives/{id}" : {
       "get" : {
         "summary" : "Archive is in components.",
-        "description" : "Archive is in components.  Its `manifest` field is `inline_schema`d, so the inline\n expansion appears inside the Archive component schema (and inside every $ref chain\n that reaches Archive).  Manifest itself is also in components via GetManifest below;\n the inline expansion's nested `entry` field $refs Entry.",
+        "description" : "Archive is in components.  Its `manifest` field is `inline`d, so the inline\n expansion appears inside the Archive component schema (and inside every $ref chain\n that reaches Archive).  Manifest itself is also in components via GetManifest below;\n the inline expansion's nested `entry` field $refs Entry.",
         "parameters" : [ {
           "name" : "id",
           "in" : "path",
@@ -56,7 +56,7 @@
     "/previews/{id}" : {
       "get" : {
         "summary" : "Preview is in components.",
-        "description" : "Preview is in components.  Its `snapshot` field is `inline_schema`d, and Snapshot is\n reached only through this field — so Snapshot and Tag are absent from components and\n expand inline inside the Preview component schema.",
+        "description" : "Preview is in components.  Its `snapshot` field is `inline`d, and Snapshot is\n reached only through this field — so Snapshot and Tag are absent from components and\n expand inline inside the Preview component schema.",
         "parameters" : [ {
           "name" : "id",
           "in" : "path",

@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package engine.protoc.openapi.model;
+
+option java_package = "com.engine.protoc.openapi.model";
+option java_multiple_files = true;
+
+import "google/protobuf/any.proto";
+import "google/rpc/code.proto";
+
+// Shortcut declaration of an error scenario on a single operation.  Each entry expands at
+// compile time into a `responses[status]` entry whose schema is an inline `google.rpc.Status`
+// body carrying a typed `details.items` $ref.  The Status envelope is always inlined and
+// never lands in `components/schemas`.  Mirrors `Operation.responses` in expressive power
+// for the common error-shape case, without requiring the user to write the full nested tree.
+message ErrorResponse {
+    // HTTP status code emitted on the operation's `responses` map.  Accepts any OAS-legal
+    // key: a numeric string ("400", "409"), an OAS range ("4XX"), or "default".
+    string status = 1;
+
+    // The proto message describing the error payload.  Authored using the bracketed
+    // `google.protobuf.Any` textual syntax — for example:
+    //
+    //     error_type: { [type.googleapis.com/booking.v1.BookError] {} }
+    //
+    // The empty `{}` body is intentional: only the resolved type is consulted, the value
+    // is ignored.  The referenced message is added to `components/schemas` as a normal
+    // component.  The surrounding `google.rpc.Status` envelope is always inlined at the
+    // use site and never registered as a component.
+    .google.protobuf.Any error_type = 2;
+
+    // Optional response description.  When omitted, falls back to the error message's
+    // leading proto comment, then to the string "Error".
+    optional string description = 3;
+
+    // Optional gRPC status code associated with this error scenario.  When present:
+    //   • emitted as the `x-grpc-code` vendor extension (string enum name) on the
+    //     response object;
+    //   • seeds an `examples` entry on the response media type whose `value.code` is the
+    //     gRPC code's integer number.
+    optional .google.rpc.Code grpc_code = 4;
+}

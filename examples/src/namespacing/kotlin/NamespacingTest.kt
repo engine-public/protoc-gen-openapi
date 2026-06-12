@@ -59,6 +59,8 @@ class NamespacingTest :
         // -----------------------------------------------------------------------
         val run1 =
             ProtocGenOpenAPI.from(request()) {
+                inlineRequestSchemas = false
+                inlineResponseSchemas = false
                 merge = true
                 schemaNamespaceVersionExtraction = true
                 setSchemaTitleToProtoSimpleName = true
@@ -81,6 +83,8 @@ class NamespacingTest :
         // -----------------------------------------------------------------------
         val run2 =
             ProtocGenOpenAPI.from(request()) {
+                inlineRequestSchemas = false
+                inlineResponseSchemas = false
                 merge = true
                 schemaNamespaceSeparator = DASH
                 schemaNamespaceVersionExtraction = true
@@ -103,6 +107,8 @@ class NamespacingTest :
         // -----------------------------------------------------------------------
         val run3 =
             ProtocGenOpenAPI.from(request()) {
+                inlineRequestSchemas = false
+                inlineResponseSchemas = false
                 merge = true
                 schemaNamespaceStrategy = FULL_PACKAGE
                 schemaNamespaceCasing = CAPITALIZED
@@ -127,6 +133,8 @@ class NamespacingTest :
         // -----------------------------------------------------------------------
         val run4 =
             ProtocGenOpenAPI.from(request()) {
+                inlineRequestSchemas = false
+                inlineResponseSchemas = false
                 merge = true
                 schemaNamespaceStrategy = FULL_PACKAGE
                 schemaNamespaceSeparator = DOT
@@ -152,6 +160,8 @@ class NamespacingTest :
         // -----------------------------------------------------------------------
         val run5 =
             ProtocGenOpenAPI.from(request()) {
+                inlineRequestSchemas = false
+                inlineResponseSchemas = false
                 merge = true
                 schemaNamespaceStrategy = FULL_PACKAGE
                 schemaNamespaceSeparator = UNDERSCORE
@@ -178,6 +188,8 @@ class NamespacingTest :
         // -----------------------------------------------------------------------
         val run6 =
             ProtocGenOpenAPI.from(request()) {
+                inlineRequestSchemas = false
+                inlineResponseSchemas = false
                 merge = true
                 schemaNamespaceStrategy = SIMPLIFIED_PACKAGE
                 schemaNamespaceSeparator = UNDERSCORE

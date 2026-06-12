@@ -74,6 +74,9 @@
                 "pattern": "\\Qorg/slf4j/impl/StaticLoggerBinder.class\\E"
             },
             {
+                "pattern": "\\Qredoc.openapi.json\\E"
+            },
+            {
                 "pattern": "\\Qschemas/spec.openapis.org/oas/3.1/dialect/base\\E"
             },
             {
@@ -86,7 +89,13 @@
                 "pattern": "\\Qschemas/spec.openapis.org/oas/3.1/schema/2022-10-07\\E"
             },
             {
+                "pattern": "\\Qswagger.openapi.json\\E"
+            },
+            {
                 "pattern": "java.base:\\Qjdk/internal/icu/impl/data/icudt72b/nfc.nrm\\E"
+            },
+            {
+                "pattern": "java.base:\\Qsun/text/resources/SentenceBreakIteratorData\\E"
             }
         ]
     },

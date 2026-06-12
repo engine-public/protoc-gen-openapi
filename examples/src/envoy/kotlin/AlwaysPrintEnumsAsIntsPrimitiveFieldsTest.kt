@@ -70,6 +70,7 @@ class AlwaysPrintEnumsAsIntsPrimitiveFieldsTest :
                 { "matches reference: " + it.name },
                 result.fileList,
             ) { file ->
+                GoldenFiles.maybeWriteGolden("envoy", "${file.name}.AlwaysPrintEnumsAsIntsPrimitiveFieldsTest.json", file.content)
                 val expected = jsonMapper.readTree(
                     AlwaysPrintEnumsAsIntsPrimitiveFieldsTest::class.java
                         .getResourceAsStream("/${file.name}.AlwaysPrintEnumsAsIntsPrimitiveFieldsTest.json")

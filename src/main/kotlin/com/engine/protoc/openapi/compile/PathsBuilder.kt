@@ -22,13 +22,33 @@ import com.google.api.HttpRule
 import com.google.protobuf.DescriptorProtos
 import org.commonmark.node.*
 import org.commonmark.parser.Parser
+import org.commonmark.parser.beta.LinkProcessor
+import org.commonmark.parser.beta.LinkResult
 import org.commonmark.renderer.markdown.MarkdownRenderer
+import org.commonmark.renderer.text.TextContentRenderer
 import org.slf4j.LoggerFactory
 import tools.jackson.databind.node.ArrayNode
 import tools.jackson.databind.node.ObjectNode
+import java.text.BreakIterator
+import java.util.Locale
 
 private val markdownParser: Parser = Parser.builder().build()
 private val markdownRenderer: MarkdownRenderer = MarkdownRenderer.builder().build()
+private val markdownTextRenderer: TextContentRenderer =
+    TextContentRenderer.builder().stripNewlines(true).build()
+
+/**
+ * Parser used only for deriving the plain-text `operation.summary`.  Its [LinkProcessor] flattens
+ * every link, reference, and image to its visible text, so reference-link syntax such as
+ * `[Widget]` or `[Service.Method]` contributes just `Widget` / `Service.Method` to the summary
+ * rather than leaving literal square brackets in a field that cannot render Markdown.
+ */
+private val summaryParser: Parser =
+    Parser.builder()
+        .linkProcessor { linkInfo, scanner, _ ->
+            LinkResult.replaceWith(Text(linkInfo.text()), scanner.position())
+        }
+        .build()
 private val log = LoggerFactory.getLogger(PathsBuilder::class.java)
 
 /**
@@ -61,10 +81,59 @@ internal class PathsBuilder(
     private val autoMapping: Boolean = false,
     private val inlineRequestSchemas: Boolean = false,
     private val inlineResponseSchemas: Boolean = false,
+    // Non-null when CommonMark reference-link resolution is enabled (referenceLinkTarget != NONE).
+    private val referenceLinkResolver: ReferenceLinkResolver? = null,
 ) {
     // Services (name → leading comment) that contributed ≥1 operation, in encounter order.
     // Only populated when autoTagServices is true.
     private val contributingServices = LinkedHashMap<String, String?>()
+
+    // CommonMark parser used for `description` fields.  When a reference-link resolver is
+    // configured, its LinkProcessor is installed so bracketed references rewrite to anchors;
+    // otherwise the plain module-level parser is used.
+    private val descriptionParser: Parser =
+        referenceLinkResolver
+            ?.let { Parser.builder().linkProcessor(it.linkProcessor).build() }
+            ?: markdownParser
+
+    /**
+     * Parses [text] as CommonMark with reference-link resolution bound to [scopeFqn].  The scope
+     * is cleared in a `finally` so a parser exception never leaks a stale scope into the next
+     * comment.  Used by [renderDescription] and the enum-description builder.
+     */
+    private fun parseScoped(
+        text: String,
+        scopeFqn: String,
+    ): Node {
+        referenceLinkResolver?.setCurrentScope(scopeFqn)
+        return try {
+            descriptionParser.parse(text)
+        } finally {
+            referenceLinkResolver?.clearCurrentScope()
+        }
+    }
+
+    /**
+     * Resolves CommonMark reference links in [comment] under [scopeFqn] and returns the result.
+     *
+     * When no resolver is configured (referenceLinkTarget = NONE) the comment is returned
+     * verbatim.  When a resolver is configured but the comment contains no resolvable reference,
+     * the comment is still returned verbatim — only comments whose references actually rewrote to
+     * anchors are re-rendered through the CommonMark renderer, so plain prose keeps its exact
+     * source text.
+     */
+    private fun renderDescription(
+        comment: String,
+        scopeFqn: String,
+    ): String {
+        val resolver = referenceLinkResolver ?: return comment
+        val document = parseScoped(comment, scopeFqn)
+        if (!resolver.consumeTouched()) return comment
+        return markdownRenderer.render(document)
+            .lines()
+            .joinToString("\n") { it.trimEnd() }
+            .trimEnd()
+    }
 
     // Stack of "currently expanding" type names used by [expandInline] for cycle detection.
     // Each frame is the snapshot of expanded types up to the current depth; pushed on entry to
@@ -322,7 +391,15 @@ internal class PathsBuilder(
                     continue
                 }
 
-                val (effectivePath, operationNode) = buildOperation(method, binding, httpRule, autoTagName, serviceTags)
+                val (effectivePath, operationNode) = buildOperation(
+                    method,
+                    binding,
+                    httpRule,
+                    autoTagName,
+                    serviceTags,
+                    serviceName = service.name?.value.orEmpty(),
+                    serviceFqn = fqn(filePackage, service),
+                )
 
                 val slotKey = effectivePath to binding.httpMethod
                 val existingOwner = occupiedSlots[slotKey]
@@ -346,6 +423,7 @@ internal class PathsBuilder(
             if (autoTagServices && contributed) {
                 val name = service.name?.value ?: continue
                 val description = service.location?.proto?.leadingComments?.trim()?.ifEmpty { null }
+                    ?.let { renderDescription(it, fqn(filePackage, service)) }
                 contributingServices[name] = description
             }
         }
@@ -367,6 +445,10 @@ internal class PathsBuilder(
         autoTagName: String? = null,
         // Tags from the service-level `engine.protoc.openapi.tags` option, applied to all methods.
         serviceTags: List<String> = emptyList(),
+        // Enclosing service's simple name and fully-qualified name, used to derive a stable
+        // operationId and to scope reference-link resolution in the operation's description.
+        serviceName: String = "",
+        serviceFqn: String = "",
     ): Pair<String, ObjectNode> {
         val methodWrapper = method.options?.findExtension(Annotations.method)?.value
         val defaultInstance = Operation.getDefaultInstance()
@@ -407,7 +489,8 @@ internal class PathsBuilder(
 
         // ---- Summary (leading comment → annotation override) -------------
         val comment = method.location?.proto?.leadingComments?.trim()?.ifEmpty { null }
-        val summary = annotation?.takeIf { it.hasSummary() }?.summary ?: comment?.firstSentence()
+        val summary = annotation?.takeIf { it.hasSummary() }?.summary
+            ?: comment?.firstSentence()?.ifEmpty { null }
         if (summary != null) node.put("summary", summary)
 
         val description = when {
@@ -415,8 +498,17 @@ internal class PathsBuilder(
             comment != null -> comment
             else -> null
         }
-        if (description != null) node.put("description", description)
-        if (annotation?.hasOperationId() == true) node.put("operationId", annotation.operationId)
+        if (description != null) node.put("description", renderDescription(description, serviceFqn))
+
+        // operationId is emitted whenever it is explicitly annotated, or whenever reference-link
+        // resolution is enabled — anchors target the operationId, so a stable one must exist on
+        // every linkable operation.  The derived value matches [operationIdFor].
+        val operationId = if (annotation?.hasOperationId() == true || referenceLinkResolver != null) {
+            operationIdFor(annotation, serviceName, method.proto.name.orEmpty())
+        } else {
+            null
+        }
+        if (operationId != null) node.put("operationId", operationId)
 
         // Auto-tag (service name) is prepended; service-level tags follow; explicit annotation tags last.
         // Distinct preserves order while dropping any accidental duplicate.
@@ -788,7 +880,10 @@ internal class PathsBuilder(
             field.label == DescriptorProtos.FieldDescriptorProto.Label.LABEL_REPEATED
         val isMessage = field.type == DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE
         val name = prefix + queryParamFieldName(field)
+        // No bare-sibling scope is threaded here (query params flatten nested fields), but
+        // qualified and global type/operation references still resolve.
         val description = fieldWrapper.location?.proto?.leadingComments?.trim()?.ifEmpty { null }
+            ?.let { renderDescription(it, "") }
 
         if (isMessage && isMapField(field)) {
             log.warn(
@@ -1044,7 +1139,7 @@ internal class PathsBuilder(
         if (typeName != null) {
             val comment = ctx.messageIndex.find(typeName)
                 ?.location?.proto?.leadingComments?.trim()?.ifEmpty { null }
-            if (comment != null) return comment
+            if (comment != null) return renderDescription(comment, typeName.removePrefix("."))
         }
         return "Error"
     }
@@ -1166,7 +1261,7 @@ internal class PathsBuilder(
 
         // ---- Leading comment → description ------------------------------
         val comment = wrapper.location?.proto?.leadingComments?.trim()?.ifEmpty { null }
-        if (comment != null) base.put("description", comment)
+        if (comment != null) base.put("description", renderDescription(comment, typeName.removePrefix(".")))
 
         // ---- Properties from fields -------------------------------------
         val required = mutableListOf<String>()
@@ -1181,7 +1276,7 @@ internal class PathsBuilder(
             } else {
                 field.jsonName.ifEmpty { field.name }
             }
-            val fieldSchema = buildFieldSchema(fieldWrapper)
+            val fieldSchema = buildFieldSchema(fieldWrapper, typeName.removePrefix("."))
             propsNode.set(jsonName, fieldSchema)
 
             // proto3 required: proto2 LABEL_REQUIRED, or alwaysPrintPrimitiveFields for
@@ -1218,14 +1313,18 @@ internal class PathsBuilder(
         }
     }
 
-    private fun buildFieldSchema(fieldWrapper: FieldDescriptorProtoWrapper): ObjectNode {
+    private fun buildFieldSchema(
+        fieldWrapper: FieldDescriptorProtoWrapper,
+        // FQN of the containing message, scoping reference-link resolution in the field comment.
+        scopeFqn: String = "",
+    ): ObjectNode {
         val field = fieldWrapper.proto
         val base = fieldTypeSchema(field)
 
         // ---- Leading comment → description -----------------------------
         val comment = fieldWrapper.location?.proto?.leadingComments?.trim()?.ifEmpty { null }
         if (comment != null && !base.has("description")) {
-            base.put("description", comment)
+            base.put("description", renderDescription(comment, scopeFqn))
         }
 
         // ---- engine.protoc.openapi.field annotation override -----------
@@ -1404,6 +1503,7 @@ internal class PathsBuilder(
             buildEnumDescription(
                 enumComment = enumWrapper.location?.proto?.leadingComments?.trim()?.ifEmpty { null },
                 visibleValues = visibleValues,
+                scopeFqn = typeName.removePrefix("."),
             )?.let { node.put("description", it) }
 
             val valuesArr = ctx.mapper.createArrayNode()
@@ -1432,6 +1532,8 @@ internal class PathsBuilder(
     private fun buildEnumDescription(
         enumComment: String?,
         visibleValues: List<EnumValueDescriptorProtoWrapper>,
+        // FQN of the enum, scoping reference-link resolution in the enum and value comments.
+        scopeFqn: String = "",
     ): String? {
         val isNumeric = ctx.enumValueFormat == ProtocGenOpenAPI.Options.EnumValueFormat.NUMERIC_VALUE
         val isLowerCase = ctx.enumValueFormat == ProtocGenOpenAPI.Options.EnumValueFormat.LOWER_CASE
@@ -1459,7 +1561,7 @@ internal class PathsBuilder(
         if (enumComment == null && labeledValues.isEmpty()) return null
 
         val documentNode = if (enumComment != null) {
-            markdownParser.parse(enumComment) as? Document ?: Document()
+            parseScoped(enumComment, scopeFqn) as? Document ?: Document()
         } else {
             Document()
         }
@@ -1467,7 +1569,7 @@ internal class PathsBuilder(
         if (labeledValues.isNotEmpty()) {
             val list = BulletList().apply {
                 for ((name, comment) in labeledValues) {
-                    val commentDoc = comment?.let { markdownParser.parse(it) as? Document }
+                    val commentDoc = comment?.let { parseScoped(it, scopeFqn) as? Document }
                     appendChild(
                         ListItem().apply {
                             val firstBlock = commentDoc?.firstChild
@@ -1568,14 +1670,30 @@ internal fun HttpRule.primaryBinding(): HttpBinding? {
 // String helpers
 // ---------------------------------------------------------------------------
 
+/**
+ * Derives a plain-text summary sentence from a (possibly CommonMark) comment.
+ *
+ * `operation.summary` is a plain-text field — it does not support CommonMark — so any inline
+ * markup in the comment must be stripped rather than passed through. We render the comment's
+ * first paragraph to plain text (turning `[label](url)` into `label`, dropping emphasis and code
+ * spans), then return its first sentence. A comment that opens with a non-paragraph block (list,
+ * heading, fenced code) falls back to the whole rendered document.
+ *
+ * Sentence boundaries come from [BreakIterator], which is locale-aware and far more reliable than
+ * a bare `.`/`!`/`?` scan — it does not split on `e.g.`, decimals (`v1.2`), or URLs.
+ */
 private fun String.firstSentence(): String {
-    for (i in indices) {
-        when (this[i]) {
-            '.', '!', '?' -> {
-                val next = getOrNull(i + 1)
-                if (next != null && next.isWhitespace()) return substring(0, i + 1).trim()
-            }
-        }
-    }
-    return trim()
+    val document = summaryParser.parse(this)
+    val firstBlock = document.firstChild
+    val plain = if (firstBlock is Paragraph) {
+        markdownTextRenderer.render(firstBlock)
+    } else {
+        markdownTextRenderer.render(document)
+    }.trim()
+    if (plain.isEmpty()) return ""
+
+    val iterator = BreakIterator.getSentenceInstance(Locale.ROOT)
+    iterator.setText(plain)
+    val end = iterator.next()
+    return if (end == BreakIterator.DONE) plain else plain.substring(0, end).trim()
 }

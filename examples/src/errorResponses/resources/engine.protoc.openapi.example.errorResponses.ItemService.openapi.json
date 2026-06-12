@@ -3,8 +3,9 @@
   "paths" : {
     "/items/{id}" : {
       "get" : {
-        "summary" : "Single error scenario, with `grpc_code` to drive the example payload.",
+        "summary" : "Single error scenario, with \"grpc_code\" to drive the example payload.",
         "description" : "Single error scenario, with `grpc_code` to drive the example payload.",
+        "operationId" : "ItemService_Get",
         "parameters" : [ {
           "name" : "id",
           "in" : "path",
@@ -63,8 +64,9 @@
         }
       },
       "put" : {
-        "summary" : "Collision between an explicit `responses` entry and an `error_responses` entry at the\n same status.",
+        "summary" : "Collision between an explicit \"responses\" entry and an \"error_responses\" entry at the same status.",
         "description" : "Collision between an explicit `responses` entry and an `error_responses` entry at the\n same status.  The shortcut wins (last-write-wins); the compiler emits a WARN.",
+        "operationId" : "ItemService_Update",
         "parameters" : [ {
           "name" : "id",
           "in" : "path",
@@ -133,8 +135,9 @@
         }
       },
       "delete" : {
-        "summary" : "Duplicate status within `error_responses` itself.",
+        "summary" : "Duplicate status within \"error_responses\" itself.",
         "description" : "Duplicate status within `error_responses` itself.  The compiler emits a WARN and the\n last entry wins.",
+        "operationId" : "ItemService_Delete",
         "parameters" : [ {
           "name" : "id",
           "in" : "path",
@@ -186,6 +189,7 @@
       "get" : {
         "summary" : "Multiple error scenarios across distinct status codes.",
         "description" : "Multiple error scenarios across distinct status codes.",
+        "operationId" : "ItemService_List",
         "parameters" : [ {
           "name" : "id",
           "in" : "query",

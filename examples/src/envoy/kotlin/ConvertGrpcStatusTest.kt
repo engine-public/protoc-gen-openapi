@@ -59,6 +59,7 @@ class ConvertGrpcStatusTest : EnvoyTestBase(GrpcJsonTranscoder(convertGrpcStatus
                 { "matches reference: " + it.name },
                 result.fileList,
             ) { file ->
+                GoldenFiles.maybeWriteGolden("envoy", "${file.name}.ConvertGrpcStatusTest.json", file.content)
                 val expected = jsonMapper.readTree(
                     ConvertGrpcStatusTest::class.java
                         .getResourceAsStream("/${file.name}.ConvertGrpcStatusTest.json")

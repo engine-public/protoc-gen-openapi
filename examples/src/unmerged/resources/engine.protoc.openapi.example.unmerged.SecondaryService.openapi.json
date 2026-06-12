@@ -27,6 +27,7 @@
   "paths": {
     "/doodad": {
       "post": {
+        "operationId": "SecondaryService_AnotherThingToDoWithDooDads",
         "responses": {
           "200": {
             "content": {

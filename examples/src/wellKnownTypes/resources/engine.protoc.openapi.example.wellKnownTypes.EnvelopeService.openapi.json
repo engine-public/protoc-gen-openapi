@@ -5,6 +5,7 @@
       "get" : {
         "summary" : "Fetches an envelope by id; exercises Any-bearing fields inside a component schema.",
         "description" : "Fetches an envelope by id; exercises Any-bearing fields inside a component schema.",
+        "operationId" : "EnvelopeService_GetEnvelope",
         "parameters" : [ {
           "name" : "id",
           "in" : "path",
@@ -31,6 +32,7 @@
       "get" : {
         "summary" : "Returns a binary blob via google.api.HttpBody.",
         "description" : "Returns a binary blob via google.api.HttpBody.  HttpBody itself becomes a\n component schema whose `extensions` field is `repeated google.protobuf.Any` —\n the regression that motivated the inline-WKT fix.",
+        "operationId" : "EnvelopeService_DownloadEnvelope",
         "parameters" : [ {
           "name" : "id",
           "in" : "path",

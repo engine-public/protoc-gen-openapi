@@ -82,6 +82,7 @@
     "/orders/{id}": {
       "get": {
         "description": "Retrieve an order by its identifier.",
+        "operationId": "OrderService_GetOrder",
         "parameters": [
           {
             "in": "path",
@@ -110,6 +111,7 @@
     "/returns": {
       "post": {
         "description": "Create a new return request.",
+        "operationId": "OrderService_CreateReturn",
         "requestBody": {
           "content": {
             "application/json": {

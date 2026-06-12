@@ -95,6 +95,11 @@ Covers single error, multiple errors, optional `grpc_code` (emitted as `x-grpc-c
 Demonstrates how the plugin emits inline OpenAPI schemas for structural protobuf well-known types — `Any`, `Struct`, `Value`, `ListValue`, `FieldMask`, and `Empty` — instead of dangling `$ref`s into `components/schemas`.
 Covers both first-party fields that carry these types and the canonical regression case where `google.api.HttpBody` is returned by an RPC and its `extensions` field bottoms out in `google.protobuf.Any`.
 
+### [referenceLinks](src/referenceLinks/README.md)
+
+Demonstrates the `referenceLinkTarget` option, which rewrites CommonMark reference links (`[Widget]`, `[WidgetService.GetWidget]`) in proto comments into same-document anchors.
+Compiles one proto twice — once for the `SWAGGER_UI` dialect and once for `REDOC` — showing the different anchor formats and the `<SchemaDefinition>` schema sections that Redoc mode emits so schema references have a target.
+
 ### [responseBodyError](src/responseBodyError/README.md)
 
 Demonstrates the compiler's error behavior when `response_body` or `body` annotations name a field that does not exist on the corresponding message.

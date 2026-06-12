@@ -32,6 +32,8 @@ class UnmergedTest :
         }.compile()
         val mapper = ObjectMapper()
 
+        response.fileList.forEach { GoldenFiles.maybeWriteGolden("unmerged", it.name, it.content) }
+
         val oasSchema by lazy {
             SchemaRegistry.withDefaultDialect(SpecificationVersion.DRAFT_2020_12) {
                 it.schemaIdResolvers {

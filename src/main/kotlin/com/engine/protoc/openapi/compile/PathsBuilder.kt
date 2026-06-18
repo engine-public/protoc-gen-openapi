@@ -7,6 +7,7 @@ import com.engine.protoc.openapi.compile.json.putExtensionsInto
 import com.engine.protoc.openapi.compile.json.toJson
 import com.engine.protoc.openapi.model.Operation
 import com.engine.protoc.openapi.model.ParameterOrReference
+import com.engine.protoc.openapi.model.Reference
 import com.engine.protoc.openapi.model.Schema
 import com.engine.protoc.util.enums.EnumDescriptorProtoWrapper
 import com.engine.protoc.util.enums.EnumValueDescriptorProtoWrapper
@@ -45,6 +46,12 @@ internal class PathsBuilder(
     private val collector: MessageCollector,
     private val autoTagServices: Boolean = false,
     private val autoMapping: Boolean = false,
+    // Resolved `components/parameters` entries (component key → declared parameter `name`),
+    // gathered from file- and service-level OpenAPI annotations.  Lets query-parameter
+    // auto-derivation honour manual `(engine.protoc.openapi.parameters)` declarations that point
+    // at a reusable component via `$ref` rather than declaring the parameter inline.  Only locally
+    // resolvable refs appear here; see [resolveRefParameterName].
+    private val componentParameterNamesByKey: Map<String, String> = emptyMap(),
 ) {
     // Services (name → leading comment) that contributed ≥1 operation, in encounter order.
     // Only populated when autoTagServices is true.
@@ -418,18 +425,33 @@ internal class PathsBuilder(
         // Path-bound field names come from the *original* URL template — annotation-driven path
         // param renaming changes the URL placeholder but the underlying field that binds the path
         // is still named after the proto field, not the rewritten placeholder.
+        //
+        // Limitation: `pathParamRegex` only matches single-segment `{word}` placeholders, so a
+        // dotted path binding such as `{address.city}` is not recognised here (nor by
+        // [inferPathParameters]).  When that happens the nested field is not excluded and will be
+        // emitted as a `address.city` query parameter as well.  Bind nested fields with a flat
+        // placeholder name or declare them manually to avoid the duplication.
         val pathVarNames = pathParamRegex.findAll(binding.path).map { it.groupValues[1] }.toSet()
         val methodLabel = "${binding.httpMethod.uppercase()} ${binding.path}"
 
         // Collect every name declared manually via `(engine.protoc.openapi.parameters)`, regardless
-        // of `in`.  A top-level request field is considered "claimed by the operator" when its
-        // proto name or JSON name matches one of these — whether the operator chose to expose it
-        // as a query parameter, a header, a cookie, or anything else.  Auto-derivation honours
-        // that choice by leaving the field alone (and logging a WARN so the overlap is visible).
-        val manualClaimedNames: Set<String> = annotatedParams
-            .filter { it.hasParameter() }
-            .mapNotNull { it.parameter.name.takeIf { n -> n.isNotEmpty() } }
-            .toSet()
+        // of `in`.  A request field is considered "claimed by the operator" when its proto name,
+        // JSON name, or (for nested fields) dotted parameter name matches one of these — whether the
+        // operator chose to expose it as a query parameter, a header, a cookie, or anything else.
+        // Auto-derivation honours that choice by leaving the field alone (and logging a WARN so the
+        // overlap is visible).  Inline parameters contribute their `name` directly; `$ref` entries
+        // contribute the `name` of the component they resolve to (see [resolveRefParameterName]).
+        val manualClaimedNames: Set<String> = buildSet {
+            for (param in annotatedParams) {
+                when {
+                    param.hasParameter() ->
+                        param.parameter.name.takeIf { it.isNotEmpty() }?.let { add(it) }
+
+                    param.hasReference() ->
+                        resolveRefParameterName(param.reference)?.let { add(it) }
+                }
+            }
+        }
 
         val autoQueryParams: List<ObjectNode> = when {
             hasExplicitRequestBodyAnnotation -> emptyList()
@@ -601,6 +623,10 @@ internal class PathsBuilder(
 
     private val pathParamRegex = Regex("""\{(\w+)\}""")
 
+    // Matches a local OpenAPI parameter reference, capturing the component key (the segment after
+    // `#/components/parameters/`).  Used to resolve `$ref` manual parameters back to their name.
+    private val componentParameterRefRegex = Regex("""^#/components/parameters/(.+)$""")
+
     private fun inferPathParameters(
         pathTemplate: String,
         inputTypeName: String,
@@ -685,7 +711,9 @@ internal class PathsBuilder(
             // Skip fields the operator has already declared manually via
             // `(engine.protoc.openapi.parameters)` — manual declarations win regardless of the
             // chosen `in` position (query, header, cookie, …) and we leave the field's nested
-            // children alone too, since manual annotations cover the field semantically.
+            // children alone too, since manual annotations cover the field semantically.  Matching
+            // both proto and JSON names here catches the common top-level case; dotted overrides
+            // (e.g. `address.city`) are honoured at the leaf in [appendQueryParam].
             if (field.name in manualClaimedNames || field.jsonName in manualClaimedNames) {
                 log.warn(
                     "{}: request field '{}' is auto-derivable as a query parameter but is also declared in (engine.protoc.openapi.parameters); using the manual declaration.",
@@ -694,9 +722,27 @@ internal class PathsBuilder(
                 )
                 continue
             }
-            appendQueryParam(fieldWrapper, prefix = "", out = result, methodLabel = methodLabel)
+            appendQueryParam(fieldWrapper, prefix = "", out = result, methodLabel = methodLabel, manualClaimedNames = manualClaimedNames)
         }
         return result
+    }
+
+    /**
+     * Resolves a local `#/components/parameters/<key>` reference to the declared parameter `name`
+     * so that auto-derivation can treat the field it covers as manually claimed.
+     *
+     * Returns `null` for references that cannot be resolved here — remote/relative `$ref`s into
+     * other documents, `proto_rpc_ref`s, components that are themselves a `$ref`, or keys absent
+     * from the gathered file/service-level component map.  When a `$ref` cannot be resolved, an
+     * overlapping request field may still be auto-derived as a *duplicate* query parameter;
+     * declare that field with an inline `(engine.protoc.openapi.parameters)` entry or move it into
+     * the request body to avoid the collision.
+     */
+    private fun resolveRefParameterName(reference: Reference): String? {
+        if (reference.refTypeCase != Reference.RefTypeCase.URI_REF) return null
+        val key = componentParameterRefRegex.matchEntire(reference.uriRef)
+            ?.groupValues?.get(1) ?: return null
+        return componentParameterNamesByKey[key]?.takeIf { it.isNotEmpty() }
     }
 
     /**
@@ -704,24 +750,42 @@ internal class PathsBuilder(
      * a nested message field with the given dotted [prefix].  Repeated message and map fields are
      * skipped with a WARN.
      *
-     * The emitted parameter's `description` comes from the field's leading proto comment so that
-     * the same documentation that drives the response-schema property's `description` also shows
-     * up on the auto-derived query parameter.  For nested-message recursion the description of
-     * the leaf sub-field is used — parent prefixes do not contribute prose, since the dotted
-     * name (`address.city`) already signals the hierarchy.
+     * The emitted parameter's `schema` is the field's proto-derived schema with its
+     * `(engine.protoc.openapi.field)` annotation merged on top — the most specific declaration
+     * wins, mirroring how the same annotation drives the response-schema property — and its
+     * `description` is that annotation's `description` when present, otherwise the field's leading
+     * proto comment.  For nested-message recursion the leaf sub-field's schema and description are
+     * used; parent prefixes do not contribute prose, since the dotted name (`address.city`) already
+     * signals the hierarchy.
+     *
+     * A field whose fully-qualified (possibly dotted) parameter [name] appears in
+     * [manualClaimedNames] is skipped with a WARN: a manual `(engine.protoc.openapi.parameters)`
+     * declaration always replaces the auto-derived parameter rather than duplicating it.  Checking
+     * here — at every depth — is what lets a nested override such as `address.city` win.
      */
     private fun appendQueryParam(
         fieldWrapper: FieldDescriptorProtoWrapper,
         prefix: String,
         out: MutableList<ObjectNode>,
         methodLabel: String,
+        manualClaimedNames: Set<String>,
     ) {
         val field = fieldWrapper.proto
         val isRepeated =
             field.label == DescriptorProtos.FieldDescriptorProto.Label.LABEL_REPEATED
         val isMessage = field.type == DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE
         val name = prefix + queryParamFieldName(field)
-        val description = fieldWrapper.location?.proto?.leadingComments?.trim()?.ifEmpty { null }
+
+        // Manual declaration wins at every depth — skip (and prune any nested children) so the
+        // operator's declaration is the only parameter emitted for this name.
+        if (name in manualClaimedNames) {
+            log.warn(
+                "{}: query parameter '{}' is auto-derivable but is also declared in (engine.protoc.openapi.parameters); using the manual declaration.",
+                methodLabel,
+                name,
+            )
+            return
+        }
 
         if (isMessage && isMapField(field)) {
             log.warn(
@@ -746,7 +810,8 @@ internal class PathsBuilder(
         if (isMessage && !isRepeated) {
             val wktScalar = ctx.wellKnownScalarSchema(field.typeName)
             if (wktScalar != null) {
-                out += buildQueryParam(name, wktScalar, repeated = false, description = description)
+                val (schema, description) = queryParamSchemaAndDescription(fieldWrapper, wktScalar)
+                out += buildQueryParam(name, schema, repeated = false, description = description)
                 return
             }
             // Skip structural well-known types (Struct, Any, Value, ...) — there is no useful
@@ -762,12 +827,48 @@ internal class PathsBuilder(
             }
             val nested = ctx.messageIndex.find(field.typeName) ?: return
             for (sub in nested.fields) {
-                appendQueryParam(sub, "$name.", out, methodLabel)
+                appendQueryParam(sub, "$name.", out, methodLabel, manualClaimedNames)
             }
             return
         }
 
-        out += buildQueryParam(name, fieldTypeSchema(field), repeated = isRepeated, description = description)
+        val (schema, description) = queryParamSchemaAndDescription(fieldWrapper, fieldTypeSchema(field))
+        out += buildQueryParam(name, schema, repeated = isRepeated, description = description)
+    }
+
+    /**
+     * Builds the `(schema, description)` pair for a query parameter derived from [fieldWrapper],
+     * starting from the proto-derived [base] schema.
+     *
+     * The field's `(engine.protoc.openapi.field)` annotation is deep-merged onto [base] so the
+     * parameter carries the same constraints (`pattern`, `minLength`, `format`, `enum`, …) the
+     * field advertises everywhere else — the most specific declaration wins.  A `description`
+     * supplied by that annotation takes precedence over the field's leading proto comment and is
+     * lifted out of the schema so it lands on the parameter object (where parameters surface
+     * documentation) rather than being duplicated inside the schema.
+     */
+    private fun queryParamSchemaAndDescription(
+        fieldWrapper: FieldDescriptorProtoWrapper,
+        base: ObjectNode,
+    ): Pair<ObjectNode, String?> {
+        // Whether the proto-derived schema already carries a description (e.g. an inlined enum
+        // documents itself).  Such a description belongs to the schema and is left in place; only a
+        // description the field annotation contributes is lifted onto the parameter object.
+        val baseHadDescription = base.has("description")
+        val annotation = fieldWrapper.options?.findExtension(Annotations.field)?.value
+        val schema = if (annotation != null && annotation.schemaValueCase == Schema.SchemaValueCase.OBJECT) {
+            with(ctx) { base.deepMerge(annotation.`object`.toJson(ctx)) }
+        } else {
+            base
+        }
+        val annotationDescription = if (!baseHadDescription && schema.has("description")) {
+            schema.remove("description")?.asString()?.ifEmpty { null }
+        } else {
+            null
+        }
+        val description = annotationDescription
+            ?: fieldWrapper.location?.proto?.leadingComments?.trim()?.ifEmpty { null }
+        return schema to description
     }
 
     private fun buildQueryParam(

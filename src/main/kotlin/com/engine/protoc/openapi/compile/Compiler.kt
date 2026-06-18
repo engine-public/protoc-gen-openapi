@@ -1,6 +1,7 @@
 package com.engine.protoc.openapi.compile
 
 import com.engine.protoc.openapi.Annotations
+import com.engine.protoc.openapi.OpenAPI
 import com.engine.protoc.openapi.ProtocGenOpenAPI
 import com.engine.protoc.openapi.compile.json.JsonContext
 import com.engine.protoc.openapi.compile.json.mergeInto
@@ -164,7 +165,13 @@ internal class Compiler(
         }
 
         val collector = MessageCollector(ctx.messageIndex, ctx.enumIndex, options.inlineEnums)
-        val pathsBuilder = PathsBuilder(ctx, collector, options.autoTagServices, options.autoMapping)
+        val pathsBuilder = PathsBuilder(
+            ctx,
+            collector,
+            options.autoTagServices,
+            options.autoMapping,
+            collectComponentParameterNames(targetFiles),
+        )
 
         // Seed pass: populate `collector` from every method's i/o, honouring method-level
         // inline_request_schema / inline_response_schema.  Must run before the emit pass so
@@ -237,6 +244,7 @@ internal class Compiler(
     private fun compileUnmerged(): PluginProtos.CodeGeneratorResponse {
         val response = CodeGeneratorResponseWrapper()
         val (mapper, ctx, targetFiles) = setup()
+        val componentParameterNames = collectComponentParameterNames(targetFiles)
 
         for (file in targetFiles) {
             val fileAnnotation = try {
@@ -297,7 +305,13 @@ internal class Compiler(
 
                     // Paths — only this service's methods
                     val collector = MessageCollector(ctx.messageIndex, ctx.enumIndex, options.inlineEnums)
-                    val pathsBuilder = PathsBuilder(ctx, collector, options.autoTagServices, options.autoMapping)
+                    val pathsBuilder = PathsBuilder(
+                        ctx,
+                        collector,
+                        options.autoTagServices,
+                        options.autoMapping,
+                        componentParameterNames,
+                    )
                     pathsBuilder.seedForService(service, file.`package`?.value)
                     mergePaths(doc, pathsBuilder.buildForService(service, file.`package`?.value), ctx)
 
@@ -389,6 +403,39 @@ internal class Compiler(
             request.protoFiles.find { it.name == name }
         }
         return Setup(mapper, ctx, targetFiles)
+    }
+
+    /**
+     * Gathers every `components/parameters` entry declared in file- and service-level OpenAPI
+     * annotations across [files] into a `component key → declared parameter name` map.
+     *
+     * [PathsBuilder] uses this to honour manual `(engine.protoc.openapi.parameters)` declarations
+     * that reference a reusable component via `$ref` (e.g. `#/components/parameters/PageSize`):
+     * the auto-derived query parameters skip any request field whose name matches the referenced
+     * component's name.  Only locally declared parameters (not themselves a `$ref`) are recorded;
+     * the first declaration of a given key wins, and entries with an empty name are ignored.
+     */
+    private fun collectComponentParameterNames(
+        files: List<FileDescriptorProtoWrapper>,
+    ): Map<String, String> {
+        val byKey = LinkedHashMap<String, String>()
+
+        fun ingest(openApi: OpenAPI?) {
+            if (openApi?.hasComponents() != true) return
+            for ((key, value) in openApi.components.parametersMap) {
+                if (!value.hasParameter()) continue
+                val name = value.parameter.name
+                if (name.isNotEmpty()) byKey.putIfAbsent(key, name)
+            }
+        }
+
+        for (file in files) {
+            runCatching { ingest(file.options?.findExtension(Annotations.file)?.value) }
+            for (service in file.services) {
+                runCatching { ingest(service.options?.findExtension(Annotations.service)?.value) }
+            }
+        }
+        return byKey
     }
 
     private fun mergePaths(

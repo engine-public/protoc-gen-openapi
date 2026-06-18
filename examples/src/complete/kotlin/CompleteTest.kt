@@ -494,6 +494,37 @@ class CompleteTest :
         }
 
         // -----------------------------------------------------------------------
+        // Auto-derived query parameters — manual-declaration override precedence
+        // -----------------------------------------------------------------------
+
+        // A manual `(engine.protoc.openapi.parameters)` declaration always replaces auto-derivation
+        // rather than producing a duplicate parameter — whether it references a reusable component
+        // via `$ref` (matched by the component's resolved name) or uses a dotted name to claim a
+        // nested field.  Un-claimed siblings are still auto-derived. (SearchProducts / SearchFilter)
+        test("query-parameter override precedence (searchProducts)") {
+            assertSoftly {
+                val params = doc["paths"]["/search"]["get"]["parameters"].shouldNotBeNull()
+                val names = params.mapNotNull { it["name"]?.asString() }
+
+                // The `$ref` to #/components/parameters/PageSize (name `pageSize`) is the only
+                // pageSize parameter — the request's `page_size` field must not be auto-derived
+                // a second time.
+                params.count { it["\$ref"]?.asString() == "#/components/parameters/PageSize" } shouldBe 1
+                names.count { it == "pageSize" } shouldBe 0
+
+                // The dotted inline override wins for `geo.city` (exactly one, carrying its manual
+                // description); the un-claimed sibling `geo.region` is still auto-derived.
+                names.count { it == "geo.city" } shouldBe 1
+                val geoCity = params.find { it["name"]?.asString() == "geo.city" }.shouldNotBeNull()
+                geoCity["description"].asString() shouldBe "City filter (manual override)"
+                ("geo.region" in names) shouldBe true
+
+                // The remaining un-claimed top-level scalar is auto-derived as usual.
+                ("term" in names) shouldBe true
+            }
+        }
+
+        // -----------------------------------------------------------------------
         // SchemaObject coverage via message and field annotations
         // -----------------------------------------------------------------------
 

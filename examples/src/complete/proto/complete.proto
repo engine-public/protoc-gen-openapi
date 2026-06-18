@@ -907,6 +907,25 @@ message StockFilter {
     double max_price = 4;
 }
 
+// A nested geo filter used to exercise dotted query-parameter override precedence.
+message GeoFilter {
+    string city = 1;
+    string region = 2;
+}
+
+// Request that exercises query-parameter override precedence against auto-derivation:
+//   - `page_size` (JSON name `pageSize`) collides with the reusable
+//     `#/components/parameters/PageSize` component the SearchProducts operation references, so
+//     auto-derivation must not emit a second `pageSize` parameter.
+//   - `geo.city` is claimed by an inline manual parameter that uses its dotted name, so the
+//     nested-message recursion must suppress `geo.city` while still emitting its sibling
+//     `geo.region`.
+message SearchFilter {
+    int32 page_size = 1;
+    string term = 2;
+    GeoFilter geo = 3;
+}
+
 message CreateProductRequest {
     string name = 1;
     string description = 2;
@@ -1071,6 +1090,50 @@ service StorefrontService {
             }
             security: { names: { key: "bearerAuth" value: {} } }
             extensions: { key: "x-rate-limit" value: { number_value: 100 } }
+        };
+    }
+
+    // Search products.  Exercises query-parameter override precedence (see SearchFilter): both a
+    // `$ref` parameter and a dotted inline parameter take precedence over auto-derivation, so the
+    // request's `page_size` and `geo.city` fields are not auto-derived as duplicate parameters.
+    rpc SearchProducts(SearchFilter) returns (ProductList) {
+        option (google.api.http) = { get: "/search" };
+        option (.engine.protoc.openapi.method) = {
+            tags: ["products"]
+            summary: "Search products"
+            operationId: "searchProducts"
+            parameters: [
+                // $ref to the reusable PageSize component — its name (`pageSize`) must claim the
+                // request's page_size field so it is not auto-derived a second time.
+                { reference: { uri_ref: "#/components/parameters/PageSize" } },
+                // Dotted manual override — claims the nested `geo.city` field by its dotted name.
+                {
+                    parameter: {
+                        name: "geo.city"
+                        in: "query"
+                        description: "City filter (manual override)"
+                        schema: { schema: { object: { type: "string" } } }
+                    }
+                }
+            ]
+            responses: {
+                codes: {
+                    key: "200"
+                    value: {
+                        response_object: {
+                            description: "Search results"
+                            content: {
+                                key: "application/json"
+                                value: {
+                                    schema: {
+                                        object: { proto_message_ref: { [type.googleapis.com/engine.protoc.openapi.example.complete.ProductList] {} } }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         };
     }
 

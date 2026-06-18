@@ -127,12 +127,24 @@ when [`preserveProtoFieldNames`](src/main/kotlin/com/engine/protoc/openapi/Proto
 is set), recurse into nested messages with dotted names (`?address.city=…`), and emit `style=form,
 explode=true` for repeated scalars.  Repeated message and map fields are skipped with a `WARN` log
 since OpenAPI has no faithful query-string representation for them.
+Each parameter's schema carries the field's own `(engine.protoc.openapi.field)` annotation
+(constraints, `format`, `enum`, …) merged on top of its proto-derived type, so a query parameter
+advertises the same constraints the field declares everywhere else.
 
 When a method also declares `(engine.protoc.openapi.parameters)` entries, those manual declarations
-win for any field they cover (matched by proto or JSON name) and a `WARN` log records the overlap.
+win for any field they cover and a `WARN` log records the overlap.
+A field is treated as covered when a manual parameter's name matches its proto name, its JSON name,
+or — for nested fields — its dotted name (`address.city`); manual entries that reference a reusable
+component via `$ref` are matched by the referenced component's declared name.
+Two coverage cases cannot be detected and may surface as duplicate parameters: a `$ref` the plugin
+cannot resolve locally (a remote/relative `$ref`, or one whose component is itself a `$ref`), and a
+nested field bound to the URL with a dotted placeholder such as `{address.city}` (the path-template
+parser only recognises single-segment `{var}` placeholders).
+Declare the overlapping field with an inline parameter, or move it into the request body, to avoid
+the duplicate.
 Worked examples live in [examples/src/envoy/](examples/src/envoy/) (live Envoy round-trip tests)
 and [examples/src/complete/](examples/src/complete/) (snapshot coverage of every verb/body
-combination).
+combination, plus manual-override precedence).
 
 ## Related Projects
 

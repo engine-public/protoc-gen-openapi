@@ -97,6 +97,40 @@ paths:
       security:
       - bearerAuth: []
       - apiKeyAuth: []
+  /search:
+    get:
+      summary: "Search products"
+      description: "Search products.  Exercises query-parameter override precedence\
+        \ (see SearchFilter): both a\n `$ref` parameter and a dotted inline parameter\
+        \ take precedence over auto-derivation, so the\n request's `page_size` and\
+        \ `geo.city` fields are not auto-derived as duplicate parameters."
+      operationId: "searchProducts"
+      tags:
+      - "products"
+      parameters:
+      - $ref: "#/components/parameters/PageSize"
+      - name: "geo.city"
+        in: "query"
+        description: "City filter (manual override)"
+        schema:
+          type: "string"
+      - name: "term"
+        in: "query"
+        required: false
+        schema:
+          type: "string"
+      - name: "geo.region"
+        in: "query"
+        required: false
+        schema:
+          type: "string"
+      responses:
+        "200":
+          description: "Search results"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductList"
   /products/{id}:
     get:
       summary: "Get product"
@@ -117,7 +151,13 @@ paths:
           \ multi-type (type repeated)"
         required: false
         schema:
-          type: "string"
+          type:
+          - "string"
+          - "null"
+          writeOnly: true
+          maxLength: 200
+          minLength: 1
+          pattern: "^[A-Za-z0-9 .,'-]+$"
       - name: "description"
         in: "query"
         required: false
@@ -131,16 +171,30 @@ paths:
         schema:
           type: "number"
           format: "double"
+          default: 9.99
+          example: 29.99
+          multipleOf: 0.01
+          maximum: 99999.99
+          exclusiveMaximum: 100000.0
+          minimum: 0.01
+          exclusiveMinimum: 0.0
       - name: "category"
         in: "query"
-        description: "covers SchemaObject.enum (repeated Any), SchemaObject.const (Any)"
+        description: "covers SchemaObject.enum (repeated Any), SchemaObject.const\
+          \ (Any)"
         required: false
         schema:
           type: "string"
+          enum:
+          - "footwear"
+          - "apparel"
+          - "equipment"
+          const: "footwear"
       - name: "tags"
         in: "query"
         description: "covers SchemaObject.items, prefix_items, contains, min_contains,\
-          \ max_contains,\n min_items, max_items, unique_items, unevaluated_items (Schema.boolean=false)"
+          \ max_contains,\n min_items, max_items, unique_items, unevaluated_items\
+          \ (Schema.boolean=false)"
         required: false
         style: "form"
         explode: true
@@ -148,6 +202,20 @@ paths:
           type: "array"
           items:
             type: "string"
+            minLength: 1
+          prefixItems:
+          - type: "string"
+            pattern: "^[a-z]+$"
+          - type: "string"
+          contains:
+            type: "string"
+            minLength: 2
+          minContains: 0
+          maxContains: 10
+          maxItems: 20
+          minItems: 0
+          uniqueItems: true
+          unevaluatedItems: false
       - name: "stockQuantity"
         in: "query"
         description: "covers SchemaObject.deprecated (on field), SchemaObject.examples\
@@ -156,6 +224,11 @@ paths:
         schema:
           type: "integer"
           format: "int32"
+          title: "Stock Quantity"
+          deprecated: true
+          examples:
+          - 0
+          - 100
       responses:
         "200":
           description: "Product found"
@@ -270,7 +343,13 @@ paths:
           \ multi-type (type repeated)"
         required: false
         schema:
-          type: "string"
+          type:
+          - "string"
+          - "null"
+          writeOnly: true
+          maxLength: 200
+          minLength: 1
+          pattern: "^[A-Za-z0-9 .,'-]+$"
       - name: "description"
         in: "query"
         required: false
@@ -284,16 +363,30 @@ paths:
         schema:
           type: "number"
           format: "double"
+          default: 9.99
+          example: 29.99
+          multipleOf: 0.01
+          maximum: 99999.99
+          exclusiveMaximum: 100000.0
+          minimum: 0.01
+          exclusiveMinimum: 0.0
       - name: "category"
         in: "query"
-        description: "covers SchemaObject.enum (repeated Any), SchemaObject.const (Any)"
+        description: "covers SchemaObject.enum (repeated Any), SchemaObject.const\
+          \ (Any)"
         required: false
         schema:
           type: "string"
+          enum:
+          - "footwear"
+          - "apparel"
+          - "equipment"
+          const: "footwear"
       - name: "tags"
         in: "query"
         description: "covers SchemaObject.items, prefix_items, contains, min_contains,\
-          \ max_contains,\n min_items, max_items, unique_items, unevaluated_items (Schema.boolean=false)"
+          \ max_contains,\n min_items, max_items, unique_items, unevaluated_items\
+          \ (Schema.boolean=false)"
         required: false
         style: "form"
         explode: true
@@ -301,6 +394,20 @@ paths:
           type: "array"
           items:
             type: "string"
+            minLength: 1
+          prefixItems:
+          - type: "string"
+            pattern: "^[a-z]+$"
+          - type: "string"
+          contains:
+            type: "string"
+            minLength: 2
+          minContains: 0
+          maxContains: 10
+          maxItems: 20
+          minItems: 0
+          uniqueItems: true
+          unevaluatedItems: false
       - name: "stockQuantity"
         in: "query"
         description: "covers SchemaObject.deprecated (on field), SchemaObject.examples\
@@ -309,6 +416,11 @@ paths:
         schema:
           type: "integer"
           format: "int32"
+          title: "Stock Quantity"
+          deprecated: true
+          examples:
+          - 0
+          - 100
       responses:
         "204":
           description: "Product deleted"
@@ -422,6 +534,10 @@ paths:
         required: false
         schema:
           type: "string"
+          contentEncoding: "utf-8"
+          contentMediaType: "text/plain"
+          contentSchema:
+            type: "string"
       - name: "total"
         in: "query"
         required: false
@@ -463,6 +579,10 @@ paths:
         required: false
         schema:
           type: "string"
+          contentEncoding: "utf-8"
+          contentMediaType: "text/plain"
+          contentSchema:
+            type: "string"
       - name: "total"
         in: "query"
         required: false

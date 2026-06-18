@@ -6,11 +6,12 @@ option java_package = "com.engine.protoc.openapi";
 option java_multiple_files = true;
 
 import "engine/protoc/openapi/openapi.proto";
-import "engine/protoc/openapi/model/error_response.proto";
 import "engine/protoc/openapi/model/operation.proto";
 import "engine/protoc/openapi/model/schema.proto";
 
+import "google/protobuf/any.proto";
 import "google/protobuf/descriptor.proto";
+import "google/rpc/code.proto";
 
 // File-level OpenAPI annotation: applied via `(engine.protoc.openapi.file)` on a proto file.
 message File {
@@ -61,7 +62,44 @@ message Method {
     // Conflicts (same status appearing in both `operation.responses` and `error_responses`,
     // or twice in `error_responses` itself) resolve as last-wins with a WARN log identifying
     // the operation, the contested status, and the conflicting payloads.
-    repeated .engine.protoc.openapi.model.ErrorResponse error_responses = 4;
+    repeated .engine.protoc.openapi.ErrorResponse error_responses = 4;
+}
+
+// Shortcut declaration of an error scenario on a single operation.  Each entry expands at
+// compile time into a `responses[status]` entry whose schema is an inline `google.rpc.Status`
+// body carrying a typed `details.items` $ref.  The Status envelope is always inlined and
+// never lands in `components/schemas`.  Mirrors `Operation.responses` in expressive power
+// for the common error-shape case, without requiring the user to write the full nested tree.
+//
+// This is DSL sugar for the `(engine.protoc.openapi.method)` annotation, not part of the
+// emitted OpenAPI model — hence it lives here alongside the annotation wrappers rather than
+// under the `model` package.
+message ErrorResponse {
+    // HTTP status code emitted on the operation's `responses` map.  Accepts any OAS-legal
+    // key: a numeric string ("400", "409"), an OAS range ("4XX"), or "default".
+    string status = 1;
+
+    // The proto message describing the error payload.  Authored using the bracketed
+    // `google.protobuf.Any` textual syntax — for example:
+    //
+    //     error_type: { [type.googleapis.com/booking.v1.BookError] {} }
+    //
+    // The empty `{}` body is intentional: only the resolved type is consulted, the value
+    // is ignored.  The referenced message is added to `components/schemas` as a normal
+    // component.  The surrounding `google.rpc.Status` envelope is always inlined at the
+    // use site and never registered as a component.
+    .google.protobuf.Any error_type = 2;
+
+    // Optional response description.  When omitted, falls back to the error message's
+    // leading proto comment, then to the string "Error".
+    optional string description = 3;
+
+    // Optional gRPC status code associated with this error scenario.  When present:
+    //   • emitted as the `x-grpc-code` vendor extension (string enum name) on the
+    //     response object;
+    //   • seeds an `examples` entry on the response media type whose `value.code` is the
+    //     gRPC code's integer number.
+    optional .google.rpc.Code grpc_code = 4;
 }
 
 // Message-level OpenAPI annotation: applied via `(engine.protoc.openapi.message)` on a proto message.

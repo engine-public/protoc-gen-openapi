@@ -1,12 +1,12 @@
 package com.engine.protoc.openapi.compile
 
 import com.engine.protoc.openapi.Annotations
+import com.engine.protoc.openapi.ErrorResponse
 import com.engine.protoc.openapi.Method
 import com.engine.protoc.openapi.ProtocGenOpenAPI
 import com.engine.protoc.openapi.compile.json.JsonContext
 import com.engine.protoc.openapi.compile.json.putExtensionsInto
 import com.engine.protoc.openapi.compile.json.toJson
-import com.engine.protoc.openapi.model.ErrorResponse
 import com.engine.protoc.openapi.model.Operation
 import com.engine.protoc.openapi.model.ParameterOrReference
 import com.engine.protoc.openapi.model.Reference

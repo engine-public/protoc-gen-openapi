@@ -414,10 +414,13 @@ public class ProtocGenOpenAPI(
          * leading comment; when it resolves, it is rewritten to a same-document anchor pointing at
          * the referenced operation, tag, or schema.
          *
-         * Anchor fragment formats are renderer-specific and **not** portable, so a target must be
-         * chosen explicitly:
+         * Anchor fragment formats are renderer-specific and **not** portable, so the target must be
+         * chosen explicitly; resolution is off by default:
          *
-         * - [ReferenceLinkTarget.SWAGGER_UI] (default) — operations resolve to `#/{tag}/{operationId}`
+         * - [ReferenceLinkTarget.NONE] (default) — reference-link resolution is disabled.
+         *   `description` fields still emit clean CommonMark, but bracketed tokens are left
+         *   untouched and no derived `operationId` is added.
+         * - [ReferenceLinkTarget.SWAGGER_UI] — operations resolve to `#/{tag}/{operationId}`
          *   and services (tags) to `#/{tag}`.  Swagger UI has no stable anchor for component
          *   schemas, so message/enum references cannot be linked (see the unresolved behaviour below).
          *   Requires the consumer to enable Swagger UI's `deepLinking` option.
@@ -427,8 +430,6 @@ public class ProtocGenOpenAPI(
          *   emits a `<SchemaDefinition>` section per component schema, grouped under an
          *   `x-tagGroups` "Schemas" group, so every schema reference has a controlled `#tag/{name}`
          *   anchor to point at.
-         * - [ReferenceLinkTarget.NONE] — reference-link resolution is disabled.  `description`
-         *   fields still emit clean CommonMark, but bracketed tokens are left untouched.
          *
          * Unresolved or non-portable references never fail the build: the brackets are stripped and
          * the label is rendered as an inline code span (e.g. `[Property]` → `` `Property` ``) with a
@@ -508,7 +509,7 @@ public class ProtocGenOpenAPI(
          * `--openapi_out` parameters.
          */
         public enum class ReferenceLinkTarget {
-            /** Reference-link resolution is disabled; bracketed tokens are left untouched. */
+            /** Reference-link resolution is disabled; bracketed tokens are left untouched.  Default. */
             NONE,
 
             /** Resolve operation and tag references to Swagger UI anchors; schemas are not linked. */
@@ -729,7 +730,7 @@ public class ProtocGenOpenAPI(
              * @see [Options.referenceLinkTarget]
              */
             public var referenceLinkTarget: ReferenceLinkTarget =
-                parameters.get<ReferenceLinkTarget>("referenceLinkTarget") ?: ReferenceLinkTarget.SWAGGER_UI
+                parameters.get<ReferenceLinkTarget>("referenceLinkTarget") ?: ReferenceLinkTarget.NONE
 
             public companion object {
                 private const val SERVICE_INCLUDE_DEFAULT =

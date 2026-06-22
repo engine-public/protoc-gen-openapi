@@ -5,7 +5,6 @@
       "get" : {
         "summary" : "Normal $ref path: Envelope appears in components and is $ref'd here.",
         "description" : "Normal $ref path: Envelope appears in components and is $ref'd here.",
-        "operationId" : "EnvelopeService_GetEnvelope",
         "parameters" : [ {
           "name" : "id",
           "in" : "path",
@@ -32,7 +31,6 @@
       "get" : {
         "summary" : "Inline response: the response schema is inlined, but Envelope is still in components (because GetEnvelope above $refs it), so the inline body $refs Envelope rather than expanding it.",
         "description" : "Inline response: the response schema is inlined, but Envelope is still in components\n (because GetEnvelope above $refs it), so the inline body $refs Envelope rather than\n expanding it.",
-        "operationId" : "EnvelopeService_PeekEnvelope",
         "parameters" : [ {
           "name" : "id",
           "in" : "path",
@@ -68,7 +66,6 @@
       "get" : {
         "summary" : "Inline response of a type that is reached only through this inline path.",
         "description" : "Inline response of a type that is reached *only* through this inline path.  PrivateNote\n and its NoteAttachment field are therefore absent from components — both expand inline\n at this single site.",
-        "operationId" : "EnvelopeService_GetNote",
         "parameters" : [ {
           "name" : "id",
           "in" : "path",
@@ -114,7 +111,6 @@
       "post" : {
         "summary" : "Inline request: the body's referenced message (Envelope, via body: \"envelope\") is inlined at the requestBody site.",
         "description" : "Inline request: the body's referenced message (Envelope, via body: \"envelope\") is\n inlined at the requestBody site.  Envelope is also in components from the GetEnvelope\n RPC above, so its nested Payload $ref is preserved (Payload is in components too).",
-        "operationId" : "EnvelopeService_UpdateEnvelope",
         "parameters" : [ {
           "name" : "envelope_id",
           "in" : "path",

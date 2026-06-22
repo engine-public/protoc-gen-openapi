@@ -1,15 +1,13 @@
 {
   "info": {
     "description": "The greeter service definition.",
-    "title": "Greeter",
-    "version": "1.0.0"
+    "title": "Greeter"
   },
   "openapi": "3.1.0",
   "paths": {
     "/hello/{name}": {
       "get": {
         "description": "Sends a greeting to the named person.",
-        "operationId": "Greeter_SayHello",
         "parameters": [
           {
             "in": "path",

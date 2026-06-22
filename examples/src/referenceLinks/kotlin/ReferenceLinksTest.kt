@@ -15,8 +15,9 @@ import tools.jackson.databind.ObjectMapper
  * Exercises the `referenceLinkTarget` option: CommonMark reference links (`[Widget]`,
  * `[WidgetService.ListWidgets]`) in proto comments are rewritten to same-document anchors.
  *
- * Two runs over the same proto compare the two renderer dialects:
- *  - the default `SWAGGER_UI` target — operation and tag references resolve, schema references do
+ * Two runs over the same proto compare the two renderer dialects (resolution is off by default, so
+ * each run selects its target explicitly):
+ *  - the `SWAGGER_UI` target — operation and tag references resolve, schema references do
  *    not (Swagger UI has no schema anchors) and fall back to plain text;
  *  - the `REDOC` target — operation, tag, and schema references resolve, and a `<SchemaDefinition>`
  *    section tag is emitted per component schema so the schema anchors have a target.
@@ -41,7 +42,7 @@ class ReferenceLinksTest :
                 inlineRequestSchemas = false
                 inlineResponseSchemas = false
                 validateOutput = false
-                // referenceLinkTarget defaults to SWAGGER_UI.
+                referenceLinkTarget = ProtocGenOpenAPI.Options.ReferenceLinkTarget.SWAGGER_UI
             }.compile()
 
         val redoc =

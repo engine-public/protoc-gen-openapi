@@ -43,7 +43,6 @@
     "/engine.protoc.openapi.example.envoy.HelloService/PingHello": {
       "post": {
         "description": "PingHello intentionally has no google.api.http annotation so it can be\n exercised via Envoy's auto_mapping feature.",
-        "operationId": "HelloService_PingHello",
         "requestBody": {
           "content": {
             "application/json": {
@@ -71,7 +70,6 @@
     },
     "/hello": {
       "post": {
-        "operationId": "HelloService_SayHello",
         "requestBody": {
           "content": {
             "application/json": {
@@ -98,7 +96,6 @@
     },
     "/hellos": {
       "post": {
-        "operationId": "HelloService_StreamHellos",
         "requestBody": {
           "content": {
             "application/json": {

@@ -5,7 +5,6 @@
       "get" : {
         "summary" : "GET with one path-bound field and the rest becoming query parameters.",
         "description" : "GET with one path-bound field and the rest becoming query parameters.\n Canonical \"REST-style\" mapping.",
-        "operationId" : "BodyService_GreetByPath",
         "parameters" : [ {
           "name" : "your_name",
           "in" : "path",
@@ -63,7 +62,6 @@
       "delete" : {
         "summary" : "DELETE with one path-bound field; remaining fields become query parameters.",
         "description" : "DELETE with one path-bound field; remaining fields become query\n parameters.  Confirms DELETE behaves identically to GET.",
-        "operationId" : "BodyService_DeleteByName",
         "parameters" : [ {
           "name" : "your_name",
           "in" : "path",
@@ -123,7 +121,6 @@
       "post" : {
         "summary" : "POST with body unset — Envoy permits this and binds all non-path fields as query parameters regardless of verb.",
         "description" : "POST with body unset — Envoy permits this and binds all non-path fields\n as query parameters regardless of verb.  Atypical, but spec-allowed.",
-        "operationId" : "BodyService_EchoNoBody",
         "parameters" : [ {
           "name" : "yourName",
           "in" : "query",
@@ -183,7 +180,6 @@
       "post" : {
         "summary" : "POST with body naming a single sub-field; remaining non-path fields become query parameters.",
         "description" : "POST with body naming a single sub-field; remaining non-path fields\n become query parameters.",
-        "operationId" : "BodyService_GreetWithNamedBody",
         "parameters" : [ {
           "name" : "yourName",
           "in" : "query",

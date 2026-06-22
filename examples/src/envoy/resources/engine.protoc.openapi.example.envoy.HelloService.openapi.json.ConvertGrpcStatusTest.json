@@ -42,7 +42,6 @@
   "paths": {
     "/hello": {
       "post": {
-        "operationId": "HelloService_SayHello",
         "requestBody": {
           "content": {
             "application/json": {
@@ -94,7 +93,6 @@
     },
     "/hellos": {
       "post": {
-        "operationId": "HelloService_StreamHellos",
         "requestBody": {
           "content": {
             "application/json": {

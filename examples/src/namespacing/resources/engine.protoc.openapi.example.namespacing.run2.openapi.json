@@ -43,7 +43,6 @@
     "/catalog/{id}": {
       "get": {
         "description": "Retrieve a catalog item by its identifier.",
-        "operationId": "CatalogService_GetItem",
         "parameters": [
           {
             "in": "path",
@@ -72,7 +71,6 @@
     "/inventory/{id}": {
       "get": {
         "description": "Retrieve inventory details for an item by its identifier.",
-        "operationId": "InventoryService_GetItem",
         "parameters": [
           {
             "in": "path",

@@ -1,0 +1,123 @@
+{
+  "openapi" : "3.1.0",
+  "paths" : {
+    "/widgets/{id}" : {
+      "get" : {
+        "summary" : "Fetches a single Widget by id.",
+        "description" : "Fetches a single [Widget](#tag/Widget) by id.  For the collection form, see\n[WidgetService.ListWidgets](#operation/WidgetService_ListWidgets).",
+        "operationId" : "WidgetService_GetWidget",
+        "tags" : [ "WidgetService" ],
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Widget"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/widgets" : {
+      "get" : {
+        "summary" : "Lists every Widget.",
+        "description" : "Lists every [Widget](#tag/Widget).  Each item carries a [WidgetStatus](#tag/WidgetStatus).",
+        "operationId" : "WidgetService_ListWidgets",
+        "tags" : [ "WidgetService" ],
+        "parameters" : [ {
+          "name" : "pageSize",
+          "in" : "query",
+          "description" : "Maximum number of [Widget](#tag/Widget) items to return in one page.",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ListWidgetsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "tags" : [ {
+    "name" : "WidgetService",
+    "description" : "Manages [Widget](#tag/Widget) resources.  Start with [WidgetService.GetWidget](#operation/WidgetService_GetWidget) to fetch one."
+  }, {
+    "name" : "ListWidgetsResponse",
+    "description" : "<SchemaDefinition schemaRef=\"#/components/schemas/ListWidgetsResponse\" />"
+  }, {
+    "name" : "Widget",
+    "description" : "<SchemaDefinition schemaRef=\"#/components/schemas/Widget\" />"
+  }, {
+    "name" : "WidgetStatus",
+    "description" : "<SchemaDefinition schemaRef=\"#/components/schemas/WidgetStatus\" />"
+  } ],
+  "components" : {
+    "schemas" : {
+      "ListWidgetsResponse" : {
+        "type" : "object",
+        "description" : "A page of [Widget](#tag/Widget) results returned by [WidgetService.ListWidgets](#operation/WidgetService_ListWidgets).",
+        "properties" : {
+          "widgets" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Widget"
+            },
+            "description" : "The [Widget](#tag/Widget) items on this page."
+          }
+        }
+      },
+      "Widget" : {
+        "type" : "object",
+        "description" : "A widget.  Its lifecycle state is a [WidgetStatus](#tag/WidgetStatus); the display label lives in [name](#tag/Widget).",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "description" : "Unique id of this widget."
+          },
+          "name" : {
+            "type" : "string",
+            "description" : "Human-readable label."
+          },
+          "status" : {
+            "$ref" : "#/components/schemas/WidgetStatus",
+            "description" : "Current lifecycle state — one of the [WidgetStatus](#tag/WidgetStatus) values."
+          }
+        }
+      },
+      "WidgetStatus" : {
+        "type" : "string",
+        "description" : "Lifecycle state of a [Widget](#tag/Widget).\n\n- `WIDGET_STATUS_UNSPECIFIED` — Default, unset state.\n\n- `WIDGET_STATUS_ACTIVE` — The [Widget](#tag/Widget) is active and visible.\n\n- `WIDGET_STATUS_ARCHIVED` — The [Widget](#tag/Widget) has been archived.",
+        "enum" : [ "WIDGET_STATUS_UNSPECIFIED", "WIDGET_STATUS_ACTIVE", "WIDGET_STATUS_ARCHIVED" ]
+      }
+    }
+  },
+  "x-tagGroups" : [ {
+    "name" : "API",
+    "tags" : [ "WidgetService" ]
+  }, {
+    "name" : "Schemas",
+    "tags" : [ "ListWidgetsResponse", "Widget", "WidgetStatus" ]
+  } ]
+}

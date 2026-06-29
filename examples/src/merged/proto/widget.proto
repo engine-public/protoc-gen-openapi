@@ -10,9 +10,11 @@ import "engine/protoc/openapi/annotations.proto";
 
 // CRUD Operations on Widgets
 service WidgetService {
-    option (.engine.protoc.openapi.tags) = "foo";
-    option (.engine.protoc.openapi.tags) = "bar";
-    option (.engine.protoc.openapi.tags) = "baz";
+    option (.engine.protoc.openapi.service) = {
+        tags: "foo"
+        tags: "bar"
+        tags: "baz"
+    };
 
     // List all widgets in the system
     rpc ListWidgets(ListWidgetRequest) returns (ListWidgetResponse) {

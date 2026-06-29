@@ -4,6 +4,7 @@ import com.engine.protoc.openapi.ProtocGenOpenAPI
 import tools.jackson.databind.JsonNode
 import tools.jackson.databind.node.ArrayNode
 import tools.jackson.databind.node.ObjectNode
+import tools.jackson.databind.node.StringNode
 
 /**
  * Computes schema keys for `components/schemas` entries and their corresponding `$ref` strings.
@@ -30,6 +31,9 @@ internal class SchemaKeyResolver(
     private val enumIndex: EnumIndex,
 ) {
     private val versionRegex = Regex("""^v\d+[a-zA-Z0-9]*$""")
+
+    // Matches a Redoc schema-section anchor `#tag/{key}`; the key uses the schema-key alphabet.
+    private val schemaAnchorRegex = Regex("""#tag/([A-Za-z0-9_.\-]+)""")
 
     // Populated by finalize() only for SIMPLIFIED_PACKAGE.
     private var simplifiedKeyMap: Map<String, String> = emptyMap()
@@ -119,11 +123,34 @@ internal class SchemaKeyResolver(
                     val newKey = buildPhaseToFinalMap[oldKey]
                     if (newKey != null) node.put("\$ref", "#/components/schemas/$newKey")
                 }
-                for ((_, child) in node.properties()) rewriteTree(child)
+                // Reference-link anchors emitted into `description` text under REDOC mode point at
+                // a schema's generated `<SchemaDefinition>` section via `#tag/{buildPhaseKey}`;
+                // rewrite those to the final simplified key so they match the emitted section tag.
+                for ((key, child) in node.properties().toList()) {
+                    if (child is StringNode) {
+                        rewriteSchemaAnchors(child.asString())?.let { node.put(key, it) }
+                    } else {
+                        rewriteTree(child)
+                    }
+                }
             }
 
             is ArrayNode -> for (child in node) rewriteTree(child)
         }
+    }
+
+    /**
+     * Rewrites every `#tag/{buildPhaseKey}` anchor in [text] to `#tag/{finalKey}` for keys that
+     * the `SIMPLIFIED_PACKAGE` strategy renamed.  Returns `null` when nothing changed (the common
+     * case) so callers can skip the write.  Service-name tags are not build-phase keys, so they
+     * are left untouched.
+     */
+    private fun rewriteSchemaAnchors(text: String): String? {
+        if (!text.contains("#tag/")) return null
+        val rewritten = schemaAnchorRegex.replace(text) { match ->
+            buildPhaseToFinalMap[match.groupValues[1]]?.let { "#tag/$it" } ?: match.value
+        }
+        return rewritten.takeIf { it != text }
     }
 
     /**

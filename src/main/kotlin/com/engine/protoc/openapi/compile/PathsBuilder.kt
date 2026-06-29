@@ -216,22 +216,12 @@ internal class PathsBuilder(
         filePackage: String?,
         serviceName: String?,
     ) {
-        val httpRule = method.options?.findExtension(AnnotationsProto.http)?.value
+        val httpRule = method.httpRule()
         val methodWrapper = method.options?.findExtension(Annotations.method)?.value
         val annotation = methodWrapper?.takeIf { it.hasOperation() }?.operation
         val inlineRequest = methodWrapper?.resolvedInlineRequest() ?: inlineRequestSchemas
         val inlineResponse = methodWrapper?.resolvedInlineResponse() ?: inlineResponseSchemas
-
-        val binding: HttpBinding = if (httpRule != null) {
-            httpRule.primaryBinding() ?: return
-        } else if (autoMapping) {
-            val pkg = filePackage?.let { "$it." } ?: ""
-            val svc = serviceName ?: return
-            val name = method.proto.name ?: return
-            HttpBinding("post", "/$pkg$svc/$name", "*")
-        } else {
-            return
-        }
+        val binding = resolveBinding(method, httpRule, filePackage, serviceName) ?: return
 
         // Response — skip when inlined.
         if (!inlineResponse) {
@@ -261,8 +251,9 @@ internal class PathsBuilder(
         // are independent of the inline flag (the user explicitly requested a $ref to them).
         // Only the inlined RequestBody branch carries a contentMap; the Reference branch points
         // at a `components/requestBodies` entry that doesn't need additional collection here.
-        if (hasExplicitRequestBody && annotation.requestBody.hasRequestBody()) {
-            annotation.requestBody.requestBody.contentMap.values.forEach { mt ->
+        val explicitRequestBody = annotation?.takeIf { it.hasRequestBody() }?.requestBody
+        if (explicitRequestBody?.hasRequestBody() == true) {
+            explicitRequestBody.requestBody.contentMap.values.forEach { mt ->
                 if (mt.hasSchema()) collector.collectFromSchema(mt.schema)
             }
         }
@@ -284,6 +275,37 @@ internal class PathsBuilder(
         val typeUrl = er.errorType.typeUrl
         if (typeUrl.isEmpty()) return null
         return ".${typeUrl.substringAfterLast('/')}"
+    }
+
+    // ---- Shared method → binding resolution (seed pass + emit pass) ------
+    //
+    // [seedOperation] (collection) and [buildForServicePairs] (emission) must agree on exactly
+    // which methods produce an operation and which [HttpBinding] each one realizes.  If they
+    // drift, the seeded component set and the emitted `$ref`s fall out of sync — orphan component
+    // schemas at best, dangling `$ref`s to never-collected types at worst.  Both passes go
+    // through the helpers below so there is a single source of truth.
+
+    /** The `google.api.http` rule on this method, or null when it carries none. */
+    private fun MethodDescriptorProtoWrapper.httpRule(): HttpRule? = options?.findExtension(AnnotationsProto.http)?.value
+
+    /**
+     * Resolves the single [HttpBinding] that [method] realizes, or null when it produces no
+     * operation: the primary binding of an explicit `google.api.http` rule, or — when
+     * [autoMapping] is on and no rule is present — a synthesised `POST /<pkg.Service>/<Method>`
+     * binding with `body: "*"`.
+     */
+    private fun resolveBinding(
+        method: MethodDescriptorProtoWrapper,
+        httpRule: HttpRule?,
+        filePackage: String?,
+        serviceName: String?,
+    ): HttpBinding? {
+        if (httpRule != null) return httpRule.primaryBinding()
+        if (!autoMapping) return null
+        val pkg = filePackage?.let { "$it." } ?: ""
+        val svc = serviceName ?: return null
+        val name = method.proto.name ?: return null
+        return HttpBinding("post", "/$pkg$svc/$name", "*")
     }
 
     /**
@@ -383,20 +405,8 @@ internal class PathsBuilder(
             var contributed = false
 
             for (method in service.methods) {
-                val httpRule = method.options
-                    ?.findExtension(AnnotationsProto.http)?.value
-
-                val binding: HttpBinding = if (httpRule != null) {
-                    httpRule.primaryBinding() ?: continue
-                } else if (autoMapping) {
-                    // Synthesise POST /<pkg.Service>/<Method> body:* for unannotated methods.
-                    val pkg = filePackage?.let { "$it." } ?: ""
-                    val svcName = service.name?.value ?: continue
-                    val methodName = method.proto.name ?: continue
-                    HttpBinding("post", "/$pkg$svcName/$methodName", "*")
-                } else {
-                    continue
-                }
+                val httpRule = method.httpRule()
+                val binding = resolveBinding(method, httpRule, filePackage, service.name?.value) ?: continue
 
                 val (effectivePath, operationNode) = buildOperation(
                     method,
@@ -1329,7 +1339,11 @@ internal class PathsBuilder(
 
         val current = inlineExpandingStack.lastOrNull() ?: emptySet()
         if (typeName in current) {
-            // Cycle — escape into a component schema and stop recursing.
+            // Cycle — escape into a component schema and stop recursing.  This mutates
+            // [collector] during the path-building pass, which is sound only because Compiler
+            // finalizes schema keys and runs SchemaBuilder *after* every path is built: the
+            // forced type therefore still receives a finalized key and a component entry.
+            // Reordering those phases would silently drop cyclic-inline types from the output.
             collector.collect(typeName)
             return ctx.obj().also {
                 it.put("\$ref", "#/components/schemas/${ctx.schemaKeyResolver.buildPhaseKeyOf(typeName)}")

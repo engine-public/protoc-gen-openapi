@@ -31,6 +31,7 @@ class ServiceOrderingTest :
         val mapper = ObjectMapper()
         val outputName = "engine.protoc.openapi.example.serviceOrdering.openapi.json"
         val generatedFile = response.fileList.find { it.name == outputName }.shouldNotBeNull()
+        GoldenFiles.maybeWriteGolden("serviceOrdering", outputName, generatedFile.content)
         val expected =
             ServiceOrderingTest::class.java
                 .getResourceAsStream("/$outputName")

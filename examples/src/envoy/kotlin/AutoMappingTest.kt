@@ -57,6 +57,7 @@ class AutoMappingTest : EnvoyTestBase(GrpcJsonTranscoder(autoMapping = true)) {
                 { "matches reference: " + it.name },
                 result.fileList,
             ) { file ->
+                GoldenFiles.maybeWriteGolden("envoy", "${file.name}.AutoMappingTest.json", file.content)
                 val expected = jsonMapper.readTree(
                     AutoMappingTest::class.java
                         .getResourceAsStream("/${file.name}.AutoMappingTest.json")

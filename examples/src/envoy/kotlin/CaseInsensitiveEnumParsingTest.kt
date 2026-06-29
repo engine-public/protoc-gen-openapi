@@ -66,6 +66,7 @@ class CaseInsensitiveEnumParsingTest : EnvoyTestBase(GrpcJsonTranscoder(caseInse
                 { "matches reference: " + it.name },
                 result.fileList,
             ) { file ->
+                GoldenFiles.maybeWriteGolden("envoy", "${file.name}.CaseInsensitiveEnumParsingTest.json", file.content)
                 val expected = jsonMapper.readTree(
                     CaseInsensitiveEnumParsingTest::class.java
                         .getResourceAsStream("/${file.name}.CaseInsensitiveEnumParsingTest.json")

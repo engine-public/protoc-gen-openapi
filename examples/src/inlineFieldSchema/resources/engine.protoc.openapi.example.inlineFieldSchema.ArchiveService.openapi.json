@@ -109,6 +109,18 @@
           }
         }
       },
+      "Entry" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
       "Header" : {
         "type" : "object",
         "properties" : {
@@ -125,18 +137,6 @@
           },
           "entry" : {
             "$ref" : "#/components/schemas/Entry"
-          }
-        }
-      },
-      "Entry" : {
-        "type" : "object",
-        "properties" : {
-          "name" : {
-            "type" : "string"
-          },
-          "size" : {
-            "type" : "integer",
-            "format" : "int32"
           }
         }
       },

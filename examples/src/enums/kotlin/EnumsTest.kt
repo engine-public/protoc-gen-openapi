@@ -47,6 +47,7 @@ class EnumsTest :
             { "run1: matches reference: " + it.name },
             run1.fileList,
         ) { file ->
+            GoldenFiles.maybeWriteGolden("enums", "${file.name}.run1.json", file.content)
             val expected = mapper.readTree(
                 EnumsTest::class.java
                     .getResourceAsStream("/${file.name}.run1.json")
@@ -90,6 +91,7 @@ class EnumsTest :
             { "run2: matches reference: " + it.name },
             run2.fileList,
         ) { file ->
+            GoldenFiles.maybeWriteGolden("enums", "${file.name}.run2.json", file.content)
             val expected = mapper.readTree(
                 EnumsTest::class.java
                     .getResourceAsStream("/${file.name}.run2.json")
@@ -134,6 +136,7 @@ class EnumsTest :
             { "run3: matches reference: " + it.name },
             run3.fileList,
         ) { file ->
+            GoldenFiles.maybeWriteGolden("enums", "${file.name}.run3.json", file.content)
             val expected = mapper.readTree(
                 EnumsTest::class.java
                     .getResourceAsStream("/${file.name}.run3.json")
@@ -178,6 +181,7 @@ class EnumsTest :
             { "run4: matches reference: " + it.name },
             run4.fileList,
         ) { file ->
+            GoldenFiles.maybeWriteGolden("enums", "${file.name}.run4.json", file.content)
             val expected = mapper.readTree(
                 EnumsTest::class.java
                     .getResourceAsStream("/${file.name}.run4.json")

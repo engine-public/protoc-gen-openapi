@@ -59,6 +59,7 @@ class StreamNewlineDelimitedTest : EnvoyTestBase(GrpcJsonTranscoder(printOptions
                 { "matches reference: " + it.name },
                 result.fileList,
             ) { file ->
+                GoldenFiles.maybeWriteGolden("envoy", "${file.name}.StreamNewlineDelimitedTest.json", file.content)
                 val expected = jsonMapper.readTree(
                     StreamNewlineDelimitedTest::class.java
                         .getResourceAsStream("/${file.name}.StreamNewlineDelimitedTest.json")

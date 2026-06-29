@@ -29,6 +29,7 @@ class ErrorResponsesTest :
         val outputName =
             "engine.protoc.openapi.example.errorResponses.ItemService.openapi.json"
         val generatedFile = response.fileList.find { it.name == outputName }.shouldNotBeNull()
+        GoldenFiles.maybeWriteGolden("errorResponses", outputName, generatedFile.content)
         val expected =
             ErrorResponsesTest::class.java
                 .getResourceAsStream("/$outputName")

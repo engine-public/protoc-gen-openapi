@@ -61,6 +61,7 @@ class StreamSseStyleDelimitedTest : EnvoyTestBase(GrpcJsonTranscoder(printOption
                 { "matches reference: " + it.name },
                 result.fileList,
             ) { file ->
+                GoldenFiles.maybeWriteGolden("envoy", "${file.name}.StreamSseStyleDelimitedTest.json", file.content)
                 val expected = jsonMapper.readTree(
                     StreamSseStyleDelimitedTest::class.java
                         .getResourceAsStream("/${file.name}.StreamSseStyleDelimitedTest.json")

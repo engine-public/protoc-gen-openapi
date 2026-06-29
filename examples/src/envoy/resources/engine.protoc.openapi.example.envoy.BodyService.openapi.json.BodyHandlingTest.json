@@ -60,7 +60,7 @@
         }
       },
       "delete" : {
-        "summary" : "DELETE with one path-bound field; remaining fields become query\n parameters.",
+        "summary" : "DELETE with one path-bound field; remaining fields become query parameters.",
         "description" : "DELETE with one path-bound field; remaining fields become query\n parameters.  Confirms DELETE behaves identically to GET.",
         "parameters" : [ {
           "name" : "your_name",
@@ -119,7 +119,7 @@
     },
     "/echo" : {
       "post" : {
-        "summary" : "POST with body unset — Envoy permits this and binds all non-path fields\n as query parameters regardless of verb.",
+        "summary" : "POST with body unset — Envoy permits this and binds all non-path fields as query parameters regardless of verb.",
         "description" : "POST with body unset — Envoy permits this and binds all non-path fields\n as query parameters regardless of verb.  Atypical, but spec-allowed.",
         "parameters" : [ {
           "name" : "yourName",
@@ -178,7 +178,7 @@
     },
     "/greet/named" : {
       "post" : {
-        "summary" : "POST with body naming a single sub-field; remaining non-path fields\n become query parameters.",
+        "summary" : "POST with body naming a single sub-field; remaining non-path fields become query parameters.",
         "description" : "POST with body naming a single sub-field; remaining non-path fields\n become query parameters.",
         "parameters" : [ {
           "name" : "yourName",

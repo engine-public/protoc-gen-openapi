@@ -3,7 +3,7 @@
   "paths" : {
     "/widgets/{id}" : {
       "get" : {
-        "summary" : "No method-level annotation: inherits the global inlineResponseSchemas=true default, so the\n Widget response schema is inlined directly at the use site.",
+        "summary" : "No method-level annotation: inherits the global inlineResponseSchemas=true default, so the Widget response schema is inlined directly at the use site.",
         "description" : "No method-level annotation: inherits the global inlineResponseSchemas=true default, so the\n Widget response schema is inlined directly at the use site.  Widget is reached only via\n inlined paths in this service, so it never lands in components/schemas.",
         "parameters" : [ {
           "name" : "id",
@@ -38,7 +38,7 @@
     },
     "/gadgets/{id}" : {
       "get" : {
-        "summary" : "Per-method override: inline_response=false forces a $ref to components/schemas even though\n the global default is true.",
+        "summary" : "Per-method override: inline_response=false forces a $ref to components/schemas even though the global default is true.",
         "description" : "Per-method override: inline_response=false forces a $ref to components/schemas even though\n the global default is true.  Because of this non-inlined path, Gadget appears in components\n and the other (inlined) Gadget call sites $ref into it.",
         "parameters" : [ {
           "name" : "id",
@@ -64,7 +64,7 @@
     },
     "/widgets/{envelope_id}" : {
       "post" : {
-        "summary" : "No method-level annotation: inherits the global inlineRequestSchemas=true default, so the\n request body schema is inlined.",
+        "summary" : "No method-level annotation: inherits the global inlineRequestSchemas=true default, so the request body schema is inlined.",
         "description" : "No method-level annotation: inherits the global inlineRequestSchemas=true default, so the\n request body schema is inlined.",
         "parameters" : [ {
           "name" : "envelope_id",
@@ -118,7 +118,7 @@
     },
     "/gadgets/{envelope_id}" : {
       "post" : {
-        "summary" : "Per-method override: inline_request=false forces a $ref to components/schemas for the\n request body even though the global default is true.",
+        "summary" : "Per-method override: inline_request=false forces a $ref to components/schemas for the request body even though the global default is true.",
         "description" : "Per-method override: inline_request=false forces a $ref to components/schemas for the\n request body even though the global default is true.",
         "parameters" : [ {
           "name" : "envelope_id",

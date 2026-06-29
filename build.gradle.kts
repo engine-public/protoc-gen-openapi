@@ -27,6 +27,28 @@ buildscript {
                 useVersion("3.6.1")
                 because("plexus-utils directory traversal (GHSA-6fmv-xxpf-w3cw)")
             }
+            /*
+             * jackson-databind 2.x deserialization CVE batch (alerts #45/#47/#49/#51/#54/#55/#57).
+             * Build-time only: arrives via jackson-bom 2.21.2 pulled by the cyclonedx
+             * (cyclonedx-core-java) and jreleaser plugins; it is on no project
+             * runtime/compile classpath, so it is never shipped. Alert #54
+             * (GHSA-5jmj-h7xm-6q6v) requires >= 2.21.5, which was never published to
+             * Maven Central (the line jumps 2.21.4 -> 2.22.0), so pin the whole Jackson
+             * 2.x family to 2.22.0 to keep databind/core/dataformat internally aligned.
+             *
+             * jackson-annotations is excluded: since Jackson 2.20 it drops the patch
+             * component (its release is "2.22", not "2.22.0"), so forcing it to "2.22.0"
+             * would fail to resolve. The jackson-bom 2.22.0 above pins it to 2.22 for us.
+             */
+            if (requested.group.startsWith("com.fasterxml.jackson") &&
+                requested.name != "jackson-annotations"
+            ) {
+                useVersion("2.22.0")
+                because(
+                    "jackson-databind 2.x deserialization CVEs; alert #54 (GHSA-5jmj-h7xm-6q6v) " +
+                        "requires >= 2.21.5, unpublished, so using 2.22.0.",
+                )
+            }
         }
     }
 }

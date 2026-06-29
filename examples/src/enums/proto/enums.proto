@@ -10,9 +10,11 @@ import "google/protobuf/empty.proto";
 import "engine/protoc/openapi/annotations.proto";
 
 option (.engine.protoc.openapi.file) = {
-    info: {
-        title: "Enums Example API"
-        version: "1.0.0"
+    openapi: {
+        info: {
+            title: "Enums Example API"
+            version: "1.0.0"
+        }
     }
 };
 
@@ -23,7 +25,7 @@ option (.engine.protoc.openapi.file) = {
 // The lifecycle status of an order.
 enum OrderStatus {
     // UNSET is the proto3 conventional default value (number = 0).
-    UNSET = 0 [(.engine.protoc.openapi.suppress) = false];
+    UNSET = 0 [(.engine.protoc.openapi.enum_value) = { suppress: false }];
     // Order has been received and is awaiting processing.
     //
     // Sometimes an enum comment might be multi-line.
@@ -41,7 +43,7 @@ enum OrderStatus {
 // This enum carries inline = true, so it is always inlined regardless of the
 // inlineEnums compiler option.
 enum ShipmentPriority {
-    option (.engine.protoc.openapi.inline) = true;
+    option (.engine.protoc.openapi.enum) = { inline: true };
     PRIORITY_UNSET = 0;
     STANDARD = 1;
     EXPRESS = 2;
@@ -52,7 +54,7 @@ enum ShipmentPriority {
 // This enum carries inline = false, so it is always a component schema
 // regardless of the inlineEnums compiler option.
 enum ReturnReason {
-    option (.engine.protoc.openapi.inline) = false;
+    option (.engine.protoc.openapi.enum) = { inline: false };
     REASON_UNSET = 0;
     DAMAGED = 1;
     WRONG_ITEM = 2;
@@ -64,8 +66,10 @@ enum ReturnReason {
 // description and a title, demonstrating annotation-level override.
 enum PaymentMethod {
     option (.engine.protoc.openapi.enum) = {
-        object: {
-            description: "The payment instrument used to complete the transaction."
+        schema: {
+            object: {
+                description: "The payment instrument used to complete the transaction."
+            }
         }
     };
     PAYMENT_UNSET = 0;
@@ -73,7 +77,7 @@ enum PaymentMethod {
     DEBIT_CARD = 2;
     BANK_TRANSFER = 3;
     // Suppress this value with a per-value annotation regardless of suppressDefaultEnumValues.
-    CRYPTO = 4 [(.engine.protoc.openapi.suppress) = true];
+    CRYPTO = 4 [(.engine.protoc.openapi.enum_value) = { suppress: true }];
 }
 
 // ---------------------------------------------------------------------------

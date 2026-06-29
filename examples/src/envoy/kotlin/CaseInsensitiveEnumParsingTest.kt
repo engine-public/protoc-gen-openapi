@@ -48,7 +48,12 @@ class CaseInsensitiveEnumParsingTest : EnvoyTestBase(GrpcJsonTranscoder(caseInse
                     .shouldNotBeNull()
 
             val result = ProtocGenOpenAPI.from(request()) {
+
+                inlineRequestSchemas = false
+
+                inlineResponseSchemas = false
                 enumValueFormat = ProtocGenOpenAPI.Options.EnumValueFormat.LOWER_CASE
+                serviceInclude = "HelloService"
                 version = "1.0.0"
             }.compile()
 
@@ -61,6 +66,7 @@ class CaseInsensitiveEnumParsingTest : EnvoyTestBase(GrpcJsonTranscoder(caseInse
                 { "matches reference: " + it.name },
                 result.fileList,
             ) { file ->
+                GoldenFiles.maybeWriteGolden("envoy", "${file.name}.CaseInsensitiveEnumParsingTest.json", file.content)
                 val expected = jsonMapper.readTree(
                     CaseInsensitiveEnumParsingTest::class.java
                         .getResourceAsStream("/${file.name}.CaseInsensitiveEnumParsingTest.json")

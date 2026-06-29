@@ -124,6 +124,51 @@ internal class JsonContext(
             else -> null
         }
 
+    /**
+     * Returns an inline JSON Schema for any well-known protobuf type, including the structural
+     * messages (`Any`, `Struct`, `Value`, `ListValue`, `FieldMask`, `Empty`) that have no useful
+     * `components/schemas` representation derived from their proto fields.  Returns `null` when
+     * the type is not well-known and must be emitted via `$ref` or recursive expansion.
+     */
+    fun wellKnownTypeSchema(typeName: String): ObjectNode? = wellKnownScalarSchema(typeName) ?: wellKnownStructuralSchema(typeName)
+
+    /**
+     * Inline schemas for protobuf structural well-known types.  These messages encode as
+     * arbitrary JSON in proto3 JSON (`Any` carries `@type` + free-form members, `Struct` is an
+     * open object, `Value` is any JSON value, `ListValue` is an array of those, `FieldMask` is a
+     * comma-joined path string, `Empty` is the empty object), so the proto field structure of
+     * the message itself is not a useful schema to surface to API clients.
+     */
+    private fun wellKnownStructuralSchema(typeName: String): ObjectNode? =
+        when (typeName) {
+            ".google.protobuf.Any" -> openObject()
+
+            ".google.protobuf.Struct" -> openObject()
+
+            ".google.protobuf.Value" -> obj()
+
+            ".google.protobuf.ListValue" -> obj().also {
+                it.put("type", "array")
+                it.set("items", obj())
+            }
+
+            ".google.protobuf.FieldMask" -> scalar("string")
+
+            ".google.protobuf.Empty" -> obj().also {
+                it.put("type", "object")
+                it.set("properties", obj())
+                it.put("additionalProperties", false)
+            }
+
+            else -> null
+        }
+
+    private fun openObject(): ObjectNode =
+        obj().also {
+            it.put("type", "object")
+            it.put("additionalProperties", true)
+        }
+
     private fun scalar(
         type: String,
         format: String? = null,

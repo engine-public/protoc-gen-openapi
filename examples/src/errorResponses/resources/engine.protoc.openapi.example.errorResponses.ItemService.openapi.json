@@ -1,0 +1,381 @@
+{
+  "openapi" : "3.1.0",
+  "paths" : {
+    "/items/{id}" : {
+      "get" : {
+        "summary" : "Single error scenario, with \"grpc_code\" to drive the example payload.",
+        "description" : "Single error scenario, with `grpc_code` to drive the example payload.",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Item"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Item not found.",
+            "x-grpc-code" : "NOT_FOUND",
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  "grpc-error" : {
+                    "summary" : "NOT_FOUND",
+                    "value" : {
+                      "code" : 5,
+                      "message" : "",
+                      "details" : [ ]
+                    }
+                  }
+                },
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "code" : {
+                      "type" : "integer",
+                      "format" : "int32"
+                    },
+                    "message" : {
+                      "type" : "string"
+                    },
+                    "details" : {
+                      "type" : "array",
+                      "items" : {
+                        "$ref" : "#/components/schemas/ValidationError"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put" : {
+        "summary" : "Collision between an explicit \"responses\" entry and an \"error_responses\" entry at the same status.",
+        "description" : "Collision between an explicit `responses` entry and an `error_responses` entry at the\n same status.  The shortcut wins (last-write-wins); the compiler emits a WARN.",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "required" : true,
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Item"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Inline 200 from explicit responses block.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Item"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Last write loses to a concurrent update.",
+            "x-grpc-code" : "ABORTED",
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  "grpc-error" : {
+                    "summary" : "ABORTED",
+                    "value" : {
+                      "code" : 10,
+                      "message" : "",
+                      "details" : [ ]
+                    }
+                  }
+                },
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "code" : {
+                      "type" : "integer",
+                      "format" : "int32"
+                    },
+                    "message" : {
+                      "type" : "string"
+                    },
+                    "details" : {
+                      "type" : "array",
+                      "items" : {
+                        "$ref" : "#/components/schemas/ConflictError"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete" : {
+        "summary" : "Duplicate status within \"error_responses\" itself.",
+        "description" : "Duplicate status within `error_responses` itself.  The compiler emits a WARN and the\n last entry wins.",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Item"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Second declaration overwrites the first.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "code" : {
+                      "type" : "integer",
+                      "format" : "int32"
+                    },
+                    "message" : {
+                      "type" : "string"
+                    },
+                    "details" : {
+                      "type" : "array",
+                      "items" : {
+                        "$ref" : "#/components/schemas/ConflictError"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/items" : {
+      "get" : {
+        "summary" : "Multiple error scenarios across distinct status codes.",
+        "description" : "Multiple error scenarios across distinct status codes.",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Item"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "One or more proto field validation failures.",
+            "x-grpc-code" : "INVALID_ARGUMENT",
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  "grpc-error" : {
+                    "summary" : "INVALID_ARGUMENT",
+                    "value" : {
+                      "code" : 3,
+                      "message" : "",
+                      "details" : [ ]
+                    }
+                  }
+                },
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "code" : {
+                      "type" : "integer",
+                      "format" : "int32"
+                    },
+                    "message" : {
+                      "type" : "string"
+                    },
+                    "details" : {
+                      "type" : "array",
+                      "items" : {
+                        "$ref" : "#/components/schemas/ValidationError"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Caller is unauthenticated or lacks permission for this resource.",
+            "x-grpc-code" : "UNAUTHENTICATED",
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  "grpc-error" : {
+                    "summary" : "UNAUTHENTICATED",
+                    "value" : {
+                      "code" : 16,
+                      "message" : "",
+                      "details" : [ ]
+                    }
+                  }
+                },
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "code" : {
+                      "type" : "integer",
+                      "format" : "int32"
+                    },
+                    "message" : {
+                      "type" : "string"
+                    },
+                    "details" : {
+                      "type" : "array",
+                      "items" : {
+                        "$ref" : "#/components/schemas/AuthError"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Catch-all for unexpected server-side failures.",
+            "x-grpc-code" : "INTERNAL",
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  "grpc-error" : {
+                    "summary" : "INTERNAL",
+                    "value" : {
+                      "code" : 13,
+                      "message" : "",
+                      "details" : [ ]
+                    }
+                  }
+                },
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "code" : {
+                      "type" : "integer",
+                      "format" : "int32"
+                    },
+                    "message" : {
+                      "type" : "string"
+                    },
+                    "details" : {
+                      "type" : "array",
+                      "items" : {
+                        "$ref" : "#/components/schemas/ServerError"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "info" : {
+    "title" : "Error Responses Example API",
+    "version" : "1.0.0"
+  },
+  "components" : {
+    "schemas" : {
+      "AuthError" : {
+        "type" : "object",
+        "description" : "Caller is unauthenticated or lacks permission for this resource.",
+        "properties" : {
+          "reason" : {
+            "type" : "string"
+          }
+        }
+      },
+      "ConflictError" : {
+        "type" : "object",
+        "description" : "The requested entity changed underneath the caller.",
+        "properties" : {
+          "currentVersion" : {
+            "type" : "string"
+          }
+        }
+      },
+      "Item" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string"
+          },
+          "value" : {
+            "type" : "string"
+          }
+        }
+      },
+      "ServerError" : {
+        "type" : "object",
+        "description" : "Catch-all for unexpected server-side failures.",
+        "properties" : {
+          "traceId" : {
+            "type" : "string"
+          }
+        }
+      },
+      "ValidationError" : {
+        "type" : "object",
+        "description" : "One or more proto field validation failures.",
+        "properties" : {
+          "fieldPaths" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "detail" : {
+            "type" : "string"
+          }
+        }
+      }
+    }
+  }
+}

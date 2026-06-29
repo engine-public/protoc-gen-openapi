@@ -21,12 +21,15 @@ class MergedTest :
 
         val request = MergedTest::class.java.getResourceAsStream("/code-generator-request.binpb").shouldNotBeNull()
         val response = ProtocGenOpenAPI.from(request) {
+            inlineRequestSchemas = false
+            inlineResponseSchemas = false
             merge = true
             validateOutput = true
             validationErrorsAreFatal = true
             autoTagServices = true
         }.compile()
         val generatedFile = response.fileList.find { it.name == "engine.protoc.openapi.example.merged.openapi.json" }.shouldNotBeNull()
+        GoldenFiles.maybeWriteGolden("merged", generatedFile.name, generatedFile.content)
         val mapper = ObjectMapper()
         val json = mapper.readTree(generatedFile.content)
 

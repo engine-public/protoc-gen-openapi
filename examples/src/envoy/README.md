@@ -103,7 +103,8 @@ schema refs as explicitly annotated methods.
 trailers into a JSON body shaped as `google.rpc.Status` (`{"code": 5, "message": "..."}`) and maps
 gRPC status codes to HTTP status codes (`NOT_FOUND` → 404). The test confirms that a gRPC
 `NOT_FOUND` error produces an HTTP 404 with the expected JSON body. The compiler injects a
-`google.rpc.Status` component schema and a `default` error response entry on every operation.
+`default` error response entry on every operation whose JSON body is an inline `google.rpc.Status`
+schema — the envelope is never added to `components/schemas`.
 
 ### `stream_newline_delimited` → `streamNewlineDelimited`
 

@@ -24,10 +24,15 @@ class UnmergedTest :
 
         val request = UnmergedTest::class.java.getResourceAsStream("/code-generator-request.binpb").shouldNotBeNull()
         val response = ProtocGenOpenAPI.from(request) {
+            inlineRequestSchemas = false
+            inlineResponseSchemas = false
             merge = false
             validateOutput = true
+            validationErrorsAreFatal = true
         }.compile()
         val mapper = ObjectMapper()
+
+        response.fileList.forEach { GoldenFiles.maybeWriteGolden("unmerged", it.name, it.content) }
 
         val oasSchema by lazy {
             SchemaRegistry.withDefaultDialect(SpecificationVersion.DRAFT_2020_12) {

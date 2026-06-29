@@ -22,8 +22,11 @@ class PetStoreTest :
 
         val request = PetStoreTest::class.java.getResourceAsStream("/code-generator-request.binpb").shouldNotBeNull()
         val response = ProtocGenOpenAPI.from(request) {
+            inlineRequestSchemas = false
+            inlineResponseSchemas = false
             merge = false
             validateOutput = true
+            validationErrorsAreFatal = true
         }.compile()
         val generatedFile = response.fileList.find { it.name == "engine.protoc.openapi.example.petstore.PetService.openapi.json" }.shouldNotBeNull()
         val mapper = ObjectMapper()

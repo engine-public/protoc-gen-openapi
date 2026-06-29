@@ -13,7 +13,9 @@ import "engine/protoc/openapi/annotations.proto";
 // Regardless of what options.version is set to, the annotation version always wins.
 service PinnedVersionService {
     option (.engine.protoc.openapi.service) = {
-        info { version: "pinned-1.0.0" }
+        openapi: {
+            info { version: "pinned-1.0.0" }
+        }
     };
 
     // Gets a widget by its identifier.

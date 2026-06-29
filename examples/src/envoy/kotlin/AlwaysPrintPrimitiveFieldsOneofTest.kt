@@ -75,6 +75,8 @@ class AlwaysPrintPrimitiveFieldsOneofTest :
 
         test("oneof members are excluded from required with alwaysPrintPrimitiveFields") {
             val result = ProtocGenOpenAPI.from(rawRequest.toByteArray().inputStream()) {
+                inlineRequestSchemas = false
+                inlineResponseSchemas = false
                 alwaysPrintPrimitiveFields = true
                 autoMapping = true
             }.compile()
@@ -92,6 +94,8 @@ class AlwaysPrintPrimitiveFieldsOneofTest :
 
         test("without alwaysPrintPrimitiveFields no required array is emitted") {
             val result = ProtocGenOpenAPI.from(rawRequest.toByteArray().inputStream()) {
+                inlineRequestSchemas = false
+                inlineResponseSchemas = false
                 alwaysPrintPrimitiveFields = false
                 autoMapping = true
             }.compile()

@@ -43,7 +43,12 @@ class PreserveProtoFieldNamesTest : EnvoyTestBase(GrpcJsonTranscoder(printOption
                     .shouldNotBeNull()
 
             val result = ProtocGenOpenAPI.from(request()) {
+
+                inlineRequestSchemas = false
+
+                inlineResponseSchemas = false
                 preserveProtoFieldNames = true
+                serviceInclude = "HelloService"
                 version = "1.0.0"
             }.compile()
 
@@ -56,6 +61,7 @@ class PreserveProtoFieldNamesTest : EnvoyTestBase(GrpcJsonTranscoder(printOption
                 { "matches reference: " + it.name },
                 result.fileList,
             ) { file ->
+                GoldenFiles.maybeWriteGolden("envoy", "${file.name}.PreserveProtoFieldNamesTest.json", file.content)
                 val expected = jsonMapper.readTree(
                     PreserveProtoFieldNamesTest::class.java
                         .getResourceAsStream("/${file.name}.PreserveProtoFieldNamesTest.json")

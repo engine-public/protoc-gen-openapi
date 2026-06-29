@@ -71,7 +71,11 @@ testing {
         register<JvmTestSuite>("filtering")
         register<JvmTestSuite>("wellKnownTypes")
         register<JvmTestSuite>("inlineSchemas")
+        register<JvmTestSuite>("inlineSchemasGlobal")
         register<JvmTestSuite>("inlineFieldSchema")
+        register<JvmTestSuite>("serviceOrdering")
+        register<JvmTestSuite>("errorResponses")
+        register<JvmTestSuite>("referenceLinks")
 
         /*
          * Envoy integration suite: runs Envoy in a container (via testcontainers) and exercises

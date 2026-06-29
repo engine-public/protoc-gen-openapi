@@ -9,9 +9,11 @@ import "google/api/annotations.proto";
 import "engine/protoc/openapi/annotations.proto";
 
 option (.engine.protoc.openapi.file) = {
-    info: {
-        title: "Service Filtering Example"
-        version: "1.0.0"
+    openapi: {
+        info: {
+            title: "Service Filtering Example"
+            version: "1.0.0"
+        }
     }
 };
 

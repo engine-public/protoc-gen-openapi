@@ -70,15 +70,35 @@ Covers `preserve_proto_field_names`, `always_print_primitive_fields`, `always_pr
 Demonstrates the method-level `inline_request_schema` / `inline_response_schema` annotations, which expand the request or response body schema at the use site instead of emitting a `$ref` into `components/schemas`.
 Transitive: a message reached only through inlined boundaries is also inlined; one that has any non-inlined reference stays in components and is `$ref`'d from the inline expansion.
 
+### [inlineSchemasGlobal](src/inlineSchemasGlobal/README.md)
+
+Demonstrates the `inlineRequestSchemas` and `inlineResponseSchemas` compiler options, the global counterparts of the per-method `inline_request` / `inline_response` annotations.
+Both default to `true`, so every RPC's request and response body schema is inlined at the use site unless the method's annotation explicitly opts out.
+
 ### [inlineFieldSchema](src/inlineFieldSchema/README.md)
 
 Demonstrates the field-level `inline_schema` annotation, which inlines a single message-typed field's schema at the field site.
 Shares the transitivity rule with [inlineSchemas](src/inlineSchemas/README.md) but operates at the field granularity rather than the request/response boundary.
 
+### [serviceOrdering](src/serviceOrdering/README.md)
+
+Demonstrates the service-level `index_order` annotation, which controls the order in which a service's paths and auto-generated tag appear in the emitted document.
+Un-annotated services fall into their encounter ordinal, annotated services use their explicit value, negative indices are valid, and ties break by source order.
+
+### [errorResponses](src/errorResponses/README.md)
+
+Demonstrates the method-level `error_responses` shortcut: one line per `(HTTP status, error class)` pair expands into a fully-formed response whose schema is `google.rpc.Status` (via `allOf`) typed with the error class's `$ref`.
+Covers single error, multiple errors, optional `grpc_code` (emitted as `x-grpc-code` plus a seeded `examples` block), and the two collision shapes (explicit `responses` vs `error_responses`, and duplicate status within `error_responses`).
+
 ### [wellKnownTypes](src/wellKnownTypes/README.md)
 
 Demonstrates how the plugin emits inline OpenAPI schemas for structural protobuf well-known types — `Any`, `Struct`, `Value`, `ListValue`, `FieldMask`, and `Empty` — instead of dangling `$ref`s into `components/schemas`.
 Covers both first-party fields that carry these types and the canonical regression case where `google.api.HttpBody` is returned by an RPC and its `extensions` field bottoms out in `google.protobuf.Any`.
+
+### [referenceLinks](src/referenceLinks/README.md)
+
+Demonstrates the `referenceLinkTarget` option, which rewrites CommonMark reference links (`[Widget]`, `[WidgetService.GetWidget]`) in proto comments into same-document anchors.
+Compiles one proto twice — once for the `SWAGGER_UI` dialect and once for `REDOC` — showing the different anchor formats and the `<SchemaDefinition>` schema sections that Redoc mode emits so schema references have a target.
 
 ### [responseBodyError](src/responseBodyError/README.md)
 

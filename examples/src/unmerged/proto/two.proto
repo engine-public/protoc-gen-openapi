@@ -13,8 +13,10 @@ import "doodad.proto";
 // This guy does some really heavy stuff.
 service SecondaryService {
     option (.engine.protoc.openapi.service) = {
-        info: {
-            version: "7.2.1"
+        openapi: {
+            info: {
+                version: "7.2.1"
+            }
         }
     };
 

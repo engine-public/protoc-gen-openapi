@@ -65,7 +65,7 @@
             "description": "OK"
           }
         },
-        "summary": "PingHello intentionally has no google.api.http annotation so it can be\n exercised via Envoy's auto_mapping feature."
+        "summary": "PingHello intentionally has no google.api.http annotation so it can be exercised via Envoy's auto_mapping feature."
       }
     },
     "/hello": {

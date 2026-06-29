@@ -1,0 +1,107 @@
+{
+  "openapi" : "3.1.0",
+  "paths" : {
+    "/widgets/{id}" : {
+      "get" : {
+        "summary" : "Fetches a single Widget by id.",
+        "description" : "Fetches a single `Widget` by id.  For the collection form, see\n[WidgetService.ListWidgets](#/WidgetService/WidgetService_ListWidgets).",
+        "operationId" : "WidgetService_GetWidget",
+        "tags" : [ "WidgetService" ],
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Widget"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/widgets" : {
+      "get" : {
+        "summary" : "Lists every Widget.",
+        "description" : "Lists every `Widget`.  Each item carries a `WidgetStatus`.",
+        "operationId" : "WidgetService_ListWidgets",
+        "tags" : [ "WidgetService" ],
+        "parameters" : [ {
+          "name" : "pageSize",
+          "in" : "query",
+          "description" : "Maximum number of `Widget` items to return in one page.",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ListWidgetsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "tags" : [ {
+    "name" : "WidgetService",
+    "description" : "Manages `Widget` resources.  Start with [WidgetService.GetWidget](#/WidgetService/WidgetService_GetWidget) to fetch one."
+  } ],
+  "components" : {
+    "schemas" : {
+      "ListWidgetsResponse" : {
+        "type" : "object",
+        "description" : "A page of `Widget` results returned by [WidgetService.ListWidgets](#/WidgetService/WidgetService_ListWidgets).",
+        "properties" : {
+          "widgets" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Widget"
+            },
+            "description" : "The `Widget` items on this page."
+          }
+        }
+      },
+      "Widget" : {
+        "type" : "object",
+        "description" : "A widget.  Its lifecycle state is a `WidgetStatus`; the display label lives in `name`.",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "description" : "Unique id of this widget."
+          },
+          "name" : {
+            "type" : "string",
+            "description" : "Human-readable label."
+          },
+          "status" : {
+            "$ref" : "#/components/schemas/WidgetStatus",
+            "description" : "Current lifecycle state — one of the `WidgetStatus` values."
+          }
+        }
+      },
+      "WidgetStatus" : {
+        "type" : "string",
+        "description" : "Lifecycle state of a `Widget`.\n\n- `WIDGET_STATUS_UNSPECIFIED` — Default, unset state.\n\n- `WIDGET_STATUS_ACTIVE` — The `Widget` is active and visible.\n\n- `WIDGET_STATUS_ARCHIVED` — The `Widget` has been archived.",
+        "enum" : [ "WIDGET_STATUS_UNSPECIFIED", "WIDGET_STATUS_ACTIVE", "WIDGET_STATUS_ARCHIVED" ]
+      }
+    }
+  }
+}

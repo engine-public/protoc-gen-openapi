@@ -12,8 +12,10 @@ import "engine/protoc/openapi/annotations.proto";
 // CRUD Operations on DooDads
 service DooDadService {
     option (.engine.protoc.openapi.service) = {
-        info {
-            version: "22.33.44"
+        openapi: {
+            info {
+                version: "22.33.44"
+            }
         }
     };
 

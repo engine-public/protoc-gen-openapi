@@ -53,6 +53,10 @@ class AlwaysPrintPrimitiveFieldsTest : EnvoyTestBase(GrpcJsonTranscoder(printOpt
                     .shouldNotBeNull()
 
             val result = ProtocGenOpenAPI.from(request()) {
+
+                inlineRequestSchemas = false
+
+                inlineResponseSchemas = false
                 alwaysPrintPrimitiveFields = true
                 serviceInclude = "HelloService"
                 version = "1.0.0"
@@ -67,6 +71,7 @@ class AlwaysPrintPrimitiveFieldsTest : EnvoyTestBase(GrpcJsonTranscoder(printOpt
                 { "matches reference: " + it.name },
                 result.fileList,
             ) { file ->
+                GoldenFiles.maybeWriteGolden("envoy", "${file.name}.AlwaysPrintPrimitiveFieldsTest.json", file.content)
                 val expected = jsonMapper.readTree(
                     AlwaysPrintPrimitiveFieldsTest::class.java
                         .getResourceAsStream("/${file.name}.AlwaysPrintPrimitiveFieldsTest.json")

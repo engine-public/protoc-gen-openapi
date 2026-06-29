@@ -14,9 +14,11 @@ import "google/protobuf/struct.proto";
 import "engine/protoc/openapi/annotations.proto";
 
 option (.engine.protoc.openapi.file) = {
-    info: {
-        title: "Well-Known Types Example API"
-        version: "1.0.0"
+    openapi: {
+        info: {
+            title: "Well-Known Types Example API"
+            version: "1.0.0"
+        }
     }
 };
 

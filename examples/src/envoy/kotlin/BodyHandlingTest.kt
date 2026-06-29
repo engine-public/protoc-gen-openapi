@@ -97,6 +97,10 @@ class BodyHandlingTest :
                     .shouldNotBeNull()
 
             val result = ProtocGenOpenAPI.from(request()) {
+
+                inlineRequestSchemas = false
+
+                inlineResponseSchemas = false
                 serviceInclude = "BodyService"
                 version = "1.0.0"
             }.compile()
@@ -110,6 +114,7 @@ class BodyHandlingTest :
                 { "matches reference: " + it.name },
                 result.fileList,
             ) { file ->
+                GoldenFiles.maybeWriteGolden("envoy", "${file.name}.BodyHandlingTest.json", file.content)
                 val expected = jsonMapper.readTree(
                     BodyHandlingTest::class.java
                         .getResourceAsStream("/${file.name}.BodyHandlingTest.json")

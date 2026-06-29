@@ -31,24 +31,6 @@
           }
         },
         "type": "object"
-      },
-      "google.rpc.Status": {
-        "properties": {
-          "code": {
-            "format": "int32",
-            "type": "integer"
-          },
-          "details": {
-            "items": {
-              "type": "object"
-            },
-            "type": "array"
-          },
-          "message": {
-            "type": "string"
-          }
-        },
-        "type": "object"
       }
     }
   },
@@ -85,7 +67,22 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/google.rpc.Status"
+                  "properties": {
+                    "code": {
+                      "format": "int32",
+                      "type": "integer"
+                    },
+                    "details": {
+                      "items": {
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
                 }
               }
             },
@@ -121,7 +118,22 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/google.rpc.Status"
+                  "properties": {
+                    "code": {
+                      "format": "int32",
+                      "type": "integer"
+                    },
+                    "details": {
+                      "items": {
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
                 }
               }
             },

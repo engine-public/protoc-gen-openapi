@@ -19,6 +19,8 @@ class InlineFieldSchemaTest :
                 .shouldNotBeNull()
         val response =
             ProtocGenOpenAPI.from(request) {
+                inlineRequestSchemas = false
+                inlineResponseSchemas = false
                 validateOutput = true
                 validationErrorsAreFatal = true
             }.compile()
@@ -27,6 +29,7 @@ class InlineFieldSchemaTest :
         val outputName =
             "engine.protoc.openapi.example.inlineFieldSchema.ArchiveService.openapi.json"
         val generatedFile = response.fileList.find { it.name == outputName }.shouldNotBeNull()
+        GoldenFiles.maybeWriteGolden("inlineFieldSchema", outputName, generatedFile.content)
         val expected =
             InlineFieldSchemaTest::class.java
                 .getResourceAsStream("/$outputName")

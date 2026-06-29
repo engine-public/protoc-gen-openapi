@@ -82,6 +82,8 @@ class PreserveProtoFieldNamesNestedTest :
 
         test("preserveProtoFieldNames applies to nested schemas resolved via ref as well as top-level") {
             val result = ProtocGenOpenAPI.from(rawRequest.toByteArray().inputStream()) {
+                inlineRequestSchemas = false
+                inlineResponseSchemas = false
                 preserveProtoFieldNames = true
             }.compile()
 
@@ -103,6 +105,8 @@ class PreserveProtoFieldNamesNestedTest :
 
         test("without preserveProtoFieldNames nested schemas use json_name") {
             val result = ProtocGenOpenAPI.from(rawRequest.toByteArray().inputStream()) {
+                inlineRequestSchemas = false
+                inlineResponseSchemas = false
                 preserveProtoFieldNames = false
             }.compile()
 

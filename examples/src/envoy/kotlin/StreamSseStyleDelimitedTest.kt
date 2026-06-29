@@ -43,6 +43,10 @@ class StreamSseStyleDelimitedTest : EnvoyTestBase(GrpcJsonTranscoder(printOption
                     .shouldNotBeNull()
 
             val result = ProtocGenOpenAPI.from(request()) {
+
+                inlineRequestSchemas = false
+
+                inlineResponseSchemas = false
                 streamSseStyleDelimited = true
                 serviceInclude = "HelloService"
                 version = "1.0.0"
@@ -57,6 +61,7 @@ class StreamSseStyleDelimitedTest : EnvoyTestBase(GrpcJsonTranscoder(printOption
                 { "matches reference: " + it.name },
                 result.fileList,
             ) { file ->
+                GoldenFiles.maybeWriteGolden("envoy", "${file.name}.StreamSseStyleDelimitedTest.json", file.content)
                 val expected = jsonMapper.readTree(
                     StreamSseStyleDelimitedTest::class.java
                         .getResourceAsStream("/${file.name}.StreamSseStyleDelimitedTest.json")
@@ -78,6 +83,8 @@ class StreamSseStyleDelimitedTest : EnvoyTestBase(GrpcJsonTranscoder(printOption
                     .getResourceAsStream("/code-generator-request.binpb")
                     .shouldNotBeNull()
                 val result = ProtocGenOpenAPI.from(request) {
+                    inlineRequestSchemas = false
+                    inlineResponseSchemas = false
                     streamSseStyleDelimited = true
                     streamNewlineDelimited = true
                     serviceInclude = "HelloService"
@@ -96,6 +103,8 @@ class StreamSseStyleDelimitedTest : EnvoyTestBase(GrpcJsonTranscoder(printOption
                     .getResourceAsStream("/code-generator-request.binpb")
                     .shouldNotBeNull()
                 val result = ProtocGenOpenAPI.from(request) {
+                    inlineRequestSchemas = false
+                    inlineResponseSchemas = false
                     streamSseStyleDelimited = true
                     serviceInclude = "HelloService"
                     version = "1.0.0"

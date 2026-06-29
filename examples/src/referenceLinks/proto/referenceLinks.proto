@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+// Demonstrates CommonMark reference links in proto comments.  Comments throughout this file
+// reference other elements with `[Type]` and `[Service.Method]` syntax; the `referenceLinkTarget`
+// option rewrites each resolvable reference to a same-document anchor (Swagger UI or Redoc style).
+package engine.protoc.openapi.example.referenceLinks;
+
+option java_package = "com.engine.protoc.openapi.example.referenceLinks";
+option java_multiple_files = true;
+
+import "google/api/annotations.proto";
+
+// Manages [Widget] resources.  Start with [WidgetService.GetWidget] to fetch one.
+service WidgetService {
+    // Fetches a single [Widget] by id.  For the collection form, see
+    // [WidgetService.ListWidgets].
+    rpc GetWidget(GetWidgetRequest) returns (Widget) {
+        option (google.api.http) = {get: "/widgets/{id}"};
+    }
+
+    // Lists every [Widget].  Each item carries a [WidgetStatus].
+    rpc ListWidgets(ListWidgetsRequest) returns (ListWidgetsResponse) {
+        option (google.api.http) = {get: "/widgets"};
+    }
+}
+
+// Request for [WidgetService.GetWidget].
+message GetWidgetRequest {
+    // Unique id of the [Widget] to fetch.
+    string id = 1;
+}
+
+// Request for [WidgetService.ListWidgets].
+message ListWidgetsRequest {
+    // Maximum number of [Widget] items to return in one page.
+    int32 page_size = 1;
+}
+
+// A page of [Widget] results returned by [WidgetService.ListWidgets].
+message ListWidgetsResponse {
+    // The [Widget] items on this page.
+    repeated Widget widgets = 1;
+}
+
+// A widget.  Its lifecycle state is a [WidgetStatus]; the display label lives in [name].
+message Widget {
+    // Unique id of this widget.
+    string id = 1;
+
+    // Human-readable label.
+    string name = 2;
+
+    // Current lifecycle state — one of the [WidgetStatus] values.
+    WidgetStatus status = 3;
+}
+
+// Lifecycle state of a [Widget].
+enum WidgetStatus {
+    // Default, unset state.
+    WIDGET_STATUS_UNSPECIFIED = 0;
+
+    // The [Widget] is active and visible.
+    WIDGET_STATUS_ACTIVE = 1;
+
+    // The [Widget] has been archived.
+    WIDGET_STATUS_ARCHIVED = 2;
+}

@@ -7,7 +7,13 @@ import com.engine.protoc.util.extensions.wrap
 import com.google.api.AnnotationsProto
 import com.google.protobuf.ExtensionRegistry
 import com.google.protobuf.compiler.PluginProtos
+import org.apache.logging.log4j.core.appender.ConsoleAppender
+import org.apache.logging.log4j.core.config.Configurator
+import org.apache.logging.log4j.core.config.builder.api.ConfigurationBuilderFactory
+import org.slf4j.event.Level
 import java.io.InputStream
+import java.util.concurrent.atomic.AtomicBoolean
+import org.apache.logging.log4j.Level as Log4jLevel
 
 public class ProtocGenOpenAPI(
     private val request: CodeGeneratorRequestWrapper,
@@ -61,6 +67,26 @@ public class ProtocGenOpenAPI(
          *   RFC 3986 URI-reference, which may not contain curly-braces in the host.
          */
         val validateOutput: Boolean,
+
+        /**
+         * Controls how validation issues found by [validateOutput] are reported.
+         *
+         * When `false` (the default), every validation issue is emitted at the SLF4J `WARN`
+         * level and the compile completes successfully — the generated document is still
+         * written to the [CodeGeneratorResponse][com.google.protobuf.compiler.PluginProtos.CodeGeneratorResponse]
+         * and no error string is set.
+         *
+         * When `true`, each issue is still logged at `WARN` AND added to the
+         * `CodeGeneratorResponse.error` field, causing the plugin to exit non-zero and protoc
+         * to abort the generation step.
+         *
+         * Has no effect unless [validateOutput] is also `true`; when [validateOutput] is
+         * `false` no validation runs at all.  Setting this option to `true` while
+         * [validateOutput] is `false` is reported as a `WARN` at compile-start.
+         *
+         * Passed via `--openapi_out=validationErrorsAreFatal=true:outdir`.
+         */
+        val validationErrorsAreFatal: Boolean,
 
         /**
          * The serialization format of every generated OpenAPI document.
@@ -155,6 +181,36 @@ public class ProtocGenOpenAPI(
         val inlineEnums: Boolean,
 
         /**
+         * Global default for inlining an RPC's request body schema at the use site rather than
+         * emitting a `$ref` into `components/schemas`.  Equivalent in effect to setting
+         * `inline_request: true` on every method's `engine.protoc.openapi.method` annotation.
+         *
+         * The per-method `inline_request` annotation overrides this option for a specific RPC,
+         * regardless of the global setting — an explicit `inline_request: false` keeps the `$ref`
+         * even when this option is `true`, and an explicit `inline_request: true` inlines even
+         * when this option is `false`.
+         *
+         * Transitivity is unchanged: messages reached only through an inlined boundary are
+         * themselves inlined; messages also reachable through a non-inlined path remain in
+         * components and are `$ref`'d from the inline expansion.
+         *
+         * Passed via `--openapi_out=inlineRequestSchemas=false:outdir`.
+         */
+        val inlineRequestSchemas: Boolean,
+
+        /**
+         * Global default for inlining an RPC's response body schema at the use site rather than
+         * emitting a `$ref` into `components/schemas`.  Equivalent in effect to setting
+         * `inline_response: true` on every method's `engine.protoc.openapi.method` annotation.
+         *
+         * The per-method `inline_response` annotation overrides this option for a specific RPC,
+         * regardless of the global setting.
+         *
+         * Passed via `--openapi_out=inlineResponseSchemas=false:outdir`.
+         */
+        val inlineResponseSchemas: Boolean,
+
+        /**
          * When `true`, enum values whose proto number is `0` (the proto3 default value
          * convention) are omitted from all OAS enum value lists.
          *
@@ -230,18 +286,22 @@ public class ProtocGenOpenAPI(
         val preserveProtoFieldNames: Boolean,
 
         /**
-         * When `true`, a reusable `google.rpc.Status` schema is added to `components/schemas`
-         * and every operation's `responses` map gains a `"default"` entry referencing it.
-         *
-         * This matches Envoy's `convert_grpc_status` option, which translates gRPC error trailers
-         * into an HTTP error response whose JSON body is shaped as `google.rpc.Status`:
+         * When `true`, every operation's `responses` map gains a `"default"` entry whose JSON
+         * body is an inline `google.rpc.Status` schema:
          *
          * ```json
          * { "code": 5, "message": "not found", "details": [...] }
          * ```
          *
-         * Enable this when the Envoy filter is configured with `convert_grpc_status: true` so
-         * that API consumers can see the error contract in the generated OpenAPI spec.
+         * This matches Envoy's `convert_grpc_status` option, which translates gRPC error trailers
+         * into an HTTP error response with that shape.  Enable this when the Envoy filter is
+         * configured with `convert_grpc_status: true` so that API consumers can see the error
+         * contract in the generated OpenAPI spec.
+         *
+         * The Status envelope is always inlined at the use site — it is never added to
+         * `components/schemas`.  Status is treated as an Envoy implementation detail, not a
+         * reusable OAS schema unit; the same inlining rule applies to error bodies produced by
+         * the `engine.protoc.openapi.method` annotation's `error_responses` field.
          *
          * See: [GrpcJsonTranscoder.convert_grpc_status](https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/filters/http/grpc_json_transcoder/v3/transcoder.proto#extensions-filters-http-grpc-json-transcoder-v3-grpcjsontranscoder)
          *
@@ -284,6 +344,32 @@ public class ProtocGenOpenAPI(
         val streamSseStyleDelimited: Boolean,
 
         /**
+         * Threshold at which the plugin emits log records via SLF4J.  Accepts any value of
+         * [org.slf4j.event.Level] (`TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR`); a record is
+         * emitted when its level is greater than or equal to this threshold.  Defaults to
+         * `ERROR` so the plugin is quiet by default but still surfaces error-level reports.
+         *
+         * The option is realised at runtime by programmatically reconfiguring the Log4j 2
+         * `Configuration` after [Options] is built, so it controls every logger the plugin
+         * (and its dependencies) creates.
+         *
+         * Passed via `--openapi_out=logLevel=DEBUG:outdir` (case-insensitive).
+         */
+        val logLevel: Level,
+
+        /**
+         * Optional path to a file that receives timestamped log records in addition to the
+         * stderr console output.  The stderr `Console` appender is always attached — its lines
+         * are prefixed with `[protoc-gen-openapi]` so they stand out from other compiler
+         * output protoc may multiplex on the same stream.  When this option is set, a `File`
+         * appender is *also* attached at the given path with a `%d{HH:mm:ss.SSS}`-prefixed
+         * pattern.
+         *
+         * Passed via `--openapi_out=logFile=/tmp/protoc.log:outdir`.
+         */
+        val logFile: String?,
+
+        /**
          * A Java-compatible regular expression tested via [Regex.containsMatchIn] against the
          * fully-qualified service name (`<package>.<ServiceName>`, e.g.
          * `com.example.v1.WidgetService`).  A service is **included** in the generated output
@@ -320,6 +406,38 @@ public class ProtocGenOpenAPI(
          * Passed via `--openapi_out=serviceExclude=<pattern>:outdir`.
          */
         val serviceExclude: String?,
+
+        /**
+         * Selects the documentation-renderer dialect that CommonMark **reference links** in
+         * `description` fields resolve against.  A reference link is a bracketed token such as
+         * `[Widget]`, `[catalog.v1.Widget]`, or `[WidgetService.GetWidget]` written in a proto
+         * leading comment; when it resolves, it is rewritten to a same-document anchor pointing at
+         * the referenced operation, tag, or schema.
+         *
+         * Anchor fragment formats are renderer-specific and **not** portable, so the target must be
+         * chosen explicitly; resolution is off by default:
+         *
+         * - [ReferenceLinkTarget.NONE] (default) — reference-link resolution is disabled.
+         *   `description` fields still emit clean CommonMark, but bracketed tokens are left
+         *   untouched and no derived `operationId` is added.
+         * - [ReferenceLinkTarget.SWAGGER_UI] — operations resolve to `#/{tag}/{operationId}`
+         *   and services (tags) to `#/{tag}`.  Swagger UI has no stable anchor for component
+         *   schemas, so message/enum references cannot be linked (see the unresolved behaviour below).
+         *   Requires the consumer to enable Swagger UI's `deepLinking` option.
+         * - [ReferenceLinkTarget.REDOC] — operations resolve to `#operation/{operationId}`, tags to
+         *   `#tag/{tagName}`, and message/enum references to plugin-generated schema sections (see
+         *   below).  Because Redoc has no stable standalone-schema anchor, enabling this target also
+         *   emits a `<SchemaDefinition>` section per component schema, grouped under an
+         *   `x-tagGroups` "Schemas" group, so every schema reference has a controlled `#tag/{name}`
+         *   anchor to point at.
+         *
+         * Unresolved or non-portable references never fail the build: the brackets are stripped and
+         * the label is rendered as an inline code span (e.g. `[Property]` → `` `Property` ``) with a
+         * warning.  (In a derived `summary`, which is plain text, the label is emitted bare.)
+         *
+         * Passed via `--openapi_out=referenceLinkTarget=redoc:outdir` (case-insensitive).
+         */
+        val referenceLinkTarget: ReferenceLinkTarget,
     ) {
         /**
          * The serialization format for generated OpenAPI documents.
@@ -382,6 +500,23 @@ public class ProtocGenOpenAPI(
              * See: [GrpcJsonTranscoder.case_insensitive_enum_parsing](https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/filters/http/grpc_json_transcoder/v3/transcoder.proto#extensions-filters-http-grpc-json-transcoder-v3-grpcjsontranscoder)
              */
             LOWER_CASE,
+        }
+
+        /**
+         * Selects the documentation-renderer dialect that CommonMark reference links in
+         * `description` fields resolve against.  See [Options.referenceLinkTarget] for the
+         * per-target anchor formats and behaviour.  All values are matched case-insensitively in
+         * `--openapi_out` parameters.
+         */
+        public enum class ReferenceLinkTarget {
+            /** Reference-link resolution is disabled; bracketed tokens are left untouched.  Default. */
+            NONE,
+
+            /** Resolve operation and tag references to Swagger UI anchors; schemas are not linked. */
+            SWAGGER_UI,
+
+            /** Resolve operation, tag, and schema references to Redoc anchors. */
+            REDOC,
         }
 
         /**
@@ -453,6 +588,12 @@ public class ProtocGenOpenAPI(
             public var validateOutput: Boolean = parameters.get<Boolean>("validateOutput") ?: false
 
             /**
+             * @see [Options.validationErrorsAreFatal]
+             */
+            public var validationErrorsAreFatal: Boolean =
+                parameters.get<Boolean>("validationErrorsAreFatal") ?: false
+
+            /**
              * @see [Options.outputFormat]
              */
             public var outputFormat: OutputFormat =
@@ -503,6 +644,18 @@ public class ProtocGenOpenAPI(
             public var inlineEnums: Boolean = parameters.get<Boolean>("inlineEnums") ?: false
 
             /**
+             * @see [Options.inlineRequestSchemas]
+             */
+            public var inlineRequestSchemas: Boolean =
+                parameters.get<Boolean>("inlineRequestSchemas") ?: true
+
+            /**
+             * @see [Options.inlineResponseSchemas]
+             */
+            public var inlineResponseSchemas: Boolean =
+                parameters.get<Boolean>("inlineResponseSchemas") ?: true
+
+            /**
              * @see [Options.suppressDefaultEnumValues]
              */
             public var suppressDefaultEnumValues: Boolean =
@@ -551,6 +704,17 @@ public class ProtocGenOpenAPI(
                 parameters.get<Boolean>("streamSseStyleDelimited") ?: false
 
             /**
+             * @see [Options.logLevel]
+             */
+            public var logLevel: org.slf4j.event.Level =
+                parameters.get<org.slf4j.event.Level>("logLevel") ?: org.slf4j.event.Level.ERROR
+
+            /**
+             * @see [Options.logFile]
+             */
+            public var logFile: String? = parameters.get<String>("logFile")
+
+            /**
              * @see [Options.serviceInclude]
              */
             public var serviceInclude: String =
@@ -561,6 +725,12 @@ public class ProtocGenOpenAPI(
              */
             public var serviceExclude: String? =
                 parameters.get<String>("serviceExclude")
+
+            /**
+             * @see [Options.referenceLinkTarget]
+             */
+            public var referenceLinkTarget: ReferenceLinkTarget =
+                parameters.get<ReferenceLinkTarget>("referenceLinkTarget") ?: ReferenceLinkTarget.NONE
 
             public companion object {
                 private const val SERVICE_INCLUDE_DEFAULT =
@@ -574,6 +744,7 @@ public class ProtocGenOpenAPI(
                     merge = merge,
                     version = version,
                     validateOutput = validateOutput,
+                    validationErrorsAreFatal = validationErrorsAreFatal,
                     outputFormat = outputFormat,
                     autoTagServices = autoTagServices,
                     schemaNamespaceStrategy = schemaNamespaceStrategy,
@@ -582,6 +753,8 @@ public class ProtocGenOpenAPI(
                     schemaNamespaceVersionExtraction = schemaNamespaceVersionExtraction,
                     setSchemaTitleToProtoSimpleName = setSchemaTitleToProtoSimpleName,
                     inlineEnums = inlineEnums,
+                    inlineRequestSchemas = inlineRequestSchemas,
+                    inlineResponseSchemas = inlineResponseSchemas,
                     suppressDefaultEnumValues = suppressDefaultEnumValues,
                     enumValueFormat = enumValueFormat,
                     autoMapping = autoMapping,
@@ -590,8 +763,11 @@ public class ProtocGenOpenAPI(
                     convertGrpcStatus = convertGrpcStatus,
                     streamNewlineDelimited = streamNewlineDelimited,
                     streamSseStyleDelimited = streamSseStyleDelimited,
+                    logLevel = logLevel,
+                    logFile = logFile,
                     serviceInclude = serviceInclude,
                     serviceExclude = serviceExclude,
+                    referenceLinkTarget = referenceLinkTarget,
                 )
         }
     }
@@ -609,11 +785,84 @@ public class ProtocGenOpenAPI(
             block: Options.Builder.() -> Unit = {},
         ): ProtocGenOpenAPI {
             val cgreq = PluginProtos.CodeGeneratorRequest.parseFrom(input, registry).wrap()
-            return ProtocGenOpenAPI(
-                cgreq,
-                Options.Builder.from(cgreq.parameters).apply(block).build(),
-            )
+            val options = Options.Builder.from(cgreq.parameters).apply(block).build()
+            applyLoggingConfiguration(options)
+            return ProtocGenOpenAPI(cgreq, options)
         }
+
+        /**
+         * Reconfigures the Log4j 2 `Configuration` from [Options.logLevel] and [Options.logFile].
+         *
+         * Appenders are attached to the `com.engine` logger only, so downstream dependencies'
+         * loggers stay silent regardless of their own level.  A stderr `Console` appender is
+         * always attached, prefixed with `[protoc-gen-openapi]` so its records stand out from
+         * other compiler output protoc may multiplex on the same stream.  When [Options.logFile]
+         * is non-null a `File` appender is also attached, writing timestamped records to the
+         * given path.  The root logger is silenced with `Level.OFF` to discard anything emitted
+         * outside the `com.engine` tree.  Invoked from [from] immediately after [Options] is
+         * built so subsequent `LoggerFactory.getLogger` calls observe the resolved configuration.
+         */
+        private fun applyLoggingConfiguration(options: Options) {
+            val cb = ConfigurationBuilderFactory.newConfigurationBuilder()
+            cb.setStatusLevel(Log4jLevel.OFF)
+
+            cb.add(
+                cb.newAppender("stderr", "Console")
+                    .addAttribute("target", ConsoleAppender.Target.SYSTEM_ERR)
+                    .add(
+                        cb.newLayout("PatternLayout")
+                            .addAttribute("pattern", "[protoc-gen-openapi] %-5level %logger{36} - %msg%n"),
+                    ),
+            )
+
+            val engine =
+                cb.newLogger("com.engine", options.logLevel.toLog4j())
+                    .addAttribute("additivity", false)
+                    .add(cb.newAppenderRef("stderr"))
+
+            options.logFile?.let { path ->
+                cb.add(
+                    cb.newAppender("file", "File")
+                        .addAttribute("fileName", path)
+                        .add(
+                            cb.newLayout("PatternLayout")
+                                .addAttribute("pattern", "%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n"),
+                        ),
+                )
+                engine.add(cb.newAppenderRef("file"))
+            }
+
+            cb.add(engine)
+            cb.add(cb.newRootLogger(Log4jLevel.OFF))
+            val config = cb.build(false)
+            // First call in this JVM: `initialize` so a fresh LoggerContext
+            // starts with our configuration directly, bypassing Log4j's default
+            // config-file probing (~24 file paths) that breaks under
+            // native-image's strict missing-resource registration.
+            // Subsequent calls (test harnesses re-entering `from(...)` with
+            // different `logLevel` / `logFile`): `reconfigure` swaps in the
+            // freshly-built configuration.  Calling `reconfigure` on the same
+            // config object that was just installed by `initialize` triggers a
+            // start-then-immediate-stop sequence inside log4j2 that leaves
+            // every appender in the `stopped` state, silently dropping all
+            // subsequent events — the gate below avoids that.
+            if (configurationInitialized.compareAndSet(false, true)) {
+                Configurator.initialize(config)
+            } else {
+                Configurator.reconfigure(config)
+            }
+        }
+
+        private val configurationInitialized = AtomicBoolean(false)
+
+        private fun Level.toLog4j(): Log4jLevel =
+            when (this) {
+                Level.ERROR -> Log4jLevel.ERROR
+                Level.WARN -> Log4jLevel.WARN
+                Level.INFO -> Log4jLevel.INFO
+                Level.DEBUG -> Log4jLevel.DEBUG
+                Level.TRACE -> Log4jLevel.TRACE
+            }
     }
 
     public fun compile(): PluginProtos.CodeGeneratorResponse = Compiler(request, options).compile()

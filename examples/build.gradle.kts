@@ -1,8 +1,12 @@
+@file:OptIn(ExperimentalTime::class)
+
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import org.gradle.internal.extensions.stdlib.capitalized
 import org.gradle.kotlin.dsl.idea
 import org.gradle.kotlin.dsl.`java-test-fixtures`
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 plugins {
     idea
@@ -65,6 +69,13 @@ testing {
         register<JvmTestSuite>("namespacing")
         register<JvmTestSuite>("enums")
         register<JvmTestSuite>("filtering")
+        register<JvmTestSuite>("wellKnownTypes")
+        register<JvmTestSuite>("inlineSchemas")
+        register<JvmTestSuite>("inlineSchemasGlobal")
+        register<JvmTestSuite>("inlineFieldSchema")
+        register<JvmTestSuite>("serviceOrdering")
+        register<JvmTestSuite>("errorResponses")
+        register<JvmTestSuite>("referenceLinks")
 
         /*
          * Envoy integration suite: runs Envoy in a container (via testcontainers) and exercises
@@ -79,7 +90,6 @@ testing {
                 implementation(libs.grpc.kotlin.stub)
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.testcontainers)
-                runtimeOnly(libs.slf4j.simple)
             }
             tasks.named("processEnvoyResources", ProcessResources::class) {
                 dependsOn("generateEnvoyProto")
@@ -156,7 +166,10 @@ protobuf {
              */
             if (name == "generate${suiteName.capitalized()}Proto") {
                 plugins {
-                    create("recorder")
+                    create("recorder") {
+                        option("logLevel=TRACE")
+                        option("logFile=${project.layout.buildDirectory.dir("logs/${Clock.System.now().epochSeconds}").map { it.file("${suiteName}.txt") }.get().asFile.absolutePath}")
+                    }
                 }
                 if (suiteName == "envoy") {
                     generateDescriptorSet = true
@@ -293,6 +306,14 @@ val pruneNativeImageMetadata = tasks.register("pruneNativeImageMetadata") {
         // Envoy test setup resources.
         "envoy/envoy.template.yaml",
         "hello.pb",
+        // Log4j 2 probes for a long list of `log4j2*.{xml,json,properties,…}`
+        // config files at startup before our programmatic Configurator.reconfigure
+        // call takes over. The agent records every probe even though no file
+        // exists for any of them, and log4j-core 2.25.0+ ships its own
+        // native-image metadata for the ones it actually needs at runtime.
+        // Strip these duplicates so the file stays focused on entries we own.
+        "log4j2",
+        "META-INF/log4j-provider.properties",
     )
 
     doLast {

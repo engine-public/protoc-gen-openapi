@@ -32,7 +32,10 @@ class EnumsTest :
         // -----------------------------------------------------------------------
         val run1 =
             ProtocGenOpenAPI.from(request()) {
+                inlineRequestSchemas = false
+                inlineResponseSchemas = false
                 validateOutput = true
+                validationErrorsAreFatal = true
             }.compile()
 
         test("run1: no errors") {
@@ -44,6 +47,7 @@ class EnumsTest :
             { "run1: matches reference: " + it.name },
             run1.fileList,
         ) { file ->
+            GoldenFiles.maybeWriteGolden("enums", "${file.name}.run1.json", file.content)
             val expected = mapper.readTree(
                 EnumsTest::class.java
                     .getResourceAsStream("/${file.name}.run1.json")
@@ -71,8 +75,11 @@ class EnumsTest :
         // -----------------------------------------------------------------------
         val run2 =
             ProtocGenOpenAPI.from(request()) {
+                inlineRequestSchemas = false
+                inlineResponseSchemas = false
                 inlineEnums = true
                 validateOutput = true
+                validationErrorsAreFatal = true
             }.compile()
 
         test("run2: no errors") {
@@ -84,6 +91,7 @@ class EnumsTest :
             { "run2: matches reference: " + it.name },
             run2.fileList,
         ) { file ->
+            GoldenFiles.maybeWriteGolden("enums", "${file.name}.run2.json", file.content)
             val expected = mapper.readTree(
                 EnumsTest::class.java
                     .getResourceAsStream("/${file.name}.run2.json")
@@ -112,8 +120,11 @@ class EnumsTest :
         // -----------------------------------------------------------------------
         val run3 =
             ProtocGenOpenAPI.from(request()) {
+                inlineRequestSchemas = false
+                inlineResponseSchemas = false
                 suppressDefaultEnumValues = true
                 validateOutput = true
+                validationErrorsAreFatal = true
             }.compile()
 
         test("run3: no errors") {
@@ -125,6 +136,7 @@ class EnumsTest :
             { "run3: matches reference: " + it.name },
             run3.fileList,
         ) { file ->
+            GoldenFiles.maybeWriteGolden("enums", "${file.name}.run3.json", file.content)
             val expected = mapper.readTree(
                 EnumsTest::class.java
                     .getResourceAsStream("/${file.name}.run3.json")
@@ -152,9 +164,12 @@ class EnumsTest :
         // -----------------------------------------------------------------------
         val run4 =
             ProtocGenOpenAPI.from(request()) {
+                inlineRequestSchemas = false
+                inlineResponseSchemas = false
                 inlineEnums = true
                 suppressDefaultEnumValues = true
                 validateOutput = true
+                validationErrorsAreFatal = true
             }.compile()
 
         test("run4: no errors") {
@@ -166,6 +181,7 @@ class EnumsTest :
             { "run4: matches reference: " + it.name },
             run4.fileList,
         ) { file ->
+            GoldenFiles.maybeWriteGolden("enums", "${file.name}.run4.json", file.content)
             val expected = mapper.readTree(
                 EnumsTest::class.java
                     .getResourceAsStream("/${file.name}.run4.json")

@@ -1,0 +1,194 @@
+{
+  "openapi" : "3.1.0",
+  "paths" : {
+    "/beta/{id}" : {
+      "get" : {
+        "tags" : [ "BetaService" ],
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/BetaResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/alpha/{id}" : {
+      "get" : {
+        "tags" : [ "AlphaService" ],
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AlphaResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/epsilon/{id}" : {
+      "get" : {
+        "tags" : [ "EpsilonService" ],
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EpsilonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/gamma/{id}" : {
+      "get" : {
+        "tags" : [ "GammaService" ],
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GammaResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/delta/{id}" : {
+      "get" : {
+        "tags" : [ "DeltaService" ],
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DeltaResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "info" : {
+    "title" : "Service Ordering Example API",
+    "version" : "1.0.0"
+  },
+  "tags" : [ {
+    "name" : "BetaService",
+    "description" : "Source-position 1 — explicit `index_order = -1` places it ahead of every un-annotated\n service.  Negative indices are intended for exactly this case."
+  }, {
+    "name" : "AlphaService",
+    "description" : "Source-position 0 — no `index_order`, so it falls into its encounter ordinal (0)."
+  }, {
+    "name" : "EpsilonService",
+    "description" : "Source-position 4 — explicit `index_order = 0` collides with AlphaService's implicit\n ordinal of 0.  The compiler logs a WARN naming both services and falls back to source\n order; AlphaService keeps the earlier slot because it appears first in source."
+  }, {
+    "name" : "GammaService",
+    "description" : "Source-position 2 — no annotation, so it sorts at ordinal 2.  Sparse: nothing fills the\n gap between Alpha (0) and Gamma (10) other than this one."
+  }, {
+    "name" : "DeltaService",
+    "description" : "Source-position 3 — explicit `index_order = 10` pushes it well past the un-annotated tail."
+  } ],
+  "components" : {
+    "schemas" : {
+      "AlphaResponse" : {
+        "type" : "object",
+        "properties" : {
+          "value" : {
+            "type" : "string"
+          }
+        }
+      },
+      "BetaResponse" : {
+        "type" : "object",
+        "properties" : {
+          "value" : {
+            "type" : "string"
+          }
+        }
+      },
+      "DeltaResponse" : {
+        "type" : "object",
+        "properties" : {
+          "value" : {
+            "type" : "string"
+          }
+        }
+      },
+      "EpsilonResponse" : {
+        "type" : "object",
+        "properties" : {
+          "value" : {
+            "type" : "string"
+          }
+        }
+      },
+      "GammaResponse" : {
+        "type" : "object",
+        "properties" : {
+          "value" : {
+            "type" : "string"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,6 +1,7 @@
 package com.engine.protoc.openapi.compile
 
 import com.engine.protoc.openapi.Annotations
+import com.engine.protoc.openapi.OpenAPI
 import com.engine.protoc.openapi.ProtocGenOpenAPI
 import com.engine.protoc.openapi.compile.json.JsonContext
 import com.engine.protoc.openapi.compile.json.mergeInto
@@ -13,7 +14,7 @@ import com.networknt.schema.InputFormat
 import com.networknt.schema.SchemaLocation
 import com.networknt.schema.SchemaRegistry
 import com.networknt.schema.SpecificationVersion
-import tools.jackson.databind.JsonNode
+import org.slf4j.LoggerFactory
 import tools.jackson.databind.ObjectMapper
 import tools.jackson.databind.SerializationFeature
 import tools.jackson.databind.json.JsonMapper
@@ -52,6 +53,8 @@ internal class Compiler(
     private val request: CodeGeneratorRequestWrapper,
     private val options: ProtocGenOpenAPI.Options,
 ) {
+
+    private val log = LoggerFactory.getLogger(Compiler::class.java)
 
     internal companion object {
         internal val oasSchema =
@@ -104,7 +107,34 @@ internal class Compiler(
         return true
     }
 
-    fun compile(): PluginProtos.CodeGeneratorResponse = if (options.merge) compileMerged() else compileUnmerged()
+    fun compile(): PluginProtos.CodeGeneratorResponse {
+        log.info("compile starting with options: {}", options)
+        if (options.validationErrorsAreFatal && !options.validateOutput) {
+            log.warn(
+                "validationErrorsAreFatal=true has no effect because validateOutput=false; " +
+                    "no validation will be performed",
+            )
+        }
+        return if (options.merge) compileMerged() else compileUnmerged()
+    }
+
+    /**
+     * Emits every validation issue at WARN; when [ProtocGenOpenAPI.Options.validationErrorsAreFatal]
+     * is also true, additionally adds each issue to the [response]'s error list so the plugin
+     * surfaces them as a protoc compile error.
+     */
+    private fun reportValidationIssues(
+        response: CodeGeneratorResponseWrapper,
+        issues: Iterable<*>,
+    ) {
+        for (issue in issues) {
+            val text = issue.toString()
+            log.warn("Validation issue: {}", text)
+            if (options.validationErrorsAreFatal) {
+                response.addError(text)
+            }
+        }
+    }
 
     // -------------------------------------------------------------------------
     // Merged path — one output covering all target files (original behaviour)
@@ -124,22 +154,51 @@ internal class Compiler(
 
         for (file in targetFiles) {
             try {
-                val extension = file.options?.findExtension(Annotations.file)?.value ?: continue
+                val extension = file.options?.findExtension(Annotations.file)?.value
+                    ?.takeIf { it.hasOpenapi() }?.openapi ?: continue
                 extension.mergeInto(doc, ctx)
             } catch (e: Exception) {
-                response.addError("[${file.name}] Error merging OpenAPI extension: ${e.detail()}")
+                val msg = "[${file.name}] Error merging OpenAPI extension: ${e.detail()}"
+                log.error(msg, e)
+                response.addError(msg)
             }
         }
 
         val collector = MessageCollector(ctx.messageIndex, ctx.enumIndex, options.inlineEnums)
-        val pathsBuilder = PathsBuilder(ctx, collector, options.autoTagServices, options.autoMapping)
+        val pathsBuilder = PathsBuilder(
+            ctx,
+            collector,
+            options.autoTagServices,
+            options.autoMapping,
+            options.inlineRequestSchemas,
+            options.inlineResponseSchemas,
+            referenceLinkResolverFor(targetFiles, ctx),
+            collectComponentParameterNames(targetFiles),
+        )
 
+        // Seed pass: populate `collector` from every method's i/o, honouring method-level
+        // inline_request_schema / inline_response_schema.  Must run before the emit pass so
+        // that emit-time `$ref`-vs-inline decisions see the final collected set.
         for (file in targetFiles) {
             try {
-                mergePaths(doc, pathsBuilder.build(listOf(file), ::isServiceIncluded), ctx)
+                pathsBuilder.seed(listOf(file), ::isServiceIncluded)
             } catch (e: Exception) {
-                response.addError("[${file.name}] Error building paths: ${e.detail()}")
+                val msg = "[${file.name}] Error seeding component schemas: ${e.detail()}"
+                log.error(msg, e)
+                response.addError(msg)
             }
+        }
+
+        // Build all targetFiles in a single call so that services with
+        // `(engine.protoc.openapi.index_order)` can be sorted across file boundaries — the
+        // per-file fallback ordinal in PathsBuilder.orderByIndex is computed against this
+        // flattened list.
+        try {
+            mergePaths(doc, pathsBuilder.build(targetFiles, ::isServiceIncluded), ctx)
+        } catch (e: Exception) {
+            val msg = "Error building paths: ${e.detail()}"
+            log.error(msg, e)
+            response.addError(msg)
         }
 
         applyServiceTags(doc, pathsBuilder, ctx)
@@ -152,24 +211,30 @@ internal class Compiler(
         try {
             mergeSchemas(doc, SchemaBuilder(ctx, pathsBuilder).build(collector), ctx)
         } catch (e: Exception) {
-            response.addError("Error building component schemas: ${e.detail()}")
+            val msg = "Error building component schemas: ${e.detail()}"
+            log.error(msg, e)
+            response.addError(msg)
         }
 
         ctx.schemaKeyResolver.rewriteRefs(doc)
+        emitRedocSchemaSections(doc, ctx)
 
         if (!response.hasErrors) {
             try {
                 val content = mapper.writeValueAsString(doc)
                 response.addFile(outputFileName(targetFiles), content)
                 if (options.validateOutput) {
-                    oasSchema.validate(content, inputFormat) { ctx ->
-                        ctx.executionConfig { cfg -> cfg.formatAssertionsEnabled(true) }
-                    }.forEach {
-                        response.addError(it.toString())
-                    }
+                    reportValidationIssues(
+                        response,
+                        oasSchema.validate(content, inputFormat) { ctx ->
+                            ctx.executionConfig { cfg -> cfg.formatAssertionsEnabled(true) }
+                        },
+                    )
                 }
             } catch (e: Exception) {
-                response.addError("Error serializing output: ${e.detail()}")
+                val msg = "Error serializing output: ${e.detail()}"
+                log.error(msg, e)
+                response.addError(msg)
             }
         }
 
@@ -183,12 +248,16 @@ internal class Compiler(
     private fun compileUnmerged(): PluginProtos.CodeGeneratorResponse {
         val response = CodeGeneratorResponseWrapper()
         val (mapper, ctx, targetFiles) = setup()
+        val componentParameterNames = collectComponentParameterNames(targetFiles)
 
         for (file in targetFiles) {
             val fileAnnotation = try {
                 file.options?.findExtension(Annotations.file)?.value
+                    ?.takeIf { it.hasOpenapi() }?.openapi
             } catch (e: Exception) {
-                response.addError("[${file.name}] Error reading file-level annotation: ${e.detail()}")
+                val msg = "[${file.name}] Error reading file-level annotation: ${e.detail()}"
+                log.error(msg, e)
+                response.addError(msg)
                 null
             }
 
@@ -208,7 +277,9 @@ internal class Compiler(
                         if (pkg.isEmpty()) "openapi.$outputExtension" else "$pkg.openapi.$outputExtension"
                     response.addFile(fileName, mapper.writeValueAsString(doc))
                 } catch (e: Exception) {
-                    response.addError("[${file.name}] Error generating file-only output: ${e.detail()}")
+                    val msg = "[${file.name}] Error generating file-only output: ${e.detail()}"
+                    log.error(msg, e)
+                    response.addError(msg)
                 }
                 continue
             }
@@ -235,11 +306,22 @@ internal class Compiler(
 
                     // Layer 4: explicit service-level annotation (highest priority)
                     service.options?.findExtension(Annotations.service)?.value
+                        ?.takeIf { it.hasOpenapi() }?.openapi
                         ?.mergeInto(doc, ctx)
 
                     // Paths — only this service's methods
                     val collector = MessageCollector(ctx.messageIndex, ctx.enumIndex, options.inlineEnums)
-                    val pathsBuilder = PathsBuilder(ctx, collector, options.autoTagServices, options.autoMapping)
+                    val pathsBuilder = PathsBuilder(
+                        ctx,
+                        collector,
+                        options.autoTagServices,
+                        options.autoMapping,
+                        options.inlineRequestSchemas,
+                        options.inlineResponseSchemas,
+                        referenceLinkResolverFor(listOf(file), ctx),
+                        componentParameterNames,
+                    )
+                    pathsBuilder.seedForService(service, file.`package`?.value)
                     mergePaths(doc, pathsBuilder.buildForService(service, file.`package`?.value), ctx)
 
                     applyServiceTags(doc, pathsBuilder, ctx)
@@ -253,6 +335,7 @@ internal class Compiler(
                     mergeSchemas(doc, SchemaBuilder(ctx, pathsBuilder).build(collector), ctx)
 
                     ctx.schemaKeyResolver.rewriteRefs(doc)
+                    emitRedocSchemaSections(doc, ctx)
 
                     val pkg = file.`package`?.value.orEmpty()
                     val svcName = service.name?.value.orEmpty()
@@ -263,14 +346,17 @@ internal class Compiler(
                     response.addFile(fileName, content)
 
                     if (options.validateOutput) {
-                        oasSchema.validate(content, inputFormat) { ctx ->
-                            ctx.executionConfig { cfg -> cfg.formatAssertionsEnabled(true) }
-                        }.forEach {
-                            response.addError(it.toString())
-                        }
+                        reportValidationIssues(
+                            response,
+                            oasSchema.validate(content, inputFormat) { ctx ->
+                                ctx.executionConfig { cfg -> cfg.formatAssertionsEnabled(true) }
+                            },
+                        )
                     }
                 } catch (e: Exception) {
-                    response.addError("[$svcLabel] Error generating output: ${e.detail()}")
+                    val msg = "[$svcLabel] Error generating output: ${e.detail()}"
+                    log.error(msg, e)
+                    response.addError(msg)
                 }
             }
         }
@@ -281,6 +367,80 @@ internal class Compiler(
     // -------------------------------------------------------------------------
     // Shared helpers
     // -------------------------------------------------------------------------
+
+    /**
+     * Builds the reference-link resolver for a document spanning [files], or `null` when
+     * `referenceLinkTarget = NONE`.  The resolver indexes those files' schemas, services, and
+     * operations so CommonMark reference links in `description` fields rewrite to anchors.
+     */
+    private fun referenceLinkResolverFor(
+        files: List<FileDescriptorProtoWrapper>,
+        ctx: JsonContext,
+    ): ReferenceLinkResolver? =
+        if (options.referenceLinkTarget == ProtocGenOpenAPI.Options.ReferenceLinkTarget.NONE) {
+            null
+        } else {
+            ReferenceLinkResolver(
+                files,
+                options.referenceLinkTarget,
+                options.autoTagServices,
+                options.autoMapping,
+                ctx.schemaKeyResolver,
+            )
+        }
+
+    /**
+     * Under `referenceLinkTarget = REDOC`, gives every `components/schemas` entry an addressable
+     * section so message/enum reference links can point at it.  Redoc has no stable anchor for a
+     * standalone component schema, so for each schema we emit a top-level tag named after the
+     * schema key whose description is a Redoc `<SchemaDefinition>` directive; Redoc renders that
+     * tag as the schema's section, reachable at `#tag/{key}` — exactly the anchor
+     * [ReferenceLinkResolver] emits.
+     *
+     * When `autoTagServices` is enabled (so every operation already carries a service tag) we also
+     * emit an `x-tagGroups` navigation split — operation/service tags under "API", schema sections
+     * under "Schemas" — unless the document already declares `x-tagGroups`.  We never emit
+     * `x-tagGroups` otherwise, because doing so would hide untagged operations from Redoc's menu.
+     */
+    private fun emitRedocSchemaSections(
+        doc: ObjectNode,
+        ctx: JsonContext,
+    ) {
+        if (options.referenceLinkTarget != ProtocGenOpenAPI.Options.ReferenceLinkTarget.REDOC) return
+        val schemas = (doc.get("components") as? ObjectNode)?.get("schemas") as? ObjectNode ?: return
+        if (schemas.size() == 0) return
+
+        val tags = doc.get("tags") as? ArrayNode
+            ?: ctx.mapper.createArrayNode().also { doc.set("tags", it) }
+        val existingTagNames = tags.mapNotNull { (it as? ObjectNode)?.get("name")?.asString() }
+
+        val schemaKeys = schemas.properties().map { it.key }
+        for (key in schemaKeys) {
+            val tag = ctx.obj()
+            tag.put("name", key)
+            tag.put("description", "<SchemaDefinition schemaRef=\"#/components/schemas/$key\" />")
+            tags.add(tag)
+        }
+
+        if (options.autoTagServices && !doc.has("x-tagGroups")) {
+            val groups = ctx.mapper.createArrayNode()
+            if (existingTagNames.isNotEmpty()) {
+                groups.add(
+                    ctx.obj().also { g ->
+                        g.put("name", "API")
+                        g.set("tags", ctx.mapper.createArrayNode().also { a -> existingTagNames.forEach(a::add) })
+                    },
+                )
+            }
+            groups.add(
+                ctx.obj().also { g ->
+                    g.put("name", "Schemas")
+                    g.set("tags", ctx.mapper.createArrayNode().also { a -> schemaKeys.forEach(a::add) })
+                },
+            )
+            doc.set("x-tagGroups", groups)
+        }
+    }
 
     private data class Setup(
         val mapper: ObjectMapper,
@@ -327,6 +487,49 @@ internal class Compiler(
             request.protoFiles.find { it.name == name }
         }
         return Setup(mapper, ctx, targetFiles)
+    }
+
+    /**
+     * Gathers every `components/parameters` entry declared in file- and service-level OpenAPI
+     * annotations across [files] into a `component key → declared parameter name` map.
+     *
+     * [PathsBuilder] uses this to honour manual `(engine.protoc.openapi.parameters)` declarations
+     * that reference a reusable component via `$ref` (e.g. `#/components/parameters/PageSize`):
+     * the auto-derived query parameters skip any request field whose name matches the referenced
+     * component's name.  Only locally declared parameters (not themselves a `$ref`) are recorded;
+     * the first declaration of a given key wins, and entries with an empty name are ignored.
+     */
+    private fun collectComponentParameterNames(
+        files: List<FileDescriptorProtoWrapper>,
+    ): Map<String, String> {
+        val byKey = LinkedHashMap<String, String>()
+
+        fun ingest(openApi: OpenAPI?) {
+            if (openApi?.hasComponents() != true) return
+            for ((key, value) in openApi.components.parametersMap) {
+                if (!value.hasParameter()) continue
+                val name = value.parameter.name
+                if (name.isNotEmpty()) byKey.putIfAbsent(key, name)
+            }
+        }
+
+        for (file in files) {
+            runCatching {
+                ingest(
+                    file.options?.findExtension(Annotations.file)?.value
+                        ?.takeIf { it.hasOpenapi() }?.openapi,
+                )
+            }
+            for (service in file.services) {
+                runCatching {
+                    ingest(
+                        service.options?.findExtension(Annotations.service)?.value
+                            ?.takeIf { it.hasOpenapi() }?.openapi,
+                    )
+                }
+            }
+        }
+        return byKey
     }
 
     private fun mergePaths(

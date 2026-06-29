@@ -8,6 +8,7 @@ import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 import org.jreleaser.gradle.plugin.JReleaserExtension
 import org.jreleaser.model.Active
 import java.util.Calendar
+import java.util.function.Predicate
 
 buildscript {
     configurations.classpath {
@@ -106,6 +107,27 @@ dependencies {
     implementation(libs.kotlin.reflect)
     implementation(libs.networknt.jsonSchemaValidator)
     implementation(libs.protobuf.java)
+
+    // slf4j-api is already on the classpath transitively (networknt). Ship
+    // Log4j 2 as the binding so the plugin's logLevel / logFile options can
+    // be applied programmatically via the Configurator API. log4j-core is
+    // used directly in applyLoggingConfiguration() (ConfigurationBuilder,
+    // Configurator, ConsoleAppender.Target), so it sits on the compile
+    // classpath alongside log4j-api. log4j-slf4j2-impl bridges SLF4J 2.x
+    // (networknt's transitive slf4j-api line) to log4j-core at runtime.
+    // log4j-core 2.25.0+ ships its own GraalVM native-image reachability
+    // metadata, so no hand-rolled reflect/resource config is required. The
+    // project publishes native binaries (pom-only) so these aren't visible
+    // to library consumers as transitive deps.
+    implementation(libs.log4j.api)
+    implementation(libs.log4j.core)
+    runtimeOnly(libs.log4j.slf4j2.impl)
+
+    // GraalVM hosted API used by native-image Feature classes under
+    // com.engine.protoc.openapi.nativeimage. Compile-only — the
+    // org.graalvm.nativeimage module is provided by the GraalVM JDK at
+    // native-image build time and is not shipped to consumers.
+    compileOnly(libs.graalvm.sdk)
 }
 
 allprojects {
@@ -300,6 +322,14 @@ graalvmNative {
     }
     agent {
         enabled = true
+        /*
+         * Scope the native-image-agent to the `run` task only.  By default the plugin attaches
+         * the agent as a JVMTI agent to every JavaExec/Test task, which conflicts with the IDE
+         * debugger's own JVMTI agent and aborts test runs with `JVMTI_ERROR_NOT_AVAILABLE`.
+         * `metadataCopy` only consumes output from `run` anyway, so instrumenting other tasks
+         * provides no benefit.
+         */
+        tasksToInstrumentPredicate.set(Predicate<Task> { it.name == "run" })
         metadataCopy {
             inputTaskNames.add("run")
             outputDirectories.add("src/main/resources/META-INF/native-image/com.engine/protoc-gen-openapi")

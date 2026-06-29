@@ -1,12 +1,24 @@
 [
     {
+        "name": "[B",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true
+    },
+    {
+        "name": "[C"
+    },
+    {
         "name": "[Ljava.lang.Class;"
     },
     {
         "name": "[Ljava.lang.Object;"
     },
     {
-        "name": "[Ljava.lang.StackTraceElement;"
+        "name": "[Ljava.lang.StackTraceElement;",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true
     },
     {
         "name": "[Ljava.lang.String;"
@@ -21,10 +33,25 @@
         "name": "[Ljava.lang.invoke.LambdaForm$Name;"
     },
     {
+        "name": "[Ljava.lang.invoke.LambdaFormEditor$Transform;"
+    },
+    {
         "name": "[Ljava.lang.invoke.MethodHandle;"
     },
     {
+        "name": "[Ljava.lang.reflect.Field;"
+    },
+    {
+        "name": "[Ljava.lang.reflect.Type;"
+    },
+    {
+        "name": "[Ljava.net.InetAddress;"
+    },
+    {
         "name": "[Ljava.nio.ByteBuffer;"
+    },
+    {
+        "name": "[Ljava.nio.file.attribute.FileAttribute;"
     },
     {
         "name": "[Ljava.time.format.DateTimeFormatterBuilder$DateTimePrinterParser;"
@@ -75,6 +102,12 @@
         "name": "[Ltools.jackson.databind.introspect.POJOPropertyBuilder;"
     },
     {
+        "name": "[Ltools.jackson.databind.node.ContainerNode;"
+    },
+    {
+        "name": "[Ltools.jackson.databind.ser.BeanPropertyWriter;"
+    },
+    {
         "name": "[Ltools.jackson.databind.ser.Serializers;"
     },
     {
@@ -109,6 +142,9 @@
     },
     {
         "name": "com.engine.protoc.openapi.ProtocGenOpenAPI$Options$OutputFormat"
+    },
+    {
+        "name": "com.engine.protoc.openapi.ProtocGenOpenAPI$Options$ReferenceLinkTarget"
     },
     {
         "name": "com.engine.protoc.openapi.ProtocGenOpenAPI$Options$SchemaNamespaceCasing"
@@ -637,9 +673,30 @@
         "name": "java.io.Closeable"
     },
     {
+        "name": "java.io.File"
+    },
+    {
         "name": "java.io.Serializable",
         "allPermittedSubclasses": true,
         "queryAllDeclaredMethods": true
+    },
+    {
+        "name": "java.lang.AssertionError",
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "readResolve",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "writeReplace",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
     },
     {
         "name": "java.lang.AutoCloseable"
@@ -792,6 +849,24 @@
         "name": "java.lang.Enum"
     },
     {
+        "name": "java.lang.Error",
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "readResolve",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "writeReplace",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
         "name": "java.lang.Float",
         "methods": [
             {
@@ -862,6 +937,7 @@
     },
     {
         "name": "java.lang.Object",
+        "allDeclaredFields": true,
         "queryAllDeclaredConstructors": true,
         "methods": [
             {
@@ -940,6 +1016,42 @@
         ]
     },
     {
+        "name": "java.lang.StackTraceElement",
+        "allDeclaredFields": true,
+        "methods": [
+            {
+                "name": "readObject",
+                "parameterTypes": [
+                    "java.io.ObjectInputStream"
+                ]
+            },
+            {
+                "name": "readObjectNoData",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "readResolve",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "writeObject",
+                "parameterTypes": [
+                    "java.io.ObjectOutputStream"
+                ]
+            },
+            {
+                "name": "writeReplace",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
         "name": "java.lang.StackWalker$Option",
         "methods": [
             {
@@ -952,12 +1064,50 @@
     },
     {
         "name": "java.lang.String",
+        "fields": [
+            {
+                "name": "serialPersistentFields"
+            },
+            {
+                "name": "serialVersionUID"
+            }
+        ],
         "methods": [
             {
                 "name": "format",
                 "parameterTypes": [
                     "java.lang.String",
                     "java.lang.Object[]"
+                ]
+            },
+            {
+                "name": "readObject",
+                "parameterTypes": [
+                    "java.io.ObjectInputStream"
+                ]
+            },
+            {
+                "name": "readObjectNoData",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "readResolve",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "writeObject",
+                "parameterTypes": [
+                    "java.io.ObjectOutputStream"
+                ]
+            },
+            {
+                "name": "writeReplace",
+                "parameterTypes": [
+                    
                 ]
             }
         ]
@@ -991,6 +1141,13 @@
                 "parameterTypes": [
                     "long",
                     "java.lang.String"
+                ]
+            },
+            {
+                "name": "mix",
+                "parameterTypes": [
+                    "long",
+                    "boolean"
                 ]
             },
             {
@@ -1046,6 +1203,15 @@
                     "long",
                     "byte[]",
                     "java.lang.String",
+                    "java.lang.String"
+                ]
+            },
+            {
+                "name": "prepend",
+                "parameterTypes": [
+                    "long",
+                    "byte[]",
+                    "boolean",
                     "java.lang.String"
                 ]
             },
@@ -1111,6 +1277,30 @@
         "fields": [
             {
                 "name": "next"
+            }
+        ]
+    },
+    {
+        "name": "java.lang.Throwable",
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "readResolve",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "writeObject",
+                "parameterTypes": [
+                    "java.io.ObjectOutputStream"
+                ]
+            },
+            {
+                "name": "writeReplace",
+                "parameterTypes": [
+                    
+                ]
             }
         ]
     },
@@ -1516,6 +1706,342 @@
         ]
     },
     {
+        "name": "java.lang.invoke.BoundMethodHandle$Species_LLLLLLLL",
+        "fields": [
+            {
+                "name": "argL0"
+            },
+            {
+                "name": "argL1"
+            },
+            {
+                "name": "argL2"
+            },
+            {
+                "name": "argL3"
+            },
+            {
+                "name": "argL4"
+            },
+            {
+                "name": "argL5"
+            },
+            {
+                "name": "argL6"
+            },
+            {
+                "name": "argL7"
+            }
+        ],
+        "methods": [
+            {
+                "name": "make",
+                "parameterTypes": [
+                    "java.lang.invoke.MethodType",
+                    "java.lang.invoke.LambdaForm",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.invoke.BoundMethodHandle$Species_LLLLLLLLL",
+        "fields": [
+            {
+                "name": "argL0"
+            },
+            {
+                "name": "argL1"
+            },
+            {
+                "name": "argL2"
+            },
+            {
+                "name": "argL3"
+            },
+            {
+                "name": "argL4"
+            },
+            {
+                "name": "argL5"
+            },
+            {
+                "name": "argL6"
+            },
+            {
+                "name": "argL7"
+            },
+            {
+                "name": "argL8"
+            }
+        ],
+        "methods": [
+            {
+                "name": "make",
+                "parameterTypes": [
+                    "java.lang.invoke.MethodType",
+                    "java.lang.invoke.LambdaForm",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.invoke.BoundMethodHandle$Species_LLLLLLLLLL",
+        "fields": [
+            {
+                "name": "argL0"
+            },
+            {
+                "name": "argL1"
+            },
+            {
+                "name": "argL2"
+            },
+            {
+                "name": "argL3"
+            },
+            {
+                "name": "argL4"
+            },
+            {
+                "name": "argL5"
+            },
+            {
+                "name": "argL6"
+            },
+            {
+                "name": "argL7"
+            },
+            {
+                "name": "argL8"
+            },
+            {
+                "name": "argL9"
+            }
+        ],
+        "methods": [
+            {
+                "name": "make",
+                "parameterTypes": [
+                    "java.lang.invoke.MethodType",
+                    "java.lang.invoke.LambdaForm",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.invoke.BoundMethodHandle$Species_LLLLLLLLLLL",
+        "fields": [
+            {
+                "name": "argL0"
+            },
+            {
+                "name": "argL1"
+            },
+            {
+                "name": "argL10"
+            },
+            {
+                "name": "argL2"
+            },
+            {
+                "name": "argL3"
+            },
+            {
+                "name": "argL4"
+            },
+            {
+                "name": "argL5"
+            },
+            {
+                "name": "argL6"
+            },
+            {
+                "name": "argL7"
+            },
+            {
+                "name": "argL8"
+            },
+            {
+                "name": "argL9"
+            }
+        ],
+        "methods": [
+            {
+                "name": "make",
+                "parameterTypes": [
+                    "java.lang.invoke.MethodType",
+                    "java.lang.invoke.LambdaForm",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.invoke.BoundMethodHandle$Species_LLLLLLLLLLLL",
+        "fields": [
+            {
+                "name": "argL0"
+            },
+            {
+                "name": "argL1"
+            },
+            {
+                "name": "argL10"
+            },
+            {
+                "name": "argL11"
+            },
+            {
+                "name": "argL2"
+            },
+            {
+                "name": "argL3"
+            },
+            {
+                "name": "argL4"
+            },
+            {
+                "name": "argL5"
+            },
+            {
+                "name": "argL6"
+            },
+            {
+                "name": "argL7"
+            },
+            {
+                "name": "argL8"
+            },
+            {
+                "name": "argL9"
+            }
+        ],
+        "methods": [
+            {
+                "name": "make",
+                "parameterTypes": [
+                    "java.lang.invoke.MethodType",
+                    "java.lang.invoke.LambdaForm",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.invoke.BoundMethodHandle$Species_LLLLLLLLLLLLL",
+        "fields": [
+            {
+                "name": "argL0"
+            },
+            {
+                "name": "argL1"
+            },
+            {
+                "name": "argL10"
+            },
+            {
+                "name": "argL11"
+            },
+            {
+                "name": "argL12"
+            },
+            {
+                "name": "argL2"
+            },
+            {
+                "name": "argL3"
+            },
+            {
+                "name": "argL4"
+            },
+            {
+                "name": "argL5"
+            },
+            {
+                "name": "argL6"
+            },
+            {
+                "name": "argL7"
+            },
+            {
+                "name": "argL8"
+            },
+            {
+                "name": "argL9"
+            }
+        ],
+        "methods": [
+            {
+                "name": "make",
+                "parameterTypes": [
+                    "java.lang.invoke.MethodType",
+                    "java.lang.invoke.LambdaForm",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object",
+                    "java.lang.Object"
+                ]
+            }
+        ]
+    },
+    {
         "name": "java.lang.invoke.MethodHandle"
     },
     {
@@ -1689,6 +2215,12 @@
         ]
     },
     {
+        "name": "java.math.BigDecimal"
+    },
+    {
+        "name": "java.math.BigInteger"
+    },
+    {
         "name": "java.net.Inet6Address",
         "fields": [
             {
@@ -1737,6 +2269,12 @@
                 ]
             }
         ]
+    },
+    {
+        "name": "java.net.URI"
+    },
+    {
+        "name": "java.net.URL"
     },
     {
         "name": "java.net.UnixDomainSocketAddress",
@@ -1793,6 +2331,12 @@
         ]
     },
     {
+        "name": "java.nio.charset.Charset"
+    },
+    {
+        "name": "java.nio.file.Path"
+    },
+    {
         "name": "java.nio.file.attribute.PosixFilePermission",
         "methods": [
             {
@@ -1821,6 +2365,9 @@
         "name": "java.security.KeyStoreSpi"
     },
     {
+        "name": "java.security.Provider"
+    },
+    {
         "name": "java.security.SecureRandomParameters"
     },
     {
@@ -1845,7 +2392,28 @@
     {
         "name": "java.util.AbstractList",
         "allDeclaredFields": true,
-        "queryAllDeclaredMethods": true
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "readResolve",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "writeReplace",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
     },
     {
         "name": "java.util.AbstractMap",
@@ -1901,8 +2469,86 @@
         ]
     },
     {
+        "name": "java.util.ArrayList",
+        "allDeclaredFields": true,
+        "methods": [
+            {
+                "name": "readObject",
+                "parameterTypes": [
+                    "java.io.ObjectInputStream"
+                ]
+            },
+            {
+                "name": "readObjectNoData",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "readResolve",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "writeObject",
+                "parameterTypes": [
+                    "java.io.ObjectOutputStream"
+                ]
+            },
+            {
+                "name": "writeReplace",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.util.Arrays$ArrayList",
+        "allDeclaredFields": true,
+        "queryAllDeclaredMethods": true,
+        "queryAllDeclaredConstructors": true
+    },
+    {
         "name": "java.util.Collection",
         "queryAllDeclaredMethods": true
+    },
+    {
+        "name": "java.util.Collections$EmptyList",
+        "allDeclaredFields": true,
+        "methods": [
+            {
+                "name": "readObject",
+                "parameterTypes": [
+                    "java.io.ObjectInputStream"
+                ]
+            },
+            {
+                "name": "readObjectNoData",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "readResolve",
+                "parameterTypes": [
+                    
+                ]
+            },
+            {
+                "name": "writeObject",
+                "parameterTypes": [
+                    "java.io.ObjectOutputStream"
+                ]
+            },
+            {
+                "name": "writeReplace",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
     },
     {
         "name": "java.util.Collections$SingletonList",
@@ -2061,6 +2707,9 @@
         "name": "java.util.Spliterator"
     },
     {
+        "name": "java.util.UUID"
+    },
+    {
         "name": "java.util.concurrent.ArrayBlockingQueue",
         "allDeclaredFields": true,
         "methods": [
@@ -2098,6 +2747,7 @@
     },
     {
         "name": "java.util.concurrent.CancellationException",
+        "unsafeAllocated": true,
         "methods": [
             {
                 "name": "<init>",
@@ -2346,6 +2996,14 @@
         ]
     },
     {
+        "name": "java.util.concurrent.atomic.Striped64$Cell",
+        "fields": [
+            {
+                "name": "value"
+            }
+        ]
+    },
+    {
         "name": "java.util.concurrent.locks.AbstractOwnableSynchronizer",
         "allDeclaredFields": true,
         "queryAllDeclaredConstructors": true,
@@ -2587,6 +3245,9 @@
                 ]
             }
         ]
+    },
+    {
+        "name": "java.util.regex.Pattern"
     },
     {
         "name": "java.util.stream.BaseStream"
@@ -2889,11 +3550,155 @@
         ]
     },
     {
+        "name": "jdk.internal.reflect.GeneratedSerializationConstructorAccessor29",
+        "unsafeAllocated": true
+    },
+    {
         "name": "jdk.internal.reflect.GeneratedSerializationConstructorAccessor3",
         "unsafeAllocated": true
     },
     {
+        "name": "jdk.internal.reflect.GeneratedSerializationConstructorAccessor30",
+        "unsafeAllocated": true
+    },
+    {
+        "name": "jdk.internal.reflect.GeneratedSerializationConstructorAccessor31",
+        "unsafeAllocated": true
+    },
+    {
+        "name": "jdk.internal.reflect.GeneratedSerializationConstructorAccessor32",
+        "unsafeAllocated": true
+    },
+    {
+        "name": "jdk.internal.reflect.GeneratedSerializationConstructorAccessor33",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "jdk.internal.reflect.GeneratedSerializationConstructorAccessor34",
+        "unsafeAllocated": true
+    },
+    {
+        "name": "jdk.internal.reflect.GeneratedSerializationConstructorAccessor35",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "jdk.internal.reflect.GeneratedSerializationConstructorAccessor36",
+        "unsafeAllocated": true
+    },
+    {
+        "name": "jdk.internal.reflect.GeneratedSerializationConstructorAccessor37",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "jdk.internal.reflect.GeneratedSerializationConstructorAccessor38",
+        "unsafeAllocated": true
+    },
+    {
+        "name": "jdk.internal.reflect.GeneratedSerializationConstructorAccessor39",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
         "name": "jdk.internal.reflect.GeneratedSerializationConstructorAccessor4",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "jdk.internal.reflect.GeneratedSerializationConstructorAccessor40",
+        "unsafeAllocated": true
+    },
+    {
+        "name": "jdk.internal.reflect.GeneratedSerializationConstructorAccessor41",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "jdk.internal.reflect.GeneratedSerializationConstructorAccessor42",
+        "unsafeAllocated": true
+    },
+    {
+        "name": "jdk.internal.reflect.GeneratedSerializationConstructorAccessor43",
+        "unsafeAllocated": true
+    },
+    {
+        "name": "jdk.internal.reflect.GeneratedSerializationConstructorAccessor44",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "jdk.internal.reflect.GeneratedSerializationConstructorAccessor45",
+        "unsafeAllocated": true
+    },
+    {
+        "name": "jdk.internal.reflect.GeneratedSerializationConstructorAccessor46",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "jdk.internal.reflect.GeneratedSerializationConstructorAccessor47",
+        "unsafeAllocated": true
+    },
+    {
+        "name": "jdk.internal.reflect.GeneratedSerializationConstructorAccessor48",
         "unsafeAllocated": true,
         "methods": [
             {
@@ -3304,6 +4109,18 @@
         "name": "long"
     },
     {
+        "name": "org.apache.logging.slf4j.SLF4JServiceProvider",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
         "name": "org.apiguardian.api.API"
     },
     {
@@ -3319,7 +4136,30 @@
         ]
     },
     {
+        "name": "org.jspecify.annotations.NullMarked",
+        "queryAllDeclaredMethods": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    "java.lang.reflect.InvocationHandler"
+                ]
+            }
+        ]
+    },
+    {
         "name": "org.robolectric.Robolectric"
+    },
+    {
+        "name": "org.slf4j.event.Level",
+        "methods": [
+            {
+                "name": "values",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
     },
     {
         "name": "short"
@@ -4035,6 +4875,30 @@
         ]
     },
     {
+        "name": "sun.text.resources.BreakIteratorInfo",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "name": "sun.text.resources.BreakIteratorResources",
+        "unsafeAllocated": true,
+        "methods": [
+            {
+                "name": "<init>",
+                "parameterTypes": [
+                    
+                ]
+            }
+        ]
+    },
+    {
         "name": "sun.text.resources.cldr.FormatData",
         "unsafeAllocated": true,
         "methods": [
@@ -4236,6 +5100,10 @@
     },
     {
         "name": "tools.jackson.databind.node.ObjectNode",
+        "allPermittedSubclasses": true
+    },
+    {
+        "name": "tools.jackson.databind.node.StringNode",
         "allPermittedSubclasses": true
     }
 ]

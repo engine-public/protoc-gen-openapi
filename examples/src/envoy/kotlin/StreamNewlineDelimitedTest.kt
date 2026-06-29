@@ -41,7 +41,12 @@ class StreamNewlineDelimitedTest : EnvoyTestBase(GrpcJsonTranscoder(printOptions
                     .shouldNotBeNull()
 
             val result = ProtocGenOpenAPI.from(request()) {
+
+                inlineRequestSchemas = false
+
+                inlineResponseSchemas = false
                 streamNewlineDelimited = true
+                serviceInclude = "HelloService"
                 version = "1.0.0"
             }.compile()
 
@@ -54,6 +59,7 @@ class StreamNewlineDelimitedTest : EnvoyTestBase(GrpcJsonTranscoder(printOptions
                 { "matches reference: " + it.name },
                 result.fileList,
             ) { file ->
+                GoldenFiles.maybeWriteGolden("envoy", "${file.name}.StreamNewlineDelimitedTest.json", file.content)
                 val expected = jsonMapper.readTree(
                     StreamNewlineDelimitedTest::class.java
                         .getResourceAsStream("/${file.name}.StreamNewlineDelimitedTest.json")

@@ -1,0 +1,188 @@
+{
+  "openapi" : "3.1.0",
+  "paths" : {
+    "/envelopes/{id}" : {
+      "get" : {
+        "summary" : "Normal $ref path: Envelope appears in components and is $ref'd here.",
+        "description" : "Normal $ref path: Envelope appears in components and is $ref'd here.",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Envelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/envelopes/{id}/peek" : {
+      "get" : {
+        "summary" : "Inline response: the response schema is inlined, but Envelope is still in components (because GetEnvelope above $refs it), so the inline body $refs Envelope rather than expanding it.",
+        "description" : "Inline response: the response schema is inlined, but Envelope is still in components\n (because GetEnvelope above $refs it), so the inline body $refs Envelope rather than\n expanding it.",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "description" : "A shared \"envelope\" type referenced from two RPCs: one that inlines its response, one that\n emits a $ref.  The non-inline reference keeps Envelope in components/schemas, and the inline\n reference $refs into that same component.",
+                  "properties" : {
+                    "id" : {
+                      "type" : "string"
+                    },
+                    "payload" : {
+                      "$ref" : "#/components/schemas/Payload"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/notes/{id}" : {
+      "get" : {
+        "summary" : "Inline response of a type that is reached only through this inline path.",
+        "description" : "Inline response of a type that is reached *only* through this inline path.  PrivateNote\n and its NoteAttachment field are therefore absent from components — both expand inline\n at this single site.",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "description" : "A type reached only through an inlined RPC response.  The transitivity rule omits it from\n components/schemas; its schema appears once, inline, at the response site.",
+                  "properties" : {
+                    "author" : {
+                      "type" : "string"
+                    },
+                    "attachment" : {
+                      "type" : "object",
+                      "description" : "Reached only via PrivateNote, which is itself inline-only — so this transitively gets\n expanded inline too.",
+                      "properties" : {
+                        "mimeType" : {
+                          "type" : "string"
+                        },
+                        "content" : {
+                          "type" : "string",
+                          "format" : "byte"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/envelopes/{envelope_id}" : {
+      "post" : {
+        "summary" : "Inline request: the body's referenced message (Envelope, via body: \"envelope\") is inlined at the requestBody site.",
+        "description" : "Inline request: the body's referenced message (Envelope, via body: \"envelope\") is\n inlined at the requestBody site.  Envelope is also in components from the GetEnvelope\n RPC above, so its nested Payload $ref is preserved (Payload is in components too).",
+        "parameters" : [ {
+          "name" : "envelope_id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "required" : true,
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "object",
+                "description" : "A shared \"envelope\" type referenced from two RPCs: one that inlines its response, one that\n emits a $ref.  The non-inline reference keeps Envelope in components/schemas, and the inline\n reference $refs into that same component.",
+                "properties" : {
+                  "id" : {
+                    "type" : "string"
+                  },
+                  "payload" : {
+                    "$ref" : "#/components/schemas/Payload"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Envelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "info" : {
+    "title" : "Inline Schemas Example API",
+    "version" : "1.0.0"
+  },
+  "components" : {
+    "schemas" : {
+      "Envelope" : {
+        "type" : "object",
+        "description" : "A shared \"envelope\" type referenced from two RPCs: one that inlines its response, one that\n emits a $ref.  The non-inline reference keeps Envelope in components/schemas, and the inline\n reference $refs into that same component.",
+        "properties" : {
+          "id" : {
+            "type" : "string"
+          },
+          "payload" : {
+            "$ref" : "#/components/schemas/Payload"
+          }
+        }
+      },
+      "Payload" : {
+        "type" : "object",
+        "description" : "A shared inner message embedded within Envelope.  Because it's reached from a non-inlined\n path (Envelope is in components), Payload is also in components.",
+        "properties" : {
+          "kind" : {
+            "type" : "string"
+          },
+          "body" : {
+            "type" : "string"
+          }
+        }
+      }
+    }
+  }
+}

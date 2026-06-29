@@ -1,0 +1,272 @@
+{
+  "openapi" : "3.1.0",
+  "paths" : {
+    "/greet/{your_name}" : {
+      "get" : {
+        "summary" : "GET with one path-bound field and the rest becoming query parameters.",
+        "description" : "GET with one path-bound field and the rest becoming query parameters.\n Canonical \"REST-style\" mapping.",
+        "parameters" : [ {
+          "name" : "your_name",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "greetingType",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "$ref" : "#/components/schemas/Greeting"
+          }
+        }, {
+          "name" : "address.city",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "address.zip",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "tags",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/HelloResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete" : {
+        "summary" : "DELETE with one path-bound field; remaining fields become query parameters.",
+        "description" : "DELETE with one path-bound field; remaining fields become query\n parameters.  Confirms DELETE behaves identically to GET.",
+        "parameters" : [ {
+          "name" : "your_name",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "greetingType",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "$ref" : "#/components/schemas/Greeting"
+          }
+        }, {
+          "name" : "address.city",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "address.zip",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "tags",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/HelloResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/echo" : {
+      "post" : {
+        "summary" : "POST with body unset — Envoy permits this and binds all non-path fields as query parameters regardless of verb.",
+        "description" : "POST with body unset — Envoy permits this and binds all non-path fields\n as query parameters regardless of verb.  Atypical, but spec-allowed.",
+        "parameters" : [ {
+          "name" : "yourName",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "greetingType",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "$ref" : "#/components/schemas/Greeting"
+          }
+        }, {
+          "name" : "address.city",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "address.zip",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "tags",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/HelloResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/greet/named" : {
+      "post" : {
+        "summary" : "POST with body naming a single sub-field; remaining non-path fields become query parameters.",
+        "description" : "POST with body naming a single sub-field; remaining non-path fields\n become query parameters.",
+        "parameters" : [ {
+          "name" : "yourName",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "greetingType",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "$ref" : "#/components/schemas/Greeting"
+          }
+        }, {
+          "name" : "tags",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        } ],
+        "requestBody" : {
+          "required" : true,
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Address"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/HelloResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "info" : {
+    "title" : "BodyService",
+    "description" : "BodyService exercises the three HttpRule.body modes (unset, \"*\", and a named\n field) across multiple HTTP verbs.  Each RPC asserts the canonical\n transcoder behaviour described in google/api/http.proto: with body unset\n every non-path field becomes a URL query parameter; with body=\"<field>\"\n that field is the request body and the rest become query parameters.",
+    "version" : "1.0.0"
+  },
+  "components" : {
+    "schemas" : {
+      "Address" : {
+        "type" : "object",
+        "description" : "A nested address used to exercise dotted query-parameter recursion.",
+        "properties" : {
+          "city" : {
+            "type" : "string"
+          },
+          "zip" : {
+            "type" : "string"
+          }
+        }
+      },
+      "Greeting" : {
+        "type" : "string",
+        "description" : "The type of greeting to use.\n\n- `GREETING_HELLO` — A formal hello greeting.\n\n- `GREETING_HI` — A casual hi greeting.",
+        "enum" : [ "GREETING_UNSPECIFIED", "GREETING_HELLO", "GREETING_HI" ]
+      },
+      "HelloResponse" : {
+        "type" : "object",
+        "properties" : {
+          "replyMessage" : {
+            "type" : "string"
+          },
+          "greeting" : {
+            "$ref" : "#/components/schemas/Greeting"
+          }
+        }
+      }
+    }
+  }
+}

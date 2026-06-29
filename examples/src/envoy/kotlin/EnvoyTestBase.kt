@@ -45,6 +45,7 @@ abstract class EnvoyTestBase(
         beforeSpec {
             grpcServer = ServerBuilder.forPort(0)
                 .addService(HelloServiceImpl())
+                .addService(BodyServiceImpl())
                 .build()
                 .start()
 
@@ -118,12 +119,58 @@ abstract class EnvoyTestBase(
     protected fun postJson(
         path: String,
         body: Any,
+        query: Map<String, String> = emptyMap(),
     ): HttpResponse<String> {
         val request = HttpRequest.newBuilder()
-            .uri(URI.create("http://localhost:$envoyPort$path"))
+            .uri(URI.create("http://localhost:$envoyPort$path${query.toQueryString()}"))
             .header("Content-Type", "application/json")
             .POST(HttpRequest.BodyPublishers.ofString(jsonMapper.writeValueAsString(body)))
             .build()
         return httpClient.send(request, HttpResponse.BodyHandlers.ofString())
     }
+
+    protected fun postJsonNoBody(
+        path: String,
+        query: Map<String, String> = emptyMap(),
+    ): HttpResponse<String> {
+        // No Content-Type header — Envoy's transcoder returns 415 when one is set but the body
+        // is empty.  Real clients calling body-unset RPCs send no Content-Type either.
+        val request = HttpRequest.newBuilder()
+            .uri(URI.create("http://localhost:$envoyPort$path${query.toQueryString()}"))
+            .POST(HttpRequest.BodyPublishers.noBody())
+            .build()
+        return httpClient.send(request, HttpResponse.BodyHandlers.ofString())
+    }
+
+    protected fun getJson(
+        path: String,
+        query: Map<String, String> = emptyMap(),
+    ): HttpResponse<String> {
+        val request = HttpRequest.newBuilder()
+            .uri(URI.create("http://localhost:$envoyPort$path${query.toQueryString()}"))
+            .GET()
+            .build()
+        return httpClient.send(request, HttpResponse.BodyHandlers.ofString())
+    }
+
+    protected fun deleteJson(
+        path: String,
+        query: Map<String, String> = emptyMap(),
+    ): HttpResponse<String> {
+        val request = HttpRequest.newBuilder()
+            .uri(URI.create("http://localhost:$envoyPort$path${query.toQueryString()}"))
+            .DELETE()
+            .build()
+        return httpClient.send(request, HttpResponse.BodyHandlers.ofString())
+    }
+
+    private fun Map<String, String>.toQueryString(): String =
+        if (isEmpty()) {
+            ""
+        } else {
+            entries.joinToString(prefix = "?", separator = "&") { (k, v) ->
+                java.net.URLEncoder.encode(k, Charsets.UTF_8) + "=" +
+                    java.net.URLEncoder.encode(v, Charsets.UTF_8)
+            }
+        }
 }

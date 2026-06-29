@@ -1,0 +1,102 @@
+syntax = "proto3";
+
+package engine.protoc.openapi.example.inlineSchemas;
+
+option java_package = "com.engine.protoc.openapi.example.inlineSchemas";
+option java_multiple_files = true;
+
+import "google/api/annotations.proto";
+import "engine/protoc/openapi/annotations.proto";
+
+option (.engine.protoc.openapi.file) = {
+    openapi: {
+        info: {
+            title: "Inline Schemas Example API"
+            version: "1.0.0"
+        }
+    }
+};
+
+// A shared "envelope" type referenced from two RPCs: one that inlines its response, one that
+// emits a $ref.  The non-inline reference keeps Envelope in components/schemas, and the inline
+// reference $refs into that same component.
+message Envelope {
+    string id = 1;
+    Payload payload = 2;
+}
+
+// A shared inner message embedded within Envelope.  Because it's reached from a non-inlined
+// path (Envelope is in components), Payload is also in components.
+message Payload {
+    string kind = 1;
+    string body = 2;
+}
+
+// A type reached only through an inlined RPC response.  The transitivity rule omits it from
+// components/schemas; its schema appears once, inline, at the response site.
+message PrivateNote {
+    string author = 1;
+    NoteAttachment attachment = 2;
+}
+
+// Reached only via PrivateNote, which is itself inline-only — so this transitively gets
+// expanded inline too.
+message NoteAttachment {
+    string mime_type = 1;
+    bytes content = 2;
+}
+
+// Request bag whose body is a sub-message.  When inline_request=true on the method, the
+// sub-message is inlined at the requestBody site.
+message UpdateEnvelopeRequest {
+    string envelope_id = 1;
+    Envelope envelope = 2;
+}
+
+message GetEnvelopeRequest {
+    string id = 1;
+}
+
+message GetNoteRequest {
+    string id = 1;
+}
+
+service EnvelopeService {
+    // Normal $ref path: Envelope appears in components and is $ref'd here.
+    rpc GetEnvelope(GetEnvelopeRequest) returns (Envelope) {
+        option (google.api.http) = {
+            get: "/envelopes/{id}"
+        };
+    }
+
+    // Inline response: the response schema is inlined, but Envelope is still in components
+    // (because GetEnvelope above $refs it), so the inline body $refs Envelope rather than
+    // expanding it.
+    rpc PeekEnvelope(GetEnvelopeRequest) returns (Envelope) {
+        option (google.api.http) = {
+            get: "/envelopes/{id}/peek"
+        };
+        option (engine.protoc.openapi.method) = { inline_response: true };
+    }
+
+    // Inline response of a type that is reached *only* through this inline path.  PrivateNote
+    // and its NoteAttachment field are therefore absent from components — both expand inline
+    // at this single site.
+    rpc GetNote(GetNoteRequest) returns (PrivateNote) {
+        option (google.api.http) = {
+            get: "/notes/{id}"
+        };
+        option (engine.protoc.openapi.method) = { inline_response: true };
+    }
+
+    // Inline request: the body's referenced message (Envelope, via body: "envelope") is
+    // inlined at the requestBody site.  Envelope is also in components from the GetEnvelope
+    // RPC above, so its nested Payload $ref is preserved (Payload is in components too).
+    rpc UpdateEnvelope(UpdateEnvelopeRequest) returns (Envelope) {
+        option (google.api.http) = {
+            post: "/envelopes/{envelope_id}"
+            body: "envelope"
+        };
+        option (engine.protoc.openapi.method) = { inline_request: true };
+    }
+}

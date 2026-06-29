@@ -51,8 +51,13 @@ class AlwaysPrintEnumsAsIntsPrimitiveFieldsTest :
                     .shouldNotBeNull()
 
             val result = ProtocGenOpenAPI.from(request()) {
+
+                inlineRequestSchemas = false
+
+                inlineResponseSchemas = false
                 enumValueFormat = ProtocGenOpenAPI.Options.EnumValueFormat.NUMERIC_VALUE
                 alwaysPrintPrimitiveFields = true
+                serviceInclude = "HelloService"
                 version = "1.0.0"
             }.compile()
 
@@ -65,6 +70,7 @@ class AlwaysPrintEnumsAsIntsPrimitiveFieldsTest :
                 { "matches reference: " + it.name },
                 result.fileList,
             ) { file ->
+                GoldenFiles.maybeWriteGolden("envoy", "${file.name}.AlwaysPrintEnumsAsIntsPrimitiveFieldsTest.json", file.content)
                 val expected = jsonMapper.readTree(
                     AlwaysPrintEnumsAsIntsPrimitiveFieldsTest::class.java
                         .getResourceAsStream("/${file.name}.AlwaysPrintEnumsAsIntsPrimitiveFieldsTest.json")

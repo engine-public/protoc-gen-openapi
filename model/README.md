@@ -69,17 +69,21 @@ import "engine/protoc/openapi/annotations.proto";
 import "google/api/annotations.proto";
 
 option (engine.protoc.openapi.file) = {
-    openapi: "3.1.0"
-    info: {
-        title: "Greeter API"
-        version: "1.0.0"
+    openapi: {
+        openapi: "3.1.0"
+        info: {
+            title: "Greeter API"
+            version: "1.0.0"
+        }
     }
 };
 
 service Greeter {
     rpc SayHello(HelloRequest) returns (HelloReply) {
         option (engine.protoc.openapi.method) = {
-            summary: "Greet a user by name"
+            operation: {
+                summary: "Greet a user by name"
+            }
         };
         option (google.api.http) = {
             get: "/hello/{name}"
@@ -102,20 +106,15 @@ For richer examples covering every annotation field — message schemas, field o
 ## Annotations
 
 Defined in [`annotations.proto`](src/main/proto/engine/protoc/openapi/annotations.proto).
-Every annotation is a proto option attached to one of the standard descriptor option types.
+Each scope has a single extension that points at a wrapper message; the wrapper's fields hold the OAS payload plus any scope-specific flags.
+This shape keeps the field names in their own per-wrapper namespace (so e.g. both `(field).inline` and `(enum).inline` can use the same short name).
 
-| scope | option | type | purpose |
+| scope | extension | wrapper | nested fields |
 |---|---|---|---|
-| file | [`(engine.protoc.openapi.file)`](src/main/proto/engine/protoc/openapi/annotations.proto#L16) | [`OpenAPI`](src/main/proto/engine/protoc/openapi/openapi.proto) | File-level OAS document: `info`, `servers`, `tags`, `security`, `components`, `externalDocs`. Applied to every document generated from this file. |
-| service | [`(engine.protoc.openapi.service)`](src/main/proto/engine/protoc/openapi/annotations.proto#L21) | [`OpenAPI`](src/main/proto/engine/protoc/openapi/openapi.proto) | Overrides or supplements file-level metadata for a single service. Highest-priority layer for `info.version`. |
-| service | [`(engine.protoc.openapi.tags)`](src/main/proto/engine/protoc/openapi/annotations.proto#L25) | `repeated string` | Tags applied to every RPC in the service. Tag definitions themselves still come from the `OpenAPI.tags` block at file or service scope. |
-| service | [`(engine.protoc.openapi.index_order)`](src/main/proto/engine/protoc/openapi/annotations.proto#L33) | `int32` | Sort key controlling the order this service's paths (and its auto-tag when `autoTagServices` is enabled) appear in the document. Un-annotated services fall into their encounter ordinal; negative values place a service ahead of the un-annotated baseline; ties break by source order. See [examples/src/serviceOrdering](../examples/src/serviceOrdering/README.md). |
-| method | [`(engine.protoc.openapi.method)`](src/main/proto/engine/protoc/openapi/annotations.proto#L38) | [`Operation`](src/main/proto/engine/protoc/openapi/model/operation.proto) | OAS Operation object for a single RPC: `summary`, `description`, `tags`, `parameters`, `requestBody`, `responses`, `security`, `callbacks`, etc. |
-| method | [`(engine.protoc.openapi.inline_request_schema)`](src/main/proto/engine/protoc/openapi/annotations.proto#L44) | `bool` | When `true`, the RPC's request body schema is inlined at the use site instead of emitted as a `$ref` into `components/schemas`. Transitive — see [examples/src/inlineSchemas](../examples/src/inlineSchemas/README.md). |
-| method | [`(engine.protoc.openapi.inline_response_schema)`](src/main/proto/engine/protoc/openapi/annotations.proto#L47) | `bool` | Same as `inline_request_schema`, but for the RPC's response body. |
-| message | [`(engine.protoc.openapi.message)`](src/main/proto/engine/protoc/openapi/annotations.proto#L52) | [`Schema`](src/main/proto/engine/protoc/openapi/model/schema.proto) | Schema-level overrides for the generated message schema: `title`, `description`, `required`, composition keywords, etc. |
-| field | [`(engine.protoc.openapi.field)`](src/main/proto/engine/protoc/openapi/annotations.proto#L57) | [`Schema`](src/main/proto/engine/protoc/openapi/model/schema.proto) | Schema-level overrides for a single field: validation keywords, `description`, `example`, `nullable`, format hints, etc. |
-| field | [`(engine.protoc.openapi.inline_schema)`](src/main/proto/engine/protoc/openapi/annotations.proto#L68) | `bool` | When `true` on a message-typed field, the referenced message's schema is inlined at the field site instead of emitted as a `$ref`. Same transitivity rule as the method-level inline flags — see [examples/src/inlineFieldSchema](../examples/src/inlineFieldSchema/README.md). |
-| enum | [`(engine.protoc.openapi.enum)`](src/main/proto/engine/protoc/openapi/annotations.proto#L73) | [`Schema`](src/main/proto/engine/protoc/openapi/model/schema.proto) | Schema-level overrides for the generated enum schema. |
-| enum | [`(engine.protoc.openapi.inline)`](src/main/proto/engine/protoc/openapi/annotations.proto#L75) | `bool` | When `true`, this enum is inlined at every reference instead of emitted as a shared `$ref`. Per-enum override of the `inlineEnums` compiler option. |
-| enum value | [`(engine.protoc.openapi.suppress)`](src/main/proto/engine/protoc/openapi/annotations.proto#L81) | `bool` | When `true`, omit this enum value from generated OAS `enum` arrays. Useful for proto3's conventional `*_UNSPECIFIED = 0` value. |
+| file | [`(engine.protoc.openapi.file)`](src/main/proto/engine/protoc/openapi/annotations.proto#L143) | [`File`](src/main/proto/engine/protoc/openapi/annotations.proto#L17) | `openapi:` [`OpenAPI`](src/main/proto/engine/protoc/openapi/openapi.proto) — file-level OAS document: `info`, `servers`, `tags`, `security`, `components`, `externalDocs`. Applied to every document generated from this file. |
+| service | [`(engine.protoc.openapi.service)`](src/main/proto/engine/protoc/openapi/annotations.proto#L147) | [`Service`](src/main/proto/engine/protoc/openapi/annotations.proto#L23) | `openapi:` [`OpenAPI`](src/main/proto/engine/protoc/openapi/openapi.proto) — overrides or supplements file-level metadata for a single service. Highest-priority layer for `info.version`.<br>`tags: repeated string` — applied to every RPC in the service; tag definitions themselves still come from the `OpenAPI.tags` block at file or service scope.<br>`index_order: int32` — sort key controlling the order this service's paths (and its auto-tag when `autoTagServices` is enabled) appear in the document. Un-annotated services fall into their encounter ordinal; negative values place a service ahead of the un-annotated baseline; ties break by source order. See [examples/src/serviceOrdering](../examples/src/serviceOrdering/README.md). |
+| method | [`(engine.protoc.openapi.method)`](src/main/proto/engine/protoc/openapi/annotations.proto#L151) | [`Method`](src/main/proto/engine/protoc/openapi/annotations.proto#L42) | `operation:` [`Operation`](src/main/proto/engine/protoc/openapi/model/operation.proto) — OAS Operation object for a single RPC: `summary`, `description`, `tags`, `parameters`, `requestBody`, `responses`, `security`, `callbacks`, etc.<br>`inline_request: bool` — when `true`, the RPC's request body schema is inlined at the use site instead of emitted as a `$ref` into `components/schemas`. Transitive — see [examples/src/inlineSchemas](../examples/src/inlineSchemas/README.md).<br>`inline_response: bool` — same as `inline_request`, but for the RPC's response body.<br>`error_responses: repeated ErrorResponse` — shortcut for typed error scenarios that expand into entries on `operation.responses`; see [examples/src/errorResponses](../examples/src/errorResponses/README.md). |
+| message | [`(engine.protoc.openapi.message)`](src/main/proto/engine/protoc/openapi/annotations.proto#L155) | [`Message`](src/main/proto/engine/protoc/openapi/annotations.proto#L106) | `schema:` [`Schema`](src/main/proto/engine/protoc/openapi/model/schema.proto) — schema-level overrides for the generated message schema: `title`, `description`, `required`, composition keywords, etc. |
+| field | [`(engine.protoc.openapi.field)`](src/main/proto/engine/protoc/openapi/annotations.proto#L159) | [`Field`](src/main/proto/engine/protoc/openapi/annotations.proto#L112) | `schema:` [`Schema`](src/main/proto/engine/protoc/openapi/model/schema.proto) — schema-level overrides for a single field: validation keywords, `description`, `example`, `nullable`, format hints, etc.<br>`inline: bool` — when `true` on a message-typed field, the referenced message's schema is inlined at the field site instead of emitted as a `$ref`. Same transitivity rule as the method-level inline flags — see [examples/src/inlineFieldSchema](../examples/src/inlineFieldSchema/README.md). |
+| enum | [`(engine.protoc.openapi.enum)`](src/main/proto/engine/protoc/openapi/annotations.proto#L163) | [`Enum`](src/main/proto/engine/protoc/openapi/annotations.proto#L126) | `schema:` [`Schema`](src/main/proto/engine/protoc/openapi/model/schema.proto) — schema-level overrides for the generated enum schema.<br>`inline: bool` — when `true`, this enum is inlined at every reference instead of emitted as a shared `$ref`. Per-enum override of the `inlineEnums` compiler option. |
+| enum value | [`(engine.protoc.openapi.enum_value)`](src/main/proto/engine/protoc/openapi/annotations.proto#L167) | [`EnumValue`](src/main/proto/engine/protoc/openapi/annotations.proto#L137) | `suppress: bool` — when `true`, omit this enum value from generated OAS `enum` arrays. Useful for proto3's conventional `*_UNSPECIFIED = 0` value. |

@@ -28,9 +28,10 @@ Every component type appears at least once:
 
 ### Operations
 
-Nine RPCs cover the full variety of operation-level annotation:
+Eleven RPCs cover the full variety of operation-level annotation:
 
 - Inline and `$ref` parameters, including a `$ref` that adds `summary` and `description` overrides.
+- Manual-declaration precedence over auto-derived query parameters: a `$ref` parameter and a dotted inline parameter each suppress the matching auto-derived field, while un-claimed siblings are still derived (`searchProducts`).
 - `requestBody` by reference and by value.
 - Multiple response codes including `201` and `default`.
 - Inline and referenced response headers.

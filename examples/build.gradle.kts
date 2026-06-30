@@ -108,7 +108,7 @@ testing {
  * to 4.1.135.Final. Constraints (not `useVersion` forces) so a future grpc
  * upgrade that brings a newer Netty still wins cleanly.
  *
- * Alerts: https://github.com/HotelEngine/protoc-gen-openapi/security/dependabot
+ * Alerts: https://github.com/engine-public/protoc-gen-openapi/security/dependabot
  */
 dependencies {
     constraints {

@@ -81,18 +81,18 @@ publishing {
                 licenses {
                     license {
                         name.set("Apache-2.0")
-                        url.set("https://github.com/hotelengine/protoc-gen-openapi/blob/${version}/LICENSE")
+                        url.set("https://github.com/engine-public/protoc-gen-openapi/blob/${version}/LICENSE")
                     }
                 }
                 developers {
                     developer {
-                        organizationUrl.set("https://github.com/hotelengine")
+                        organizationUrl.set("https://github.com/engine-public")
                     }
                 }
                 scm {
-                    connection.set("scm:git:https://github.com/hotelengine/protoc-gen-openapi.git")
-                    developerConnection.set("scm:git:https://github.com/hotelengine/protoc-gen-openapi.git")
-                    url.set("https://github.com/hotelengine/protoc-gen-openapi")
+                    connection.set("scm:git:https://github.com/engine-public/protoc-gen-openapi.git")
+                    developerConnection.set("scm:git:https://github.com/engine-public/protoc-gen-openapi.git")
+                    url.set("https://github.com/engine-public/protoc-gen-openapi")
                 }
             }
         }
@@ -103,7 +103,7 @@ afterEvaluate {
     publishing.publications.named<MavenPublication>("maven") {
         pom {
             description.set(project.description)
-            url.set("https://github.com/hotelengine/protoc-gen-openapi/blob/${version}/model/README.md")
+            url.set("https://github.com/engine-public/protoc-gen-openapi/blob/${version}/model/README.md")
         }
     }
 }

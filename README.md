@@ -65,7 +65,7 @@ protobuf {
 ```bash
 # optional one-time: download and extract the model protos
 curl -L -o protoc-gen-openapi-model-protos.zip \
-  https://github.com/HotelEngine/protoc-gen-openapi/releases/download/<version>/protoc-gen-openapi-model-protos.zip
+  https://github.com/engine-public/protoc-gen-openapi/releases/download/<version>/protoc-gen-openapi-model-protos.zip
 unzip -d build/proto/openapi-model protoc-gen-openapi-model-protos.zip
 
 protoc \
@@ -151,7 +151,7 @@ combination, plus manual-override precedence).
 
 ## Related Projects
 
-- [engine-public/protoc-utils](https://github.com/HotelEngine/protoc-utils) — shared protoc plugin utilities (descriptor wrappers, comment parsing, parameter handling) and the `recorder` plugin used by this project's example suite.
+- [engine-public/protoc-utils](https://github.com/engine-public/protoc-utils) — shared protoc plugin utilities (descriptor wrappers, comment parsing, parameter handling) and the `recorder` plugin used by this project's example suite.
 
 ## Contributing
 

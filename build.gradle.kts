@@ -194,7 +194,7 @@ allprojects {
         resolutionStrategy {
             eachDependency {
                 /*
-                 * https://github.com/HotelEngine/protoc-gen-openapi/security/dependabot/3
+                 * https://github.com/engine-public/protoc-gen-openapi/security/dependabot/3
                  * https://nvd.nist.gov/vuln/detail/CVE-2026-1225
                  */
                 if (requested.group == "ch.qos.logback" && requested.module.name.startsWith("logback-")) {
@@ -400,18 +400,18 @@ publishing {
                 licenses {
                     license {
                         name.set("Apache-2.0")
-                        url.set("https://github.com/hotelengine/protoc-gen-openapi/blob/${version}/LICENSE")
+                        url.set("https://github.com/engine-public/protoc-gen-openapi/blob/${version}/LICENSE")
                     }
                 }
                 developers {
                     developer {
-                        organizationUrl.set("https://github.com/hotelengine")
+                        organizationUrl.set("https://github.com/engine-public")
                     }
                 }
                 scm {
-                    connection.set("scm:git:https://github.com/hotelengine/protoc-gen-openapi.git")
-                    developerConnection.set("scm:git:https://github.com/hotelengine/protoc-gen-openapi.git")
-                    url.set("https://github.com/hotelengine/protoc-gen-openapi")
+                    connection.set("scm:git:https://github.com/engine-public/protoc-gen-openapi.git")
+                    developerConnection.set("scm:git:https://github.com/engine-public/protoc-gen-openapi.git")
+                    url.set("https://github.com/engine-public/protoc-gen-openapi")
                 }
             }
         }
@@ -422,7 +422,7 @@ afterEvaluate {
     val pub = publishing.publications.getByName<MavenPublication>("maven")
     pub.pom {
         description.set(project.description)
-        url.set("https://github.com/hotelengine/protoc-gen-openapi/blob/${version}/README.md")
+        url.set("https://github.com/engine-public/protoc-gen-openapi/blob/${version}/README.md")
     }
 
     val binDir = nativeBinariesDir.get()

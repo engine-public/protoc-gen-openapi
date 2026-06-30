@@ -79,7 +79,7 @@ Each example under [`examples/src/<name>/`](examples/README.md) is a self-contai
 
 Each suite runs:
 
-1. `protoc` with the `recorder` plugin (a native binary published as `com.engine:protoc-utils-recorder` from [engine-public/protoc-utils](https://github.com/HotelEngine/protoc-utils)) to capture the raw `CodeGeneratorRequest` as a `.binpb` file.
+1. `protoc` with the `recorder` plugin (a native binary published as `com.engine:protoc-utils-recorder` from [engine-public/protoc-utils](https://github.com/engine-public/protoc-utils)) to capture the raw `CodeGeneratorRequest` as a `.binpb` file.
 2. A test that loads the `.binpb` and feeds it to `ProtocGenOpenAPI.compile()`.
 3. For happy-path examples, comparison against reference JSON/YAML files stored in `src/<suite>/resources/`.
    For error-case examples, an assertion that compilation fails with an informative error.

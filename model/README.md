@@ -43,7 +43,7 @@ If you are invoking `protoc` directly, place the model `.proto` sources somewher
 ```bash
 # one-time: download and extract the model protos from the GitHub release
 curl -L -o protoc-gen-openapi-model-protos.zip \
-  https://github.com/HotelEngine/protoc-gen-openapi/releases/download/<version>/protoc-gen-openapi-model-protos.zip
+  https://github.com/engine-public/protoc-gen-openapi/releases/download/<version>/protoc-gen-openapi-model-protos.zip
 unzip -d build/proto/openapi-model protoc-gen-openapi-model-protos.zip
 
 protoc \

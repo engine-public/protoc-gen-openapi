@@ -141,29 +141,29 @@ message EnumValue {
 }
 
 extend .google.protobuf.FileOptions {
-    .engine.protoc.openapi.File file = 20231016;
+    .engine.protoc.openapi.File file = 1308;
 }
 
 extend .google.protobuf.ServiceOptions {
-    .engine.protoc.openapi.Service service = 20231016;
+    .engine.protoc.openapi.Service service = 1308;
 }
 
 extend .google.protobuf.MethodOptions {
-    .engine.protoc.openapi.Method method = 20231016;
+    .engine.protoc.openapi.Method method = 1308;
 }
 
 extend .google.protobuf.MessageOptions {
-    .engine.protoc.openapi.Message message = 20231016;
+    .engine.protoc.openapi.Message message = 1308;
 }
 
 extend .google.protobuf.FieldOptions {
-    .engine.protoc.openapi.Field field = 20231016;
+    .engine.protoc.openapi.Field field = 1308;
 }
 
 extend .google.protobuf.EnumOptions {
-    .engine.protoc.openapi.Enum enum = 20231016;
+    .engine.protoc.openapi.Enum enum = 1308;
 }
 
 extend .google.protobuf.EnumValueOptions {
-    .engine.protoc.openapi.EnumValue enum_value = 20231016;
+    .engine.protoc.openapi.EnumValue enum_value = 1308;
 }

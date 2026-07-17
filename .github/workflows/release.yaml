@@ -57,6 +57,15 @@ jobs:
       - name: Setup gradle
         uses: gradle/actions/setup-gradle@50e97c2cd7a37755bbfafc9c5b7cafaece252f6e # https://github.com/gradle/actions/releases/tag/v6.1.0
 
+      - name: Raise Gradle daemon heap for JReleaser upload
+        # JReleaser 1.24 buffers the Maven Central bundle in memory during
+        # upload; the default daemon heap OOMs on our multi-platform bundle.
+        # Scoped to $GRADLE_USER_HOME on the ephemeral runner so developers
+        # are unaffected.
+        run: |
+          mkdir -p "$GRADLE_USER_HOME"
+          echo 'org.gradle.jvmargs=-Xmx4g' >> "$GRADLE_USER_HOME/gradle.properties"
+
       - name: Download JVM Distribution Artifacts
         uses: actions/download-artifact@v4
         with:

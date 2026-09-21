@@ -50,6 +50,14 @@ buildscript {
                         "fixed in 2.22.1.",
                 )
             }
+            /*
+             * GHSA-9pwp-9qqc-pr26 / CVE-2026-8763 — bcprov-jdk18on. Transitive of
+             * JReleaser (via bcpg/bcpkix signing stack).
+             */
+            if (requested.group == "org.bouncycastle") {
+                useVersion("1.85")
+                because("bcprov-jdk18on GHSA-9pwp-9qqc-pr26 / CVE-2026-8763")
+            }
         }
     }
 }

@@ -105,14 +105,14 @@ testing {
  * even the latest grpc-netty (1.82.1) only reaches 4.1.133.Final — both
  * affected by successive batches of CVEs disclosed in late 2026. Until
  * grpc-netty publishes against a patched Netty, constrain the affected modules
- * to 4.1.135.Final. Constraints (not `useVersion` forces) so a future grpc
+ * to 4.1.137.Final. Constraints (not `useVersion` forces) so a future grpc
  * upgrade that brings a newer Netty still wins cleanly.
  *
  * Alerts: https://github.com/engine-public/protoc-gen-openapi/security/dependabot
  */
 dependencies {
     constraints {
-        "envoyImplementation"("io.netty:netty-codec-http2:4.1.135.Final") {
+        "envoyImplementation"("io.netty:netty-codec-http2:4.1.137.Final") {
             because(
                 "GHSA-563q-j3cm-6jxm (#44, HTTP/2 Reset attack with a different on-the-wire " +
                     "signature), GHSA-c2gf-v879-257j (#41, ByteBuf ref-count leak in " +
@@ -121,7 +121,7 @@ dependencies {
                     "CVE-2026-42587 (#37, HttpContentDecompressor maxAllocation bypass DoS).",
             )
         }
-        "envoyImplementation"("io.netty:netty-codec-http:4.1.135.Final") {
+        "envoyImplementation"("io.netty:netty-codec-http:4.1.137.Final") {
             because(
                 "GHSA-hvcg-qmg6-jm4c (#43, HttpObjectDecoder skips arbitrary initial control " +
                     "characters), CVE-2026-42587 (#36, decompression DoS), CVE-2026-42585 " +
@@ -131,7 +131,7 @@ dependencies {
                     "smuggling), CVE-2026-41417 (#29, DefaultHttpRequest.setUri injection).",
             )
         }
-        "envoyImplementation"("io.netty:netty-handler:4.1.135.Final") {
+        "envoyImplementation"("io.netty:netty-handler:4.1.137.Final") {
             because(
                 "GHSA-c653-97m9-rcg9 (#42, wrapping a plain trust manager silently disables " +
                     "hostname verification), GHSA-x4gw-5cx5-pgmh (#39, SNI handler " +
@@ -139,12 +139,12 @@ dependencies {
                     "(#38, IPv6 subnet filter bypass via incorrect comparator masking).",
             )
         }
-        "envoyImplementation"("io.netty:netty-codec:4.1.135.Final") {
+        "envoyImplementation"("io.netty:netty-codec:4.1.137.Final") {
             because(
                 "CVE-2026-42583 (alert #33): Lz4FrameDecoder is vulnerable to resource exhaustion.",
             )
         }
-        "envoyImplementation"("io.netty:netty-handler-proxy:4.1.135.Final") {
+        "envoyImplementation"("io.netty:netty-handler-proxy:4.1.137.Final") {
             because(
                 "CVE-2026-42578 (alert #30): HTTP header injection via HttpProxyHandler " +
                     "with validation disabled (incomplete fix for CVE-2025-67735).",

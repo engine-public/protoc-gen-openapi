@@ -13,7 +13,7 @@ testcontainers = "2.0.5"
 kotest = "6.1.4"
 engine-protoc-utils = "1.0.0"
 graalvm-sdk = "23.1.2"
-log4j = "2.26.0"
+log4j = "2.26.1"
 
 # plugin versions
 google-osdetector-plugin = "1.7.3"

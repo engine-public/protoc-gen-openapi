@@ -341,6 +341,9 @@ graalvmNative {
             })
             buildArgs.add("-H:+UnlockExperimentalVMOptions")
             buildArgs.add("-H:ThrowMissingRegistrationErrors=")
+            // protobuf-java RuntimeVersion.<clinit> hits String.format → CLDR bundle lookup for the default locale.
+            // Embed every locale so the binary works regardless of the user's system locale.
+            buildArgs.add("-H:IncludeLocales=")
         }
     }
     agent {

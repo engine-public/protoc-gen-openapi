@@ -70,6 +70,8 @@ jobs:
         env:
           JF_USER: ${{ vars.JF_USER }}
           JF_PASSWORD: ${{ secrets.JF_PASSWORD }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           ./gradlew -Pcodeql=true clean compileKotlin -x ktlintCheck -x nativeCompile
 

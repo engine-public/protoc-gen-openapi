@@ -65,7 +65,7 @@ jobs:
           # only as native binaries (see native-build.yaml + release.yaml).
           cp model/build/libs/*.jar staging/
           # CycloneDX SBOMs (one per module) ride along so they get attached
-          # to the GitHub release and to Maven Central via the
+          # to the GitHub release and to GitHub Packages via the
           # `cyclonedx`-classified artifacts on each publication.
           cp build/reports/cyclonedx-direct/bom.json \
             "staging/protoc-gen-openapi-${VERSION}-cyclonedx.json"

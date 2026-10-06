@@ -108,3 +108,13 @@ Tests use [kotest](https://kotest.io) `FunSpec` style with `assertSoftly` enable
    Both must pass.
 3. If you added new proto types or new reflection usage and `nativeCompile` (or the resulting binary) fails, regenerate the reflection metadata as described above and include the updated `reflect-config.json` in your PR.
 4. Open a pull request describing the change and linking any relevant Envoy or OAS spec references.
+
+## Releasing
+
+Releases are cut by running the `Release` workflow (`.github/workflows/release.yaml`) via `workflow_dispatch`.
+It fans out to `build.yaml` (JVM jars, SBOMs, model proto zip) and `native-build.yaml` (one native binary per platform), then publishes to [GitHub Packages](https://github.com/engine-public/protoc-gen-openapi/packages), tags the commit, and attaches the same artifacts to a GitHub Release.
+
+Publishing runs `./gradlew publishAllPublicationsToGitHubPackagesRepository`, which pushes both `com.engine:protoc-gen-openapi` (POM-only, with per-platform native binaries as `.exe` classifiers) and `com.engine:protoc-gen-openapi-model`.
+It authenticates with the `GITHUB_ACTOR` / `GITHUB_TOKEN` environment variables; the release job supplies the workflow token with `packages: write`, so no additional secrets are needed.
+The root publication picks up native binaries from `ENGINE_NATIVE_BIN_DIR` when set, otherwise it attaches only the host's binary from the local `nativeCompile` output.
+Use `./gradlew publishToMavenLocal` to inspect the published artifact set without uploading anything.

@@ -21,6 +21,7 @@ Two common entry points are shown below.
 ### Gradle Integration
 
 Add the artifact and configure the [`protobuf-gradle-plugin`](https://github.com/google/protobuf-gradle-plugin) to extract the `.proto` files from the jar so `protoc` can resolve the imports.
+The artifact is published to GitHub Packages; see the [root README](../README.md#gradle) for the required repository configuration.
 
 ```kotlin
 plugins {

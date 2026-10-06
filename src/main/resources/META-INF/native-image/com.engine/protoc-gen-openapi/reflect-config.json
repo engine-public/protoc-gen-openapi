@@ -1074,6 +1074,12 @@
         ],
         "methods": [
             {
+                "name": "encodedLength",
+                "parameterTypes": [
+                    "java.nio.charset.Charset"
+                ]
+            },
+            {
                 "name": "format",
                 "parameterTypes": [
                     "java.lang.String",
@@ -2068,6 +2074,15 @@
                     "java.lang.invoke.MethodHandle",
                     "java.lang.invoke.MethodHandle"
                 ]
+            },
+            {
+                "name": "tableSwitch",
+                "parameterTypes": [
+                    "int",
+                    "java.lang.invoke.MethodHandle",
+                    "java.lang.invoke.MethodHandleImpl$CasesHolder",
+                    "java.lang.Object[]"
+                ]
             }
         ]
     },
@@ -2210,6 +2225,43 @@
                 "parameterTypes": [
                     "int",
                     "int"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "java.lang.runtime.SwitchBootstraps",
+        "methods": [
+            {
+                "name": "enumEqCheck",
+                "parameterTypes": [
+                    "java.lang.Object",
+                    "java.lang.Enum$EnumDesc",
+                    "java.lang.invoke.MethodHandles$Lookup",
+                    "java.lang.runtime.SwitchBootstraps$ResolvedEnumLabel"
+                ]
+            },
+            {
+                "name": "integerEqCheck",
+                "parameterTypes": [
+                    "java.lang.Object",
+                    "java.lang.Integer"
+                ]
+            },
+            {
+                "name": "isZero",
+                "parameterTypes": [
+                    "int"
+                ]
+            },
+            {
+                "name": "mappedEnumLookup",
+                "parameterTypes": [
+                    "java.lang.Enum",
+                    "java.lang.invoke.MethodHandles$Lookup",
+                    "java.lang.Class",
+                    "java.lang.Enum$EnumDesc[]",
+                    "java.lang.runtime.SwitchBootstraps$EnumMap"
                 ]
             }
         ]
@@ -2606,6 +2658,9 @@
         ]
     },
     {
+        "name": "java.util.ImmutableCollections$Access"
+    },
+    {
         "name": "java.util.Iterator"
     },
     {
@@ -2662,6 +2717,13 @@
         "name": "java.util.Objects",
         "methods": [
             {
+                "name": "checkIndex",
+                "parameterTypes": [
+                    "int",
+                    "int"
+                ]
+            },
+            {
                 "name": "equals",
                 "parameterTypes": [
                     "java.lang.Object",
@@ -2670,6 +2732,12 @@
             },
             {
                 "name": "hashCode",
+                "parameterTypes": [
+                    "java.lang.Object"
+                ]
+            },
+            {
+                "name": "isNull",
                 "parameterTypes": [
                     "java.lang.Object"
                 ]
@@ -4186,6 +4254,12 @@
                 ]
             },
             {
+                "name": "unboxInteger",
+                "parameterTypes": [
+                    "java.lang.Integer"
+                ]
+            },
+            {
                 "name": "unboxLong",
                 "parameterTypes": [
                     "java.lang.Object",
@@ -4197,6 +4271,11 @@
     {
         "name": "sun.misc.Unsafe",
         "allDeclaredFields": true,
+        "fields": [
+            {
+                "name": "theUnsafe"
+            }
+        ],
         "methods": [
             {
                 "name": "arrayBaseOffset",

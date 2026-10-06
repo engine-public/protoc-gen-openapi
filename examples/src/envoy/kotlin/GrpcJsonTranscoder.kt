@@ -16,6 +16,7 @@ data class GrpcJsonTranscoder(
     /**
      * Supplies the filename of the proto descriptor set for the gRPC services.
      */
+    @get:JsonInclude(JsonInclude.Include.ALWAYS)
     val protoDescriptor: String = "/etc/envoy/hello.pb",
 
     /**
@@ -27,6 +28,7 @@ data class GrpcJsonTranscoder(
      * If the list of services is empty, filter is considered disabled.
      * However, this behavior changes if [RequestValidationOptions.rejectUnknownMethod] is enabled.
      */
+    @get:JsonInclude(JsonInclude.Include.ALWAYS)
     val services: List<String> = listOf("engine.protoc.openapi.example.envoy.HelloService"),
 
     /**
@@ -312,6 +314,12 @@ data class GrpcJsonTranscoder(
         ALL_CHARACTERS,
     }
 
+    /*
+     * Required by Envoy, so always written. The class-level NON_DEFAULT would
+     * otherwise drop these: since Jackson 3.2 it compares against a
+     * default-constructed instance, and these values never change from it.
+     */
     @get:JsonProperty("@type", index = -1)
+    @get:JsonInclude(JsonInclude.Include.ALWAYS)
     val type = "type.googleapis.com/envoy.extensions.filters.http.grpc_json_transcoder.v3.GrpcJsonTranscoder"
 }

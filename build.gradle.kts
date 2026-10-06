@@ -11,26 +11,27 @@ buildscript {
     configurations.classpath {
         resolutionStrategy.eachDependency {
             /*
-             * jackson-databind 2.x deserialization CVE batch (alerts #45/#47/#49/#51/#54/#55/#57/#59).
-             * Build-time only: arrives via jackson-bom 2.21.2 pulled by the cyclonedx
-             * (cyclonedx-core-java) plugin; it is on no project
-             * runtime/compile classpath, so it is never shipped. Alert #59
-             * (GHSA-5jmj-h7xm-6q6v, case-insensitive @JsonIgnoreProperties bypass) is
-             * fixed in 2.22.1; the 2.21-line fix (2.21.5) was never published to Maven
-             * Central. Pin the whole Jackson 2.x family to 2.22.1 to keep
+             * jackson 2.x CVE batch (alerts #45/#47/#49/#51/#54/#55/#57/#59 and
+             * #80/#82/#84/#85/#88/#89/#91). Build-time only: arrives via the cyclonedx
+             * plugin (cyclonedx-core-java); it is on no project runtime/compile
+             * classpath, so it is never shipped. Even cyclonedx 3.4.1 still imports
+             * jackson 2.22.1, which is affected by GHSA-wv8q-qhhj-9h54,
+             * GHSA-cxp5-3px4-pw24, GHSA-p6pp-m3f8-5c89, GHSA-7hhh-6rmp-j9qf,
+             * GHSA-q4xh-88c3-wmh7, GHSA-wjgm-6hv5-3cvf, and GHSA-gx83-3vf8-gh7j, all
+             * fixed by 2.22.3. Pin the whole Jackson 2.x family to 2.22.3 to keep
              * databind/core/dataformat internally aligned.
              *
              * jackson-annotations is excluded: since Jackson 2.20 it drops the patch
-             * component (its release is "2.22", not "2.22.1"), so forcing it to "2.22.1"
-             * would fail to resolve. The jackson-bom 2.22.1 above pins it to 2.22 for us.
+             * component (its release is "2.22", not "2.22.3"), so forcing it to "2.22.3"
+             * would fail to resolve. The jackson-bom 2.22.3 above pins it to 2.22 for us.
              */
             if (requested.group.startsWith("com.fasterxml.jackson") &&
                 requested.name != "jackson-annotations"
             ) {
-                useVersion("2.22.1")
+                useVersion("2.22.3")
                 because(
-                    "jackson-databind 2.x deserialization CVEs; alert #59 (GHSA-5jmj-h7xm-6q6v) " +
-                        "fixed in 2.22.1.",
+                    "jackson 2.x CVEs via the cyclonedx plugin; alerts #80/#82/#84/#85/#88/#89/#91 " +
+                        "fixed in 2.22.3.",
                 )
             }
         }
@@ -315,7 +316,7 @@ graalvmNative {
     }
     metadataRepository {
         enabled = true
-        version = "0.3.24"
+        version = "0.3.35"
     }
 }
 

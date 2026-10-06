@@ -4,6 +4,9 @@
 
 - GraalVM 21 (the Gradle toolchain spec pins `JvmVendorSpec.GRAAL_VM`; install via SDKMAN or the [GraalVM downloads page](https://www.graalvm.org/downloads/))
 - A POSIX shell environment
+- A [GitHub personal access token](https://github.com/settings/tokens) with the `read:packages` scope.
+  The [engine-public/protoc-utils](https://github.com/engine-public/protoc-utils) dependencies are published to GitHub Packages, which requires authentication even for public packages.
+  Set `gpr.user` (your GitHub username) and `gpr.key` (the token) in `~/.gradle/gradle.properties`, or export `GITHUB_ACTOR` and `GITHUB_TOKEN`.
 
 The version of the produced artifacts is read from the `ENGINE_BUILD_VERSION` environment variable and falls back to `0.0.0-pre.0` when unset.
 
@@ -79,7 +82,7 @@ Each example under [`examples/src/<name>/`](examples/README.md) is a self-contai
 
 Each suite runs:
 
-1. `protoc` with the `recorder` plugin (a native binary published as `com.engine:protoc-utils-recorder` from [engine-public/protoc-utils](https://github.com/engine-public/protoc-utils)) to capture the raw `CodeGeneratorRequest` as a `.binpb` file.
+1. `protoc` with the `recorder` plugin (a native binary published to GitHub Packages as `com.engine:protoc-utils-recorder` from [engine-public/protoc-utils](https://github.com/engine-public/protoc-utils)) to capture the raw `CodeGeneratorRequest` as a `.binpb` file.
 2. A test that loads the `.binpb` and feeds it to `ProtocGenOpenAPI.compile()`.
 3. For happy-path examples, comparison against reference JSON/YAML files stored in `src/<suite>/resources/`.
    For error-case examples, an assertion that compilation fails with an informative error.

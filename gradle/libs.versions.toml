@@ -11,7 +11,7 @@ grpcKotlin = "1.5.0"
 kotlinx-coroutines = "1.8.1"
 testcontainers = "2.0.5"
 kotest = "6.1.4"
-engine-protoc-utils = "1.0.0"
+engine-protoc-utils = "1.0.3"
 graalvm-sdk = "23.1.2"
 log4j = "2.26.0"
 

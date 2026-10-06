@@ -101,56 +101,19 @@ testing {
 
 /*
  * Netty arrives transitively via grpc-netty (consumed only by the `envoy`
- * test suite above). grpc-netty 1.81.0 still pulls Netty 4.1.132.Final, and
- * even the latest grpc-netty (1.82.1) only reaches 4.1.133.Final — both
- * affected by successive batches of CVEs disclosed in late 2026. Until
- * grpc-netty publishes against a patched Netty, constrain the affected modules
- * to 4.1.135.Final. Constraints (not `useVersion` forces) so a future grpc
- * upgrade that brings a newer Netty still wins cleanly.
+ * test suite above). grpc-netty 1.84.0 pulls Netty 4.2.16.Final, which is
+ * still affected by GHSA-c4c3-7fpv-j4q5 (#75, SNI routing bypass via
+ * fragmented ClientHello), GHSA-fccg-mwvh-qqg4 (#74, quadratic ClientHello
+ * reassembly), and GHSA-8c42-7qj2-3j46 (#73, CORS Vary header overwrite),
+ * all fixed in 4.2.17.Final. Align every Netty module on a patched release
+ * via the Netty BOM; drop this once grpc-netty publishes against >= 4.2.17.
+ * A platform (not a `useVersion` force) so a future grpc upgrade that brings
+ * a newer Netty still wins cleanly.
  *
  * Alerts: https://github.com/engine-public/protoc-gen-openapi/security/dependabot
  */
 dependencies {
-    constraints {
-        "envoyImplementation"("io.netty:netty-codec-http2:4.1.135.Final") {
-            because(
-                "GHSA-563q-j3cm-6jxm (#44, HTTP/2 Reset attack with a different on-the-wire " +
-                    "signature), GHSA-c2gf-v879-257j (#41, ByteBuf ref-count leak in " +
-                    "DelegatingDecompressorFrameListener -> memory exhaustion), " +
-                    "GHSA-5x3r-wrvg-rp6q (#40, advertised MAX_CONCURRENT_STREAMS not enforced), " +
-                    "CVE-2026-42587 (#37, HttpContentDecompressor maxAllocation bypass DoS).",
-            )
-        }
-        "envoyImplementation"("io.netty:netty-codec-http:4.1.135.Final") {
-            because(
-                "GHSA-hvcg-qmg6-jm4c (#43, HttpObjectDecoder skips arbitrary initial control " +
-                    "characters), CVE-2026-42587 (#36, decompression DoS), CVE-2026-42585 " +
-                    "(#35, malformed Transfer-Encoding smuggling), CVE-2026-42584 (#34, " +
-                    "HttpClientCodec response desync), CVE-2026-42581 (#32, HTTP/1.0 TE+CL " +
-                    "coexistence smuggling), CVE-2026-42580 (#31, chunk-size parsing " +
-                    "smuggling), CVE-2026-41417 (#29, DefaultHttpRequest.setUri injection).",
-            )
-        }
-        "envoyImplementation"("io.netty:netty-handler:4.1.135.Final") {
-            because(
-                "GHSA-c653-97m9-rcg9 (#42, wrapping a plain trust manager silently disables " +
-                    "hostname verification), GHSA-x4gw-5cx5-pgmh (#39, SNI handler " +
-                    "pre-allocates up to 16 MiB from nine attacker bytes), GHSA-3qp7-7mw8-wx86 " +
-                    "(#38, IPv6 subnet filter bypass via incorrect comparator masking).",
-            )
-        }
-        "envoyImplementation"("io.netty:netty-codec:4.1.135.Final") {
-            because(
-                "CVE-2026-42583 (alert #33): Lz4FrameDecoder is vulnerable to resource exhaustion.",
-            )
-        }
-        "envoyImplementation"("io.netty:netty-handler-proxy:4.1.135.Final") {
-            because(
-                "CVE-2026-42578 (alert #30): HTTP header injection via HttpProxyHandler " +
-                    "with validation disabled (incomplete fix for CVE-2025-67735).",
-            )
-        }
-    }
+    "envoyImplementation"(platform("io.netty:netty-bom:4.2.19.Final"))
 }
 
 protobuf {

@@ -13,7 +13,7 @@ For engine annotations and the model artifact, read [model/README.md](model/READ
   Houses the `Options` data class (every plugin option lives here as a property with KDoc) and the `from(...)` factory that registers the `Annotations` + `google.api` extension registries before parsing the `CodeGeneratorRequest`.
 - [`compile/Compiler.kt`](src/main/kotlin/com/engine/protoc/openapi/compile/Compiler.kt) — internal compiler.
   `compile()` dispatches to `compileMerged()` or `compileUnmerged()` based on `options.merge`.
-- [`compile/`](src/main/kotlin/com/engine/protoc/openapi/compile) — supporting builders and indices: `SchemaBuilder`, `PathsBuilder`, `MessageIndex`, `EnumIndex`, `RpcIndex`, `SchemaKeyResolver`, plus the `json/` serializers.
+- [`compile/`](src/main/kotlin/com/engine/protoc/openapi/compile) — supporting builders and indices: `SchemaBuilder`, `PathsBuilder`, `Descriptions` (every emitted description/summary/title: reference-link resolution and plain-text scrubbing), `MessageIndex`, `EnumIndex`, `RpcIndex`, `SchemaKeyResolver`, plus the `json/` serializers.
 
 ## Working Reminders
 

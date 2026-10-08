@@ -1,6 +1,7 @@
 package com.engine.protoc.openapi.compile.json
 
 import com.engine.protoc.openapi.ProtocGenOpenAPI
+import com.engine.protoc.openapi.compile.Descriptions
 import com.engine.protoc.openapi.compile.EnumIndex
 import com.engine.protoc.openapi.compile.MessageIndex
 import com.engine.protoc.openapi.compile.RpcIndex
@@ -54,6 +55,11 @@ internal class JsonContext(
      * Mirrors Envoy's `stream_sse_style_delimited` PrintOption.
      */
     val streamSseStyleDelimited: Boolean = false,
+    /**
+     * Produces every emitted `description`, `summary`, and `title` string, resolving reference
+     * links and scrubbing Markdown from plain-text fields.
+     */
+    val descriptions: Descriptions,
 ) {
     fun obj(): ObjectNode = mapper.createObjectNode()
 

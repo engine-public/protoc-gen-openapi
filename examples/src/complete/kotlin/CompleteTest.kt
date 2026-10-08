@@ -34,6 +34,7 @@ class CompleteTest :
         val generatedFile = response.fileList
             .find { it.name == "engine.protoc.openapi.example.complete.StorefrontService.openapi.yaml" }
             .shouldNotBeNull()
+        GoldenFiles.maybeWriteGolden("complete", generatedFile.name, generatedFile.content)
         val doc: JsonNode = mapper.readTree(generatedFile.content)
         val expected = CompleteTest::class.java.getResourceAsStream("/engine.protoc.openapi.example.complete.StorefrontService.openapi.yaml").shouldNotBeNull().reader().readText()
 

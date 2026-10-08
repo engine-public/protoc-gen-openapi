@@ -101,8 +101,8 @@ paths:
     get:
       summary: "Search products"
       description: "Search products.  Exercises query-parameter override precedence\
-        \ (see SearchFilter): both a\n `$ref` parameter and a dotted inline parameter\
-        \ take precedence over auto-derivation, so the\n request's `page_size` and\
+        \ (see SearchFilter): both a\n`$ref` parameter and a dotted inline parameter\
+        \ take precedence over auto-derivation, so the\nrequest's `page_size` and\
         \ `geo.city` fields are not auto-derived as duplicate parameters."
       operationId: "searchProducts"
       tags:
@@ -166,7 +166,7 @@ paths:
       - name: "price"
         in: "query"
         description: "covers SchemaObject.minimum, exclusive_minimum, maximum, exclusive_maximum,\n\
-          \ multiple_of, default, example (SchemaObject.example deprecated field)"
+          multiple_of, default, example (SchemaObject.example deprecated field)"
         required: false
         schema:
           type: "number"
@@ -193,8 +193,7 @@ paths:
       - name: "tags"
         in: "query"
         description: "covers SchemaObject.items, prefix_items, contains, min_contains,\
-          \ max_contains,\n min_items, max_items, unique_items, unevaluated_items\
-          \ (Schema.boolean=false)"
+          \ max_contains,\nmin_items, max_items, unique_items, unevaluated_items (Schema.boolean=false)"
         required: false
         style: "form"
         explode: true
@@ -219,7 +218,7 @@ paths:
       - name: "stockQuantity"
         in: "query"
         description: "covers SchemaObject.deprecated (on field), SchemaObject.examples\
-          \ (repeated Any),\n SchemaObject.title (on field)"
+          \ (repeated Any),\nSchemaObject.title (on field)"
         required: false
         schema:
           type: "integer"
@@ -358,7 +357,7 @@ paths:
       - name: "price"
         in: "query"
         description: "covers SchemaObject.minimum, exclusive_minimum, maximum, exclusive_maximum,\n\
-          \ multiple_of, default, example (SchemaObject.example deprecated field)"
+          multiple_of, default, example (SchemaObject.example deprecated field)"
         required: false
         schema:
           type: "number"
@@ -385,8 +384,7 @@ paths:
       - name: "tags"
         in: "query"
         description: "covers SchemaObject.items, prefix_items, contains, min_contains,\
-          \ max_contains,\n min_items, max_items, unique_items, unevaluated_items\
-          \ (Schema.boolean=false)"
+          \ max_contains,\nmin_items, max_items, unique_items, unevaluated_items (Schema.boolean=false)"
         required: false
         style: "form"
         explode: true
@@ -411,7 +409,7 @@ paths:
       - name: "stockQuantity"
         in: "query"
         description: "covers SchemaObject.deprecated (on field), SchemaObject.examples\
-          \ (repeated Any),\n SchemaObject.title (on field)"
+          \ (repeated Any),\nSchemaObject.title (on field)"
         required: false
         schema:
           type: "integer"
@@ -516,8 +514,8 @@ paths:
     patch:
       summary: "Update order shipping address"
       description: "Update only the shipping address on an existing order.  Exercises\
-        \ the named-field body\n mode: `shipping_address` is the request body string,\
-        \ while the remaining non-path fields\n (`status`, `total`) become URL query\
+        \ the named-field body\nmode: `shipping_address` is the request body string,\
+        \ while the remaining non-path fields\n(`status`, `total`) become URL query\
         \ parameters auto-derived from the Order message."
       operationId: "updateOrderShipping"
       tags:
@@ -792,6 +790,7 @@ components:
       type: "http"
       scheme: "bearer"
       bearerFormat: "JWT"
+      description: "JWT bearer token authentication"
       x-bearer-docs: "https://example.com/auth"
     apiKeyAuth:
       type: "apiKey"
@@ -923,8 +922,8 @@ components:
     Order:
       type: "object"
       description: "Order covers SchemaObject: id ($id), schema ($schema), anchor\
-        \ ($anchor),\n dynamic_anchor ($dynamicAnchor), dynamic_ref ($dynamicRef),\
-        \ defs ($defs),\n uri_ref ($ref at SchemaObject level).\n Order.status field\
+        \ ($anchor),\ndynamic_anchor ($dynamicAnchor), dynamic_ref ($dynamicRef),\
+        \ defs ($defs),\nuri_ref ($ref at SchemaObject level).\nOrder.status field\
         \ covers: content_encoding, content_media_type, content_schema."
       properties:
         orderId:
@@ -992,7 +991,7 @@ components:
           type: "number"
           format: "double"
           description: "covers SchemaObject.minimum, exclusive_minimum, maximum, exclusive_maximum,\n\
-            \ multiple_of, default, example (SchemaObject.example deprecated field)"
+            multiple_of, default, example (SchemaObject.example deprecated field)"
           default: 9.99
           example: 29.99
           multipleOf: 0.01
@@ -1015,7 +1014,7 @@ components:
             type: "string"
             minLength: 1
           description: "covers SchemaObject.items, prefix_items, contains, min_contains,\
-            \ max_contains,\n min_items, max_items, unique_items, unevaluated_items\
+            \ max_contains,\nmin_items, max_items, unique_items, unevaluated_items\
             \ (Schema.boolean=false)"
           prefixItems:
           - type: "string"
@@ -1034,7 +1033,7 @@ components:
           type: "integer"
           format: "int32"
           description: "covers SchemaObject.deprecated (on field), SchemaObject.examples\
-            \ (repeated Any),\n SchemaObject.title (on field)"
+            \ (repeated Any),\nSchemaObject.title (on field)"
           title: "Stock Quantity"
           deprecated: true
           examples:
@@ -1073,7 +1072,7 @@ components:
     ProductList:
       type: "object"
       description: "ProductList covers: all_of (Schema.boolean=true), any_of, one_of,\n\
-        \ not (Schema.boolean=false), if_schema, then_schema, else_schema,\n unevaluated_properties\
+        not (Schema.boolean=false), if_schema, then_schema, else_schema,\nunevaluated_properties\
         \ (Schema.boolean=false), additional_properties_schema (Schema.boolean=true)."
       properties:
         products:

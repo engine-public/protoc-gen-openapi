@@ -3,9 +3,10 @@
 Demonstrates the `referenceLinkTarget` option, which rewrites CommonMark reference links in proto comments into same-document anchors.
 
 A reference link is a bracketed token in a leading comment — `[Widget]`, `[catalog.v1.Widget]`, or `[WidgetService.GetWidget]` — that names another element in the compile scope.
-When it resolves, the plugin replaces it with a Markdown link to the referenced operation, tag, or schema; when it does not, the bracketed text is left as-is and a warning is logged.
+When it resolves, the plugin replaces it with a Markdown link to the referenced operation, tag, or schema, or with an inline code span when the target has no anchor in the document.
+What happens to references that don't resolve is controlled by `resolveReferenceLinksMode`; see [referenceLinkResolution](../referenceLinkResolution/README.md).
 
-Anchor fragment formats are renderer-specific and are not portable, so the target is chosen explicitly (resolution is off by default).
+Anchor fragment formats are renderer-specific and are not portable, so the target is chosen explicitly (the default, `NONE`, links nothing).
 This suite compiles the same proto twice:
 
 - **`SWAGGER_UI`** — operation references resolve to `#/{tag}/{operationId}` and service references to `#/{tag}`.

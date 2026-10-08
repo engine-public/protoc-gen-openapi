@@ -42,7 +42,7 @@
   "paths": {
     "/engine.protoc.openapi.example.envoy.HelloService/PingHello": {
       "post": {
-        "description": "PingHello intentionally has no google.api.http annotation so it can be\n exercised via Envoy's auto_mapping feature.",
+        "description": "PingHello intentionally has no google.api.http annotation so it can be\nexercised via Envoy's auto_mapping feature.",
         "requestBody": {
           "content": {
             "application/json": {

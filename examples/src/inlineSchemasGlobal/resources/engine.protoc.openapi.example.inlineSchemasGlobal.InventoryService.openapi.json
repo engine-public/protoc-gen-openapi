@@ -4,7 +4,7 @@
     "/widgets/{id}" : {
       "get" : {
         "summary" : "No method-level annotation: inherits the global inlineResponseSchemas=true default, so the Widget response schema is inlined directly at the use site.",
-        "description" : "No method-level annotation: inherits the global inlineResponseSchemas=true default, so the\n Widget response schema is inlined directly at the use site.  Widget is reached only via\n inlined paths in this service, so it never lands in components/schemas.",
+        "description" : "No method-level annotation: inherits the global inlineResponseSchemas=true default, so the\nWidget response schema is inlined directly at the use site.  Widget is reached only via\ninlined paths in this service, so it never lands in components/schemas.",
         "parameters" : [ {
           "name" : "id",
           "in" : "path",
@@ -39,7 +39,7 @@
     "/gadgets/{id}" : {
       "get" : {
         "summary" : "Per-method override: inline_response=false forces a $ref to components/schemas even though the global default is true.",
-        "description" : "Per-method override: inline_response=false forces a $ref to components/schemas even though\n the global default is true.  Because of this non-inlined path, Gadget appears in components\n and the other (inlined) Gadget call sites $ref into it.",
+        "description" : "Per-method override: inline_response=false forces a $ref to components/schemas even though\nthe global default is true.  Because of this non-inlined path, Gadget appears in components\nand the other (inlined) Gadget call sites $ref into it.",
         "parameters" : [ {
           "name" : "id",
           "in" : "path",
@@ -65,7 +65,7 @@
     "/widgets/{envelope_id}" : {
       "post" : {
         "summary" : "No method-level annotation: inherits the global inlineRequestSchemas=true default, so the request body schema is inlined.",
-        "description" : "No method-level annotation: inherits the global inlineRequestSchemas=true default, so the\n request body schema is inlined.",
+        "description" : "No method-level annotation: inherits the global inlineRequestSchemas=true default, so the\nrequest body schema is inlined.",
         "parameters" : [ {
           "name" : "envelope_id",
           "in" : "path",
@@ -119,7 +119,7 @@
     "/gadgets/{envelope_id}" : {
       "post" : {
         "summary" : "Per-method override: inline_request=false forces a $ref to components/schemas for the request body even though the global default is true.",
-        "description" : "Per-method override: inline_request=false forces a $ref to components/schemas for the\n request body even though the global default is true.",
+        "description" : "Per-method override: inline_request=false forces a $ref to components/schemas for the\nrequest body even though the global default is true.",
         "parameters" : [ {
           "name" : "envelope_id",
           "in" : "path",
@@ -145,7 +145,7 @@
               "application/json" : {
                 "schema" : {
                   "type" : "object",
-                  "description" : "Reached through at least one non-inlined RPC (GetGadget with inline_response=false),\n so it lands in components/schemas and inlined sites $ref into it.",
+                  "description" : "Reached through at least one non-inlined RPC (GetGadget with inline_response=false),\nso it lands in components/schemas and inlined sites $ref into it.",
                   "properties" : {
                     "id" : {
                       "type" : "string"
@@ -170,7 +170,7 @@
     "schemas" : {
       "Gadget" : {
         "type" : "object",
-        "description" : "Reached through at least one non-inlined RPC (GetGadget with inline_response=false),\n so it lands in components/schemas and inlined sites $ref into it.",
+        "description" : "Reached through at least one non-inlined RPC (GetGadget with inline_response=false),\nso it lands in components/schemas and inlined sites $ref into it.",
         "properties" : {
           "id" : {
             "type" : "string"

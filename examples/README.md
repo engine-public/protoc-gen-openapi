@@ -95,6 +95,11 @@ Covers single error, multiple errors, optional `grpc_code` (emitted as `x-grpc-c
 Demonstrates how the plugin emits inline OpenAPI schemas for structural protobuf well-known types — `Any`, `Struct`, `Value`, `ListValue`, `FieldMask`, and `Empty` — instead of dangling `$ref`s into `components/schemas`.
 Covers both first-party fields that carry these types and the canonical regression case where `google.api.HttpBody` is returned by an RPC and its `extensions` field bottoms out in `google.protobuf.Any`.
 
+### [referenceLinkResolution](src/referenceLinkResolution/README.md)
+
+Demonstrates `resolveReferenceLinksMode` and `referenceLink`: reference links in proto comments and annotation text resolve to anchors, code spans, or external URLs, plain-text `summary` and `title` fields are scrubbed of Markdown, and unresolved or ambiguous references fail the run under `FAIL_ON_INVALID`.
+Compiles one proto set under `FAIL_ON_INVALID`, `WARN` (Redoc and Swagger UI targets), and `NONE`.
+
 ### [referenceLinks](src/referenceLinks/README.md)
 
 Demonstrates the `referenceLinkTarget` option, which rewrites CommonMark reference links (`[Widget]`, `[WidgetService.GetWidget]`) in proto comments into same-document anchors.

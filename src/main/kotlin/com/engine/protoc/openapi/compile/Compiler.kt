@@ -8,7 +8,9 @@ import com.engine.protoc.openapi.compile.json.mergeInto
 import com.engine.protoc.util.compiler.CodeGeneratorRequestWrapper
 import com.engine.protoc.util.compiler.CodeGeneratorResponseWrapper
 import com.engine.protoc.util.file.FileDescriptorProtoWrapper
+import com.engine.protoc.util.markdown.ReferenceLinkFailure
 import com.engine.protoc.util.service.ServiceDescriptorProtoWrapper
+import com.google.api.AnnotationsProto
 import com.google.protobuf.compiler.PluginProtos
 import com.networknt.schema.InputFormat
 import com.networknt.schema.SchemaLocation
@@ -152,18 +154,6 @@ internal class Compiler(
         // that explicitly sets info.version will overwrite it (higher-priority layers win).
         applyOptionsVersion(doc, ctx)
 
-        for (file in targetFiles) {
-            try {
-                val extension = file.options?.findExtension(Annotations.file)?.value
-                    ?.takeIf { it.hasOpenapi() }?.openapi ?: continue
-                extension.mergeInto(doc, ctx)
-            } catch (e: Exception) {
-                val msg = "[${file.name}] Error merging OpenAPI extension: ${e.detail()}"
-                log.error(msg, e)
-                response.addError(msg)
-            }
-        }
-
         val collector = MessageCollector(ctx.messageIndex, ctx.enumIndex, options.inlineEnums)
         val pathsBuilder = PathsBuilder(
             ctx,
@@ -172,7 +162,6 @@ internal class Compiler(
             options.autoMapping,
             options.inlineRequestSchemas,
             options.inlineResponseSchemas,
-            referenceLinkResolverFor(targetFiles, ctx),
             collectComponentParameterNames(targetFiles),
         )
 
@@ -184,6 +173,25 @@ internal class Compiler(
                 pathsBuilder.seed(listOf(file), ::isServiceIncluded)
             } catch (e: Exception) {
                 val msg = "[${file.name}] Error seeding component schemas: ${e.detail()}"
+                log.error(msg, e)
+                response.addError(msg)
+            }
+        }
+
+        ctx.descriptions.beginDocument(
+            isSchemaEmitted = { it in collector.allCollected },
+            isServiceEmitted = { serviceFqn -> targetFiles.any { file -> file.emitsService(serviceFqn) } },
+        )
+
+        // File-level annotations are merged after the seed pass so reference links in their
+        // descriptions see the document's final set of component schemas.
+        for (file in targetFiles) {
+            try {
+                val extension = file.options?.findExtension(Annotations.file)?.value
+                    ?.takeIf { it.hasOpenapi() }?.openapi ?: continue
+                extension.mergeInto(doc, ctx)
+            } catch (e: Exception) {
+                val msg = "[${file.name}] Error merging OpenAPI extension: ${e.detail()}"
                 log.error(msg, e)
                 response.addError(msg)
             }
@@ -218,6 +226,7 @@ internal class Compiler(
 
         ctx.schemaKeyResolver.rewriteRefs(doc)
         emitRedocSchemaSections(doc, ctx)
+        reportReferenceLinkFailures(response, ctx)
 
         if (!response.hasErrors) {
             try {
@@ -271,6 +280,7 @@ internal class Compiler(
                     }
                     // Apply options version before the annotation so the annotation can override it.
                     applyOptionsVersion(doc, ctx)
+                    ctx.descriptions.beginDocument(isSchemaEmitted = { false }, isServiceEmitted = { false })
                     fileAnnotation.mergeInto(doc, ctx)
                     val pkg = file.`package`?.value.orEmpty()
                     val fileName =
@@ -293,23 +303,8 @@ internal class Compiler(
                         it.set("paths", ctx.obj())
                     }
 
-                    // Layer 1: attributes derived from the service itself (lowest priority)
-                    applyServiceDerivedAttributes(doc, service, ctx)
-
-                    // Layer 2: options-provided version as a global default.
-                    // Applied after service-derived attributes (which never set info.version) and
-                    // before annotation layers so that annotations can override it.
-                    applyOptionsVersion(doc, ctx)
-
-                    // Layer 3: file-level annotation overwrites derived values
-                    fileAnnotation?.mergeInto(doc, ctx)
-
-                    // Layer 4: explicit service-level annotation (highest priority)
-                    service.options?.findExtension(Annotations.service)?.value
-                        ?.takeIf { it.hasOpenapi() }?.openapi
-                        ?.mergeInto(doc, ctx)
-
-                    // Paths — only this service's methods
+                    // Seed this service's schemas first so reference links in every layer below
+                    // see the document's final set of component schemas.
                     val collector = MessageCollector(ctx.messageIndex, ctx.enumIndex, options.inlineEnums)
                     val pathsBuilder = PathsBuilder(
                         ctx,
@@ -318,10 +313,34 @@ internal class Compiler(
                         options.autoMapping,
                         options.inlineRequestSchemas,
                         options.inlineResponseSchemas,
-                        referenceLinkResolverFor(listOf(file), ctx),
                         componentParameterNames,
                     )
                     pathsBuilder.seedForService(service, file.`package`?.value)
+                    val serviceFqn = listOfNotNull(file.`package`?.value?.ifEmpty { null }, service.name?.value).joinToString(".")
+                    ctx.descriptions.beginDocument(
+                        isSchemaEmitted = { it in collector.allCollected },
+                        isServiceEmitted = { it == serviceFqn && file.emitsService(serviceFqn) },
+                    )
+
+                    // Layer 1: attributes derived from the service itself (lowest priority)
+                    applyServiceDerivedAttributes(doc, file, service, ctx)
+
+                    // Layer 2: options-provided version as a global default.
+                    // Applied after service-derived attributes (which never set info.version) and
+                    // before annotation layers so that annotations can override it.
+                    applyOptionsVersion(doc, ctx)
+
+                    ctx.descriptions.withDefaultScope(serviceFqn) {
+                        // Layer 3: file-level annotation overwrites derived values
+                        fileAnnotation?.mergeInto(doc, ctx)
+
+                        // Layer 4: explicit service-level annotation (highest priority)
+                        service.options?.findExtension(Annotations.service)?.value
+                            ?.takeIf { it.hasOpenapi() }?.openapi
+                            ?.mergeInto(doc, ctx)
+                    }
+
+                    // Paths — only this service's methods
                     mergePaths(doc, pathsBuilder.buildForService(service, file.`package`?.value), ctx)
 
                     applyServiceTags(doc, pathsBuilder, ctx)
@@ -361,6 +380,8 @@ internal class Compiler(
             }
         }
 
+        reportReferenceLinkFailures(response, ctx)
+
         return response.build()
     }
 
@@ -369,25 +390,32 @@ internal class Compiler(
     // -------------------------------------------------------------------------
 
     /**
-     * Builds the reference-link resolver for a document spanning [files], or `null` when
-     * `referenceLinkTarget = NONE`.  The resolver indexes those files' schemas, services, and
-     * operations so CommonMark reference links in `description` fields rewrite to anchors.
+     * True when the service [serviceFqn] is declared in this file, passes the service filters, and
+     * has at least one RPC that becomes an operation — i.e. its tag and operations exist in the
+     * document.
      */
-    private fun referenceLinkResolverFor(
-        files: List<FileDescriptorProtoWrapper>,
+    private fun FileDescriptorProtoWrapper.emitsService(serviceFqn: String): Boolean {
+        val pkg = `package`?.value
+        val service = services.find { listOfNotNull(pkg?.ifEmpty { null }, it.name?.value).joinToString(".") == serviceFqn }
+            ?: return false
+        return isServiceIncluded(pkg, service) &&
+            service.methods.any { this@Compiler.options.autoMapping || it.options?.findExtension(AnnotationsProto.http)?.value != null }
+    }
+
+    /**
+     * Adds every reference-link failure collected while building the document to [response], so
+     * protoc fails the run under `resolveReferenceLinksMode=FAIL_ON_INVALID`.
+     */
+    private fun reportReferenceLinkFailures(
+        response: CodeGeneratorResponseWrapper,
         ctx: JsonContext,
-    ): ReferenceLinkResolver? =
-        if (options.referenceLinkTarget == ProtocGenOpenAPI.Options.ReferenceLinkTarget.NONE) {
-            null
-        } else {
-            ReferenceLinkResolver(
-                files,
-                options.referenceLinkTarget,
-                options.autoTagServices,
-                options.autoMapping,
-                ctx.schemaKeyResolver,
-            )
-        }
+    ) {
+        val failures = ctx.descriptions.drainFailures().distinct()
+        if (failures.isEmpty()) return
+        val summary = ReferenceLinkFailure.summary(failures)
+        log.error("protoc-gen-openapi failed:\n{}", summary)
+        response.addError("protoc-gen-openapi failed:\n$summary")
+    }
 
     /**
      * Under `referenceLinkTarget = REDOC`, gives every `components/schemas` entry an addressable
@@ -395,7 +423,7 @@ internal class Compiler(
      * standalone component schema, so for each schema we emit a top-level tag named after the
      * schema key whose description is a Redoc `<SchemaDefinition>` directive; Redoc renders that
      * tag as the schema's section, reachable at `#tag/{key}` — exactly the anchor
-     * [ReferenceLinkResolver] emits.
+     * [Descriptions] emits.
      *
      * When `autoTagServices` is enabled (so every operation already carries a service tag) we also
      * emit an `x-tagGroups` navigation split — operation/service tags under "API", schema sections
@@ -482,6 +510,7 @@ internal class Compiler(
             convertGrpcStatus = options.convertGrpcStatus,
             streamNewlineDelimited = options.streamNewlineDelimited,
             streamSseStyleDelimited = options.streamSseStyleDelimited,
+            descriptions = Descriptions(request.protoFiles, options, resolver),
         )
         val targetFiles = request.filesToGenerate.mapNotNull { name ->
             request.protoFiles.find { it.name == name }
@@ -584,14 +613,15 @@ internal class Compiler(
 
     private fun applyServiceDerivedAttributes(
         doc: ObjectNode,
+        file: FileDescriptorProtoWrapper,
         service: ServiceDescriptorProtoWrapper,
         ctx: JsonContext,
     ) {
         val infoNode = doc.get("info") as? ObjectNode
             ?: ctx.obj().also { doc.set("info", it) }
         service.name?.value?.let { infoNode.put("title", it) }
-        service.location?.proto?.leadingComments?.trim()?.ifEmpty { null }
-            ?.let { infoNode.put("description", it) }
+        val serviceFqn = listOfNotNull(file.`package`?.value?.ifEmpty { null }, service.name?.value).joinToString(".")
+        ctx.descriptions.comment(service)?.let { infoNode.put("description", ctx.descriptions.markdown(it, serviceFqn)) }
     }
 
     /**

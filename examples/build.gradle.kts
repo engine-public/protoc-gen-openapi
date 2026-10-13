@@ -33,6 +33,8 @@ testing {
             dependencies {
                 implementation(projects.protocGenOpenapi)
                 implementation(projects.protocGenOpenapiModel)
+                // Option types such as ReferenceLinkMode come from protoc-utils-markdown.
+                implementation(libs.engine.protoc.utils.markdown)
 
                 implementation(testFixtures(project()))
 
@@ -76,6 +78,7 @@ testing {
         register<JvmTestSuite>("serviceOrdering")
         register<JvmTestSuite>("errorResponses")
         register<JvmTestSuite>("referenceLinks")
+        register<JvmTestSuite>("referenceLinkResolution")
 
         /*
          * Envoy integration suite: runs Envoy in a container (via testcontainers) and exercises

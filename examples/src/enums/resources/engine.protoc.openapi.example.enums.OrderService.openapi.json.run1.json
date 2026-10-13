@@ -59,7 +59,7 @@
       "ReturnRequest": {
         "properties": {
           "affectedStatuses": {
-            "description": "Per-value suppress = false keeps REASON_UNSET visible even when\n suppressDefaultEnumValues = true is set globally.",
+            "description": "Per-value suppress = false keeps REASON_UNSET visible even when\nsuppressDefaultEnumValues = true is set globally.",
             "items": {
               "$ref": "#/components/schemas/OrderStatus"
             },

@@ -133,9 +133,9 @@ internal fun Map<String, Value>.putExtensionsInto(
 
 internal fun Info.toJson(ctx: JsonContext): ObjectNode {
     val node = ctx.obj()
-    if (title.isNotEmpty()) node.put("title", title)
-    if (hasSummary()) node.put("summary", summary)
-    if (hasDescription()) node.put("description", description)
+    if (title.isNotEmpty()) node.put("title", ctx.descriptions.plain(title))
+    if (hasSummary()) node.put("summary", ctx.descriptions.plain(summary))
+    if (hasDescription()) node.put("description", ctx.descriptions.markdown(description))
     if (hasTermsOfService()) node.put("termsOfService", termsOfService)
     if (hasContact()) node.set("contact", contact.toJson(ctx))
     if (hasLicense()) node.set("license", license.toJson(ctx))
@@ -167,7 +167,7 @@ internal fun License.toJson(ctx: JsonContext): ObjectNode {
 internal fun Server.toJson(ctx: JsonContext): ObjectNode {
     val node = ctx.obj()
     node.put("url", url)
-    if (hasDescription()) node.put("description", description)
+    if (hasDescription()) node.put("description", ctx.descriptions.markdown(description))
     if (variablesMap.isNotEmpty()) {
         val varNode = ctx.obj()
         for ((k, v) in variablesMap) varNode.set(k, v.toJson(ctx))
@@ -184,7 +184,7 @@ internal fun ServerVariable.toJson(ctx: JsonContext): ObjectNode {
         node.set("enum", arr)
     }
     node.put("default", default)
-    if (hasDescription()) node.put("description", description)
+    if (hasDescription()) node.put("description", ctx.descriptions.markdown(description))
     return node
 }
 
@@ -195,7 +195,7 @@ internal fun ServerVariable.toJson(ctx: JsonContext): ObjectNode {
 internal fun Tag.toJson(ctx: JsonContext): ObjectNode {
     val node = ctx.obj()
     node.put("name", name)
-    if (hasDescription()) node.put("description", description)
+    if (hasDescription()) node.put("description", ctx.descriptions.markdown(description))
     if (hasExternalDocs()) node.set("externalDocs", externalDocs.toJson(ctx))
     extensionsMap.putExtensionsInto(node, ctx)
     return node
@@ -221,8 +221,8 @@ internal fun PathItem.toJson(ctx: JsonContext): ObjectNode {
         PathItem.RefTypeCase.PROTO_RPC_REF -> node.put("\$ref", ctx.resolveProtoRpcRef(protoRpcRef, includeMethod = false))
         else -> {}
     }
-    if (hasSummary()) node.put("summary", summary)
-    if (hasDescription()) node.put("description", description)
+    if (hasSummary()) node.put("summary", ctx.descriptions.plain(summary))
+    if (hasDescription()) node.put("description", ctx.descriptions.markdown(description))
     if (hasGet()) node.set("get", get.toJson(ctx))
     if (hasPut()) node.set("put", put.toJson(ctx))
     if (hasPost()) node.set("post", post.toJson(ctx))
@@ -256,8 +256,8 @@ internal fun Operation.toJson(ctx: JsonContext): ObjectNode {
         for (t in tagsList) arr.add(t)
         node.set("tags", arr)
     }
-    if (hasSummary()) node.put("summary", summary)
-    if (hasDescription()) node.put("description", description)
+    if (hasSummary()) node.put("summary", ctx.descriptions.plain(summary))
+    if (hasDescription()) node.put("description", ctx.descriptions.markdown(description))
     if (hasExternalDocs()) node.set("externalDocs", externalDocs.toJson(ctx))
     if (hasOperationId()) node.put("operationId", operationId)
     if (parametersList.isNotEmpty()) {
@@ -305,7 +305,7 @@ internal fun Parameter.toJson(ctx: JsonContext): ObjectNode {
     val node = ctx.obj()
     node.put("name", name)
     node.put("in", `in`)
-    if (hasDescription()) node.put("description", description)
+    if (hasDescription()) node.put("description", ctx.descriptions.markdown(description))
     if (hasRequired()) node.put("required", required)
     if (hasDeprecated()) node.put("deprecated", deprecated)
     if (hasAllowEmptyValue()) node.put("allowEmptyValue", allowEmptyValue)
@@ -356,7 +356,7 @@ internal fun RequestBodyOrReference.toJson(ctx: JsonContext): ObjectNode =
 
 internal fun RequestBody.toJson(ctx: JsonContext): ObjectNode {
     val node = ctx.obj()
-    if (hasDescription()) node.put("description", description)
+    if (hasDescription()) node.put("description", ctx.descriptions.markdown(description))
     if (contentMap.isNotEmpty()) {
         val contentNode = ctx.obj()
         for ((k, v) in contentMap) contentNode.set(k, v.toJson(ctx))
@@ -416,7 +416,7 @@ internal fun ResponseOrReference.toJson(ctx: JsonContext): ObjectNode =
 
 internal fun ResponseObject.toJson(ctx: JsonContext): ObjectNode {
     val node = ctx.obj()
-    node.put("description", description)
+    node.put("description", ctx.descriptions.markdown(description))
     if (headersMap.isNotEmpty()) {
         val headersNode = ctx.obj()
         for ((k, v) in headersMap) headersNode.set(k, v.toJson(ctx))
@@ -468,7 +468,7 @@ internal fun Link.toJson(ctx: JsonContext): ObjectNode {
         node.set("parameters", paramsNode)
     }
     if (hasRequestBody()) node.set("requestBody", requestBody.toJson(ctx))
-    if (hasDescription()) node.put("description", description)
+    if (hasDescription()) node.put("description", ctx.descriptions.markdown(description))
     if (hasServer()) node.set("server", server.toJson(ctx))
     return node
 }
@@ -504,7 +504,7 @@ internal fun HeaderOrReference.toJson(ctx: JsonContext): ObjectNode =
 
 internal fun Header.toJson(ctx: JsonContext): ObjectNode {
     val node = ctx.obj()
-    if (hasDescription()) node.put("description", description)
+    if (hasDescription()) node.put("description", ctx.descriptions.markdown(description))
     if (hasRequired()) node.put("required", required)
     if (hasDeprecated()) node.put("deprecated", deprecated)
     // A Header uses either schema-based or content-based serialization, never both.
@@ -559,8 +559,8 @@ internal fun ExampleOrReference.toJson(ctx: JsonContext): ObjectNode =
 
 internal fun Example.toJson(ctx: JsonContext): ObjectNode {
     val node = ctx.obj()
-    if (hasSummary()) node.put("summary", summary)
-    if (hasDescription()) node.put("description", description)
+    if (hasSummary()) node.put("summary", ctx.descriptions.plain(summary))
+    if (hasDescription()) node.put("description", ctx.descriptions.markdown(description))
     when (typeCase) {
         Example.TypeCase.VALUE -> node.set("value", value.toJson(ctx))
         Example.TypeCase.EXTERNAL_VALUE -> node.put("externalValue", externalValue)
@@ -655,6 +655,7 @@ internal fun SecurityScheme.toJson(ctx: JsonContext): ObjectNode {
         SecurityScheme.TypeCase.OPEN_ID_CONNECT -> openIdConnect.toJson(ctx)
         else -> ctx.obj()
     }
+    if (hasDescription()) node.put("description", ctx.descriptions.markdown(description))
     extensionsMap.putExtensionsInto(node, ctx)
     return node
 }
@@ -700,7 +701,7 @@ internal fun OAuthFlow.toJson(ctx: JsonContext): ObjectNode {
     if (hasRefreshUrl()) node.put("refreshUrl", refreshUrl)
     if (scopesMap.isNotEmpty()) {
         val scopeNode = ctx.obj()
-        for ((k, v) in scopesMap) scopeNode.put(k, v)
+        for ((k, v) in scopesMap) scopeNode.put(k, ctx.descriptions.plain(v))
         node.set("scopes", scopeNode)
     }
     return node
@@ -724,7 +725,7 @@ internal fun Reference.toJson(ctx: JsonContext): ObjectNode {
         Reference.RefTypeCase.PROTO_RPC_REF -> node.put("\$ref", ctx.resolveProtoRpcRef(protoRpcRef, includeMethod = false))
         else -> {}
     }
-    if (hasSummary()) node.put("summary", summary)
-    if (hasDescription()) node.put("description", description)
+    if (hasSummary()) node.put("summary", ctx.descriptions.plain(summary))
+    if (hasDescription()) node.put("description", ctx.descriptions.markdown(description))
     return node
 }

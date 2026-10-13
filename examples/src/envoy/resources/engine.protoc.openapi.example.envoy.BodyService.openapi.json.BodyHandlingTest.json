@@ -4,7 +4,7 @@
     "/greet/{your_name}" : {
       "get" : {
         "summary" : "GET with one path-bound field and the rest becoming query parameters.",
-        "description" : "GET with one path-bound field and the rest becoming query parameters.\n Canonical \"REST-style\" mapping.",
+        "description" : "GET with one path-bound field and the rest becoming query parameters.\nCanonical \"REST-style\" mapping.",
         "parameters" : [ {
           "name" : "your_name",
           "in" : "path",
@@ -61,7 +61,7 @@
       },
       "delete" : {
         "summary" : "DELETE with one path-bound field; remaining fields become query parameters.",
-        "description" : "DELETE with one path-bound field; remaining fields become query\n parameters.  Confirms DELETE behaves identically to GET.",
+        "description" : "DELETE with one path-bound field; remaining fields become query\nparameters.  Confirms DELETE behaves identically to GET.",
         "parameters" : [ {
           "name" : "your_name",
           "in" : "path",
@@ -120,7 +120,7 @@
     "/echo" : {
       "post" : {
         "summary" : "POST with body unset — Envoy permits this and binds all non-path fields as query parameters regardless of verb.",
-        "description" : "POST with body unset — Envoy permits this and binds all non-path fields\n as query parameters regardless of verb.  Atypical, but spec-allowed.",
+        "description" : "POST with body unset — Envoy permits this and binds all non-path fields\nas query parameters regardless of verb.  Atypical, but spec-allowed.",
         "parameters" : [ {
           "name" : "yourName",
           "in" : "query",
@@ -179,7 +179,7 @@
     "/greet/named" : {
       "post" : {
         "summary" : "POST with body naming a single sub-field; remaining non-path fields become query parameters.",
-        "description" : "POST with body naming a single sub-field; remaining non-path fields\n become query parameters.",
+        "description" : "POST with body naming a single sub-field; remaining non-path fields\nbecome query parameters.",
         "parameters" : [ {
           "name" : "yourName",
           "in" : "query",
@@ -234,7 +234,7 @@
   },
   "info" : {
     "title" : "BodyService",
-    "description" : "BodyService exercises the three HttpRule.body modes (unset, \"*\", and a named\n field) across multiple HTTP verbs.  Each RPC asserts the canonical\n transcoder behaviour described in google/api/http.proto: with body unset\n every non-path field becomes a URL query parameter; with body=\"<field>\"\n that field is the request body and the rest become query parameters.",
+    "description" : "BodyService exercises the three HttpRule.body modes (unset, \"*\", and a named\nfield) across multiple HTTP verbs.  Each RPC asserts the canonical\ntranscoder behaviour described in google/api/http.proto: with body unset\nevery non-path field becomes a URL query parameter; with body=\"<field>\"\nthat field is the request body and the rest become query parameters.",
     "version" : "1.0.0"
   },
   "components" : {

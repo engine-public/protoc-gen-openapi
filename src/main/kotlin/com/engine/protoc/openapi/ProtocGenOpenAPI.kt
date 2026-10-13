@@ -4,6 +4,8 @@ import com.engine.protoc.openapi.compile.Compiler
 import com.engine.protoc.util.compiler.CodeGeneratorRequestWrapper
 import com.engine.protoc.util.compiler.Parameters
 import com.engine.protoc.util.extensions.wrap
+import com.engine.protoc.util.markdown.ReferenceLinkMode
+import com.engine.protoc.util.markdown.ReferenceLinkProcessor
 import com.google.api.AnnotationsProto
 import com.google.protobuf.ExtensionRegistry
 import com.google.protobuf.compiler.PluginProtos
@@ -408,21 +410,22 @@ public class ProtocGenOpenAPI(
         val serviceExclude: String?,
 
         /**
-         * Selects the documentation-renderer dialect that CommonMark **reference links** in
-         * `description` fields resolve against.  A reference link is a bracketed token such as
-         * `[Widget]`, `[catalog.v1.Widget]`, or `[WidgetService.GetWidget]` written in a proto
-         * leading comment; when it resolves, it is rewritten to a same-document anchor pointing at
-         * the referenced operation, tag, or schema.
+         * Selects the documentation-renderer dialect that resolved CommonMark **reference links**
+         * link to.  A reference link is a bracketed token such as `[Widget]`,
+         * `[catalog.v1.Widget]`, or `[WidgetService.GetWidget]` written in a proto comment or an
+         * annotation description; whether it is resolved, and what happens when it can't be, is
+         * controlled by [resolveReferenceLinksMode].  A resolved reference is rewritten to a
+         * same-document anchor pointing at the referenced operation, tag, or schema, or, when the
+         * target cannot address the element, to an inline code span (e.g. `` `Widget` ``).
          *
          * Anchor fragment formats are renderer-specific and **not** portable, so the target must be
-         * chosen explicitly; resolution is off by default:
+         * chosen explicitly:
          *
-         * - [ReferenceLinkTarget.NONE] (default) — reference-link resolution is disabled.
-         *   `description` fields still emit clean CommonMark, but bracketed tokens are left
-         *   untouched and no derived `operationId` is added.
+         * - [ReferenceLinkTarget.NONE] (default) — nothing is linked: resolved references render
+         *   as inline code spans, and no derived `operationId` is added.
          * - [ReferenceLinkTarget.SWAGGER_UI] — operations resolve to `#/{tag}/{operationId}`
          *   and services (tags) to `#/{tag}`.  Swagger UI has no stable anchor for component
-         *   schemas, so message/enum references cannot be linked (see the unresolved behaviour below).
+         *   schemas, so message/enum references render as inline code spans.
          *   Requires the consumer to enable Swagger UI's `deepLinking` option.
          * - [ReferenceLinkTarget.REDOC] — operations resolve to `#operation/{operationId}`, tags to
          *   `#tag/{tagName}`, and message/enum references to plugin-generated schema sections (see
@@ -431,13 +434,51 @@ public class ProtocGenOpenAPI(
          *   `x-tagGroups` "Schemas" group, so every schema reference has a controlled `#tag/{name}`
          *   anchor to point at.
          *
-         * Unresolved or non-portable references never fail the build: the brackets are stripped and
-         * the label is rendered as an inline code span (e.g. `[Property]` → `` `Property` ``) with a
-         * warning.  (In a derived `summary`, which is plain text, the label is emitted bare.)
+         * Elements that exist in the compile scope but have no anchor in this document — an RPC
+         * without an HTTP binding, a service that contributes no tag, a type that isn't emitted
+         * to `components/schemas` — also render as inline code spans; they are not failures.
+         * In plain-text fields (`summary`, `title`) references are emitted as bare text.
          *
          * Passed via `--openapi_out=referenceLinkTarget=redoc:outdir` (case-insensitive).
          */
         val referenceLinkTarget: ReferenceLinkTarget,
+
+        /**
+         * Controls resolution of CommonMark reference links (`[Widget]`, `[Widget.name]`,
+         * `[WidgetService.GetWidget]`, `[display text][Widget]`) in every string the plugin emits:
+         * proto comments and annotation-supplied descriptions, summaries, and titles.
+         *
+         * References resolve against every message, field, enum, enum value, service, and RPC in
+         * the request (including imported files), with bare names resolving first against the
+         * members of the commented descriptor.  Labels configured with [referenceLink] resolve to
+         * their URL first.
+         *
+         * - [ReferenceLinkMode.NONE] — references are not resolved; text is emitted as written,
+         *   brackets included.
+         * - [ReferenceLinkMode.WARN] — references are resolved; each unresolved or ambiguous
+         *   reference logs at `warn` and an unresolved one renders as an inline code span.
+         * - [ReferenceLinkMode.FAIL_ON_INVALID] (default) — as [ReferenceLinkMode.WARN], but each
+         *   failure logs at `error` and is collected; at the end of compilation the plugin sets
+         *   `CodeGeneratorResponse.error` listing every failure, so protoc fails the run.
+         *
+         * Passed via `--openapi_out=resolveReferenceLinksMode=warn:outdir` (case-insensitive).
+         */
+        val resolveReferenceLinksMode: ReferenceLinkMode,
+
+        /**
+         * Maps reference-link labels to URLs, so references to elements outside the compile scope
+         * can link to external documentation, e.g.
+         * `referenceLink=google.rpc.Status=https://cloud.google.com/tasks/docs/reference/rpc/google.rpc#status`
+         * makes `[Status.details][google.rpc.Status]` a link.  Repeat the parameter for each label.
+         * An override wins over any element of the same name in the compile scope.
+         *
+         * protoc splits `--openapi_out` parameters from the output directory at a `:`, so a URL
+         * scheme can't be written there; a URL that has no scheme and doesn't start with `/`,
+         * `#`, or `.` is treated as `https://`, e.g. `referenceLink=google.rpc.Status=cloud.google.com/...`.
+         *
+         * Passed via `--openapi_out=referenceLink=<label>=<URL>:outdir`.
+         */
+        val referenceLink: Map<String, String>,
     ) {
         /**
          * The serialization format for generated OpenAPI documents.
@@ -732,11 +773,34 @@ public class ProtocGenOpenAPI(
             public var referenceLinkTarget: ReferenceLinkTarget =
                 parameters.get<ReferenceLinkTarget>("referenceLinkTarget") ?: ReferenceLinkTarget.NONE
 
+            /**
+             * @see [Options.resolveReferenceLinksMode]
+             */
+            public var resolveReferenceLinksMode: ReferenceLinkMode =
+                parameters.get<ReferenceLinkMode>("resolveReferenceLinksMode") ?: ReferenceLinkMode.FAIL_ON_INVALID
+
+            /**
+             * @see [Options.referenceLink]
+             */
+            public var referenceLink: Map<String, String> =
+                ReferenceLinkProcessor.parseOverrides(parameters.get<List<String>>("referenceLink"))
+                    .mapValues { (_, url) -> withDefaultScheme(url) }
+
             public companion object {
                 private const val SERVICE_INCLUDE_DEFAULT =
                     """^[a-zA-Z][a-zA-Z0-9_]*(\.[a-zA-Z][a-zA-Z0-9_]*)*$"""
 
                 public fun from(parameters: Parameters): Builder = Builder(parameters)
+
+                private val schemePattern = Regex("^[a-zA-Z][a-zA-Z0-9+.-]*:")
+
+                /** Prepends `https://` to a URL with no scheme that isn't a relative or fragment reference. */
+                private fun withDefaultScheme(url: String): String =
+                    if (schemePattern.containsMatchIn(url) || url.startsWith("/") || url.startsWith("#") || url.startsWith(".")) {
+                        url
+                    } else {
+                        "https://$url"
+                    }
             }
 
             public fun build(): Options =
@@ -768,6 +832,8 @@ public class ProtocGenOpenAPI(
                     serviceInclude = serviceInclude,
                     serviceExclude = serviceExclude,
                     referenceLinkTarget = referenceLinkTarget,
+                    resolveReferenceLinksMode = resolveReferenceLinksMode,
+                    referenceLink = referenceLink,
                 )
         }
     }

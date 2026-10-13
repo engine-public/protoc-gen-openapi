@@ -1,6 +1,6 @@
 {
   "info": {
-    "description": "A service with no version annotation.\n When options.version is set, the output receives that string as info.version.\n When options.version is absent, the output has no info.version at all.",
+    "description": "A service with no version annotation.\nWhen options.version is set, the output receives that string as info.version.\nWhen options.version is absent, the output has no info.version at all.",
     "title": "UnversionedService",
     "version": "global-2.0.0"
   },

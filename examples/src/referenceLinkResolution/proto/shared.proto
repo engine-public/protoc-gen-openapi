@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+// An imported file.  Its types are referenced from comments in catalog.proto but never used by an
+// RPC, so they resolve without being emitted to components/schemas.
+package engine.protoc.openapi.example.referenceLinkResolution.shared;
+
+option java_package = "com.engine.protoc.openapi.example.referenceLinkResolution.shared";
+option java_multiple_files = true;
+
+// An amount of money.
+message Money {
+    // ISO-4217 currency code.
+    string currency_code = 1;
+}
+
+// A gadget from the shared package, colliding with the catalog package's [engine.protoc.openapi.example.referenceLinkResolution.catalog.Gadget] on the
+// short name `Gadget`.
+message Gadget {
+    // Gadget id.
+    string id = 1;
+}

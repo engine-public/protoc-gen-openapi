@@ -1,0 +1,101 @@
+syntax = "proto3";
+
+// Exercises reference-link resolution, failure modes, external links, and plain-text scrubbing.
+package engine.protoc.openapi.example.referenceLinkResolution.catalog;
+
+option java_package = "com.engine.protoc.openapi.example.referenceLinkResolution.catalog";
+option java_multiple_files = true;
+
+import "google/api/annotations.proto";
+import "engine/protoc/openapi/annotations.proto";
+import "shared.proto";
+
+// Manages [Gizmo] resources.  Fetch one with [GetGizmo]; on failure, details are in
+// [Status.details][google.rpc.Status].
+//
+// Unmapped RPCs like [CatalogService.Reindex] have no operation, and imported types like
+// [engine.protoc.openapi.example.referenceLinkResolution.shared.Money] have no schema here, so both render as code.
+service CatalogService {
+    // Gets a single [Gizmo] by [GetGizmoRequest.id].  Its price is a [engine.protoc.openapi.example.referenceLinkResolution.shared.Money].
+    //
+    // Further notes:
+    //
+    // - `id` must be non-empty
+    //   and stable
+    // - see [ListGizmos] for collections
+    rpc GetGizmo(GetGizmoRequest) returns (Gizmo) {
+        option (google.api.http) = {get: "/gizmos/{id}"};
+    }
+
+    // Lists every [Gizmo].
+    rpc ListGizmos(ListGizmosRequest) returns (ListGizmosResponse) {
+        option (google.api.http) = {get: "/gizmos"};
+        option (engine.protoc.openapi.method) = {
+            operation: {
+                summary: "Lists **every** [Gizmo] in the `catalog`."
+                description: "Pages through [Gizmo] results; see [GetGizmo] for one."
+            }
+        };
+    }
+
+    // Rebuilds the index.  Has no HTTP binding.
+    rpc Reindex(ListGizmosRequest) returns (ListGizmosResponse);
+}
+
+// Request for [CatalogService.GetGizmo].
+message GetGizmoRequest {
+    // Unique id of the [Gizmo] to fetch.
+    string id = 1;
+}
+
+// Request for [CatalogService.ListGizmos].
+message ListGizmosRequest {
+    // Maximum number of items; compare with [Gizmo.name] for sorting.
+    int32 page_size = 1 [(engine.protoc.openapi.field) = {
+        schema: {object: {title: "Page `size`", description: "At most 100 [Gizmo] items."}}
+    }];
+
+    // Deliberately broken reference: [NoSuchThing].
+    string filter = 2;
+}
+
+// A page of [Gizmo] results.
+message ListGizmosResponse {
+    // The items on this page.
+    repeated Gizmo gizmos = 1;
+}
+
+// A gizmo.  Its label is [name]; its state is a [GizmoState].
+//
+// `id` is the stable identifier.
+message Gizmo {
+    // Unique id.
+    string id = 1;
+
+    // Human-readable label.
+    string name = 2;
+
+    // Lifecycle state, one of the [GizmoState] values such as [GIZMO_STATE_ACTIVE].
+    GizmoState state = 3;
+
+    // The gizmo's gadget.
+    Gadget gadget = 4;
+}
+
+// A catalog gadget.  The bare name [Gadget] is ambiguous with [engine.protoc.openapi.example.referenceLinkResolution.shared.Gadget].
+message Gadget {
+    // Gadget id.
+    string id = 1;
+}
+
+// Lifecycle state of a [Gizmo].
+enum GizmoState {
+    // Unset.
+    GIZMO_STATE_UNSPECIFIED = 0;
+
+    // Visible; see [GIZMO_STATE_RETIRED] for the end state.
+    GIZMO_STATE_ACTIVE = 1;
+
+    // No longer offered.
+    GIZMO_STATE_RETIRED = 2;
+}

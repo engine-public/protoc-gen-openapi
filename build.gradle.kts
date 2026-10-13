@@ -71,6 +71,7 @@ dependencies {
 
     implementation(libs.commonmark)
     implementation(libs.engine.protoc.utils)
+    implementation(libs.engine.protoc.utils.markdown)
     implementation(libs.jackson.databind)
     implementation(libs.jackson.dataformat.yaml)
     implementation(libs.kotlin.reflect)

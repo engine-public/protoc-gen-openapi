@@ -48,8 +48,8 @@ internal fun SchemaObject.toJson(ctx: JsonContext): ObjectNode {
     }
 
     // ---- Metadata --------------------------------------------------------
-    if (hasTitle()) node.put("title", title)
-    if (hasDescription()) node.put("description", description)
+    if (hasTitle()) node.put("title", ctx.descriptions.plain(title))
+    if (hasDescription()) node.put("description", ctx.descriptions.markdown(description))
     if (hasDeprecated()) node.put("deprecated", deprecated)
     if (hasReadOnly()) node.put("readOnly", readOnly)
     if (hasWriteOnly()) node.put("writeOnly", writeOnly)
@@ -202,7 +202,7 @@ internal fun XML.toJson(ctx: JsonContext): ObjectNode {
 
 internal fun ExternalDocumentation.toJson(ctx: JsonContext): ObjectNode {
     val node = ctx.obj()
-    if (hasDescription()) node.put("description", description)
+    if (hasDescription()) node.put("description", ctx.descriptions.markdown(description))
     node.put("url", url)
     return node
 }

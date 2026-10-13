@@ -1,0 +1,128 @@
+{
+  "openapi" : "3.1.0",
+  "paths" : {
+    "/gizmos/{id}" : {
+      "get" : {
+        "summary" : "Gets a single [Gizmo] by [GetGizmoRequest.id].",
+        "description" : "Gets a single [Gizmo] by [GetGizmoRequest.id].  Its price is a [engine.protoc.openapi.example.referenceLinkResolution.shared.Money].\n\nFurther notes:\n\n- `id` must be non-empty\n  and stable\n- see [ListGizmos] for collections",
+        "tags" : [ "CatalogService" ],
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Gizmo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/gizmos" : {
+      "get" : {
+        "summary" : "Lists every [Gizmo] in the catalog.",
+        "description" : "Pages through [Gizmo] results; see [GetGizmo] for one.",
+        "tags" : [ "CatalogService" ],
+        "parameters" : [ {
+          "name" : "pageSize",
+          "in" : "query",
+          "description" : "At most 100 [Gizmo] items.",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "title" : "Page size"
+          }
+        }, {
+          "name" : "filter",
+          "in" : "query",
+          "description" : "Deliberately broken reference: [NoSuchThing].",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ListGizmosResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "tags" : [ {
+    "name" : "CatalogService",
+    "description" : "Manages [Gizmo] resources.  Fetch one with [GetGizmo]; on failure, details are in\n[Status.details][google.rpc.Status].\n\nUnmapped RPCs like [CatalogService.Reindex] have no operation, and imported types like\n[engine.protoc.openapi.example.referenceLinkResolution.shared.Money] have no schema here, so both render as code."
+  } ],
+  "components" : {
+    "schemas" : {
+      "Gadget" : {
+        "type" : "object",
+        "description" : "A catalog gadget.  The bare name [Gadget] is ambiguous with [engine.protoc.openapi.example.referenceLinkResolution.shared.Gadget].",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "description" : "Gadget id."
+          }
+        }
+      },
+      "Gizmo" : {
+        "type" : "object",
+        "description" : "A gizmo.  Its label is [name]; its state is a [GizmoState].\n\n`id` is the stable identifier.",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "description" : "Unique id."
+          },
+          "name" : {
+            "type" : "string",
+            "description" : "Human-readable label."
+          },
+          "state" : {
+            "$ref" : "#/components/schemas/GizmoState",
+            "description" : "Lifecycle state, one of the [GizmoState] values such as [GIZMO_STATE_ACTIVE]."
+          },
+          "gadget" : {
+            "$ref" : "#/components/schemas/Gadget",
+            "description" : "The gizmo's gadget."
+          }
+        }
+      },
+      "GizmoState" : {
+        "type" : "string",
+        "description" : "Lifecycle state of a \\[Gizmo\\].\n\n- `GIZMO_STATE_UNSPECIFIED` — Unset.\n\n- `GIZMO_STATE_ACTIVE` — Visible; see \\[GIZMO\\_STATE\\_RETIRED\\] for the end state.\n\n- `GIZMO_STATE_RETIRED` — No longer offered.",
+        "enum" : [ "GIZMO_STATE_UNSPECIFIED", "GIZMO_STATE_ACTIVE", "GIZMO_STATE_RETIRED" ]
+      },
+      "ListGizmosResponse" : {
+        "type" : "object",
+        "description" : "A page of [Gizmo] results.",
+        "properties" : {
+          "gizmos" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Gizmo"
+            },
+            "description" : "The items on this page."
+          }
+        }
+      }
+    }
+  }
+}

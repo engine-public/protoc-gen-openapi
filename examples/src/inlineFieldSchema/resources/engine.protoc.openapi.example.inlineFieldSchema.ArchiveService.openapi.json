@@ -4,7 +4,7 @@
     "/archives/{id}" : {
       "get" : {
         "summary" : "Archive is in components.",
-        "description" : "Archive is in components.  Its `manifest` field is `inline`d, so the inline\n expansion appears inside the Archive component schema (and inside every $ref chain\n that reaches Archive).  Manifest itself is also in components via GetManifest below;\n the inline expansion's nested `entry` field $refs Entry.",
+        "description" : "Archive is in components.  Its `manifest` field is `inline`d, so the inline\nexpansion appears inside the Archive component schema (and inside every $ref chain\nthat reaches Archive).  Manifest itself is also in components via GetManifest below;\nthe inline expansion's nested `entry` field $refs Entry.",
         "parameters" : [ {
           "name" : "id",
           "in" : "path",
@@ -56,7 +56,7 @@
     "/previews/{id}" : {
       "get" : {
         "summary" : "Preview is in components.",
-        "description" : "Preview is in components.  Its `snapshot` field is `inline`d, and Snapshot is\n reached only through this field — so Snapshot and Tag are absent from components and\n expand inline inside the Preview component schema.",
+        "description" : "Preview is in components.  Its `snapshot` field is `inline`d, and Snapshot is\nreached only through this field — so Snapshot and Tag are absent from components and\nexpand inline inside the Preview component schema.",
         "parameters" : [ {
           "name" : "id",
           "in" : "path",
@@ -88,7 +88,7 @@
     "schemas" : {
       "Archive" : {
         "type" : "object",
-        "description" : "An archive carries its manifest as an inline field.  Because Manifest is also returned\n directly by GetManifest below (non-inline), it stays in components and the inline expansion\n here `$refs` into the component schema for its nested `entry` field.",
+        "description" : "An archive carries its manifest as an inline field.  Because Manifest is also returned\ndirectly by GetManifest below (non-inline), it stays in components and the inline expansion\nhere `$refs` into the component schema for its nested `entry` field.",
         "properties" : {
           "id" : {
             "type" : "string"
@@ -142,7 +142,7 @@
       },
       "Preview" : {
         "type" : "object",
-        "description" : "A preview carries a snapshot reachable only through the inline field below — so neither\n Snapshot nor its Tag sub-field appear in components/schemas; both expand inline.",
+        "description" : "A preview carries a snapshot reachable only through the inline field below — so neither\nSnapshot nor its Tag sub-field appear in components/schemas; both expand inline.",
         "properties" : {
           "id" : {
             "type" : "string"

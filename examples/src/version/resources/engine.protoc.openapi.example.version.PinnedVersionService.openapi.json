@@ -1,6 +1,6 @@
 {
   "info": {
-    "description": "A service whose API version is pinned by an explicit service-level engine annotation.\n Regardless of what options.version is set to, the annotation version always wins.",
+    "description": "A service whose API version is pinned by an explicit service-level engine annotation.\nRegardless of what options.version is set to, the annotation version always wins.",
     "title": "PinnedVersionService",
     "version": "pinned-1.0.0"
   },
